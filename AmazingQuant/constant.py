@@ -20,6 +20,12 @@ class RightsAdjustment(Enum):
     FROWARD = "forward"
     BACKWARD = "backward"
 
+@unique
+class DatabaseName(Enum):
+    MARKET_DATA_DAILY = "market_data_daily"
+    FINANCIAL_DATA = "financial_data"
+    MARKET_DATA_ONE_MIN = "market_data_1min"
+
 
 @unique
 class EventType(Enum):

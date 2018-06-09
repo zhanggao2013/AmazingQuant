@@ -6,6 +6,7 @@ from abc import ABCMeta, abstractmethod
 
 from AmazingQuant.constant import RunMode, Period, RightsAdjustment
 from AmazingQuant.environment import Environment
+from AmazingQuant.data_center.get_data import GetMarketData
 
 
 class StrategyBase(metaclass=ABCMeta):
@@ -17,6 +18,9 @@ class StrategyBase(metaclass=ABCMeta):
         self._period = Period.DAILY  # 后续支持1min 3min 5min 等多周期
         self._universe = [self._benckmark]
         self._rights_adjustment = RightsAdjustment.NONE.value
+
+        #取数据
+        self._get_market_data = GetMarketData()
 
     @property
     def capital(self):
@@ -74,9 +78,17 @@ class StrategyBase(metaclass=ABCMeta):
     def rights_adjustment(self, value):
         self._rights_adjustment = value
 
+    def get_benchmark_index(self, benckmark, start, end, period):
+        return self._get_market_data.get_benchmark_index(benckmark=benckmark,
+                                                         start=start,
+                                                         end=end,
+                                                         period=period)
+
+
     def run(self, run_mode=RunMode.BACKTESTING.value):
         if run_mode == RunMode.BACKTESTING.value:
             self.initialize()
+            print(self.get_benchmark_index(benckmark=self.benckmark, start=self.start, end=self.end, period=self.period))
             print(self.universe, self.start, self.end, self.period, self.rights_adjustment)
 
             print(self.capital)
@@ -85,6 +97,7 @@ class StrategyBase(metaclass=ABCMeta):
             self.handle_bar()
         elif run_mode == RunMode.TRADE.value:
             pass
+
 
     @abstractmethod
     def initialize(self):

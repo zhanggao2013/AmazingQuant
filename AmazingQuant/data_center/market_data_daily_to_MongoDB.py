@@ -8,9 +8,10 @@ import json
 import pandas as pd
 
 from mongosconn import MongoConn
+from AmazingQuant.constant import DatabaseName
 
 if __name__ == "__main__":
-    db_name = "market_data_daily"
+    db_name = DatabaseName.MARKET_DATA_DAILY.value
     my_conn = MongoConn()
     db = my_conn.connect_db(db_name)
     # 激活数据库分片功能

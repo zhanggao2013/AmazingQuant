@@ -8,6 +8,9 @@ import json
 import csv
 import pandas as pd
 
+from AmazingQuant.constant import DatabaseName
+
+
 from mongosconn import MongoConn
 
 if __name__ == "__main__":
@@ -22,7 +25,7 @@ if __name__ == "__main__":
         for i in exist_collection.readlines():
             exist_collection_list.append(i.strip("\n"))
 
-    db_name = "financial_data"
+    db_name = DatabaseName.FINANCIAL_DATA.value
     my_conn = MongoConn()
     db = my_conn.connect_db(db_name)
     # 激活数据库分片功能

@@ -15,6 +15,7 @@ MONGODB_CONFIG = {
 }
 
 
+
 class Singleton(object):
     # 单例模式
     def __new__(cls, *args, **kwargs):

@@ -17,7 +17,7 @@ class EventEngineBase(object):
     _timer：私有变量，计时器
     _handlers：私有变量，事件处理函数字典
 
-
+asd
     方法说明
     _run: 私有方法，事件处理线程连续运行用
     _process: 私有方法，处理事件，调用注册在引擎中的监听函数
