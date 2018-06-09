@@ -2,14 +2,18 @@
 
 __author__ = "gao"
 
-from strategy_center.strategy import StrategyBase
+from AmazingQuant.strategy_center.strategy import StrategyBase
+
+from AmazingQuant.environment import Environment
+
 class MaStrategy(StrategyBase):
 
     def initialize(self):
+        self.capital = 200000
         self.benchmark = "000001.SH"
         self.start = "20170101"
         self.end = "20170201"
-        self.period = "day"
+        self.period = "daily"
         print(self.start)
 
     def handle_bar(self):
@@ -17,4 +21,9 @@ class MaStrategy(StrategyBase):
 
 
 if __name__ == "__main__":
+
+    Environment.account["qwe"] = 1
     MaStrategy().run()
+    print(Environment.account)
+    Environment.refresh()
+    print(Environment.account)

@@ -4,6 +4,22 @@ __author__ = "gao"
 
 from enum import Enum, unique
 
+@unique
+class RunMode(Enum):
+    BACKTESTING= "backtesting"
+    TRADE= "trade"
+
+@unique
+class Period(Enum):
+    DAILY = "daily"
+    ONE_MIN = "1min"
+
+@unique
+class RightsAdjustment(Enum):
+    NONE = "none"
+    FROWARD = "forward"
+    BACKWARD = "backward"
+
 
 @unique
 class EventType(Enum):
