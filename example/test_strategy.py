@@ -11,8 +11,8 @@ class MaStrategy(StrategyBase):
     def initialize(self):
         self.capital = 200000
         self.benchmark = "000001.SH"
-        self.start = "20170101"
-        self.end = "20170201"
+        self.start = "2017-01-01"
+        self.end = "2017-02-01"
         self.period = "daily"
         print(self.start)
 
@@ -24,6 +24,6 @@ if __name__ == "__main__":
 
     Environment.account["qwe"] = 1
     MaStrategy().run()
-    print(Environment.account)
+    #print(Environment.account)
     Environment.refresh()
-    print(Environment.account)
+    #print(Environment.account)

@@ -78,22 +78,21 @@ class StrategyBase(metaclass=ABCMeta):
     def rights_adjustment(self, value):
         self._rights_adjustment = value
 
-    def get_benchmark_index(self, benckmark, start, end, period):
-        return self._get_market_data.get_benchmark_index(benckmark=benckmark,
-                                                         start=start,
-                                                         end=end,
-                                                         period=period)
 
 
     def run(self, run_mode=RunMode.BACKTESTING.value):
         if run_mode == RunMode.BACKTESTING.value:
             self.initialize()
-            print(self.get_benchmark_index(benckmark=self.benckmark, start=self.start, end=self.end, period=self.period))
-            print(self.universe, self.start, self.end, self.period, self.rights_adjustment)
+            benchmark_index = self._get_market_data.get_benchmark_index(benckmark=self.benckmark,
+                                                                        start=self.start,
+                                                                        end=self.end,
+                                                                        period=self.period)
+            print(benchmark_index)
+            #print(self.universe, self.start, self.end, self.period, self.rights_adjustment)
 
-            print(self.capital)
-            print(Environment.account)
-            print(Environment.position)
+            #print(self.capital)
+            #print(Environment.account)
+            #print(Environment.position)
             self.handle_bar()
         elif run_mode == RunMode.TRADE.value:
             pass
