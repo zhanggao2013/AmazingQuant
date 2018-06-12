@@ -123,7 +123,7 @@ class MongoConn(Singleton):
         # 查询指定列的所有值
         try:
             db = self.conn[db_name]
-            return db[table].find(value, {colum: 1})
+            return db[table].find(value, colum)
         except Exception:
             print(traceback.format_exc())
 
