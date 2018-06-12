@@ -94,11 +94,12 @@ class StrategyBase(metaclass=ABCMeta):
 
             market_data = self._get_data.get_market_data(stock_code=self.universe,
                                                          field=["open", "high", "low", "close", "volumn", "amount"],
-                                                         start=self.start, end=self.end, period=self.period,
+                                                         start="0", end=self.end, period=self.period,
                                                          skip_paused=True, rights_adjustment=self.rights_adjustment,
                                                          count=-1)
             benchmark_index = [data_transfer.date_to_millisecond(str(int(i)), '%Y%m%d') for i in
-                               market_data["open"].ix[self.benckmark].index]
+                               market_data["open"].ix[self.benckmark].index
+                               if i >= data_transfer.date_str_to_int(self.start)]
             for bar_timetag in range(len(benchmark_index)):
                 self.timetag = benchmark_index[bar_timetag]
                 # print(self.timetag)
