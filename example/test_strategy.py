@@ -20,8 +20,9 @@ class MaStrategy(StrategyBase):
 
     def handle_bar(self):
         print(self.benchmark)
-        #print(self.timetag)
-        #print(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y-%m-%d"))
+        # print(self.timetag)
+        # print(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y-%m-%d"))
+
 
 if __name__ == "__main__":
     Environment.account["qwe"] = 1
