@@ -3,8 +3,8 @@
 __author__ = "gao"
 
 from AmazingQuant.strategy_center.strategy import StrategyBase
-
 from AmazingQuant.environment import Environment
+import AmazingQuant.utils.data_transfer as data_transfer
 
 
 class MaStrategy(StrategyBase):
@@ -18,10 +18,10 @@ class MaStrategy(StrategyBase):
         self.universe = ["000002.SZ", "000001.SH"]
         print(self.start)
 
-    def handle_bar(self, timetag):
+    def handle_bar(self):
         print(self.benchmark)
-        print(timetag)
-        print(StrategyBase.millisecond_to_date(millisecond=timetag))
+        #print(self.timetag)
+        #print(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y-%m-%d"))
 
 if __name__ == "__main__":
     Environment.account["qwe"] = 1

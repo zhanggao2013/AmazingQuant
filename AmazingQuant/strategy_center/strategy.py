@@ -3,25 +3,25 @@
 __author__ = "gao"
 
 from abc import ABCMeta, abstractmethod
-import  time
 
+import AmazingQuant.utils.data_transfer as data_transfer
 from AmazingQuant.constant import RunMode, Period, RightsAdjustment
 from AmazingQuant.environment import Environment
-from AmazingQuant.data_center.get_data import GetMarketData
+from AmazingQuant.data_center.get_data import GetData
 
 
 class StrategyBase(metaclass=ABCMeta):
     def __init__(self):
         self._capital = 1000000
-        self._start = "20170101"
-        self._end = "20180101"
+        self._start = "2017-01-01"
+        self._end = "2018-01-01"
         self._benckmark = "000300.SH"
         self._period = Period.DAILY  # 后续支持1min 3min 5min 等多周期
         self._universe = [self._benckmark]
         self._rights_adjustment = RightsAdjustment.NONE.value
-
+        self._timetag = 0
         # 取数据
-        self._get_market_data = GetMarketData()
+        self._get_data = GetData()
 
     @property
     def capital(self):
@@ -79,36 +79,38 @@ class StrategyBase(metaclass=ABCMeta):
     def rights_adjustment(self, value):
         self._rights_adjustment = value
 
-    @staticmethod
-    def millisecond_to_date(millisecond):
-        return time.strftime("%Y-%m-%d", time.localtime(millisecond))
+    @property
+    def timetag(self):
+        return self._timetag
+
+    @timetag.setter
+    def timetag(self, value):
+        self._timetag = value
 
     def run(self, run_mode=RunMode.BACKTESTING.value):
         if run_mode == RunMode.BACKTESTING.value:
             self.initialize()
-            benchmark_index = self._get_market_data.get_benchmark_index(benckmark=self.benckmark,
-                                                                        start=self.start,
-                                                                        end=self.end,
-                                                                        period=self.period)
+            print(self.universe, self.start, self.end, self.period, self.rights_adjustment)
 
-            #print(self.universe, self.start, self.end, self.period, self.rights_adjustment)
-            all_market_data_open = self._get_market_data.get_all_market_data(universe=self.universe, field="open",
-                                                                             end=self.end, period=self.period,
-                                                                             rights_adjustment=self.rights_adjustment)
-            #print(all_market_data_open)
-
+            market_data = self._get_data.get_market_data(stock_code=self.universe,
+                                                         field=["open", "high", "low", "close", "volumn", "amount"],
+                                                         start=self.start, end=self.end, period=self.period,
+                                                         skip_paused=True, rights_adjustment=self.rights_adjustment,
+                                                         count=-1)
+            benchmark_index = [data_transfer.date_to_millisecond(str(int(i)), '%Y%m%d') for i in
+                               market_data["open"].ix[self.benckmark].index]
             for bar_timetag in range(len(benchmark_index)):
-                print(bar_timetag)
-                self.handle_bar(timetag=benchmark_index[bar_timetag])
+                self.timetag = benchmark_index[bar_timetag]
+                # print(self.timetag)
+                date = int(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y%m%d"))
 
+                print(market_data["open"].ix["000300.SH"][date])
+                self.handle_bar()
+                print(market_data["close"].ix["000300.SH"][date])
 
-            all_market_data_close = self._get_market_data.get_all_market_data(universe=self.universe, field="close",
-                                                                              end=self.end, period=self.period,
-                                                                              rights_adjustment=self.rights_adjustment)
-            #print(all_market_data_close)
-            # print(self.capital)
-            # print(Environment.account)
-            # print(Environment.position)
+                # print(self.capital)
+                # print(Environment.account)
+                # print(Environment.position)
         elif run_mode == RunMode.TRADE.value:
             pass
 
