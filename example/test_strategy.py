@@ -11,7 +11,7 @@ class MaStrategy(StrategyBase):
 
     def initialize(self):
         self.capital = 200000
-        self.benchmark = "000001.SH"
+        self.benchmark = "000300.SH"
         self.start = "2017-01-01"
         self.end = "2017-02-21"
         self.period = "daily"

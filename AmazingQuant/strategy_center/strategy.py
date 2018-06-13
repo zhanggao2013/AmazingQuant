@@ -90,6 +90,8 @@ class StrategyBase(metaclass=ABCMeta):
     def run(self, run_mode=RunMode.BACKTESTING.value):
         if run_mode == RunMode.BACKTESTING.value:
             self.initialize()
+            aa = self._get_data.get_end_timetag(stock_code=self.benckmark, period=Period.DAILY.value)
+            print(aa)
             print(self.universe, self.start, self.end, self.period, self.rights_adjustment)
 
             market_data = self._get_data.get_market_data(stock_code=self.universe,
