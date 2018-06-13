@@ -15,3 +15,4 @@ def date_to_millisecond(date="20100101", format='%Y%m%d'):
 
 def date_str_to_int(date=""):
     return int(date.replace("-", ""))
+

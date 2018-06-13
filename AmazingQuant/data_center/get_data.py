@@ -43,6 +43,15 @@ class GetData(object):
             self.db = self.conn.connect_db(self.db_name)
         return market_data
 
+    def get_end_timetag(self, stock_code, period=Period.DAILY.value):
+        colum = {"_id": 0, "timetag": 1}
+        end_timetag_list = self.conn.select_colum(db_name=self.db_name, table=stock_code,
+                                                   value={},
+                                                   colum=colum)
+        if period == Period.DAILY.value:
+            end_timetag_list = [data_transfer.data(str(int(timetag))) for timetag in list(end_timetag_list)]
+
+
 
 if __name__ == "__main__":
     aa = GetMarketData()

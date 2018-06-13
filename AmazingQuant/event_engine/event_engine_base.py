@@ -7,6 +7,8 @@ from threading import Thread
 from time import sleep
 from collections import defaultdict
 
+from AmazingQuant.constant import EventType
+
 
 class EventEngineBase(object):
     """
@@ -54,7 +56,7 @@ class EventEngineBase(object):
         """引擎运行"""
         while self._active == True:
             try:
-                event = self._queue.get(block=True, timeout=1)  # 获取事件的阻塞时间设为1秒
+                event = self._queue.get(block=True, timeout=3)  # 获取事件的阻塞时间设为1秒
                 self._process(event)
             except Empty:
                 pass
@@ -74,7 +76,7 @@ class EventEngineBase(object):
         """运行在计时器线程中的循环函数"""
         while self._timer_active:
             # 创建计时器事件
-            event = Event(type_=EVENT_TIMER)
+            event = Event(type_=EventType.EVENT_TIMER.value)
 
             # 向队列中存入计时器事件
             self.put(event)
@@ -158,18 +160,19 @@ class Event(object):
 
 def test():
     """测试函数"""
-    import sys
     from datetime import datetime
-    from qtpy.QtCore import QCoreApplication
 
     def simpletest(event):
         print(u'处理每秒触发的计时器事件：{}'.format(str(datetime.now())))
 
-    app = QCoreApplication(sys.argv)
-
-    ee = EventEngine2()
-    # ee.register(EVENT_TIMER, simpletest)
-    ee.registerGeneralHandler(simpletest)
+    ee = EventEngineBase()
+    ee.put(Event(EventType.EVENT_MARKET.value))
+    #ee.register(EventType.EVENT_TIMER.value, simpletest)
+    ee.register(EventType.EVENT_MARKET.value, simpletest)
+    # ee.registerGeneralHandler(simpletest)
     ee.start()
+    ee.stop()
 
-    app.exec_()
+
+if __name__ == "__main__":
+    test()

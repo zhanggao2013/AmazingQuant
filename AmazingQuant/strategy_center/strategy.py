@@ -119,6 +119,31 @@ class StrategyBase(metaclass=ABCMeta):
     def initialize(self):
         pass
 
+
     @abstractmethod
     def handle_bar(self, timetag):
         pass
+
+
+"""
+        if run_mode == RunMode.TRADE.value:
+            self.end = float("inf")
+        i = 0
+        while True:
+            try:
+                bar = benchmark_index[i]
+            except no exist:
+                if run_mode == RunMode.BACKTESTING.value:
+                    break
+                elif run_mode == RunMode.TRADE.value:
+                    读取最新tick, 更新最新的分钟或者日线
+                    if 读取最新tick, 更新最新的分钟或者日线 == done:
+                        data.append(new_day_data)
+                        i += 1
+                        index.append(new_day_timetag)
+            else:
+                ee.start()
+                i += 1
+                ee.stop()
+
+"""
