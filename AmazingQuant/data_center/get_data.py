@@ -50,7 +50,8 @@ class GetData(object):
         end_timetag_list = self.conn.select_colum(db_name=self.db_name, table=stock_code,
                                                   value={},
                                                   colum=colum)
-        return max([i["timetag"] for i in list(end_timetag_list)])
+        end_timetag = str(int(max([i["timetag"] for i in list(end_timetag_list)])))
+        return end_timetag[:4] + "-" + end_timetag[4:6] + "-" + end_timetag[6:]
 
 
 if __name__ == "__main__":

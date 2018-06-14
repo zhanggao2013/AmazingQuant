@@ -12,8 +12,8 @@ class MaStrategy(StrategyBase):
     def initialize(self):
         self.capital = 200000
         self.benchmark = "000300.SH"
-        self.start = "2017-01-01"
-        self.end = "2017-02-21"
+        self.start = "2017-01-08"
+        self.end = "2017-02-28"
         self.period = "daily"
         self.universe = ["000002.SZ", "000001.SH"]
         print(self.start)
@@ -21,7 +21,7 @@ class MaStrategy(StrategyBase):
     def handle_bar(self):
         print(self.benchmark)
         # print(self.timetag)
-        # print(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y-%m-%d"))
+        print(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y-%m-%d"))
 
 
 if __name__ == "__main__":

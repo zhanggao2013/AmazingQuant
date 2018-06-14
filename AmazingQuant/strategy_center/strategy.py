@@ -14,9 +14,9 @@ class StrategyBase(metaclass=ABCMeta):
     def __init__(self):
         self._capital = 1000000
         self._start = "2017-01-01"
-        self._end = "2018-01-01"
+        self._end = "2018-01-02"
         self._benckmark = "000300.SH"
-        self._period = Period.DAILY  # 后续支持1min 3min 5min 等多周期
+        self._period = Period.DAILY.value  # 后续支持1min 3min 5min 等多周期
         self._universe = [self._benckmark]
         self._rights_adjustment = RightsAdjustment.NONE.value
         self._timetag = 0
@@ -88,64 +88,58 @@ class StrategyBase(metaclass=ABCMeta):
         self._timetag = value
 
     def run(self, run_mode=RunMode.BACKTESTING.value):
-        if run_mode == RunMode.BACKTESTING.value:
-            self.initialize()
-            aa = self._get_data.get_end_timetag(stock_code=self.benckmark, period=Period.DAILY.value)
-            print(aa)
-            print(self.universe, self.start, self.end, self.period, self.rights_adjustment)
+        self.initialize()
+        print(self.universe, self.start, self.end, self.period, self.rights_adjustment)
+        if run_mode == RunMode.TRADE.value:
+            self.end = self._get_data.get_end_timetag(stock_code=self.benckmark, period=Period.DAILY.value)
 
-            market_data = self._get_data.get_market_data(stock_code=self.universe,
-                                                         field=["open", "high", "low", "close", "volumn", "amount"],
-                                                         start="0", end=self.end, period=self.period,
-                                                         skip_paused=True, rights_adjustment=self.rights_adjustment,
-                                                         count=-1)
-            benchmark_index = [data_transfer.date_to_millisecond(str(int(i)), '%Y%m%d') for i in
-                               market_data["open"].ix[self.benckmark].index
-                               if i >= data_transfer.date_str_to_int(self.start)]
-            for bar_timetag in range(len(benchmark_index)):
-                self.timetag = benchmark_index[bar_timetag]
-                # print(self.timetag)
+        market_data = self._get_data.get_market_data(stock_code=self.universe,
+                                                     field=["open", "high", "low", "close", "volumn", "amount"],
+                                                     start="0", end=self.end, period=self.period,
+                                                     skip_paused=True, rights_adjustment=self.rights_adjustment,
+                                                     count=-1)
+
+        benchmark_index = [data_transfer.date_to_millisecond(str(int(i)), '%Y%m%d') for i in
+                           market_data["open"].ix[self.benckmark].index
+                           if i >= data_transfer.date_str_to_int(self.start)]
+
+        bar_index = 0
+        while True:
+            try:
+                self.timetag = benchmark_index[bar_index]
+            except IndexError:
+                if run_mode == RunMode.BACKTESTING.value:
+                    break
+                elif run_mode == RunMode.TRADE.value:
+                    '''读取最新tick, 更新最新的分钟或者日线
+                    if 读取最新tick, 更新最新的分钟或者日线 == done:
+                        market_data.append(new_day_data)
+                        bar_index += 1
+                        benchmark_index.append(new_day_timetag)
+
+                    '''
+                    pass
+
+            else:
+
                 date = int(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y%m%d"))
+                # ee.start() event 做下面两件事
 
-                print(market_data["open"].ix["000300.SH"][date])
-                self.handle_bar()
+                #（１）用当前bar的收盘价更新资金  持仓
                 print(market_data["close"].ix["000300.SH"][date])
-
                 # print(self.capital)
                 # print(Environment.account)
                 # print(Environment.position)
-        elif run_mode == RunMode.TRADE.value:
-            pass
+                #(2) 跑每一根ｂａｒ
+                self.handle_bar()
+
+                bar_index += 1
+                # ee.stop()
 
     @abstractmethod
     def initialize(self):
         pass
 
-
     @abstractmethod
     def handle_bar(self, timetag):
         pass
-
-
-"""
-        if run_mode == RunMode.TRADE.value:
-            self.end = float("inf")
-        i = 0
-        while True:
-            try:
-                bar = benchmark_index[i]
-            except no exist:
-                if run_mode == RunMode.BACKTESTING.value:
-                    break
-                elif run_mode == RunMode.TRADE.value:
-                    读取最新tick, 更新最新的分钟或者日线
-                    if 读取最新tick, 更新最新的分钟或者日线 == done:
-                        data.append(new_day_data)
-                        i += 1
-                        index.append(new_day_timetag)
-            else:
-                ee.start()
-                i += 1
-                ee.stop()
-
-"""
