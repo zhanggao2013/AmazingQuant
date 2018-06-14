@@ -2,7 +2,6 @@
 
 __author__ = "gao"
 
-import time
 import pandas as pd
 
 from AmazingQuant.data_center.mongosconn import MongoConn
