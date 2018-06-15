@@ -12,42 +12,51 @@ import AmazingQuant.utils.data_transfer as data_transfer
 class GetData(object):
     def __init__(self):
         self.conn = MongoConn()
-        self.universe = ["000300.SH"]
-        self.start = "20170101"
-        self.end = "20170504"
-        self.period = "daily"
 
-    def get_market_data(self, stock_code=[], field=[], start="", end="", period=Period.DAILY.value, skip_paused=True,
-                        rights_adjustment=RightsAdjustment.NONE.value, count=-1):
+    def get_all_market_data(self, stock_code=[], field=[], start="", end="", period=Period.DAILY.value):
+
         if period == Period.DAILY.value:
-            self.db_name = DatabaseName.MARKET_DATA_DAILY.value
-            skip_paused = True
-            rights_adjustment = RightsAdjustment.NONE.value
-            start = data_transfer.date_str_to_int(start)
+            db_name = DatabaseName.MARKET_DATA_DAILY.value
             end = data_transfer.date_str_to_int(end)
             values = []
             colum = {"_id": 0, "timetag": 1}
-            for ohlc in field:
-                colum[ohlc] = 1
+            for i in field:
+                colum[i] = 1
             for stock in stock_code:
-                stock_market_data = self.conn.select_colum(db_name=self.db_name, table=stock,
-                                                           value={"timetag": {"$gte": start, "$lte": end}},
+                stock_market_data = self.conn.select_colum(db_name=db_name, table=stock,
+                                                           value={"timetag": {"$lte": end}},
                                                            colum=colum)
                 df = pd.DataFrame(list(stock_market_data))
                 values.append(pd.DataFrame(df[field].values, index=df['timetag'], columns=field))
             market_data = pd.concat(values, keys=stock_code)
         elif period == Period.ONE_MIN.value:
-            self.db_name = DatabaseName.MARKET_DATA_ONE_MIN.value
+            db_name = DatabaseName.MARKET_DATA_ONE_MIN.value
 
         return market_data
 
-    def get_end_timetag(self, stock_code, period=Period.DAILY.value):
+    def get_market_data(self, market_data, stock_code=[], field=[], start="", end="", skip_paused=True,
+                            rights_adjustment=RightsAdjustment.NONE.value, count=-1):
+        """
+        从dataframe解析数据成最终的数据格式，复权　count　skip_paused都在在这里做
+        :param market_data:
+        :param stock_code:
+        :param field:
+        :param start:
+        :param end:
+        :param skip_paused:
+        :param rights_adjustment:
+        :param count:
+        :return:
+        """
+        pass
+
+    def get_end_timetag(self, benckmark, period=Period.DAILY.value):
         if period == Period.DAILY.value:
-            self.db_name = DatabaseName.MARKET_DATA_DAILY.value
+            db_name = DatabaseName.MARKET_DATA_DAILY.value
         elif period == Period.ONE_MIN.value:
-            self.db_name = DatabaseName.MARKET_DATA_ONE_MIN.value
+            db_name = DatabaseName.MARKET_DATA_ONE_MIN.value
         colum = {"_id": 0, "timetag": 1}
-        end_timetag_list = self.conn.select_colum(db_name=self.db_name, table=stock_code,
+        end_timetag_list = self.conn.select_colum(db_name=db_name, table=benckmark,
                                                   value={},
                                                   colum=colum)
         end_timetag = str(int(max([i["timetag"] for i in list(end_timetag_list)])))
