@@ -21,7 +21,7 @@ class MaStrategy(StrategyBase):
         print(self.benchmark)
         # print(self.timetag)
         print(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y-%m-%d"))
-        # print(market_data["close"].ix["000300.SH"])
+        print(self.daily_data["close"].ix["000300.SH"])
 
 
 if __name__ == "__main__":
