@@ -47,7 +47,8 @@ class GetData(object):
 
     def get_market_data(self, market_data, stock_code=[], field=[], start="", end="", count=-1):
         """
-        从dataframe解析数据成最终的数据格式，count　skip_paused都在在这里做
+        从dataframe解析数据成最终的数据格式，count都在在这里做
+        因为停牌或者其他原因取不到数据的，１　２　３　返回的是－１，其他返回的是pandas的空或者NaN，所以可以使用　＞０判断是否取到值
         :param market_data:
         :param stock_code:
         :param field:
@@ -75,13 +76,19 @@ class GetData(object):
         elif len(stock_code) > 1 and len(field) == 1 and (start == end) and count == -1:
             result_dict = {}
             for stock in stock_code:
-                result_dict[stock] = market_data[field[0]].ix[stock, end]
+                try:
+                    result_dict[stock] = market_data[field[0]].ix[stock, end]
+                except:
+                    result_dict[stock] = -1
             return pd.Series(result_dict)
         # （３）代码-1，字段-n，时间-1,  return Series
         elif len(stock_code) == 1 and len(field) > 1 and (start == end) and count == -1:
             result_dict = {}
             for field_one in field:
-                result_dict[field_one] = market_data[field_one].ix[stock_code[0], end]
+                try:
+                    result_dict[field_one] = market_data[field_one].ix[stock_code[0], end]
+                except:
+                    result_dict[field_one] = -1
             return pd.Series(result_dict)
         # （４）代码-1，字段-1，时间-n,  return Series
         elif len(stock_code) == 1 and len(field) == 1 and (start != end) and count == -1:
@@ -102,7 +109,10 @@ class GetData(object):
         elif len(stock_code) > 1 and len(field) > 1 and (start == end) and count == -1:
             result_dict = {}
             for stock in stock_code:
-                result_dict[stock] = market_data.ix[stock].ix[end]
+                try:
+                    result_dict[stock] = market_data.ix[stock].ix[end]
+                except:
+                    result_dict[stock] = pd.Series()
             return pd.DataFrame(result_dict).ix[field]
         # （７）代码-1，字段-n，时间-n,  return dataframe 行-timetag，列-字段
         elif len(stock_code) == 1 and len(field) > 1 and (start != end) and count == -1:
@@ -159,12 +169,12 @@ if __name__ == "__main__":
     # print(data_5)
 
     data_6 = aa.get_market_data(daily_data, stock_code=["000002.SZ", "000001.SH"], field=["open", "high"],
-                                start="2018-01-02", end="2018-01-02", count=-1)
-    # print(data_6)
+                                start="2019-01-02", end="2019-01-02", count=-1)
+    #print(data_6)
 
     data_7 = aa.get_market_data(daily_data, stock_code=["000002.SZ"], field=["open", "high"], start="2017-01-02",
                                 end="2018-01-02", count=-1)
-    # print(data_7)
+    #print(data_7)
     data_8 = aa.get_market_data(daily_data, stock_code=["000002.SZ", "000001.SH"], field=["open", "high"],
                                 start="2017-01-02",
                                 end="2018-01-02", count=-1)
