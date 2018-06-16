@@ -66,7 +66,11 @@ class GetData(object):
             end = 0
         # （１）代码-1，字段-1，时间-1,  return float
         if len(stock_code) == 1 and len(field) == 1 and (start == end) and count == -1:
-            return market_data[field[0]].ix[stock_code[0], end]
+            try:
+                return market_data[field[0]].ix[stock_code[0], end]
+            #停牌或者其他情情况取不到数据的返回-1
+            except:
+                return -1
         # （２）代码-n，字段-1，时间-1,  return Series
         elif len(stock_code) > 1 and len(field) == 1 and (start == end) and count == -1:
             result_dict = {}
