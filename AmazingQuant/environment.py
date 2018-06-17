@@ -10,9 +10,6 @@ class Environment(object):
     position = pd.DataFrame()
     account = pd.DataFrame()
 
-
-    
-
     @classmethod
     def refresh(cls):
         cls.account = pd.DataFrame()
