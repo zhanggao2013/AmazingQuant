@@ -9,7 +9,7 @@ from AmazingQuant.strategy_center.strategy import StrategyBase
 from AmazingQuant.environment import Environment
 import AmazingQuant.utils.data_transfer as data_transfer
 from AmazingQuant.data_center.get_data import GetData
-
+from AmazingQuant.environment import Environment
 
 class MaStrategy(StrategyBase):
     def initialize(self):
@@ -40,6 +40,9 @@ class MaStrategy(StrategyBase):
         elif ma10[-1] < ma30[-1]:
             # order_lots("000002.SZ",1,"fix",close_price[current_date_int],self.account)
             print("sell", -1, "fix", close_price[current_date_int], self.account)
+        Environment.aa += 1
+        print(Environment.aa)
+
 
 
 if __name__ == "__main__":

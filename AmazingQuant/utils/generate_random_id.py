@@ -8,7 +8,7 @@ from AmazingQuant.constant import ID
 
 
 def generate_random_id(topic=ID.ACCOUNT_ID.value, lens=8):
-    _list = [chr(i) for i in range(65, 91)] + [str(i) for i in range(10)]
+    _list = [str(i) for i in range(10)]
     num = random.sample(_list, lens)
     return "{}_{}".format(topic, "".join(num))
 
