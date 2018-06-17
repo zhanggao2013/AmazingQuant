@@ -12,9 +12,11 @@ class EventOrder(Event):
     def __init__(self):
         super().__init__(event_type=EventType.EVENT_ORDER.value)
 
-def simple_test(event=EventOrder()):
-    print('处理每秒触发的计时器事件：{}'.format(str(datetime.now())))
-    Environment.account[ID.ACCOUNT_ID] = 1
+
+class BacktestingOrder(object):
+    def simple_test(event=EventOrder()):
+        print('处理每秒触发的计时器事件：{}'.format(str(datetime.now())))
+        Environment.account[ID.ACCOUNT_ID] = 1
 
 
 

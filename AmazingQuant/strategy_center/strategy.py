@@ -12,6 +12,7 @@ from AmazingQuant.data_center.get_data import GetData
 
 class StrategyBase(metaclass=ABCMeta):
     def __init__(self):
+        self._run_mode = RunMode.BACKTESTING.value
         self._capital = 1000000
         self._start = "2017-01-01"
         self._end = "2018-01-02"
@@ -28,6 +29,14 @@ class StrategyBase(metaclass=ABCMeta):
         # 换存分钟线数据
         self._one_min_data_cache = False
         self._one_min_data = None
+
+    @property
+    def run_mode(self):
+        return self._run_mode
+
+    @run_mode.setter
+    def run_mode(self, value):
+        self._run_mode = value
 
     @property
     def capital(self):

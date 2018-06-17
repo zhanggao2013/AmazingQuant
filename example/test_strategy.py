@@ -16,6 +16,7 @@ from AmazingQuant.event_engine.event_trade_engine import EventTradeEngine
 
 class MaStrategy(StrategyBase):
     def initialize(self):
+        self.run_mode = RunMode.TRADE.value
         self.capital = 200000
         self.benchmark = "000002.SZ"
         self.start = "2005-01-08"
@@ -43,9 +44,9 @@ class MaStrategy(StrategyBase):
         elif ma10[-1] < ma30[-1]:
             # order_lots("000002.SZ",1,"fix",close_price[current_date_int],self.account)
             print("sell", -1, "fix", close_price[current_date_int], self.account)
-        EventTradeEngine().order_lots()
+        EventTradeEngine(self.run_mode).order_lots()
 
-        print(Environment.account[ID.ACCOUNT_ID], current_date)
+        #print(Environment.account[ID.ACCOUNT_ID], current_date)
 
 
 if __name__ == "__main__":
