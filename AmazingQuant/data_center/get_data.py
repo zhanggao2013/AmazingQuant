@@ -16,7 +16,7 @@ class GetData(object):
     def get_all_market_data(self, stock_code=[], field=[], start="", end="", period=Period.DAILY.value,
                             rights_adjustment=RightsAdjustment.NONE.value):
         """
-        复权因子在这做
+        复权因子和skip_pause在这做
         :param stock_code:
         :param field:
         :param start:

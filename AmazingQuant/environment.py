@@ -2,11 +2,12 @@
 
 __author__ = "gao"
 
+
 class Environment(object):
-    account = {}
-    position = {}
     order = {}
     deal = {}
+    position = {}
+    account = {}
 
     @classmethod
     def refresh(cls):

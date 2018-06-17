@@ -38,3 +38,9 @@ class EventType(Enum):
     EVENT_HANDLE_BAR = "event_handle_bar"
     EVENT_LOG = "event_log"
     EVENR_ERROR = "event_error"
+
+@unique
+class ID(Enum):
+    ACCOUNT_ID = "account"
+    ORDER_ID = "order"
+    DEAL_ID = "deal"

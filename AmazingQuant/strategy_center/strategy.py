@@ -15,9 +15,9 @@ class StrategyBase(metaclass=ABCMeta):
         self._capital = 1000000
         self._start = "2017-01-01"
         self._end = "2018-01-02"
-        self._benckmark = "000300.SH"
+        self._benchmark = "000300.SH"
         self._period = Period.DAILY.value  # 后续支持1min 3min 5min 等多周期
-        self._universe = [self._benckmark]
+        self._universe = [self._benchmark]
         self._rights_adjustment = RightsAdjustment.NONE.value
         self._timetag = 0
         # 取数据
@@ -54,12 +54,12 @@ class StrategyBase(metaclass=ABCMeta):
         self._end = value
 
     @property
-    def benckmark(self):
-        return self._benckmark
+    def benchmark(self):
+        return self._benchmark
 
-    @benckmark.setter
-    def benckmark(self, value):
-        self._benckmark = value
+    @benchmark.setter
+    def benchmark(self, value):
+        self._benchmark = value
 
     @property
     def period(self):
@@ -127,21 +127,20 @@ class StrategyBase(metaclass=ABCMeta):
 
     def run(self, run_mode=RunMode.BACKTESTING.value):
         self.initialize()
-        print(self.universe, self.start, self.end, self.period, self.rights_adjustment)
+        print(self.benchmark, self.start, self.end, self.period, self.rights_adjustment)
         if run_mode == RunMode.TRADE.value:
-            self.end = self._get_data.get_end_timetag(benckmark=self.benckmark, period=Period.DAILY.value)
+            self.end = self._get_data.get_end_timetag(benchmark=self.benchmark, period=Period.DAILY.value)
 
         daily_data = self._get_data.get_all_market_data(stock_code=self.universe,
                                                         field=["open", "high", "low", "close", "volumn", "amount"],
                                                         end=self.end, period=self.period)
 
         benchmark_index = [data_transfer.date_to_millisecond(str(int(i)), '%Y%m%d') for i in
-                           daily_data["open"].ix[self.benckmark].index
+                           daily_data["open"].ix[self.benchmark].index
                            if i >= data_transfer.date_str_to_int(self.start)]
-
         if self.daily_data_cache:
             self.daily_data = daily_data
-            print(self.daily_data_cache)
+            # print(self.daily_data_cache)
         if self.one_min_data_cache:
             """
             补充完分钟数据，再缓存ｍｉｎ数据
@@ -170,7 +169,7 @@ class StrategyBase(metaclass=ABCMeta):
                 # ee.start() event 做执行下面两个事件
 
                 # （１）用当前bar的收盘价更新资金  持仓
-                print(daily_data["close"].ix["000300.SH"][date])
+                # print(daily_data["close"].ix["000300.SH"][date])
                 # print(self.capital)
                 # print(Environment.account)
                 # print(Environment.position)
