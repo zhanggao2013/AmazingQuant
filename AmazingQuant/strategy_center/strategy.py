@@ -5,7 +5,7 @@ __author__ = "gao"
 from abc import ABCMeta, abstractmethod
 
 import AmazingQuant.utils.data_transfer as data_transfer
-from AmazingQuant.constant import RunMode, Period, RightsAdjustment
+from AmazingQuant.constant import RunMode, Period, RightsAdjustment, ID
 from AmazingQuant.environment import Environment
 from AmazingQuant.data_center.get_data import GetData
 

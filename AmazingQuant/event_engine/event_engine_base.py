@@ -3,7 +3,7 @@
 _author_ = "gao"
 
 from queue import Queue, Empty
-from threading import Thread
+from threading import Thread, RLock
 from time import sleep
 from collections import defaultdict
 
@@ -40,8 +40,11 @@ class EventEngineBase(object):
         # 事件处理线程
         self._thread = Thread(target=self._run)
 
+        # 线程锁
+        self._lock = RLock()
+
         # 计时器，用于触发计时器事件
-        self._timer = Thread(target=self._runTimer)
+        self._timer = Thread(target=self._run_timer)
         self._timer_active = False  # 计时器工作状态
         self._timer_sleep = 1  # 计时器触发间隔（默认1秒）
 
@@ -54,29 +57,31 @@ class EventEngineBase(object):
 
     def _run(self):
         """引擎运行"""
-        while self._active == True:
+        while self._active:
             try:
-                event = self._queue.get(block=True, timeout=3)  # 获取事件的阻塞时间设为1秒
+                event = self._queue.get(block=True, timeout=1)  # 获取事件的阻塞时间设为1秒
+                self._lock.acquire()
                 self._process(event)
+                self._lock.release()
             except Empty:
                 pass
 
     def _process(self, event):
         """处理事件"""
         # 检查是否存在对该事件进行监听的处理函数
-        if event.type_ in self._handlers:
+        if event.event_type in self._handlers:
             # 若存在，则按顺序将事件传递给处理函数执行
-            [handler(event) for handler in self._handlers[event.type_]]
+            [handler(event) for handler in self._handlers[event.event_type]]
 
         # 调用通用处理函数进行处理
         if self._general_handlers:
             [handler(event) for handler in self._general_handlers]
 
-    def _runTimer(self):
+    def _run_timer(self):
         """运行在计时器线程中的循环函数"""
         while self._timer_active:
             # 创建计时器事件
-            event = Event(type_=EventType.EVENT_TIMER.value)
+            event = Event(event_type=EventType.EVENT_TIMER.value)
 
             # 向队列中存入计时器事件
             self.put(event)
@@ -106,25 +111,26 @@ class EventEngineBase(object):
         self._active = False
 
         # 停止计时器
-        self._timer_active = False
-        self._timer.join()
+        if self._timer_active:
+            self._timer_active = False
+            self._timer.join()
 
         # 等待事件处理线程退出
         self._thread.join()
 
-    def register(self, type_, handler):
+    def register(self, event_type, handler):
         """注册事件处理函数监听"""
         # 尝试获取该事件类型对应的处理函数列表，若无defaultDict会自动创建新的list
-        handlerList = self._handlers[type_]
+        handlerList = self._handlers[event_type]
 
         # 若要注册的处理器不在该事件的处理器列表中，则注册该事件
         if handler not in handlerList:
             handlerList.append(handler)
 
-    def unregister(self, type_, handler):
+    def unregister(self, event_type, handler):
         """注销事件处理函数监听"""
         # 尝试获取该事件类型对应的处理函数列表，若无则忽略该次注销请求
-        handlerList = self._handlers[type_]
+        handlerList = self._handlers[event_type]
 
         # 如果该函数存在于列表中，则移除
         if handler in handlerList:
@@ -132,7 +138,7 @@ class EventEngineBase(object):
 
         # 如果函数列表为空，则从引擎中移除该事件类型
         if not handlerList:
-            del self._handlers[type_]
+            del self._handlers[event_type]
 
     def put(self, event):
         """向事件队列中存入事件"""
@@ -152,28 +158,29 @@ class EventEngineBase(object):
 class Event(object):
     """事件对象"""
 
-    def __init__(self, type_=None):
+    def __init__(self, event_type=None):
         """Constructor"""
-        self.type_ = type_  # 事件类型
-        self.dict_ = {}  # 字典用于保存具体的事件数据
+        self.event_type = event_type  # 事件类型
+        self.event_data_dict = {}  # 字典用于保存具体的事件数据
 
 
-def test():
-    """测试函数"""
-    from datetime import datetime
+class TestOne(object):
+    def test(self):
+        """测试函数"""
+        from datetime import datetime
 
-    def simpletest(event):
-        print(u'处理每秒触发的计时器事件：{}'.format(str(datetime.now())))
+        def simpletest(event):
+            print(u'处理每秒触发的计时器事件：{}'.format(str(datetime.now())))
 
-    ee = EventEngineBase()
-    ee.put(Event(EventType.EVENT_MARKET.value))
-    #ee.register(EventType.EVENT_TIMER.value, simpletest)
-    ee.register(EventType.EVENT_MARKET.value, simpletest)
-    # ee.registerGeneralHandler(simpletest)
-    ee.start()
-    ee.stop()
+        ee = EventEngineBase()
+        ee.put(Event(EventType.EVENT_MARKET.value))
+        # ee.register(EventType.EVENT_TIMER.value, simpletest)
+        ee.register(EventType.EVENT_MARKET.value, simpletest)
+        # ee.registerGeneralHandler(simpletest)
+        ee.start()
+        ee.stop()
 
 
 if __name__ == "__main__":
-    test()
-
+    aa = TestOne()
+    aa.test()
