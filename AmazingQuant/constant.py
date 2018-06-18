@@ -54,3 +54,4 @@ class Empty(Enum):
     EMPTY_STRING = ""
     EMPTY_INT = 0
     EMPTY_FLOAT = 0.0
+

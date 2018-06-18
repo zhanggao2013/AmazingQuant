@@ -177,7 +177,8 @@ class StrategyBase(metaclass=ABCMeta):
                 date = int(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y%m%d"))
                 # ee.start() event 做执行下面两个事件
 
-                # （１）用当前bar的收盘价更新资金  持仓
+                # （１）回测的时候，用当前bar的收盘价更新资金  持仓
+                # 真实交易的时候　取最新的资金　持仓　成交　委托
                 # print(daily_data["close"].ix["000300.SH"][date])
                 # print(self.capital)
                 # print(Environment.account)
