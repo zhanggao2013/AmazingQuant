@@ -41,6 +41,16 @@ class EventType(Enum):
 
 @unique
 class ID(Enum):
+    BROKER_ID = "broker"
+    FRONT_ID = "front"
+    SESSION_ID = "session"
     ACCOUNT_ID = "account"
     ORDER_ID = "order"
     DEAL_ID = "deal"
+
+
+@unique
+class Empty(Enum):
+    EMPTY_STRING = ""
+    EMPTY_INT = 0
+    EMPTY_FLOAT = 0.0
