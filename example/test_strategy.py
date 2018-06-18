@@ -5,18 +5,17 @@ __author__ = "gao"
 import numpy as np
 import talib
 
-from AmazingQuant.strategy_center.strategy import StrategyBase
-from AmazingQuant.environment import Environment
-import AmazingQuant.utils.data_transfer as data_transfer
-from AmazingQuant.data_center.get_data import GetData
-from AmazingQuant.environment import Environment
-from AmazingQuant.constant import RunMode, Period, RightsAdjustment, ID
+from AmazingQuant.strategy_center.strategy import *
+# from AmazingQuant.environment import Environment
+# import AmazingQuant.utils.data_transfer as data_transfer
+# from AmazingQuant.data_center.get_data import GetData
+# from AmazingQuant.constant import RunMode, Period, RightsAdjustment, ID
 from AmazingQuant.event_engine.event_trade_engine import EventTradeEngine
 
 
 class MaStrategy(StrategyBase):
     def initialize(self):
-        self.run_mode = RunMode.TRADE.value
+        self.run_mode = RunMode.BACKTESTING.value
         self.capital = 200000
         self.benchmark = "000002.SZ"
         self.start = "2005-01-08"
@@ -44,9 +43,12 @@ class MaStrategy(StrategyBase):
         elif ma10[-1] < ma30[-1]:
             # order_lots("000002.SZ",1,"fix",close_price[current_date_int],self.account)
             print("sell", -1, "fix", close_price[current_date_int], self.account)
-        EventTradeEngine(self.run_mode).order_lots()
+        EventTradeEngine(self.run_mode).order_lots(offset="buy", shares=1, style="fix",
+                                                   order_price=close_price[current_date_int],
+                                                   account_id=self.account)
+        print(current_date)
 
-        #print(Environment.account[ID.ACCOUNT_ID], current_date)
+        # print(Environment.account[ID.ACCOUNT_ID], current_date)
 
 
 if __name__ == "__main__":

@@ -59,7 +59,7 @@ class EventEngineBase(object):
         """引擎运行"""
         while self._active:
             try:
-                event = self._queue.get(block=True, timeout=1)  # 获取事件的阻塞时间设为1秒
+                event = self._queue.get(block=False)  # 获取事件设为非阻塞
                 self._lock.acquire()
                 self._process(event)
                 self._lock.release()
