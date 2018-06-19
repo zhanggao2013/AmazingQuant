@@ -134,10 +134,10 @@ class StrategyBase(metaclass=ABCMeta):
     def one_min_data(self, value):
         self._one_min_data = value
 
-    def run(self, run_mode=RunMode.BACKTESTING.value):
+    def run(self):
         self.initialize()
-        print(self.benchmark, self.start, self.end, self.period, self.rights_adjustment)
-        if run_mode == RunMode.TRADE.value:
+
+        if self.run_mode == RunMode.TRADE.value:
             self.end = self._get_data.get_end_timetag(benchmark=self.benchmark, period=Period.DAILY.value)
 
         daily_data = self._get_data.get_all_market_data(stock_code=self.universe,
@@ -155,15 +155,15 @@ class StrategyBase(metaclass=ABCMeta):
             补充完分钟数据，再缓存ｍｉｎ数据
             """
             self.one_min_data = one_min_data
-
+        print(self.benchmark, self.start, self.end, self.period, self.rights_adjustment, Environment.run_mode)
         bar_index = 0
         while True:
             try:
                 self.timetag = benchmark_index[bar_index]
             except IndexError:
-                if run_mode == RunMode.BACKTESTING.value:
+                if self.run_mode == RunMode.BACKTESTING.value:
                     break
-                elif run_mode == RunMode.TRADE.value:
+                elif self.run_mode == RunMode.TRADE.value:
                     '''读取最新tick, 更新最新的分钟或者日线
                     if 读取最新tick, 更新最新的分钟或者日线 == done:
                         daily_data.append(new_day_data)

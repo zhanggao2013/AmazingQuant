@@ -13,6 +13,7 @@ class OrderData(object):
         self.exchange = Empty.EMPTY_STRING.value  # 交易所代码
 
         # 　报单相关
+        self.price_type = Empty.EMPTY_STRING.value  # 报单类型
         self.order_price = Empty.EMPTY_FLOAT.value  # 报单价格
         self.direction = Empty.EMPTY_STRING.value  # 报单方向
         self.offset = Empty.EMPTY_STRING.value  # 报单开平
@@ -24,7 +25,7 @@ class OrderData(object):
         self.cancel_time = Empty.EMPTY_STRING.value  # 撤单时间
 
         # 　CTP相关
-        self.frond_id = Empty.EMPTY_STRING.value　　　　  # 前置机编号
+        self.frond_id = Empty.EMPTY_STRING.value  # 前置机编号
         self.session_id = Empty.EMPTY_STRING.value  # 连接编号
 
 

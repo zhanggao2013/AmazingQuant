@@ -130,13 +130,13 @@ class GetData(object):
                 result_dict[stock] = market_data.ix[stock][field].ix[index]
             return pd.concat(result_dict, keys=stock_code)
 
-    def get_end_timetag(self, benckmark, period=Period.DAILY.value):
+    def get_end_timetag(self, benchmark, period=Period.DAILY.value):
         if period == Period.DAILY.value:
             db_name = DatabaseName.MARKET_DATA_DAILY.value
         elif period == Period.ONE_MIN.value:
             db_name = DatabaseName.MARKET_DATA_ONE_MIN.value
         colum = {"_id": 0, "timetag": 1}
-        end_timetag_list = self.conn.select_colum(db_name=db_name, table=benckmark,
+        end_timetag_list = self.conn.select_colum(db_name=db_name, table=benchmark,
                                                   value={},
                                                   colum=colum)
         end_timetag = str(int(max([i["timetag"] for i in list(end_timetag_list)])))

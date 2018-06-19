@@ -4,8 +4,10 @@ __author__ = "gao"
 
 import pandas as pd
 
+from AmazingQuant.constant import RunMode
 
 class Environment(object):
+    run_mode = RunMode.BACKTESTING.value
     order = pd.DataFrame()
     deal = pd.DataFrame()
     position = pd.DataFrame()

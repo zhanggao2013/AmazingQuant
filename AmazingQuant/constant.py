@@ -43,15 +43,36 @@ class EventType(Enum):
 class ID(Enum):
     BROKER_ID = "broker"
     FRONT_ID = "front"
-    SESSION_ID = "session"
-    ACCOUNT_ID = "account"
     ORDER_ID = "order"
     DEAL_ID = "deal"
 
 
-@unique
+
 class Empty(Enum):
     EMPTY_STRING = ""
     EMPTY_INT = 0
     EMPTY_FLOAT = 0.0
 
+@unique
+class RunMode(Enum):
+    TRADE = "trade"
+    BACKTESTING = "backtesting"
+
+@unique
+class Offset(Enum):
+    OPEN = "open"
+    CLOSE = "close"
+
+@unique
+class Status(Enum):
+    NOTTRADED = "pending"
+    PARTTRADED = "partial filled"
+    ALLTRADED = "filled"
+    CANCELLED = "cancelled"
+    REJECTED = "rejected"
+    UNKNOWN = "unknown"
+
+@unique
+class PriceType(Enum):
+    LIMIT = "limit"
+    MARKET = "market"

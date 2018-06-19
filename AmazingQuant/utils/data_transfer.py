@@ -6,11 +6,11 @@ import time
 
 
 def millisecond_to_date(millisecond, format):
-    return time.strftime(format, time.localtime(millisecond))
+    return time.strftime(format, time.localtime(millisecond/1000))
 
 
 def date_to_millisecond(date="20100101", format='%Y%m%d'):
-    return int(time.mktime(time.strptime(date, format)))
+    return int(time.mktime(time.strptime(date, format))*1000)
 
 
 def date_str_to_int(date="2010-01-01"):

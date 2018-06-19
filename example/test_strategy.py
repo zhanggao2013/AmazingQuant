@@ -43,10 +43,10 @@ class MaStrategy(StrategyBase):
         elif ma10[-1] < ma30[-1]:
             # order_lots("000002.SZ",1,"fix",close_price[current_date_int],self.account)
             print("sell", -1, "fix", close_price[current_date_int], self.account)
-        EventTradeEngine(self.run_mode).order_lots(offset="buy", shares=1, style="fix",
-                                                   order_price=close_price[current_date_int],
-                                                   account_id=self.account)
-        print(current_date)
+        EventTradeEngine(self).order_lots(stock_code="000002.SZ", shares=1, price_type="fix",
+                                          order_price=close_price[current_date_int],
+                                          account_id=self.account)
+        # print(Environment.run_mode)
 
         # print(Environment.account[ID.ACCOUNT_ID], current_date)
 
