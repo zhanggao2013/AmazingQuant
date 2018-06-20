@@ -14,9 +14,21 @@ class EventOrder(Event):
         super().__init__(event_type=EventType.EVENT_ORDER.value)
 
     @classmethod
-    def simple_test(cls, event):
-        print('处理每秒触发的计时器事件：{}'.format(str(datetime.now())))
-        print(event.event_data_dict["data"].order_id)
+    def integer_conversion(cls, event):
+        Environment.current_order_data.total_volume = 100 * int(Environment.current_order_data.total_volume/100)
+
+    @classmethod
+    def account_avaliable_check(cls, event):
+        pass
+
+    @classmethod
+    def position_avaliable_volume_check(cls, event):
+        pass
+
+
+
+
+
 
         """
         回测中：

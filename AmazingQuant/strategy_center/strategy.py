@@ -4,15 +4,18 @@ __author__ = "gao"
 
 from abc import ABCMeta, abstractmethod
 
-import AmazingQuant.utils.data_transfer as data_transfer
+from AmazingQuant.utils import data_transfer, generate_random_id
 from AmazingQuant.constant import RunMode, Period, RightsAdjustment, ID
 from AmazingQuant.environment import Environment
 from AmazingQuant.data_center.get_data import GetData
+from AmazingQuant.strategy_center.event_main_engine import *
+from AmazingQuant.data_object import *
 
 
 class StrategyBase(metaclass=ABCMeta):
     def __init__(self):
         self._run_mode = RunMode.BACKTESTING.value
+        self._account = ""
         self._capital = 1000000
         self._start = "2017-01-01"
         self._end = "2018-01-02"
@@ -37,6 +40,14 @@ class StrategyBase(metaclass=ABCMeta):
     @run_mode.setter
     def run_mode(self, value):
         self._run_mode = value
+
+    @property
+    def account(self):
+        return self._account
+
+    @account.setter
+    def account(self, value):
+        self._account = value
 
     @property
     def capital(self):
@@ -137,6 +148,13 @@ class StrategyBase(metaclass=ABCMeta):
     def run(self):
         self.initialize()
 
+        # 初始化　account_data
+        Environment.current_account_data = AccountData()
+        Environment.current_account_data.account_id = generate_random_id.generate_random_id(self.account)
+        Environment.current_account_data.balance = self.capital
+        Environment.current_account_data.avaliable = self.capital
+        Environment.bar_account_data_list.append(Environment.current_account_data)
+
         if self.run_mode == RunMode.TRADE.value:
             self.end = self._get_data.get_end_timetag(benchmark=self.benchmark, period=Period.DAILY.value)
 
@@ -181,11 +199,12 @@ class StrategyBase(metaclass=ABCMeta):
                 # 真实交易的时候　取最新的资金　持仓　成交　委托
                 # print(daily_data["close"].ix["000300.SH"][date])
                 # print(self.capital)
-                # print(Environment.account)
-                # print(Environment.position)
+
                 # (2) 跑每一根bar
-                self.handle_bar()
+                self.handle_bar()   # 再trade中　对　bar_current的四个操作
                 bar_index += 1
+                update_current_bar_data(self.timetag)  # 纪录每根bar的资金 持仓 委托　成交
+                Environment.refresh()   # 重置委托　成交 的list，因为资金和持仓是回测的开始到结束，所以不需要重置
                 # ee.stop()
 
     @abstractmethod

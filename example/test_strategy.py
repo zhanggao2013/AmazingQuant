@@ -43,7 +43,7 @@ class MaStrategy(StrategyBase):
         elif ma10[-1] < ma30[-1]:
             # order_lots("000002.SZ",1,"fix",close_price[current_date_int],self.account)
             print("sell", -1, "fix", close_price[current_date_int], self.account)
-        Trade(self).order_lots(stock_code="000002.SZ", shares=1, price_type="fix",
+        Trade(self).order_lots(stock_code="000002.SZ", shares=10005, price_type="fix",
                                           order_price=close_price[current_date_int],
                                           account_id=self.account)
         # print(Environment.run_mode)

@@ -37,7 +37,9 @@ class Trade(object):
         # CTP相关
         order_data.order_time = self._strategy.timetag
         order_data.session_id = generate_random_id(account_id)
-        new_order_data = self.mission_order(order_data)
+
+        Environment.current_order_data = order_data
+        new_order_data = self.mission_order()
 
         '''if self._strategy.run_mode == RunMode.BACKTESTING.value:
             self.send_order(new_order_data)
@@ -51,7 +53,7 @@ class Trade(object):
     def send_order(self, order_data):
         pass
 
-    def mission_order(self, order_data):
+    def mission_order(self):
         """
         order  和　risk management 两个事件, ,同样使用event_engine,本地计算的engine,重新隔离出一个engine
         在risk management
@@ -61,11 +63,11 @@ class Trade(object):
         """
         mission_engine = EventEngineBase()
         event_order = EventOrder()
-        event_order.event_data_dict["data"] = order_data
+        event_order.event_data_dict["data"] = Environment.current_order_data
 
         mission_engine.put(event_order)
 
-        mission_engine.register(EventType.EVENT_ORDER.value, EventOrder.simple_test)
+        mission_engine.register(EventType.EVENT_ORDER.value, EventOrder.integer_conversion)
 
         mission_engine.start(timer=False)
         mission_engine.stop()
