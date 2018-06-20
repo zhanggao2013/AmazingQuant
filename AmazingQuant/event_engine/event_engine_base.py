@@ -59,12 +59,12 @@ class EventEngineBase(object):
         """引擎运行"""
         while self._active:
             try:
-                event = self._queue.get(block=True, timeout=1)  # 获取事件设为非阻塞
-                #self._lock.acquire()
+                event = self._queue.get(block=True, timeout=0)  # 获取事件设为非阻塞
+                self._lock.acquire()
                 self._process(event)
-                #self._lock.release()
+                self._lock.release()
             except Empty:
-                pass
+                break
 
     def _process(self, event):
         """处理事件"""
@@ -107,8 +107,6 @@ class EventEngineBase(object):
 
     def stop(self):
         """停止引擎"""
-        # 将引擎设为停止
-        self._active = False
 
         # 停止计时器
         if self._timer_active:

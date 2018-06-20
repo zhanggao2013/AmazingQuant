@@ -165,7 +165,7 @@ class StrategyBase(metaclass=ABCMeta):
 
                 # (4)
                 #update_current_bar_data(self.timetag)  #
-                Environment.refresh()  # 重置委托　成交 的list，因为资金和持仓是回测的开始到结束，所以不需要重置
+                #Environment.refresh()  # 重置委托　成交 的list，因为资金和持仓是回测的开始到结束，所以不需要重置
                 # ee.stop()
 
     @abstractmethod

@@ -19,7 +19,7 @@ class MaStrategy(StrategyBase):
         self.capital = 200000
         self.benchmark = "000002.SZ"
         self.start = "2005-01-08"
-        self.end = "2017-02-28"
+        self.end = "2005-02-28"
         self.period = "daily"
         self.universe = ["000002.SZ", "000001.SH"]
         self.daily_data_cache = True

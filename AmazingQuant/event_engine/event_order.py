@@ -28,8 +28,6 @@ class EventOrder(Event):
 
 
 
-
-
         """
         回测中：
         读取event.event_data_dict["data"]
