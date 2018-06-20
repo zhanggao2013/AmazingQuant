@@ -6,7 +6,7 @@ from AmazingQuant.event_engine.event_engine_base import Event, EventEngineBase
 from AmazingQuant.constant import *
 from AmazingQuant.event_engine.event_order import *
 from AmazingQuant.data_object import OrderData
-from AmazingQuant.event_engine.event_broker_engine import EventBrokerEngine
+from AmazingQuant.trade_center.event_broker_engine import EventBrokerEngine
 from AmazingQuant.utils.generate_random_id import generate_random_id
 
 
