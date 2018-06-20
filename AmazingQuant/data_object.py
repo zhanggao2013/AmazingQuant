@@ -52,9 +52,8 @@ class PositionData(object):
         self.exchange = Empty.EMPTY_STRING.value  # 交易所代码
 
         # 　持仓相关
-        self.deal_price = Empty.EMPTY_FLOAT.value  # 持仓均价
+        self.average_price = Empty.EMPTY_FLOAT.value  # 持仓均价
         self.direction = Empty.EMPTY_STRING.value  # 持仓方向
-        self.offset = Empty.EMPTY_STRING.value  # 持仓开平
         self.position = Empty.EMPTY_INT.value  # 持仓数量
         self.frozen = Empty.EMPTY_INT.value  # 冻结数量
         self.yesterday_position = Empty.EMPTY_INT.value  # 昨持仓数量

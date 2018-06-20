@@ -59,10 +59,10 @@ class EventEngineBase(object):
         """引擎运行"""
         while self._active:
             try:
-                event = self._queue.get(block=True, timeout=0)  # 获取事件设为非阻塞
-                self._lock.acquire()
+                event = self._queue.get(block=True, timeout=1)  # 获取事件设为非阻塞
+                #self._lock.acquire()
                 self._process(event)
-                self._lock.release()
+                #self._lock.release()
             except Empty:
                 pass
 
@@ -121,23 +121,23 @@ class EventEngineBase(object):
     def register(self, event_type, handler):
         """注册事件处理函数监听"""
         # 尝试获取该事件类型对应的处理函数列表，若无defaultDict会自动创建新的list
-        handlerList = self._handlers[event_type]
+        handler_list = self._handlers[event_type]
 
         # 若要注册的处理器不在该事件的处理器列表中，则注册该事件
-        if handler not in handlerList:
-            handlerList.append(handler)
+        if handler not in handler_list:
+            handler_list.append(handler)
 
     def unregister(self, event_type, handler):
         """注销事件处理函数监听"""
         # 尝试获取该事件类型对应的处理函数列表，若无则忽略该次注销请求
-        handlerList = self._handlers[event_type]
+        handler_list = self._handlers[event_type]
 
         # 如果该函数存在于列表中，则移除
-        if handler in handlerList:
-            handlerList.remove(handler)
+        if handler in handler_list:
+            handler_list.remove(handler)
 
         # 如果函数列表为空，则从引擎中移除该事件类型
-        if not handlerList:
+        if not handler_list:
             del self._handlers[event_type]
 
     def put(self, event):

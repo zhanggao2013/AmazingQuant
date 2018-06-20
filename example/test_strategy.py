@@ -26,13 +26,13 @@ class MaStrategy(StrategyBase):
         print(self.start)
         self.account = "test"
 
-    def handle_bar(self):
+    def handle_bar(self, event):
         # print(self.benchmark)
         # print(self.timetag)
         current_date = data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y-%m-%d")
         current_date_int = data_transfer.date_str_to_int(current_date)
         data_class = GetData()
-        close_price = data_class.get_market_data(self.daily_data, stock_code=["000002.SZ"], field=["close"],
+        close_price = data_class.get_market_data(Environment.daily_data, stock_code=["000002.SZ"], field=["close"],
                                                  start=self.start,
                                                  end=current_date)
         ma10 = talib.MA(np.array(close_price), timeperiod=10)

@@ -6,10 +6,9 @@ from abc import ABCMeta, abstractmethod
 
 from AmazingQuant.utils import data_transfer, generate_random_id
 from AmazingQuant.constant import RunMode, Period, RightsAdjustment, ID
-from AmazingQuant.environment import Environment
-from AmazingQuant.data_center.get_data import GetData
-from AmazingQuant.strategy_center.event_main_engine import *
+from AmazingQuant.strategy_center.event_bar_engine import *
 from AmazingQuant.data_object import *
+from .event_bar_engine import *
 
 
 class StrategyBase(metaclass=ABCMeta):
@@ -26,12 +25,6 @@ class StrategyBase(metaclass=ABCMeta):
         self._timetag = 0
         # 取数据
         self._get_data = GetData()
-        # 缓存日线数据
-        self._daily_data_cache = False
-        self._daily_data = None
-        # 换存分钟线数据
-        self._one_min_data_cache = False
-        self._one_min_data = None
 
     @property
     def run_mode(self):
@@ -113,38 +106,6 @@ class StrategyBase(metaclass=ABCMeta):
     def timetag(self, value):
         self._timetag = value
 
-    @property
-    def daily_data_cache(self):
-        return self._daily_data_cache
-
-    @daily_data_cache.setter
-    def daily_data_cache(self, value):
-        self._daily_data_cache = value
-
-    @property
-    def daily_data(self):
-        return self._daily_data
-
-    @daily_data.setter
-    def daily_data(self, value):
-        self._daily_data = value
-
-    @property
-    def one_min_data_cache(self):
-        return self._one_min_data_cache
-
-    @one_min_data_cache.setter
-    def one_min_data_cache(self, value):
-        self._one_min_data_cache = value
-
-    @property
-    def one_min_data(self):
-        return self._one_min_data
-
-    @one_min_data.setter
-    def one_min_data(self, value):
-        self._one_min_data = value
-
     def run(self):
         self.initialize()
 
@@ -158,26 +119,20 @@ class StrategyBase(metaclass=ABCMeta):
         if self.run_mode == RunMode.TRADE.value:
             self.end = self._get_data.get_end_timetag(benchmark=self.benchmark, period=Period.DAILY.value)
 
-        daily_data = self._get_data.get_all_market_data(stock_code=self.universe,
-                                                        field=["open", "high", "low", "close", "volumn", "amount"],
-                                                        end=self.end, period=self.period)
+        Environment.daily_data = self._get_data.get_all_market_data(stock_code=self.universe,
+                                                                    field=["open", "high", "low", "close", "volumn",
+                                                                           "amount"],
+                                                                    end=self.end, period=self.period)
 
         benchmark_index = [data_transfer.date_to_millisecond(str(int(i)), '%Y%m%d') for i in
-                           daily_data["open"].ix[self.benchmark].index
+                           Environment.daily_data["open"].ix[self.benchmark].index
                            if i >= data_transfer.date_str_to_int(self.start)]
-        if self.daily_data_cache:
-            self.daily_data = daily_data
-            # print(self.daily_data_cache)
-        if self.one_min_data_cache:
-            """
-            补充完分钟数据，再缓存ｍｉｎ数据
-            """
-            self.one_min_data = one_min_data
+
         print(self.benchmark, self.start, self.end, self.period, self.rights_adjustment, self.run_mode)
-        bar_index = 0
+        self.bar_index = 0
         while True:
             try:
-                self.timetag = benchmark_index[bar_index]
+                self.timetag = benchmark_index[self.bar_index]
             except IndexError:
                 if self.run_mode == RunMode.BACKTESTING.value:
                     break
@@ -185,7 +140,7 @@ class StrategyBase(metaclass=ABCMeta):
                     '''读取最新tick, 更新最新的分钟或者日线
                     if 读取最新tick, 更新最新的分钟或者日线 == done:
                         daily_data.append(new_day_data)
-                        bar_index += 1
+                        self.bar_index += 1
                         benchmark_index.append(new_day_timetag)
                     '''
                     pass
@@ -193,18 +148,24 @@ class StrategyBase(metaclass=ABCMeta):
             else:
 
                 date = int(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y%m%d"))
-                # ee.start() event 做执行下面两个事件
+                # ee.start() event 做执行下面四个事件
 
                 # （１）回测的时候，用当前bar的收盘价更新资金  持仓
-                # 真实交易的时候　取最新的资金　持仓　成交　委托
+                # 真实交易的时候　取最新的资金　持仓
                 # print(daily_data["close"].ix["000300.SH"][date])
                 # print(self.capital)
 
                 # (2) 跑每一根bar
-                self.handle_bar()   # 再trade中　对　bar_current的四个操作
-                bar_index += 1
-                update_current_bar_data(self.timetag)  # 纪录每根bar的资金 持仓 委托　成交
-                Environment.refresh()   # 重置委托　成交 的list，因为资金和持仓是回测的开始到结束，所以不需要重置
+                run_bar_engine(self)
+                #  self.handle_bar()  已经放到run_bar_engine
+                #  在trade中　对　bar_current的四个操作
+                #  self.bar_index += 1
+
+                # （３）market close 更新　资金和持仓
+
+                # (4)
+                #update_current_bar_data(self.timetag)  #
+                Environment.refresh()  # 重置委托　成交 的list，因为资金和持仓是回测的开始到结束，所以不需要重置
                 # ee.stop()
 
     @abstractmethod
@@ -212,5 +173,5 @@ class StrategyBase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def handle_bar(self):
+    def handle_bar(self, event):
         pass

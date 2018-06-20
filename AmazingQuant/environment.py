@@ -24,6 +24,9 @@ class Environment(object):
     bar_position_data_list = []
     bar_account_data_list = []
 
+    daily_data = pd.DataFrame()
+    one_min_data = pd.DataFrame()
+
     @classmethod
     def refresh(cls):
         cls.bar_order_data_list = []
