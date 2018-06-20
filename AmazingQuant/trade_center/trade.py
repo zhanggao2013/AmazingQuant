@@ -10,7 +10,7 @@ from AmazingQuant.event_engine.event_broker_engine import EventBrokerEngine
 from AmazingQuant.utils.generate_random_id import generate_random_id
 
 
-class EventTradeEngine(object):
+class Trade(object):
     def __init__(self, strategy):
         self._strategy = strategy
 
@@ -37,21 +37,21 @@ class EventTradeEngine(object):
         # CTP相关
         order_data.order_time = self._strategy.timetag
         order_data.session_id = generate_random_id(account_id)
-        new_order_data = self.run_order(order_data)
+        new_order_data = self.mission_order(order_data)
 
-        if self._strategy.run_mode == RunMode.BACKTESTING.value:
+        '''if self._strategy.run_mode == RunMode.BACKTESTING.value:
             self.send_order(new_order_data)
             # EventBrokerEngine.broker()
             pass
         elif self._strategy.run_mode == RunMode.TRADE.value:
             """过真实的send，只做send_order"""
             # send_order(new_order_data)
-            pass
+            pass'''
 
     def send_order(self, order_data):
         pass
 
-    def run_order(self, order_data):
+    def mission_order(self, order_data):
         """
         order  和　risk management 两个事件, ,同样使用event_engine,本地计算的engine,重新隔离出一个engine
         在risk management
@@ -59,8 +59,18 @@ class EventTradeEngine(object):
         :param order_data:
         :return:
         """
-        new_order_data = order_data
-        return new_order_data
+        mission_engine = EventEngineBase()
+        event_order = EventOrder()
+        event_order.event_data_dict["data"] = order_data
+
+        mission_engine.put(event_order)
+
+        mission_engine.register(EventType.EVENT_ORDER.value, EventOrder.simple_test)
+
+        mission_engine.start(timer=False)
+        mission_engine.stop()
+        #new_order_data = order_data
+        #return new_order_data
         pass
 
 

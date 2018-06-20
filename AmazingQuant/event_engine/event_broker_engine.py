@@ -4,8 +4,7 @@ __author__ = "gao"
 
 from AmazingQuant.event_engine.event_engine_base import Event, EventEngineBase
 from AmazingQuant.constant import EventType, RunMode
-from AmazingQuant.event_engine.event_order import (EventOrder,
-                                                   BacktestingOrder)
+from AmazingQuant.event_engine.event_order import EventOrder
 from AmazingQuant.data_object import OrderData
 
 

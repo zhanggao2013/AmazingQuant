@@ -155,7 +155,7 @@ class StrategyBase(metaclass=ABCMeta):
             补充完分钟数据，再缓存ｍｉｎ数据
             """
             self.one_min_data = one_min_data
-        print(self.benchmark, self.start, self.end, self.period, self.rights_adjustment, Environment.run_mode)
+        print(self.benchmark, self.start, self.end, self.period, self.rights_adjustment, self.run_mode)
         bar_index = 0
         while True:
             try:

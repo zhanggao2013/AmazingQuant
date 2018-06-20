@@ -10,7 +10,7 @@ from AmazingQuant.strategy_center.strategy import *
 # import AmazingQuant.utils.data_transfer as data_transfer
 # from AmazingQuant.data_center.get_data import GetData
 # from AmazingQuant.constant import RunMode, Period, RightsAdjustment, ID
-from AmazingQuant.event_engine.event_trade_engine import EventTradeEngine
+from AmazingQuant.trade_center.trade import Trade
 
 
 class MaStrategy(StrategyBase):
@@ -43,7 +43,7 @@ class MaStrategy(StrategyBase):
         elif ma10[-1] < ma30[-1]:
             # order_lots("000002.SZ",1,"fix",close_price[current_date_int],self.account)
             print("sell", -1, "fix", close_price[current_date_int], self.account)
-        EventTradeEngine(self).order_lots(stock_code="000002.SZ", shares=1, price_type="fix",
+        Trade(self).order_lots(stock_code="000002.SZ", shares=1, price_type="fix",
                                           order_price=close_price[current_date_int],
                                           account_id=self.account)
         # print(Environment.run_mode)
