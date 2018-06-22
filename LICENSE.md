@@ -1,6 +1,5 @@
 MIT License
 
-
 Copyright (c) 2018 zhanggao2013
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
