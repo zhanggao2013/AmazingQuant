@@ -5,10 +5,10 @@ __author__ = "gao"
 
 from AmazingQuant.constant import *
 from AmazingQuant.data_object import OrderData
-from AmazingQuant.trade_center.event_broker_engine import EventBrokerEngine
 from AmazingQuant.utils.generate_random_id import generate_random_id
 from AmazingQuant.trade_center.event_mission_engine import MissionEngine
 from AmazingQuant.environment import Environment
+from AmazingQuant.trade_center.event_broker_engine import EventBrokerEngine
 
 
 class Trade(object):
@@ -33,27 +33,27 @@ class Trade(object):
             order_data.offset = Offset.CLOSE.value
         order_data.total_volume = shares
         order_data.deal_volume = 0
-        order_data.status = Status.NOTTRADED.value
+        order_data.status = Status.NOT_REPORTED.value
 
         # CTP相关
         order_data.order_time = self._strategy.timetag
         order_data.session_id = generate_random_id(account_id)
 
         Environment.current_order_data = order_data
-        new_order_data = MissionEngine.mission_order(self._strategy)
+        MissionEngine().mission_order(strategy=self._strategy)
 
-        '''if self._strategy.run_mode == RunMode.BACKTESTING.value:
-            self.send_order(new_order_data)
-            # EventBrokerEngine.broker()
+        if self._strategy.run_mode == RunMode.BACKTESTING.value:
+            EventBrokerEngine().run_broker(strategy=self._strategy)
             pass
         elif self._strategy.run_mode == RunMode.TRADE.value:
-            """过真实的send，只做send_order"""
-            # send_order(new_order_data)
-            pass'''
+            """过真实的交易，只做send_order"""
+            #send_order()
+            pass
 
-    def send_order(self, order_data):
-        pass
+    def send_order(self):
+        order_data = Environment.current_order_data
 
+        #ctp_send_order(order_data)
 
 
 

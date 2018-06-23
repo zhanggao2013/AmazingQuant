@@ -65,9 +65,11 @@ class Offset(Enum):
 
 @unique
 class Status(Enum):
-    NOTTRADED = "pending"
-    PARTTRADED = "partial filled"
-    ALLTRADED = "filled"
+    NOT_REPORTED = "not_reported"
+    WITHDRAW = "withdraw"
+    NOT_TRADED = "pending"
+    PART_TRADED = "partial filled"
+    ALL_TRADED = "filled"
     CANCELLED = "cancelled"
     REJECTED = "rejected"
     UNKNOWN = "unknown"
@@ -76,3 +78,9 @@ class Status(Enum):
 class PriceType(Enum):
     LIMIT = "limit"
     MARKET = "market"
+
+@unique
+class SlippageType(Enum):
+    Slippage_Price = "slippage_price"
+    Slippage_Balance = "slippage_balance"
+

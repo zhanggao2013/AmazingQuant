@@ -68,4 +68,4 @@ class AccountData(object):
         # 数值相关
         self.pre_balance = Empty.EMPTY_FLOAT.value  # 昨日账户总资产
         self.balance = Empty.EMPTY_FLOAT.value  # 账户总资产
-        self.avaliable = Empty.EMPTY_FLOAT.value  # 可用资金
+        self.available = Empty.EMPTY_FLOAT.value  # 可用资金

@@ -27,7 +27,25 @@ class Environment(object):
     daily_data = pd.DataFrame()
     one_min_data = pd.DataFrame()
 
+    benchmark_index = []
+
+    # 风控部分
+    black_namelist = []
+
+    # 回测滑点,key是股票，或者具体的期货代码
+    slippage_dict = {}
+    # 回测手续费,key是股票，或者具体的期货代码
+    commission_dict = {}
+
+    # 每根bar结束，清空的当前bar的order 和　deal的list
     @classmethod
-    def refresh(cls):
+    def refresh_list(cls, event):
         cls.bar_order_data_list = []
         cls.bar_deal_data_list = []
+
+    @classmethod
+    def refresh_current_data(cls, event):
+        cls.current_order_data = OrderData()
+        cls.current_deal_data = DealData()
+
+

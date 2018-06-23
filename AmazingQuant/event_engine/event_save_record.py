@@ -18,7 +18,6 @@ class EventSaveRecord(Event):
         :return:
         """
         timetag = event.event_data_dict["strategy_data"].timetag
-        print(timetag, "timetag")
         Environment.order_data_dict[timetag] = Environment.bar_order_data_list
         Environment.deal_data_dict[timetag] = Environment.bar_deal_data_list
         Environment.position_data_dict[timetag] = Environment.bar_position_data_list

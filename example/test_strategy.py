@@ -16,7 +16,7 @@ from AmazingQuant.trade_center.trade import Trade
 class MaStrategy(StrategyBase):
     def initialize(self):
         self.run_mode = RunMode.BACKTESTING.value
-        self.capital = 200000
+        self.capital = 200
         self.benchmark = "000002.SZ"
         self.start = "2005-01-08"
         self.end = "2005-02-28"
@@ -43,7 +43,7 @@ class MaStrategy(StrategyBase):
         elif ma10[-1] < ma30[-1]:
             # order_lots("000002.SZ",1,"fix",close_price[current_date_int],self.account)
             print("sell", -1, "fix", close_price[current_date_int], self.account)
-        Trade(self).order_lots(stock_code="000002.SZ", shares=10005, price_type="fix",
+        Trade(self).order_lots(stock_code="000002.SZ", shares=-10005, price_type="fix",
                                           order_price=close_price[current_date_int],
                                           account_id=self.account)
         # print(Environment.run_mode)
@@ -53,6 +53,4 @@ class MaStrategy(StrategyBase):
 
 if __name__ == "__main__":
     MaStrategy().run()
-    # print(Environment.account)
-    Environment.refresh()
     # print(Environment.account)

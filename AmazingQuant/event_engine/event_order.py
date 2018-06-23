@@ -2,11 +2,10 @@
 
 __author__ = "gao"
 
-from datetime import datetime
 
-from AmazingQuant.event_engine.event_engine_base import EventEngineBase, Event
-from AmazingQuant.constant import EventType, ID
+from AmazingQuant.event_engine.event_engine_base import Event
 from AmazingQuant.environment import Environment
+from AmazingQuant.constant import *
 
 
 class EventOrder(Event):
@@ -15,18 +14,48 @@ class EventOrder(Event):
 
     @classmethod
     def integer_conversion(cls, event):
-        Environment.current_order_data.total_volume = 100 * int(Environment.current_order_data.total_volume/100)
+        """
+        交易数量根据手数取整
+        :param event:
+        :return:
+        """
+        Environment.current_order_data.total_volume = 100 * int(Environment.current_order_data.total_volume / 100)
 
     @classmethod
-    def account_avaliable_check(cls, event):
-        pass
+    def account_available_check(cls, event):
+        """
+        开仓前　买入资金检查，若不足，则委托状态改为withdraw
+        :param event:
+        :return:
+        """
+        trade_balance = Environment.current_order_data.total_volume * Environment.current_order_data.order_price
+        if Environment.current_order_data.offset == Offset.OPEN.value:
+            if trade_balance > Environment.current_account_data.available:
+                Environment.current_order_data.status = Status.WITHDRAW.value
+                print("Insufficient Available Capital")
 
     @classmethod
-    def position_avaliable_volume_check(cls, event):
+    def position_available_volume_check(cls, event):
+        if Environment.current_order_data.offset == Offset.CLOSE.value:
+            num = 0
+            if Environment.bar_position_data_list:
+                for position_stock in Environment.bar_position_data_list:
+                    num += 1
+                    if Environment.current_order_data.instrument + "." + Environment.current_order_data.exchange == \
+                            position_stock.instrument + "." + position_stock.exchange:
+                        if Environment.current_order_data.total_volume > (
+                                position_stock.position - position_stock.frozen):
+                            print("Insufficient Available Position")
+                            Environment.current_order_data.status = Status.WITHDRAW.value
+                            break
+                    elif num == len(Environment.bar_position_data_list):
+                        print("Insufficient Available Position")
+                        Environment.current_order_data.status = Status.WITHDRAW.value
+                        break
+            else:
+                print("Insufficient Available Position")
+                Environment.current_order_data.status = Status.WITHDRAW.value
         pass
-
-
-
 
         """
         回测中：
@@ -41,7 +70,3 @@ class EventOrder(Event):
         过risk management,＂写进environment＂改为发送订单请求，从broker定时订阅(从event_engine 的定时器任务订阅),save 该事件的records　
         deal position 都同上　＂订阅＂　并save
         """
-
-
-
-

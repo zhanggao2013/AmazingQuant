@@ -3,28 +3,27 @@
 __author__ = "gao"
 
 from AmazingQuant.event_engine.event_engine_base import Event, EventEngineBase
-from AmazingQuant.constant import EventType, RunMode
-from AmazingQuant.event_engine.event_order import EventOrder
-from AmazingQuant.data_object import OrderData
+from AmazingQuant.constant import EventType
+from AmazingQuant.event_engine.event_deal import EventDeal
+from AmazingQuant.data_object import DealData
 
 
 class EventBrokerEngine(object):
 
-    def broker(self, new_order_data):
+    def run_broker(self, strategy):
         """
         deal 交易撮合，更新　OrderData DealData AccountData PositionData
         OrderData(返回状态：已成　已撤（检查可用资金　可用数量不合格）等)
         :param new_order_data:
         :return:
         """
-        ee = EventEngineBase()
-        event_order = EventOrder()
-        event_order.event_data_dict["data"] = order_data
-        ee.put(event_order)
-        # ee.register(EventType.EVENT_TIMER.value, simpletest)
+        broker_engine = EventEngineBase()
+        event_deal = EventDeal()
+        event_deal.event_data_dict["strategy"] = strategy
+        broker_engine.put(event_deal)
 
-        ee.register(EventType.EVENT_ORDER.value, BacktestingOrder.simple_test)
+        broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.deal_price_calculate)
 
-        # ee.registerGeneralHandler(simpletest)
-        ee.start(timer=False)
-        ee.stop()
+        broker_engine.start(timer=False)
+        broker_engine.stop()
+
