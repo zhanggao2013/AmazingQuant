@@ -16,7 +16,7 @@ class Trade(object):
         self._strategy = strategy
 
     def order_lots(self, stock_code="", shares=1, price_type=PriceType.LIMIT, order_price=None,
-                   account_id=""):
+                   account=""):
         """下单函数"""
         order_data = OrderData()
         # 代码编号相关
@@ -37,7 +37,9 @@ class Trade(object):
 
         # CTP相关
         order_data.order_time = self._strategy.timetag
-        order_data.session_id = generate_random_id(account_id)
+        for account_data in Environment.bar_account_data_list:
+            if account_data.account_id[:-9] == account:
+                order_data.session_id = account_data.account_id
 
         Environment.current_order_data = order_data
         MissionEngine().mission_order(strategy=self._strategy)

@@ -20,6 +20,7 @@ class EventMarket(Event):
         :return:
         """
         if event.event_data_dict["strategy_data"].bar_index > 0:
+
             current_day = millisecond_to_date(event.event_data_dict["strategy_data"].timetag, "%d")
             last_timetag = Environment.benchmark_index[event.event_data_dict["strategy_data"].bar_index - 1]
             last_day = millisecond_to_date(last_timetag, "%d")
@@ -27,6 +28,7 @@ class EventMarket(Event):
                 for position_data in Environment.bar_position_data_list:
                     if last_day != current_day:
                         position_data.frozen = 0
+                        print("更新今仓冻结数量")
         pass
 
     @classmethod
@@ -36,7 +38,7 @@ class EventMarket(Event):
     @classmethod
     def update_position_close(cls, event):
         """
-        更新bar_close持仓盈亏　和　今仓冻结数量
+        更新bar_close持仓盈亏
         :param event:
         :return:
         """
@@ -55,7 +57,7 @@ class EventMarket(Event):
                         current_close_price - position_data.average_price)
 
 
-        print("更新bar_close持仓盈亏　和　今仓冻结数量")
+        print("更新bar_close持仓盈亏")
 
     @classmethod
     def update_account_close(cls, event):

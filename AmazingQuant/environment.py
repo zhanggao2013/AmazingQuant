@@ -50,7 +50,8 @@ class Environment(object):
     def refresh_current_data(cls, event):
         cls.current_order_data = OrderData()
         cls.current_deal_data = DealData()
+        cls.current_position_data = PositionData()
         cls.is_pass_risk = True
-        is_send_order = False
+        cls.is_send_order = False
 
 

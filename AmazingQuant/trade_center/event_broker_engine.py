@@ -5,7 +5,6 @@ __author__ = "gao"
 from AmazingQuant.event_engine.event_engine_base import Event, EventEngineBase
 from AmazingQuant.constant import EventType
 from AmazingQuant.event_engine.event_deal import EventDeal
-from AmazingQuant.data_object import DealData
 from AmazingQuant.environment import Environment
 
 
@@ -29,6 +28,7 @@ class EventBrokerEngine(object):
         broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.update_position_list)
         broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.update_account_list)
         broker_engine.register(EventType.EVENT_DEAL.value, Environment.refresh_current_data)
+
         broker_engine.start(timer=False)
         broker_engine.stop()
 

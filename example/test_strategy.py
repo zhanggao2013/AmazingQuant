@@ -6,17 +6,13 @@ import numpy as np
 import talib
 
 from AmazingQuant.strategy_center.strategy import *
-# from AmazingQuant.environment import Environment
-# import AmazingQuant.utils.data_transfer as data_transfer
-# from AmazingQuant.data_center.get_data import GetData
-# from AmazingQuant.constant import RunMode, Period, RightsAdjustment, ID
 from AmazingQuant.trade_center.trade import Trade
 
 
 class MaStrategy(StrategyBase):
     def initialize(self):
         self.run_mode = RunMode.BACKTESTING.value
-        self.capital = 2000
+        self.capital = {"test0": 2000000000, "test1":1000}
         self.benchmark = "000002.SZ"
         self.start = "2005-01-08"
         self.end = "2005-01-28"
@@ -59,13 +55,16 @@ class MaStrategy(StrategyBase):
         elif ma10[-1] < ma30[-1]:
             # order_lots("000002.SZ",1,"fix",close_price[current_date_int],self.account)
             print("sell", -1, "fix", close_price[current_date_int], self.account)
-        Trade(self).order_lots(stock_code="000002.SZ", shares=10005, price_type="fix",
+        Trade(self).order_lots(stock_code="000002.SZ", shares=100, price_type="fix",
                                order_price=close_price[current_date_int],
-                               account_id=self.account[0])
-        Trade(self).order_lots(stock_code="600000.SH", shares=10005, price_type="fix",
+                               account=self.account[0])
+        Trade(self).order_lots(stock_code="600000.SH", shares=100, price_type="fix",
                                order_price=close_price[current_date_int],
-                               account_id=self.account[0])
+                               account=self.account[1])
         print(len(Environment.bar_position_data_list))
+        for position in Environment.bar_position_data_list:
+            print(position.instrument + "" + position.exchange)
+            print(position.position)
 
         # print(Environment.account[ID.ACCOUNT_ID], current_date)
 

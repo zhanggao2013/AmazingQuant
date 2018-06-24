@@ -15,23 +15,22 @@ class EventRiskManagement(Event):
 
     @classmethod
     def black_namelist_check(cls, event):
+        stock_code = Environment.current_order_data.instrument + "." + Environment.current_order_data.exchange
         if Environment.current_order_data.status == Status.NOT_REPORTED.value and \
-                Environment.current_order_data.instrument + "." + Environment.current_order_data.exchange not in \
-                Environment.black_namelist:
+                stock_code in Environment.black_namelist:
             Environment.is_pass_risk = False
             print("Order Stock_code in Black_namelist")
 
-        print("黑名单")
+        #print("black_namelist_check")
         pass
 
     @classmethod
     def change_order_status(cls, event):
-        if Environment.is_pass_risk:
-            Environment.current_order_data.status = Status.NOT_TRADED.value
-        else:
+        if Environment.is_pass_risk is False:
             Environment.current_order_data.status = Status.WITHDRAW.value
 
     @classmethod
     def send_order(cls, event):
-        if Environment.current_order_data.status == Status.NOT_TRADED.value:
+        if Environment.current_order_data.status == Status.NOT_REPORTED.value:
+            Environment.current_order_data.status = Status.NOT_TRADED.value
             Environment.is_send_order = True

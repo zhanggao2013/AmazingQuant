@@ -50,6 +50,7 @@ class PositionData(object):
         # 　代码编号相关
         self.instrument = Empty.EMPTY_STRING.value  # 合约代码
         self.exchange = Empty.EMPTY_STRING.value  # 交易所代码
+        self.account_id = Empty.EMPTY_STRING.value  # 资金账号
 
         # 　持仓相关
         self.average_price = Empty.EMPTY_FLOAT.value  # 持仓均价

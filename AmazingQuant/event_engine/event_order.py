@@ -30,9 +30,11 @@ class EventOrder(Event):
         """
         trade_balance = Environment.current_order_data.total_volume * Environment.current_order_data.order_price
         if Environment.current_order_data.offset == Offset.OPEN.value:
-            if trade_balance > Environment.current_account_data.available:
-                Environment.current_order_data.status = Status.WITHDRAW.value
-                print("Insufficient Available Capital")
+            for account_data in Environment.bar_account_data_list:
+                if account_data.account_id == Environment.current_order_data.session_id:
+                    if trade_balance > account_data.available:
+                        Environment.current_order_data.status = Status.WITHDRAW.value
+                        print("Insufficient Available Capital")
 
     @classmethod
     def position_available_volume_check(cls, event):

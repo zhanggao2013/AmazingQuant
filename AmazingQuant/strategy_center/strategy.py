@@ -145,8 +145,8 @@ class StrategyBase(metaclass=ABCMeta):
             for account in self.account:
                 Environment.current_account_data = AccountData()
                 Environment.current_account_data.account_id = generate_random_id.generate_random_id(account)
-                Environment.current_account_data.total_balance = self.capital
-                Environment.current_account_data.available = self.capital
+                Environment.current_account_data.total_balance = self.capital[account]
+                Environment.current_account_data.available = self.capital[account]
                 Environment.bar_account_data_list.append(Environment.current_account_data)
 
         if self.run_mode == RunMode.TRADE.value:
