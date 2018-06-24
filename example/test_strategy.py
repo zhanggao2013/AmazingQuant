@@ -58,9 +58,11 @@ class MaStrategy(StrategyBase):
         Trade(self).order_lots(stock_code="000002.SZ", shares=100, price_type="fix",
                                order_price=close_price[current_date_int],
                                account=self.account[0])
-        Trade(self).order_lots(stock_code="600000.SH", shares=100, price_type="fix",
-                               order_price=close_price[current_date_int],
-                               account=self.account[1])
+        if self.bar_index > 5:
+            Trade(self).order_lots(stock_code="000002.SZ", shares=-100, price_type="fix",
+                                   order_price=close_price[current_date_int],
+                                   account=self.account[1])
+
         print(len(Environment.bar_position_data_list))
         for position in Environment.bar_position_data_list:
             print(position.instrument + "" + position.exchange)
