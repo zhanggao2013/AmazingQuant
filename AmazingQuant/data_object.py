@@ -15,7 +15,7 @@ class OrderData(object):
         # 　报单相关
         self.price_type = Empty.EMPTY_STRING.value  # 报单类型
         self.order_price = Empty.EMPTY_FLOAT.value  # 报单价格
-        self.direction = Empty.EMPTY_STRING.value  # 报单方向
+        self.direction = Empty.EMPTY_STRING.value  # 报单方向，期货用
         self.offset = Empty.EMPTY_STRING.value  # 报单开平
         self.total_volume = Empty.EMPTY_INT.value  # 报单总数量
         self.deal_volume = Empty.EMPTY_INT.value  # 报单成交数量
@@ -25,7 +25,7 @@ class OrderData(object):
         self.cancel_time = Empty.EMPTY_STRING.value  # 撤单时间
 
         # 　CTP相关
-        self.frond_id = Empty.EMPTY_STRING.value  # 前置机编号
+        self.frond_id = Empty.EMPTY_STRING.value  # 前置机编号，真实交易用
         self.session_id = Empty.EMPTY_STRING.value  # 连接编号
 
 
@@ -39,7 +39,7 @@ class DealData(object):
 
         # 　成交相关
         self.deal_price = Empty.EMPTY_FLOAT.value  # 成交价格
-        self.direction = Empty.EMPTY_STRING.value  # 成交方向
+        self.direction = Empty.EMPTY_STRING.value  # 成交方向，期货用
         self.offset = Empty.EMPTY_STRING.value  # 成交开平
         self.deal_volume = Empty.EMPTY_INT.value  # 成交数量
         self.deal_time = Empty.EMPTY_STRING.value  # 成交时间
@@ -54,10 +54,10 @@ class PositionData(object):
 
         # 　持仓相关
         self.average_price = Empty.EMPTY_FLOAT.value  # 持仓均价
-        self.direction = Empty.EMPTY_STRING.value  # 持仓方向
+        self.direction = Empty.EMPTY_STRING.value  # 持仓方向，期货用
         self.position = Empty.EMPTY_INT.value  # 持仓数量
         self.frozen = Empty.EMPTY_INT.value  # 冻结数量
-        self.yesterday_position = Empty.EMPTY_INT.value  # 昨持仓数量
+        self.yesterday_position = Empty.EMPTY_INT.value  # 昨持仓数量，期货用
         self.position_profit = Empty.EMPTY_FLOAT.value  # 持仓盈亏
 
 
@@ -67,6 +67,6 @@ class AccountData(object):
         self.account_id = Empty.EMPTY_STRING.value  # 资金账号代码
 
         # 数值相关
-        self.pre_balance = Empty.EMPTY_FLOAT.value  # 昨日账户总资产
+        self.pre_balance = Empty.EMPTY_FLOAT.value  # 昨日账户总资产，期货用
         self.total_balance = Empty.EMPTY_FLOAT.value  # 账户总资产
         self.available = Empty.EMPTY_FLOAT.value  # 可用资金

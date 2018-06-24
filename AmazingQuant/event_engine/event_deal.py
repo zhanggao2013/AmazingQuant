@@ -158,8 +158,9 @@ class EventDeal(Event):
                             (position_cost_balance - trade_balance) / total_position
                         position_data.position = total_position
 
-                        # 更新委托状态，并把此次委托append到Environment.bar_order_data_list
+                        # 更新委托的状态和成交数量，并把此次委托append到Environment.bar_order_data_list
                         Environment.current_order_data.status = Status.ALL_TRADED
+                        Environment.current_order_data.deal_volume = Environment.current_deal_data.deal_volume
                         Environment.bar_order_data_list.append(Environment.current_order_data)
                         # 把此次成交append到Environment.bar_deal_data_list
                         Environment.bar_deal_data_list.append(Environment.current_deal_data)
@@ -170,8 +171,9 @@ class EventDeal(Event):
                 Environment.current_position_data.position = Environment.current_deal_data.deal_volume
                 Environment.bar_position_data_list.append(Environment.current_position_data)
 
-                # 更新委托状态，并把此次委托append到Environment.bar_order_data_list
+                # 更新委托的状态和成交数量，并把此次委托append到Environment.bar_order_data_list
                 Environment.current_order_data.status = Status.ALL_TRADED
+                Environment.current_order_data.deal_volume = Environment.current_deal_data.deal_volume
                 Environment.bar_order_data_list.append(Environment.current_order_data)
                 # 把此次成交append到Environment.bar_deal_data_list
                 Environment.bar_deal_data_list.append(Environment.current_deal_data)
@@ -182,8 +184,9 @@ class EventDeal(Event):
             # 持仓为空，append到Environment.bar_position_data_list
             Environment.bar_position_data_list.append(Environment.current_position_data)
 
-            # 更新委托状态，并把此次委托append到Environment.bar_order_data_list
+            # 更新委托的状态和成交数量，并把此次委托append到Environment.bar_order_data_list
             Environment.current_order_data.status = Status.ALL_TRADED
+            Environment.current_order_data.deal_volume = Environment.current_deal_data.deal_volume
             Environment.bar_order_data_list.append(Environment.current_order_data)
             # 把此次成交append到Environment.bar_deal_data_list
             Environment.bar_deal_data_list.append(Environment.current_deal_data)

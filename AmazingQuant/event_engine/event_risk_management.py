@@ -20,17 +20,20 @@ class EventRiskManagement(Event):
                 stock_code in Environment.black_namelist:
             Environment.is_pass_risk = False
             print("Order Stock_code in Black_namelist")
-
-        #print("black_namelist_check")
+        # print("black_namelist_check")
         pass
 
     @classmethod
     def change_order_status(cls, event):
         if Environment.is_pass_risk is False:
             Environment.current_order_data.status = Status.WITHDRAW.value
+        pass
 
     @classmethod
     def send_order(cls, event):
         if Environment.current_order_data.status == Status.NOT_REPORTED.value:
             Environment.current_order_data.status = Status.NOT_TRADED.value
+            Environment.current_order_data.order_time = event.event_data_dict["strategy"].timetag
             Environment.is_send_order = True
+        pass
+

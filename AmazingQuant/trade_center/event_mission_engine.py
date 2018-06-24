@@ -29,6 +29,7 @@ class MissionEngine(object):
 
         event_risk_management = EventRiskManagement()
         mission_engine.put(event_risk_management)
+        event_risk_management.event_data_dict["strategy"] = strategy
 
         mission_engine.register(EventType.EVENT_RISK_MANAGEMENT.value, EventRiskManagement.black_namelist_check)
         mission_engine.register(EventType.EVENT_RISK_MANAGEMENT.value, EventRiskManagement.change_order_status)
