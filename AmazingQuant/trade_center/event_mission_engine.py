@@ -31,6 +31,8 @@ class MissionEngine(object):
         mission_engine.put(event_risk_management)
 
         mission_engine.register(EventType.EVENT_RISK_MANAGEMENT.value, EventRiskManagement.black_namelist_check)
+        mission_engine.register(EventType.EVENT_RISK_MANAGEMENT.value, EventRiskManagement.change_order_status)
+        mission_engine.register(EventType.EVENT_RISK_MANAGEMENT.value, EventRiskManagement.send_order)
 
         mission_engine.start(timer=False)
         mission_engine.stop()

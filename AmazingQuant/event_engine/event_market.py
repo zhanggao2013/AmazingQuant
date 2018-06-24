@@ -13,6 +13,23 @@ class EventMarket(Event):
         super().__init__(event_type=EventType.EVENT_MARKET.value)
 
     @classmethod
+    def update_position_frozen(cls, event):
+        """
+        每根bar运行前，更新今日持仓冻结数量
+        :param event:
+        :return:
+        """
+        if event.event_data_dict["strategy_data"].bar_index > 0:
+            current_day = millisecond_to_date(event.event_data_dict["strategy_data"].timetag, "%d")
+            last_timetag = Environment.benchmark_index[event.event_data_dict["strategy_data"].bar_index - 1]
+            last_day = millisecond_to_date(last_timetag, "%d")
+            if Environment.bar_position_data_list:
+                for position_data in Environment.bar_position_data_list:
+                    if last_day != current_day:
+                        position_data.frozen = 0
+        pass
+
+    @classmethod
     def push_new_bar(cls, event):
         event.event_data_dict["strategy_data"].bar_index += 1
 
@@ -27,23 +44,17 @@ class EventMarket(Event):
         current_date = millisecond_to_date(current_timetag, format='%Y-%m-%d')
         data_class = GetData()
 
-        current_day = millisecond_to_date(event.event_data_dict["strategy_data"].timetag, "%d")
-        if event.event_data_dict["strategy_data"].bar_index > 0:
-            last_timetag = Environment.benchmark_index[event.event_data_dict["strategy_data"].bar_index-1]
-            last_day = millisecond_to_date(last_timetag, "%d")
-
         if Environment.bar_position_data_list:
             for position_data in Environment.bar_position_data_list:
                 stock_code = position_data.instrument + "." + position_data.exchange
                 current_close_price = data_class.get_market_data(Environment.daily_data, stock_code=[stock_code],
                                                                  field=["close"],
-                                                                 start='%Y%m%d',
+                                                                 start=current_date,
                                                                  end=current_date)
                 position_data.position_profit = position_data.position * (
                         current_close_price - position_data.average_price)
 
-                if event.event_data_dict["strategy_data"].bar_index > 0 and last_day != current_day:
-                    position_data.frozen = 0
+
         print("更新bar_close持仓盈亏　和　今仓冻结数量")
 
     @classmethod
@@ -63,7 +74,7 @@ class EventMarket(Event):
                 stock_code = position_data.instrument + "." + position_data.exchange
                 current_close_price = data_class.get_market_data(Environment.daily_data, stock_code=[stock_code],
                                                                  field=["close"],
-                                                                 start='%Y%m%d',
+                                                                 start=current_date,
                                                                  end=current_date)
                 hold_balance += position_data.position * current_close_price
         Environment.current_account_data.balance = Environment.current_account_data.available + hold_balance

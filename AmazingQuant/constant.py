@@ -63,6 +63,7 @@ class Offset(Enum):
     OPEN = "open"
     CLOSE = "close"
 
+
 @unique
 class Status(Enum):
     NOT_REPORTED = "not_reported"
@@ -81,6 +82,13 @@ class PriceType(Enum):
 
 @unique
 class SlippageType(Enum):
-    Slippage_Price = "slippage_price"
-    Slippage_Balance = "slippage_balance"
+    SLIPPAGE_FIX = "slippage_fix"
+    SLIPPAGE_PERCENT = "slippage_percent"
+
+@unique
+class StockType(Enum):
+    STOCK_SH = "stock_SZ"
+    STOCK_SZ = "stock_SH"
+    STOCK = "stock"
+
 

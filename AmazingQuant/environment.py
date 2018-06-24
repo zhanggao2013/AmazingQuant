@@ -31,6 +31,8 @@ class Environment(object):
 
     # 风控部分
     black_namelist = []
+    is_pass_risk = True
+    is_send_order = False
 
     # 回测滑点,key是股票，或者具体的期货代码
     slippage_dict = {}
@@ -43,9 +45,12 @@ class Environment(object):
         cls.bar_order_data_list = []
         cls.bar_deal_data_list = []
 
+    # 每次下单交易完成，经过回测broker之后清空order和deal的数据，重置是否通过风控
     @classmethod
     def refresh_current_data(cls, event):
         cls.current_order_data = OrderData()
         cls.current_deal_data = DealData()
+        cls.is_pass_risk = True
+        is_send_order = False
 
 

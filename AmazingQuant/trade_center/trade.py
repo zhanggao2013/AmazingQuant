@@ -43,8 +43,9 @@ class Trade(object):
         MissionEngine().mission_order(strategy=self._strategy)
 
         if self._strategy.run_mode == RunMode.BACKTESTING.value:
-            EventBrokerEngine().run_broker(strategy=self._strategy)
-            pass
+            if Environment.is_send_order:
+                EventBrokerEngine().run_broker(strategy=self._strategy)
+
         elif self._strategy.run_mode == RunMode.TRADE.value:
             """过真实的交易，只做send_order"""
             #send_order()
