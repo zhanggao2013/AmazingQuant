@@ -35,6 +35,20 @@ class EventMarket(Event):
         event.event_data_dict["strategy_data"].bar_index += 1
 
     @classmethod
+    def delete_position_zero(cls, event):
+        """
+        删除持仓数量为０的position
+        :param event:
+        :return:
+        """
+        if Environment.bar_position_data_list:
+            for position_num in range(len(Environment.bar_position_data_list)):
+                if Environment.bar_position_data_list[position_num] == 0:
+                    del Environment.bar_position_data_list[position_num]
+
+        pass
+
+    @classmethod
     def update_position_close(cls, event):
         """
         更新bar_close持仓盈亏
@@ -53,8 +67,6 @@ class EventMarket(Event):
                                                                  end=current_date)
                 position_data.position_profit = position_data.position * (
                         current_close_price - position_data.average_price)
-
-
         print("更新bar_close持仓盈亏")
 
     @classmethod
@@ -79,3 +91,5 @@ class EventMarket(Event):
                 hold_balance += position_data.position * current_close_price
         Environment.current_account_data.balance = Environment.current_account_data.available + hold_balance
         print("更新bar_close总资产")
+
+

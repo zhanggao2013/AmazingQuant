@@ -4,7 +4,7 @@ __author__ = "gao"
 
 from abc import ABCMeta, abstractmethod
 
-from AmazingQuant.utils import data_transfer, generate_random_id
+from AmazingQuant.utils import data_transfer, generate_random_id, save_backtesting_record
 from AmazingQuant.constant import RunMode, Period, RightsAdjustment, SlippageType, StockType
 from AmazingQuant.data_object import *
 from .event_bar_engine import *
@@ -137,7 +137,7 @@ class StrategyBase(metaclass=ABCMeta):
                                                    "close_today_commission": close_today_commission,
                                                    "min_commission": min_commission}
 
-    def run(self):
+    def run(self, save_trade_record=False):
         self.initialize()
 
         # 初始化　account_data
@@ -187,7 +187,8 @@ class StrategyBase(metaclass=ABCMeta):
                 self.timetag = Environment.benchmark_index[self.bar_index]
             except IndexError:
                 if self.run_mode == RunMode.BACKTESTING.value:
-                    #if save_trade_record_dict,在这里设置是否保存交易记录
+                    if save_trade_record:
+                        save_backtesting_record.save_backtesting_record_to_csv()
 
                     break
                 elif self.run_mode == RunMode.TRADE.value:

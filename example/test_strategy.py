@@ -69,5 +69,5 @@ class MaStrategy(StrategyBase):
 
 
 if __name__ == "__main__":
-    MaStrategy().run()
+    MaStrategy().run(save_trade_record=True)
     # print(Environment.account)

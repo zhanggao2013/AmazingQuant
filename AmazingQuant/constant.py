@@ -91,4 +91,9 @@ class StockType(Enum):
     STOCK_SZ = "stock_SH"
     STOCK = "stock"
 
-
+@unique
+class RecordDataType(Enum):
+    ORDER_DATA = "order_data"
+    DEAL_DATA = "deal_data"
+    POSITION_DATA = "position_data"
+    ACCOUNT_DATA = "account_data"
