@@ -22,7 +22,7 @@ def run_bar_engine(strategy):
     event_market.event_data_dict["strategy_data"] = strategy
 
     bar_engine.put(event_market)
-    bar_engine.register(EventType.EVENT_MARKET.value, EventMarket.update_position_frozen)
+    # bar_engine.register(EventType.EVENT_MARKET.value, EventMarket.update_position_frozen)
     bar_engine.register(EventType.EVENT_MARKET.value, strategy.handle_bar)
     bar_engine.register(EventType.EVENT_MARKET.value, EventMarket.push_new_bar)
 

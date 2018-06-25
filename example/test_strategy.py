@@ -15,7 +15,7 @@ class MaStrategy(StrategyBase):
         self.capital = {"test0": 2000000000, "test1":1000}
         self.benchmark = "000002.SZ"
         self.start = "2005-01-08"
-        self.end = "2005-01-28"
+        self.end = "2006-01-28"
         self.period = "daily"
         self.universe = ["000002.SZ", "000001.SH"]
         self.daily_data_cache = True
@@ -50,18 +50,15 @@ class MaStrategy(StrategyBase):
         ma10 = talib.MA(np.array(close_price), timeperiod=10)
         ma30 = talib.MA(np.array(close_price), timeperiod=30)
         if ma10[-1] > ma30[-1]:
-            # order_lots("000002.SZ",1,"fix",close_price[current_date_int],self.account)
+            # Trade(self).order_lots(stock_code="000002.SZ", shares=100, price_type="fix",
+            #                        order_price=close_price[current_date_int],
+            #                        account=self.account[0])
             print("buy", 1, "fix", close_price[current_date_int], self.account)
         elif ma10[-1] < ma30[-1]:
-            # order_lots("000002.SZ",1,"fix",close_price[current_date_int],self.account)
+            # Trade(self).order_lots(stock_code="000002.SZ", shares=-100, price_type="fix",
+            #                        order_price=close_price[current_date_int],
+            #                        account=self.account[1])
             print("sell", -1, "fix", close_price[current_date_int], self.account)
-        Trade(self).order_lots(stock_code="000002.SZ", shares=100, price_type="fix",
-                               order_price=close_price[current_date_int],
-                               account=self.account[0])
-        if self.bar_index > 5:
-            Trade(self).order_lots(stock_code="000002.SZ", shares=-100, price_type="fix",
-                                   order_price=close_price[current_date_int],
-                                   account=self.account[1])
 
         print(len(Environment.bar_position_data_list))
         for position in Environment.bar_position_data_list:

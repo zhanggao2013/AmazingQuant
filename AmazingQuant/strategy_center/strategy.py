@@ -187,6 +187,8 @@ class StrategyBase(metaclass=ABCMeta):
                 self.timetag = Environment.benchmark_index[self.bar_index]
             except IndexError:
                 if self.run_mode == RunMode.BACKTESTING.value:
+                    #if save_trade_record_dict,在这里设置是否保存交易记录
+
                     break
                 elif self.run_mode == RunMode.TRADE.value:
                     '''读取最新tick, 更新最新的分钟或者日线
