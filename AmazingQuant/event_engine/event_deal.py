@@ -9,7 +9,7 @@ from AmazingQuant.constant import *
 from AmazingQuant.utils.generate_random_id import generate_random_id
 
 
-class EventDeal(Event):
+class EventDeal(Event):ａｓｄ资金
     def __init__(self):
         super().__init__(event_type=EventType.EVENT_DEAL.value)
 
