@@ -5,7 +5,7 @@ __author__ = "gao"
 from abc import ABCMeta, abstractmethod
 
 from AmazingQuant.utils import data_transfer, generate_random_id, save_backtesting_record
-from AmazingQuant.constant import RunMode, Period, RightsAdjustment, SlippageType, StockType
+from AmazingQuant.constant import RunMode, Period, RightsAdjustment, SlippageType, StockType, RecordDataType
 from AmazingQuant.data_object import *
 from .event_bar_engine import *
 
@@ -19,7 +19,7 @@ class StrategyBase(metaclass=ABCMeta):
         self._end = "2018-01-02"
         self._benchmark = "000300.SH"
         self._period = Period.DAILY.value  # 后续支持1min 3min 5min 等多周期
-        self._universe = [self._benchmark]
+        self._universe = []
         self._rights_adjustment = RightsAdjustment.NONE.value
         self._timetag = 0
         # 数据缓存开关
@@ -157,15 +157,16 @@ class StrategyBase(metaclass=ABCMeta):
             self.daily_data_cache = True
         elif self.period == Period.ONE_MIN.value:
             self.one_min_data_cache = True
-
+        stock_list = copy.copy(self.universe)
+        stock_list.append(self.benchmark)
+        stock_list = list(set(stock_list))
         if self._daily_data_cache:
-            Environment.daily_data = self._get_data.get_all_market_data(stock_code=self.universe,
+            Environment.daily_data = self._get_data.get_all_market_data(stock_code=stock_list,
                                                                         field=["open", "high", "low", "close",
-                                                                               "volumn",
-                                                                               "amount"],
+                                                                               "volumn", "amount"],
                                                                         end=self.end, period=Period.DAILY.value)
         if self.one_min_data_cache:
-            Environment.one_min_data = self._get_data.get_all_market_data(stock_code=self.universe,
+            Environment.one_min_data = self._get_data.get_all_market_data(stock_code=stock_list,
                                                                           field=["open", "high", "low", "close",
                                                                                  "volumn", "amount"],
                                                                           end=self.end, period=Period.ONE_MIN.value)
@@ -188,7 +189,13 @@ class StrategyBase(metaclass=ABCMeta):
             except IndexError:
                 if self.run_mode == RunMode.BACKTESTING.value:
                     if save_trade_record:
-                        save_backtesting_record.save_backtesting_record_to_csv()
+                        save_backtesting_record.save_backtesting_record_to_csv(
+                            data_type=RecordDataType.ORDER_DATA.value)
+                        save_backtesting_record.save_backtesting_record_to_csv(data_type=RecordDataType.DEAL_DATA.value)
+                        save_backtesting_record.save_backtesting_record_to_csv(
+                            data_type=RecordDataType.POSITION_DATA.value)
+                        # save_backtesting_record.save_backtesting_record_to_csv(
+                        #     data_type=RecordDataType.ACCOUNT_DATA.value)
 
                     break
                 elif self.run_mode == RunMode.TRADE.value:

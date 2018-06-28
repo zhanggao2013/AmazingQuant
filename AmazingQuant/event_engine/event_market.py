@@ -21,9 +21,9 @@ class EventMarket(Event):
         """
         if event.event_data_dict["strategy_data"].bar_index > 0:
             if Environment.bar_position_data_list:
-                current_day = millisecond_to_date(event.event_data_dict["strategy_data"].timetag, "%d")
+                current_day = millisecond_to_date(event.event_data_dict["strategy_data"].timetag, "%Y%M%d")
                 last_timetag = Environment.benchmark_index[event.event_data_dict["strategy_data"].bar_index - 1]
-                last_day = millisecond_to_date(last_timetag, "%d")
+                last_day = millisecond_to_date(last_timetag, "%Y%d")
                 for position_data in Environment.bar_position_data_list:
                     if last_day != current_day:
                         position_data.frozen = 0
@@ -89,7 +89,7 @@ class EventMarket(Event):
                                                                  start=current_date,
                                                                  end=current_date)
                 hold_balance += position_data.position * current_close_price
-        Environment.current_account_data.balance = Environment.current_account_data.available + hold_balance
+        Environment.current_account_data.total_balance = Environment.current_account_data.available + hold_balance
         print("更新bar_close总资产")
 
 

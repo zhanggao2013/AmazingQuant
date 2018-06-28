@@ -84,7 +84,6 @@ class EventDeal(Event):
         #                                            "close_today_commission": close_today_commission,
         #                                            "min_commission": min_commission}
         commission = {}
-        total_commission = 0
         trade_balance = Environment.current_deal_data.deal_price * Environment.current_deal_data.deal_volume
         # 分市场标的计算手续费率
         if Environment.current_deal_data.exchange == "SH":
@@ -102,6 +101,7 @@ class EventDeal(Event):
             total_commission = commission['close_commission'] + commission['tax']
             trade_balance *= 1 - total_commission
             Environment.current_deal_data.deal_price = trade_balance / Environment.current_deal_data.deal_volume
+        print(Environment.current_deal_data.deal_price, "wwwwwwwwwwwwwww")
 
     @classmethod
     def update_position_list(cls, event):
@@ -126,6 +126,7 @@ class EventDeal(Event):
         Environment.current_position_data.exchange = Environment.current_deal_data.exchange
         Environment.current_position_data.account_id = Environment.current_order_data.session_id
         Environment.current_position_data.frozen += Environment.current_deal_data.deal_volume
+
         if Environment.bar_position_data_list:
             position_num = 0
             position_hold = False
@@ -134,6 +135,7 @@ class EventDeal(Event):
                 if Environment.current_position_data.instrument == position_data.instrument and \
                         Environment.current_position_data.exchange == position_data.exchange:
                     position_hold = True
+                    print(Environment.current_deal_data.offset, "方向"*10)
                     if Environment.current_deal_data.offset == Offset.OPEN.value:
                         total_position = position_data.position + Environment.current_deal_data.deal_volume
                         position_cost_balance = position_data.position * position_data.average_price
@@ -144,7 +146,8 @@ class EventDeal(Event):
                             (position_cost_balance + trade_balance) / total_position
                         # 更新持仓数量
                         position_data.position = total_position
-
+                        # 更新冻结数量
+                        position_data.frozen += Environment.current_deal_data.deal_volume
                         print("update_position_list")
 
                     elif Environment.current_deal_data.offset == Offset.CLOSE.value:
@@ -153,17 +156,13 @@ class EventDeal(Event):
                         position_cost_balance = position_data.position * position_data.average_price
                         trade_balance = \
                             Environment.current_deal_data.deal_volume * Environment.current_deal_data.deal_price
-
-                        position_data.average_price = \
-                            (position_cost_balance - trade_balance) / total_position
+                        if total_position > 0:
+                            position_data.average_price = \
+                                (position_cost_balance - trade_balance) / total_position
+                        else:
+                            position_data.average_price = 0
                         position_data.position = total_position
-
-                        # 更新委托的状态和成交数量，并把此次委托append到Environment.bar_order_data_list
-                        Environment.current_order_data.status = Status.ALL_TRADED
-                        Environment.current_order_data.deal_volume = Environment.current_deal_data.deal_volume
-                        Environment.bar_order_data_list.append(Environment.current_order_data)
-                        # 把此次成交append到Environment.bar_deal_data_list
-                        Environment.bar_deal_data_list.append(Environment.current_deal_data)
+                        print("sell position"*5, position_data.position)
 
             # 持仓不为空，且不在持仓里面的，append到Environment.bar_position_data_list
             if position_num == len(Environment.bar_position_data_list) and position_hold is False:
@@ -171,12 +170,7 @@ class EventDeal(Event):
                 Environment.current_position_data.position = Environment.current_deal_data.deal_volume
                 Environment.bar_position_data_list.append(Environment.current_position_data)
 
-                # 更新委托的状态和成交数量，并把此次委托append到Environment.bar_order_data_list
-                Environment.current_order_data.status = Status.ALL_TRADED
-                Environment.current_order_data.deal_volume = Environment.current_deal_data.deal_volume
-                Environment.bar_order_data_list.append(Environment.current_order_data)
-                # 把此次成交append到Environment.bar_deal_data_list
-                Environment.bar_deal_data_list.append(Environment.current_deal_data)
+
 
         else:
             Environment.current_position_data.average_price = Environment.current_deal_data.deal_price
@@ -184,12 +178,15 @@ class EventDeal(Event):
             # 持仓为空，append到Environment.bar_position_data_list
             Environment.bar_position_data_list.append(Environment.current_position_data)
 
-            # 更新委托的状态和成交数量，并把此次委托append到Environment.bar_order_data_list
-            Environment.current_order_data.status = Status.ALL_TRADED
-            Environment.current_order_data.deal_volume = Environment.current_deal_data.deal_volume
-            Environment.bar_order_data_list.append(Environment.current_order_data)
-            # 把此次成交append到Environment.bar_deal_data_list
-            Environment.bar_deal_data_list.append(Environment.current_deal_data)
+        # 更新委托的状态和成交数量，并把此次委托append到Environment.bar_order_data_list
+        Environment.current_order_data.status = Status.ALL_TRADED.value
+        Environment.current_order_data.deal_volume = Environment.current_deal_data.deal_volume
+        Environment.bar_order_data_list.append(Environment.current_order_data)
+        # 把此次成交append到Environment.bar_deal_data_list
+        Environment.bar_deal_data_list.append(Environment.current_deal_data)
+
+
+
 
     @classmethod
     def update_account_list(cls, event):

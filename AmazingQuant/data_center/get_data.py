@@ -37,8 +37,10 @@ class GetData(object):
                 stock_market_data = self.conn.select_colum(db_name=db_name, table=stock,
                                                            value={"timetag": {"$lte": end}},
                                                            colum=colum)
-                df = pd.DataFrame(list(stock_market_data))
-                values.append(pd.DataFrame(df[field].values, index=df['timetag'], columns=field))
+                stock_market_data_list = list(stock_market_data)
+                if stock_market_data_list:
+                    df = pd.DataFrame(stock_market_data_list)
+                    values.append(pd.DataFrame(df[field].values, index=df['timetag'], columns=field))
             market_data = pd.concat(values, keys=stock_code)
         elif period == Period.ONE_MIN.value:
             db_name = DatabaseName.MARKET_DATA_ONE_MIN.value
@@ -69,7 +71,7 @@ class GetData(object):
         if len(stock_code) == 1 and len(field) == 1 and (start == end) and count == -1:
             try:
                 return market_data[field[0]].ix[stock_code[0], end]
-            #停牌或者其他情情况取不到数据的返回-1
+            # 停牌或者其他情情况取不到数据的返回-1
             except:
                 return -1
         # （２）代码-n，字段-1，时间-1,  return Series
@@ -92,9 +94,12 @@ class GetData(object):
             return pd.Series(result_dict)
         # （４）代码-1，字段-1，时间-n,  return Series
         elif len(stock_code) == 1 and len(field) == 1 and (start != end) and count == -1:
-            index = market_data[field[0]].ix[stock_code[0]].index
-            index = index[index <= end]
-            index = index[index >= start]
+            try:
+                index = market_data[field[0]].ix[stock_code[0]].index
+                index = index[index <= end]
+                index = index[index >= start]
+            except KeyError:
+                return pd.Series()
             return market_data[field[0]].ix[stock_code[0]][index]
         # （５）代码-n，字段-1，时间-n,  return dataframe 行-timetag，列-代码
         elif len(stock_code) > 1 and len(field) == 1 and (start != end) and count == -1:
@@ -145,37 +150,38 @@ class GetData(object):
 
 if __name__ == "__main__":
     aa = GetData()
-    daily_data = aa.get_all_market_data(stock_code=["000002.SZ", "000001.SH"],
-                                        field=["open", "high", "low", "close", "volumn", "amount"],
-                                        end="2018-01-02", period=Period.DAILY.value)
+    stock_list = ['000300.SH', '601857.SH', '601866.SH', '601872.SH', '601877.SH', '601878.SH', '601881.SH', '601888.SH']
+    daily_data = aa.get_all_market_data(stock_code=stock_list, field=["open", "high", "low", "close", "volumn", "amount"],
+                                                end="2015-03-12", period=Period.DAILY.value)
+    print(daily_data)
     # print(daily_data)
-    data_1 = aa.get_market_data(daily_data, stock_code=["000002.SZ"], field=["open"], start="2018-01-02",
-                                end="2018-01-02", count=-1)
-    # print(data_1)
-
-    data_2 = aa.get_market_data(daily_data, stock_code=["000002.SZ", "000001.SH"], field=["open"], start="2018-01-02",
-                                end="2018-01-02", count=-1)
-    # print(data_2)
-
-    data_3 = aa.get_market_data(daily_data, stock_code=["000002.SZ"], field=["open", "high"], start="2018-01-02",
-                                end="2018-01-02", count=-1)
-    # print(data_3)
-    data_4 = aa.get_market_data(daily_data, stock_code=["000002.SZ"], field=["open"], start="2017-01-02",
-                                end="2018-01-02", count=-1)
-    # print(data_4)
-
-    data_5 = aa.get_market_data(daily_data, stock_code=["000002.SZ", "000001.SH"], field=["open"], start="2017-01-02",
-                                end="2018-01-02", count=-1)
-    # print(data_5)
-
-    data_6 = aa.get_market_data(daily_data, stock_code=["000002.SZ", "000001.SH"], field=["open", "high"],
-                                start="2019-01-02", end="2019-01-02", count=-1)
-    #print(data_6)
-
-    data_7 = aa.get_market_data(daily_data, stock_code=["000002.SZ"], field=["open", "high"], start="2017-01-02",
-                                end="2018-01-02", count=-1)
-    #print(data_7)
-    data_8 = aa.get_market_data(daily_data, stock_code=["000002.SZ", "000001.SH"], field=["open", "high"],
-                                start="2017-01-02",
-                                end="2018-01-02", count=-1)
-    print(data_8)
+    # data_1 = aa.get_market_data(daily_data, stock_code=["000002.SZ"], field=["open"], start="2018-01-02",
+    #                             end="2018-01-02", count=-1)
+    # # print(data_1)
+    #
+    # data_2 = aa.get_market_data(daily_data, stock_code=["000002.SZ", "000001.SH"], field=["open"], start="2018-01-02",
+    #                             end="2018-01-02", count=-1)
+    # # print(data_2)
+    #
+    # data_3 = aa.get_market_data(daily_data, stock_code=["000002.SZ"], field=["open", "high"], start="2018-01-02",
+    #                             end="2018-01-02", count=-1)
+    # # print(data_3)
+    # data_4 = aa.get_market_data(daily_data, stock_code=["000002.SZ"], field=["open"], start="2017-01-02",
+    #                             end="2018-01-02", count=-1)
+    # # print(data_4)
+    #
+    # data_5 = aa.get_market_data(daily_data, stock_code=["000002.SZ", "000001.SH"], field=["open"], start="2017-01-02",
+    #                             end="2018-01-02", count=-1)
+    # # print(data_5)
+    #
+    # data_6 = aa.get_market_data(daily_data, stock_code=["000002.SZ", "000001.SH"], field=["open", "high"],
+    #                             start="2019-01-02", end="2019-01-02", count=-1)
+    # # print(data_6)
+    #
+    # data_7 = aa.get_market_data(daily_data, stock_code=["000002.SZ"], field=["open", "high"], start="2017-01-02",
+    #                             end="2018-01-02", count=-1)
+    # # print(data_7)
+    # data_8 = aa.get_market_data(daily_data, stock_code=["000002.SZ", "000001.SH"], field=["open", "high"],
+    #                             start="2017-01-02",
+    #                             end="2018-01-02", count=-1)
+    # #print(data_8)

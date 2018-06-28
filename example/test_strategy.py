@@ -12,14 +12,14 @@ from AmazingQuant.trade_center.trade import Trade
 class MaStrategy(StrategyBase):
     def initialize(self):
         self.run_mode = RunMode.BACKTESTING.value
-        self.capital = {"test0": 2000000000, "test1":1000}
-        self.benchmark = "000002.SZ"
-        self.start = "2005-01-08"
-        self.end = "2006-01-28"
+        self.capital = {"test0": 2000000000, "test1": 1000}
+        self.benchmark = "000300.SH"
+        self.start = "2015-01-08"
+        self.end = "2016-03-12"
         self.period = "daily"
-        self.universe = ["000002.SZ", "000001.SH"]
+        self.universe = ['601857.SH', '601866.SH', '601872.SH', '601877.SH', '601878.SH', '601881.SH', '601888.SH']
         self.daily_data_cache = True
-        print(self.start)
+        print(self.universe)
         self.account = ["test0", "test1"]
 
         # 回测滑点设置，按固定值0.01,20-0.01 = 19.99;百分比0.01,20*(1-0.01) = 19.98;平仓时用"+"
@@ -41,29 +41,39 @@ class MaStrategy(StrategyBase):
     def handle_bar(self, event):
         # print(self.benchmark)
         # print(self.timetag)
+
+        # 取当前持仓
+        # print(len(Environment.bar_position_data_list))
+        available_position_dict = {}
+        for position in Environment.bar_position_data_list:
+            available_position_dict[position.instrument + "." + position.exchange] = position.position - position.frozen
+
         current_date = data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y-%m-%d")
         current_date_int = data_transfer.date_str_to_int(current_date)
         data_class = GetData()
-        close_price = data_class.get_market_data(Environment.daily_data, stock_code=["000002.SZ"], field=["close"],
-                                                 start=self.start,
-                                                 end=current_date)
-        ma10 = talib.MA(np.array(close_price), timeperiod=10)
-        ma30 = talib.MA(np.array(close_price), timeperiod=30)
-        if ma10[-1] > ma30[-1]:
-            # Trade(self).order_lots(stock_code="000002.SZ", shares=100, price_type="fix",
-            #                        order_price=close_price[current_date_int],
-            #                        account=self.account[0])
-            print("buy", 1, "fix", close_price[current_date_int], self.account)
-        elif ma10[-1] < ma30[-1]:
-            # Trade(self).order_lots(stock_code="000002.SZ", shares=-100, price_type="fix",
-            #                        order_price=close_price[current_date_int],
-            #                        account=self.account[1])
-            print("sell", -1, "fix", close_price[current_date_int], self.account)
+        for stock in self.universe:
+            close_price = data_class.get_market_data(Environment.daily_data, stock_code=[stock], field=["close"],
+                                                     end=current_date)
+            print(self.start, current_date)
+            close_array = np.array(close_price)
+            if len(close_array) > 0:
+                ma10 = talib.MA(np.array(close_price), timeperiod=10)
+                ma30 = talib.MA(np.array(close_price), timeperiod=30)
+                print(type(close_price.keys()))
+                # 过滤因为停牌没有数据
+                if current_date_int in close_price.keys():
+                    if ma10[-1] > ma30[-1] and stock not in available_position_dict.keys():
+                        Trade(self).order_lots(stock_code=stock, shares=100, price_type="fix",
+                                               order_price=close_price[current_date_int],
+                                               account=self.account[0])
+                        print("buy", stock, 1, "fix", close_price[current_date_int], self.account)
+                    elif ma10[-1] < ma30[-1] and stock in available_position_dict.keys():
+                        Trade(self).order_lots(stock_code=stock, shares=-100, price_type="fix",
+                                               order_price=close_price[current_date_int],
+                                               account=self.account[0])
+                        print("sell", stock, -1, "fix", close_price[current_date_int], self.account)
 
-        print(len(Environment.bar_position_data_list))
-        for position in Environment.bar_position_data_list:
-            print(position.instrument + "" + position.exchange)
-            print(position.position)
+
 
         # print(Environment.account[ID.ACCOUNT_ID], current_date)
 

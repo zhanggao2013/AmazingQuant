@@ -22,12 +22,13 @@ class EventBrokerEngine(object):
         event_deal.event_data_dict["strategy"] = strategy
         broker_engine.put(event_deal)
 
+
         broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.initialize_deal_data)
         broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.slippage_calculate)
         broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.commission_calculate)
         broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.update_position_list)
         broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.update_account_list)
-        broker_engine.register(EventType.EVENT_DEAL.value, Environment.refresh_current_data)
+        broker_engine.register(EventType.EVENT_DEAL.value, Environment().refresh_current_data)
 
         broker_engine.start(timer=False)
         broker_engine.stop()

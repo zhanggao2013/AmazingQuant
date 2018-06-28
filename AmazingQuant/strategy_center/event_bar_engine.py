@@ -34,7 +34,7 @@ def run_bar_engine(strategy):
     event_save_record.event_data_dict["strategy_data"] = strategy
     bar_engine.put(event_save_record)
     bar_engine.register(EventType.EVENT_SAVE_RECORD.value, EventSaveRecord.save_current_bar_data)
-    bar_engine.register(EventType.EVENT_SAVE_RECORD.value, Environment.refresh_list)
+    bar_engine.register(EventType.EVENT_SAVE_RECORD.value, Environment().refresh_list)
 
     bar_engine.start(timer=True)
     bar_engine.stop()

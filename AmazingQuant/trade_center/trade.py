@@ -18,34 +18,41 @@ class Trade(object):
     def order_lots(self, stock_code="", shares=1, price_type=PriceType.LIMIT, order_price=None,
                    account=""):
         """下单函数"""
-        order_data = OrderData()
         # 代码编号相关
-        order_data.order_id = generate_random_id(ID.ORDER_ID.value)
-        order_data.instrument = stock_code[:-2]
-        order_data.exchange = stock_code[-2:]
+        Environment.current_order_data.order_id = generate_random_id(ID.ORDER_ID.value)
+        Environment.current_order_data.instrument = stock_code[:-3]
+        Environment.current_order_data.exchange = stock_code[-2:]
 
         # 　报单相关
-        order_data.price_type = price_type
-        order_data.order_price = order_price
+        Environment.current_order_data.price_type = price_type
+        Environment.current_order_data.order_price = order_price
         if shares > 0:
-            order_data.offset = Offset.OPEN.value
+            Environment.current_order_data.offset = Offset.OPEN.value
         else:
-            order_data.offset = Offset.CLOSE.value
-        order_data.total_volume = shares
-        order_data.deal_volume = 0
-        order_data.status = Status.NOT_REPORTED.value
+            Environment.current_order_data.offset = Offset.CLOSE.value
+            print("shares < 0"*5, Environment.current_order_data.offset)
+        Environment.current_order_data.total_volume = abs(shares)
+        Environment.current_order_data.deal_volume = 0
+        Environment.current_order_data.status = Status.NOT_REPORTED.value
+
+
 
         # CTP相关
-        order_data.order_time = self._strategy.timetag
+        Environment.current_order_data.order_time = self._strategy.timetag
         for account_data in Environment.bar_account_data_list:
             if account_data.account_id[:-9] == account:
-                order_data.session_id = account_data.account_id
+                Environment.current_order_data.session_id = account_data.account_id
 
-        Environment.current_order_data = order_data
+
         MissionEngine().mission_order(strategy=self._strategy)
-
+        bb = Environment.current_order_data.offset
+        dd = Environment.current_order_data.status
+        ee = Environment.bar_position_data_list
+        cc = Environment.is_send_order
         if self._strategy.run_mode == RunMode.BACKTESTING.value:
             if Environment.is_send_order:
+                aa = Environment.current_order_data.offset
+
                 EventBrokerEngine().run_broker(strategy=self._strategy)
 
         elif self._strategy.run_mode == RunMode.TRADE.value:
