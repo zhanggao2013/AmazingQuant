@@ -194,8 +194,8 @@ class StrategyBase(metaclass=ABCMeta):
                         save_backtesting_record.save_backtesting_record_to_csv(data_type=RecordDataType.DEAL_DATA.value)
                         save_backtesting_record.save_backtesting_record_to_csv(
                             data_type=RecordDataType.POSITION_DATA.value)
-                        # save_backtesting_record.save_backtesting_record_to_csv(
-                        #     data_type=RecordDataType.ACCOUNT_DATA.value)
+                        save_backtesting_record.save_backtesting_record_to_csv(
+                            data_type=RecordDataType.ACCOUNT_DATA.value)
 
                     break
                 elif self.run_mode == RunMode.TRADE.value:

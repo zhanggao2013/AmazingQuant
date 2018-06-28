@@ -53,11 +53,11 @@ class EventOrder(Event):
                                     print("Insufficient Available Position")
                                     Environment.current_order_data.status = Status.WITHDRAW.value
                                     break
-                    # 如果遍历完持仓，没有此次平仓的持仓，Status改为WITHDRAW
-                    if position_hold is False:
-                        print("Insufficient Available Position")
-                        Environment.current_order_data.status = Status.WITHDRAW.value
-                        break
+                # 如果遍历完持仓，没有此次平仓的持仓，Status改为WITHDRAW
+                if position_hold is False:
+                    print("Insufficient Available Position")
+                    Environment.current_order_data.status = Status.WITHDRAW.value
+
             # 如果持仓为空，Status改为WITHDRAW
             else:
                 print("Insufficient Available Position")

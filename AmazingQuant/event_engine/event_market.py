@@ -41,11 +41,17 @@ class EventMarket(Event):
         :param event:
         :return:
         """
-        if Environment.bar_position_data_list:
-            for position_num in range(len(Environment.bar_position_data_list)):
-                if Environment.bar_position_data_list[position_num] == 0:
-                    del Environment.bar_position_data_list[position_num]
+        print("delete_position_zero" * 3)
+        print(len(Environment.bar_position_data_list))
+        # if Environment.bar_position_data_list:
+        #     for position_num in range(len(Environment.bar_position_data_list)):
+        #         if Environment.bar_position_data_list[position_num].position == 0:
+        #             del Environment.bar_position_data_list[position_num]
 
+        Environment.bar_position_data_list = [position_data for position_data in Environment.bar_position_data_list if
+                                              position_data.position != 0]
+
+        print(len(Environment.bar_position_data_list))
         pass
 
     @classmethod
@@ -91,5 +97,3 @@ class EventMarket(Event):
                 hold_balance += position_data.position * current_close_price
         Environment.current_account_data.total_balance = Environment.current_account_data.available + hold_balance
         print("更新bar_close总资产")
-
-

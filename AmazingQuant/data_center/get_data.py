@@ -34,6 +34,7 @@ class GetData(object):
             for i in field:
                 colum[i] = 1
             for stock in stock_code:
+                self.conn.check_connected()
                 stock_market_data = self.conn.select_colum(db_name=db_name, table=stock,
                                                            value={"timetag": {"$lte": end}},
                                                            colum=colum)
