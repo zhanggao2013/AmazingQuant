@@ -51,6 +51,7 @@ class MongoConn(Singleton):
     def check_connected(self):
         # 检查是否连接成功
         if not self.connected:
+            print('stat:connected Error')
             raise NameError('stat:connected Error')
 
     def save(self, db_name, table, value):
