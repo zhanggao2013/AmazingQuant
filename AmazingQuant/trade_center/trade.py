@@ -43,16 +43,9 @@ class Trade(object):
             if account_data.account_id[:-9] == account:
                 Environment.current_order_data.session_id = account_data.account_id
 
-
         MissionEngine().mission_order(strategy=self._strategy)
-        bb = Environment.current_order_data.offset
-        dd = Environment.current_order_data.status
-        ee = Environment.bar_position_data_list
-        cc = Environment.is_send_order
         if self._strategy.run_mode == RunMode.BACKTESTING.value:
             if Environment.is_send_order:
-                aa = Environment.current_order_data.offset
-
                 EventBrokerEngine().run_broker(strategy=self._strategy)
 
         elif self._strategy.run_mode == RunMode.TRADE.value:

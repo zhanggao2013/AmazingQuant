@@ -86,10 +86,11 @@ class EventMarket(Event):
         current_date = millisecond_to_date(current_timetag, format='%Y-%m-%d')
         data_class = GetData()
 
-        hold_balance = 0
         if Environment.bar_position_data_list:
-            for position_data in Environment.bar_position_data_list:
-                for account in Environment.bar_account_data_list:
+            for account in Environment.bar_account_data_list:
+                # 分资金账号update
+                hold_balance = 0
+                for position_data in Environment.bar_position_data_list:
                     if account.account_id == position_data.account_id:
                         stock_code = position_data.instrument + "." + position_data.exchange
                         current_close_price = data_class.get_market_data(Environment.daily_data, stock_code=[stock_code],
@@ -97,5 +98,6 @@ class EventMarket(Event):
                                                                          start=current_date,
                                                                          end=current_date)
                         hold_balance += position_data.position * current_close_price
-                    account.total_balance = Environment.current_account_data.available + hold_balance
-        print("更新bar_close总资产")
+                    account.total_balance = account.available + hold_balance
+        print("更新bar_close总资产test0"*5,Environment.bar_account_data_list[0].total_balance)
+        print("更新bar_close总资产test1" * 5, Environment.bar_account_data_list[1].total_balance)
