@@ -7,6 +7,7 @@ from abc import ABCMeta, abstractmethod
 from AmazingQuant.utils import data_transfer, generate_random_id, save_backtesting_record
 from AmazingQuant.constant import RunMode, Period, RightsAdjustment, SlippageType, StockType, RecordDataType
 from AmazingQuant.data_object import *
+from AmazingQuant.analysis_center.event_analysis_engine import run_backtesting_analysis_engine
 from .event_bar_engine import *
 
 
@@ -189,13 +190,15 @@ class StrategyBase(metaclass=ABCMeta):
             except IndexError:
                 if self.run_mode == RunMode.BACKTESTING.value:
                     if save_trade_record:
-                        save_backtesting_record.save_backtesting_record_to_csv(
-                            data_type=RecordDataType.ORDER_DATA.value)
-                        save_backtesting_record.save_backtesting_record_to_csv(data_type=RecordDataType.DEAL_DATA.value)
-                        save_backtesting_record.save_backtesting_record_to_csv(
-                            data_type=RecordDataType.POSITION_DATA.value)
-                        save_backtesting_record.save_backtesting_record_to_csv(
-                            data_type=RecordDataType.ACCOUNT_DATA.value)
+                        run_backtesting_analysis_engine(self)
+
+                        # save_backtesting_record.save_backtesting_record_to_csv(
+                        #     data_type=RecordDataType.ORDER_DATA.value)
+                        # save_backtesting_record.save_backtesting_record_to_csv(data_type=RecordDataType.DEAL_DATA.value)
+                        # save_backtesting_record.save_backtesting_record_to_csv(
+                        #     data_type=RecordDataType.POSITION_DATA.value)
+                        # save_backtesting_record.save_backtesting_record_to_csv(
+                        #     data_type=RecordDataType.ACCOUNT_DATA.value)
 
                     break
                 elif self.run_mode == RunMode.TRADE.value:

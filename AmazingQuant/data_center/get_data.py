@@ -96,12 +96,13 @@ class GetData(object):
         # （４）代码-1，字段-1，时间-n,  return Series
         elif len(stock_code) == 1 and len(field) == 1 and (start != end) and count == -1:
             try:
-                index = market_data[field[0]].ix[stock_code[0]].index
-                index = index[index <= end]
-                index = index[index >= start]
+                series = market_data[field[0]].ix[stock_code[0]]
             except KeyError:
                 return pd.Series()
-            return market_data[field[0]].ix[stock_code[0]][index]
+
+            series = series[series.index >= start]
+            series = series[series.index <= end]
+            return series
         # （５）代码-n，字段-1，时间-n,  return dataframe 行-timetag，列-代码
         elif len(stock_code) > 1 and len(field) == 1 and (start != end) and count == -1:
             result_dict = {}

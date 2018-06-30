@@ -4,7 +4,7 @@ __author__ = "gao"
 
 import sys
 import os
-import datetime
+import time
 import copy
 
 import pandas as pd
@@ -47,8 +47,8 @@ def save_backtesting_record_to_csv(data_type=RecordDataType.ACCOUNT_DATA.value):
         # print(timetag_data_df)
         values.append(timetag_data_df)
     all_data = pd.concat(values, keys=Environment.benchmark_index)
-
-    all_data.to_csv(sys.argv[0][sys.argv[0].rfind(os.sep) + 1:][:-3] + "_" + data_type + datetime.datetime.now().strftime("%Y%m%d_%H%M%S") + ".csv")
+    millisecond_timetag = int(time.time() * 1000)
+    all_data.to_csv(sys.argv[0][sys.argv[0].rfind(os.sep) + 1:][:-3] + "_" + data_type + millisecond_timetag + ".csv")
 
     pass
 

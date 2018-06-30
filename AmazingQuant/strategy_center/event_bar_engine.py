@@ -6,13 +6,6 @@ from AmazingQuant.event_engine.event_market import *
 from AmazingQuant.event_engine.event_save_record import *
 
 
-def initialize_current_bar_data(timetag):
-    Environment.order_data_dict[timetag] = []
-    Environment.deal_data_dict[timetag] = []
-    Environment.position_data_dict[timetag] = []
-    Environment.account_data_dict[timetag] = []
-
-
 def run_bar_engine(strategy):
     """
 
@@ -36,6 +29,6 @@ def run_bar_engine(strategy):
     bar_engine.register(EventType.EVENT_SAVE_RECORD.value, EventSaveRecord.save_current_bar_data)
     bar_engine.register(EventType.EVENT_SAVE_RECORD.value, Environment().refresh_list)
 
-    bar_engine.start(timer=True)
+    bar_engine.start(timer=False)
     bar_engine.stop()
 

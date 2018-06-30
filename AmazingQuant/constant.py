@@ -38,6 +38,7 @@ class EventType(Enum):
     EVENT_HANDLE_BAR = "event_handle_bar"
     EVENT_LOG = "event_log"
     EVENR_ERROR = "event_error"
+    EVENT_BACKTESTING_ANALYSIS = "event_backtesting_analysis"
 
 @unique
 class ID(Enum):
@@ -47,6 +48,9 @@ class ID(Enum):
     DEAL_ID = "deal"
 
 
+if __name__ == "__main__":
+    for i in ID.__members__.values():
+        print(i.value)
 
 class Empty(Enum):
     EMPTY_STRING = ""

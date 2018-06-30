@@ -45,6 +45,13 @@ class Environment(object):
         cls.bar_order_data_list = []
         cls.bar_deal_data_list = []
 
+    # 回测交易记录
+    backtesting_record_order = pd.DataFrame()
+    backtesting_record_deal = pd.DataFrame()
+    backtesting_record_position = pd.DataFrame()
+    backtesting_record_account = pd.DataFrame()
+
+
     # 每次下单交易完成，经过回测broker之后清空order和deal的数据，重置是否通过风控
     @classmethod
     def refresh_current_data(cls, event):

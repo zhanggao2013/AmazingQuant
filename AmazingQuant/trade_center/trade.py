@@ -6,9 +6,9 @@ __author__ = "gao"
 from AmazingQuant.constant import *
 from AmazingQuant.data_object import OrderData
 from AmazingQuant.utils.generate_random_id import generate_random_id
-from AmazingQuant.trade_center.event_mission_engine import MissionEngine
+from AmazingQuant.trade_center.event_mission_engine import run_mission_engine
 from AmazingQuant.environment import Environment
-from AmazingQuant.trade_center.event_broker_engine import EventBrokerEngine
+from AmazingQuant.trade_center.event_broker_engine import run_broker_engine
 
 
 class Trade(object):
@@ -43,10 +43,11 @@ class Trade(object):
             if account_data.account_id[:-9] == account:
                 Environment.current_order_data.session_id = account_data.account_id
 
-        MissionEngine().mission_order(strategy=self._strategy)
+        run_mission_engine(strategy=self._strategy)
+
         if self._strategy.run_mode == RunMode.BACKTESTING.value:
             if Environment.is_send_order:
-                EventBrokerEngine().run_broker(strategy=self._strategy)
+                run_broker_engine(strategy=self._strategy)
 
         elif self._strategy.run_mode == RunMode.TRADE.value:
             """过真实的交易，只做send_order"""
