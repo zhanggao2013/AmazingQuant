@@ -7,6 +7,7 @@ import os
 import time
 import copy
 import math
+import collections
 
 import pandas as pd
 import numpy as np
@@ -16,6 +17,7 @@ from AmazingQuant.environment import Environment
 from AmazingQuant.constant import RecordDataType, Period
 from AmazingQuant.data_center.get_data import GetData
 from AmazingQuant.utils.data_transfer import millisecond_to_date
+from pyecharts import Line, Page, Grid
 
 
 class EmptyClass(object):
@@ -79,6 +81,8 @@ class EventBacktestingAnalysis(Event):
 
     @classmethod
     def show_backtesting_indicator(cls, event):
+        indicator_dict = {}
+        indicator_dict = collections.OrderedDict()
         # （１）基准净值
         benchmark_net_asset_value = cls().get_benchmark_net_asset_value(event)
         print(benchmark_net_asset_value, "benchmark_net_asset_value" * 3)
@@ -97,38 +101,88 @@ class EventBacktestingAnalysis(Event):
         # （５）beta
         beta = cls().get_beta(benchmark_net_asset_value, strategy_net_asset_value)
         print(beta)
+        indicator_dict["beta"] = beta
 
         # （６）alpha
         alpha = cls().get_alpha(benchmark_year_yield, strategy_year_yield, beta)
         print(alpha)
+        indicator_dict["alpha"] = alpha
 
         # （７）volatility
         volatility = cls().get_volatility(strategy_net_asset_value)
         print(volatility)
+        indicator_dict["volatility"] = volatility
 
         # （８）sharpe
         sharpe = cls().get_sharp(strategy_year_yield, volatility)
         print(sharpe)
+        indicator_dict["sharpe"] = sharpe
 
         # （９）downside_risk
         downside_risk = cls().get_downside_risk(strategy_year_yield)
         print(downside_risk)
+        indicator_dict["downside_risk"] = downside_risk
 
         # （１０）sortino_ratio
         sortino_ratio = cls().get_sortino_ratio(strategy_year_yield, downside_risk)
         print(sortino_ratio)
+        indicator_dict["sortino_ratio"] = sortino_ratio
 
         # （１１）tracking_error
         tracking_error = cls().get_tracking_error(benchmark_net_asset_value, strategy_net_asset_value)
         print(tracking_error)
+        indicator_dict["tracking_error"] = tracking_error
 
         # （１２）information_ratio
         information_ratio = cls().get_information_ratio(benchmark_year_yield, strategy_year_yield, tracking_error)
         print(information_ratio)
+        indicator_dict["information_ratio"] = information_ratio
 
         # （１３）max_drawdown
         max_drawdown = cls().get_max_drawdown(strategy_net_asset_value)
         print(max_drawdown)
+        indicator_dict["max_drawdown"] = max_drawdown
+
+        # 展示到html
+        period = event.event_data_dict["strategy"].period
+        if period == Period.DAILY.value:
+            timetag_date = [millisecond_to_date(millisecond=i, format="%Y-%m-%d") for i in Environment.benchmark_index]
+        else:
+            timetag_date = [millisecond_to_date(millisecond=i, format="%Y-%m-%d %H:%M:%S") for i in
+                            Environment.benchmark_index]
+
+        page = Page("strategy backtesting indicator")
+        line_net_asset_value = Line("net_asset_value", width=1300, height=400, title_pos="8%")
+        line_net_asset_value.add("benchmark_net_asset_value", timetag_date,
+                                 [round(i, 4) for i in benchmark_net_asset_value],
+                                 tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
+        line_net_asset_value.add("strategy_net_asset_value", timetag_date,
+                                 [round(i, 4) for i in strategy_net_asset_value],
+                                 tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
+        page.add(line_net_asset_value)
+
+        line_year_yield = Line("year_yield", width=1300, height=400, title_pos="8%")
+        line_year_yield.add("benchmark_year_yield", timetag_date,
+                            [round(i, 4) for i in benchmark_year_yield],
+                            tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
+        line_year_yield.add("strategy_year_yield", timetag_date,
+                            [round(i, 4) for i in strategy_year_yield],
+                            tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
+        page.add(line_year_yield)
+
+        for indicator_name, indicator in indicator_dict.items():
+            cls().add_to_page(page, indicator, indicator_name, timetag_date)
+            print(indicator_name)
+
+        millisecond_timetag = str(int(time.time()) * 1000)
+        page.render(path=sys.argv[0][sys.argv[0].rfind(os.sep) + 1:][
+                         :-3] + "_" + "strategy backtesting indicator" + millisecond_timetag + ".html")  # 生成本地 HTML 文件
+
+    def add_to_page(self, page, indicator, indicator_name, timetag_date):
+        line = Line(indicator_name, width=1300, height=400, title_pos="8%")
+        line.add(indicator_name, timetag_date, [round(i, 4) for i in indicator],
+                 tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
+        page.add(line)
 
     def get_benchmark_net_asset_value(self, event):
         period = event.event_data_dict["strategy"].period
@@ -243,7 +297,6 @@ class EventBacktestingAnalysis(Event):
             sortino_ratio_list.append(sortino_ratio)
         return sortino_ratio_list
 
-
     def get_tracking_error(self, benchmark_net_asset_value, strategy_net_asset_value):
         benchmark_net_asset_value_change = np.array([0]) + (
                 np.array(benchmark_net_asset_value)[1:] - np.array(benchmark_net_asset_value)[:-1])
@@ -264,7 +317,8 @@ class EventBacktestingAnalysis(Event):
         information_ratio_list = []
         for timetag_index in range(len(strategy_year_yield)):
             if tracking_error[timetag_index] > 0:
-                information_ratio = (strategy_year_yield[timetag_index] - strategy_year_yield[timetag_index]) / tracking_error[timetag_index]
+                information_ratio = (strategy_year_yield[timetag_index] - strategy_year_yield[timetag_index]) / \
+                                    tracking_error[timetag_index]
             else:
                 information_ratio = 0
             information_ratio_list.append(information_ratio)
@@ -281,8 +335,8 @@ class EventBacktestingAnalysis(Event):
 
         max_drawdown_list = []
         for timetag_index in range(len(drawdown_list)):
-            if timetag_index > 0 :
-                max_drawdown = max(drawdown_list[:timetag_index+1])
+            if timetag_index > 0:
+                max_drawdown = max(drawdown_list[:timetag_index + 1])
             else:
                 max_drawdown = 0
             max_drawdown_list.append(max_drawdown)
