@@ -15,7 +15,7 @@ class MaStrategy(StrategyBase):
         self.capital = {"test0": 2000000000, "test1": 1000}
         self.benchmark = "000300.SH"
         self.start = "2015-01-11"
-        self.end = "2015-01-13"
+        self.end = "2015-01-16"
         self.period = "daily"
         self.universe = ['603993.SH']
 

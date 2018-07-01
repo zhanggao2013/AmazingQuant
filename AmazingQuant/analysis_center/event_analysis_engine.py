@@ -23,7 +23,7 @@ def run_backtesting_analysis_engine(strategy):
     backtesting_analysis_engine.register(EventType.EVENT_BACKTESTING_ANALYSIS.value,
                                          EventBacktestingAnalysis.save_backtesting_record_to_csv)
     backtesting_analysis_engine.register(EventType.EVENT_BACKTESTING_ANALYSIS.value,
-                                         EventBacktestingAnalysis.calculate_backtesting_indicator)
+                                         EventBacktestingAnalysis.show_backtesting_indicator)
 
     backtesting_analysis_engine.start(timer=False)
     backtesting_analysis_engine.stop()
