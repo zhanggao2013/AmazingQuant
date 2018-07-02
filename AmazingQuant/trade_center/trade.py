@@ -30,7 +30,7 @@ class Trade(object):
             Environment.current_order_data.offset = Offset.OPEN.value
         else:
             Environment.current_order_data.offset = Offset.CLOSE.value
-            print("shares < 0"*5, Environment.current_order_data.offset)
+            # print("shares < 0"*5, Environment.current_order_data.offset)
         Environment.current_order_data.total_volume = abs(shares)
         Environment.current_order_data.deal_volume = 0
         Environment.current_order_data.status = Status.NOT_REPORTED.value

@@ -27,7 +27,7 @@ class EventMarket(Event):
                 for position_data in Environment.bar_position_data_list:
                     if last_day != current_day:
                         position_data.frozen = 0
-                        print("更新今仓冻结数量")
+                        # print("更新今仓冻结数量")
         pass
 
     @classmethod
@@ -41,17 +41,13 @@ class EventMarket(Event):
         :param event:
         :return:
         """
-        print("delete_position_zero" * 3)
-        print(len(Environment.bar_position_data_list))
-        # if Environment.bar_position_data_list:
-        #     for position_num in range(len(Environment.bar_position_data_list)):
-        #         if Environment.bar_position_data_list[position_num].position == 0:
-        #             del Environment.bar_position_data_list[position_num]
+        # print("delete_position_zero" )
+        # print(len(Environment.bar_position_data_list))
 
         Environment.bar_position_data_list = [position_data for position_data in Environment.bar_position_data_list if
                                               position_data.position != 0]
 
-        print(len(Environment.bar_position_data_list))
+        # print(len(Environment.bar_position_data_list))
         pass
 
     @classmethod
@@ -73,7 +69,7 @@ class EventMarket(Event):
                                                                  end=current_date)
                 position_data.position_profit = position_data.position * (
                         current_close_price - position_data.average_price)
-        print("更新bar_close持仓盈亏")
+        # print("更新bar_close持仓盈亏")
 
     @classmethod
     def update_account_close(cls, event):
@@ -99,5 +95,5 @@ class EventMarket(Event):
                                                                          end=current_date)
                         hold_balance += position_data.position * current_close_price
                     account.total_balance = account.available + hold_balance
-        print("更新bar_close总资产test0"*5,Environment.bar_account_data_list[0].total_balance)
-        print("更新bar_close总资产test1" * 5, Environment.bar_account_data_list[1].total_balance)
+        # print("更新bar_close总资产test0"*5,Environment.bar_account_data_list[0].total_balance)
+        # print("更新bar_close总资产test1" * 5, Environment.bar_account_data_list[1].total_balance)

@@ -50,13 +50,13 @@ class EventBacktestingAnalysis(Event):
                 data_dict = Environment.account_data_dict
 
             data_property = [i for i in dir(data_obj) if i not in dir(copy.deepcopy(EmptyClass()))]
-            print(data_property, dir(copy.deepcopy(EmptyClass)))
+            # print(data_property, dir(copy.deepcopy(EmptyClass)))
             values = []
             for timetag in Environment.benchmark_index:
                 timetag_data_list = []
                 for current_data in data_dict[timetag]:
                     timetag_data_list.append([current_data.__dict__[property_data] for property_data in data_property])
-                print(timetag_data_list)
+                # print(timetag_data_list)
                 timetag_data_df = pd.DataFrame(timetag_data_list, columns=data_property)
                 # timetag_data_df.set_index("account_id", inplace=True)
                 # print(timetag_data_df)
@@ -85,62 +85,62 @@ class EventBacktestingAnalysis(Event):
         indicator_dict = collections.OrderedDict()
         # （１）基准净值
         benchmark_net_asset_value = cls().get_benchmark_net_asset_value(event)
-        print(benchmark_net_asset_value, "benchmark_net_asset_value" * 3)
+        # print(benchmark_net_asset_value, "benchmark_net_asset_value" * 3)
 
         # （２）策略净值
         strategy_net_asset_value = cls().get_strategy_net_asset_value()
-        print(strategy_net_asset_value, "strategy_net_asset_value")
+        # print(strategy_net_asset_value, "strategy_net_asset_value")
 
         # （３）基准年化收益率
         benchmark_year_yield = cls().get_year_yield(benchmark_net_asset_value)
 
         # （４）策略年化收益率
         strategy_year_yield = cls().get_year_yield(strategy_net_asset_value)
-        print(benchmark_year_yield, strategy_year_yield)
+        # print(benchmark_year_yield, strategy_year_yield)
 
         # （５）beta
         beta = cls().get_beta(benchmark_net_asset_value, strategy_net_asset_value)
-        print(beta)
+        # print(beta)
         indicator_dict["beta"] = beta
 
         # （６）alpha
         alpha = cls().get_alpha(benchmark_year_yield, strategy_year_yield, beta)
-        print(alpha)
+        # print(alpha)
         indicator_dict["alpha"] = alpha
 
         # （７）volatility
         volatility = cls().get_volatility(strategy_net_asset_value)
-        print(volatility)
+        # print(volatility)
         indicator_dict["volatility"] = volatility
 
         # （８）sharpe
         sharpe = cls().get_sharp(strategy_year_yield, volatility)
-        print(sharpe)
+        # print(sharpe)
         indicator_dict["sharpe"] = sharpe
 
         # （９）downside_risk
         downside_risk = cls().get_downside_risk(strategy_year_yield)
-        print(downside_risk)
+        # print(downside_risk)
         indicator_dict["downside_risk"] = downside_risk
 
         # （１０）sortino_ratio
         sortino_ratio = cls().get_sortino_ratio(strategy_year_yield, downside_risk)
-        print(sortino_ratio)
+        # print(sortino_ratio)
         indicator_dict["sortino_ratio"] = sortino_ratio
 
         # （１１）tracking_error
         tracking_error = cls().get_tracking_error(benchmark_net_asset_value, strategy_net_asset_value)
-        print(tracking_error)
+        # print(tracking_error)
         indicator_dict["tracking_error"] = tracking_error
 
         # （１２）information_ratio
         information_ratio = cls().get_information_ratio(benchmark_year_yield, strategy_year_yield, tracking_error)
-        print(information_ratio)
+        # print(information_ratio)
         indicator_dict["information_ratio"] = information_ratio
 
         # （１３）max_drawdown
         max_drawdown = cls().get_max_drawdown(strategy_net_asset_value)
-        print(max_drawdown)
+        # print(max_drawdown)
         indicator_dict["max_drawdown"] = max_drawdown
 
         # 展示到html
@@ -172,7 +172,7 @@ class EventBacktestingAnalysis(Event):
 
         for indicator_name, indicator in indicator_dict.items():
             cls().add_to_page(page, indicator, indicator_name, timetag_date)
-            print(indicator_name)
+            # print(indicator_name)
 
         millisecond_timetag = str(int(time.time()) * 1000)
         page.render(path=sys.argv[0][sys.argv[0].rfind(os.sep) + 1:][
@@ -303,7 +303,7 @@ class EventBacktestingAnalysis(Event):
         strategy_net_asset_value_change = np.array([0]) + (
                 np.array(strategy_net_asset_value)[1:] - np.array(strategy_net_asset_value)[:-1])
         benchmark_strategy_diff = benchmark_net_asset_value_change - strategy_net_asset_value_change
-        print(benchmark_strategy_diff)
+        # print(benchmark_strategy_diff)
         tracking_error_list = []
         for timetag_index in range(len(strategy_net_asset_value)):
             if timetag_index > 0:
@@ -336,7 +336,7 @@ class EventBacktestingAnalysis(Event):
         max_drawdown_list = []
         for timetag_index in range(len(drawdown_list)):
             if timetag_index > 0:
-                max_drawdown = max(drawdown_list[:timetag_index + 1])
+                max_drawdown = 100 * max(drawdown_list[:timetag_index + 1])
             else:
                 max_drawdown = 0
             max_drawdown_list.append(max_drawdown)

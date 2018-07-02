@@ -12,7 +12,8 @@ from AmazingQuant.trade_center.trade import Trade
 class MaStrategy(StrategyBase):
     def initialize(self):
         self.run_mode = RunMode.BACKTESTING.value
-        self.capital = {"test0": 2000000000, "test1": 1000}
+        self.account = ["test0", "test1"]
+        self.capital = {"test0": 2000000, "test1": 1000}
         self.benchmark = "000300.SH"
         self.start = "2015-01-11"
         self.end = "2016-01-16"
@@ -82,13 +83,7 @@ class MaStrategy(StrategyBase):
         print(Environment.commission_dict)
 
     def handle_bar(self, event):
-        # print(self.benchmark)
-        # print(self.timetag)
-
-        # 取当前持仓
-        # print(len(Environment.bar_position_data_list))
         print("*" * 50)
-
         available_position_dict = {}
         for position in Environment.bar_position_data_list:
             available_position_dict[position.instrument + "." + position.exchange] = position.position - position.frozen
@@ -113,16 +108,16 @@ class MaStrategy(StrategyBase):
                                                order_price=close_price[current_date_int],
                                                account=self.account[0])
                         print("buy", stock, 1, "fix", close_price[current_date_int], self.account)
-                        print("buy" * 20)
+
                     elif ma5[-1] < ma20[-1] and stock in available_position_dict.keys():
                         Trade(self).order_lots(stock_code=stock, shares=-100, price_type="fix",
                                                order_price=close_price[current_date_int],
                                                account=self.account[0])
                         print("sell", stock, -1, "fix", close_price[current_date_int], self.account)
-                        print("sell" * 20)
-        # print(Environment.account[ID.ACCOUNT_ID], current_date)
-
 
 if __name__ == "__main__":
-    MaStrategy().run(save_trade_record=True)
+    from AmazingQuant.utils.performance_test import Timer
     # print(Environment.account)
+    time_test = Timer(True)
+    with time_test:
+        MaStrategy().run(save_trade_record=True)

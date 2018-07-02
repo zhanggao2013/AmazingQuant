@@ -47,11 +47,6 @@ class ID(Enum):
     ORDER_ID = "order"
     DEAL_ID = "deal"
 
-
-if __name__ == "__main__":
-    for i in ID.__members__.values():
-        print(i.value)
-
 class Empty(Enum):
     EMPTY_STRING = ""
     EMPTY_INT = 0

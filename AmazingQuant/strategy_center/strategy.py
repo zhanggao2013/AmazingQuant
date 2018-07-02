@@ -182,7 +182,7 @@ class StrategyBase(metaclass=ABCMeta):
                                            Environment.one_min_data["open"].ix[self.benchmark].index
                                            if i >= data_transfer.date_str_to_int(self.start)]
 
-        print(self.benchmark, self.start, self.end, self.period, self.rights_adjustment, self.run_mode)
+        # print(self.benchmark, self.start, self.end, self.period, self.rights_adjustment, self.run_mode)
         self.bar_index = 0
         while True:
             try:
@@ -206,23 +206,6 @@ class StrategyBase(metaclass=ABCMeta):
 
                 date = int(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y%m%d"))
                 run_bar_engine(self)
-                # event 做执行下面四个事件
-                #
-                # （１）回测的时候，用当前bar的收盘价更新资金  持仓
-                # 真实交易的时候　取最新的资金　持仓
-                # print(daily_data["close"].ix["000300.SH"][date])
-                # print(self.capital)
-                #
-                # (2) 跑每一根bar
-                #
-                #  self.handle_bar()  已经放到run_bar_engine
-                #  在trade中　对　bar_current的四个操作
-                #  self.bar_index += 1
-                #
-                # （３）market close 更新　资金和持仓
-                #
-                # (4)
-                # update_current_bar_data(self.timetag)  #
 
         @abstractmethod
         def initialize(self):
