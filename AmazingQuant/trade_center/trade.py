@@ -15,7 +15,7 @@ class Trade(object):
     def __init__(self, strategy):
         self._strategy = strategy
 
-    def order_lots(self, stock_code="", shares=1, price_type=PriceType.LIMIT, order_price=None,
+    def order_shares(self, stock_code="", shares=1, price_type=PriceType.LIMIT, order_price=None,
                    account=""):
         """下单函数"""
         # 代码编号相关
