@@ -5,10 +5,11 @@ __author__ = "gao"
 import numpy as np
 import talib
 
-# import strategy基类和交易函数类
+# import strategy基类
 from AmazingQuant.strategy_center.strategy import *
-# import 交易函数类
+# import 交易模块
 from AmazingQuant.trade_center.trade import Trade
+
 
 # 继承strategy基类
 class MaStrategy(StrategyBase):
