@@ -118,13 +118,13 @@ class MaStrategy(StrategyBase):
                 # print(type(close_price.keys()))
                 # 过滤因为停牌没有数据
                 if current_date_int in close_price.keys():
-                    # 如果5日均线突破20日均线，并且没有持仓，则买入这只股票100股
+                    # 如果5日均线突破20日均线，并且没有持仓，则买入这只股票100股，以收盘价为指定价交易
                     if ma5[-1] > ma20[-1] and stock not in available_position_dict.keys():
                         Trade(self).order_shares(stock_code=stock, shares=100, price_type="fix",
                                                  order_price=close_price[current_date_int],
                                                  account=self.account[0])
                         print("buy", stock, 1, "fix", close_price[current_date_int], self.account)
-                    # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股
+                    # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
                     elif ma5[-1] < ma20[-1] and stock in available_position_dict.keys():
                         Trade(self).order_shares(stock_code=stock, shares=-100, price_type="fix",
                                                  order_price=close_price[current_date_int],
@@ -138,4 +138,5 @@ if __name__ == "__main__":
 
     time_test = Timer(True)
     with time_test:
+        # 运行策略，设置是否保存委托，成交，资金，持仓
         MaStrategy().run(save_trade_record=True)
