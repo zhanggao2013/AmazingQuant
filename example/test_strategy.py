@@ -21,6 +21,8 @@ class MaStrategy(StrategyBase):
         self.capital = {"test0": 2000000, "test1": 1000}
         # 设置回测基准
         self.benchmark = "000300.SH"
+        # 设置复权方式
+        self.rights_adjustment = RightsAdjustment.NONE.value
         # 设置回测起止时间
         self.start = "2015-01-11"
         self.end = "2016-01-16"
