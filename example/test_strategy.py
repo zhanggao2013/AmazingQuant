@@ -7,6 +7,7 @@ import talib
 
 # import strategy基类
 from AmazingQuant.strategy_center.strategy import *
+
 # import 交易模块
 from AmazingQuant.trade_center.trade import Trade
 
