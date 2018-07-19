@@ -317,7 +317,7 @@ class EventBacktestingAnalysis(Event):
         information_ratio_list = []
         for timetag_index in range(len(strategy_year_yield)):
             if tracking_error[timetag_index] > 0:
-                information_ratio = (strategy_year_yield[timetag_index] - strategy_year_yield[timetag_index]) / \
+                information_ratio = (strategy_year_yield[timetag_index] - benchmark_year_yield[timetag_index]) / \
                                     tracking_error[timetag_index]
             else:
                 information_ratio = 0
