@@ -2,4 +2,4 @@
 
 __author__ = "gao"
 
-from AmazingQuant
+import AmazingQuant
