@@ -166,7 +166,7 @@ def main():
     i = api.subscribeForQuoteRsp('IO1804-C-3900')
     
     # 退订询价，测试通过
-    i = api.unSubscribeForQuoteRsp('IO1804-C-3900')
+    # i = api.unSubscribeForQuoteRsp('IO1804-C-3900')
     # 连续运行，用于输出行情
     app.exec_()
     

@@ -3,7 +3,7 @@
 import sys
 from time import sleep
 
-from PyQt4 import QtGui
+from PyQt5 import QtGui,QtWidgets
 
 from AQctptd import *
 
@@ -11,15 +11,15 @@ from AQctptd import *
 def print_dict(d):
     """按照键值打印一个字典"""
     for key,value in d.items():
-        print key + ':' + str(value)
+        print(key + ':' + str(value))
         
         
 #----------------------------------------------------------------------
 def simple_log(func):
     """简单装饰器用于输出函数名"""
     def wrapper(*args, **kw):
-        print ""
-        print str(func.__name__)
+        print("")
+        print(str(func.__name__))
         return func(*args, **kw)
     return wrapper
 
@@ -43,13 +43,13 @@ class TestTdApi(TdApi):
     @simple_log    
     def onFrontDisconnected(self, n):
         """服务器断开"""
-        print n
+        print(n)
         
     #----------------------------------------------------------------------
     @simple_log    
     def onHeartBeatWarning(self, n):
         """心跳报警"""
-        print n
+        print(n)
     
     #----------------------------------------------------------------------
     @simple_log    
@@ -95,8 +95,8 @@ class TestTdApi(TdApi):
         """查询合约回报"""
         print_dict(data)
         print_dict(error)
-        print n
-        print last
+        print(n)
+        print(last)
         
         
 #----------------------------------------------------------------------
@@ -105,7 +105,7 @@ def main():
     reqid = 0
     
     # 创建Qt应用对象，用于事件循环
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
 
     # 创建API对象，测试通过
     api = TestTdApi()
@@ -123,15 +123,15 @@ def main():
     # 初始化api，连接前置机，测试通过
     api.init()
     sleep(0.5)
-    
-    # 登陆，测试通过
-    loginReq = {}                           # 创建一个空字典
-    loginReq['UserID'] = ''         # 参数作为字典键值的方式传入
-    loginReq['Password'] = ''         # 键名和C++中的结构体成员名对应
-    loginReq['BrokerID'] = ''    
-    reqid = reqid + 1                       # 请求数必须保持唯一性
+
+    # 登陆
+    loginReq = {}  # 创建一个空字典
+    loginReq['UserID'] = '112770'  # 参数作为字典键值的方式传入
+    loginReq['Password'] = '30958906'  # 键名和C++中的结构体成员名对应
+    loginReq['BrokerID'] = '9999'
+    reqid = reqid + 1  # 请求数必须保持唯一性
     i = api.reqUserLogin(loginReq, reqid)
-    sleep(0.5)
+    # sleep(0.5)
     
     ## 查询合约, 测试通过
     #reqid = reqid + 1
