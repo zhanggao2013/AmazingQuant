@@ -128,7 +128,7 @@ def main():
     api.createFtdcMdApi('')
     
     # 注册前置机地址
-    api.registerFront("tcp://qqfz-md1.ctp.shcifco.com:32313")
+    api.registerFront("tcp://180.168.146.187:10010")
     
     # 初始化api，连接前置机
     api.init()
@@ -142,7 +142,7 @@ def main():
     reqid = reqid + 1                       # 请求数必须保持唯一性
     i = api.reqUserLogin(loginReq, 1)
     sleep(0.5)
-    
+    print(i)
     ## 登出，测试出错（无此功能）
     #reqid = reqid + 1
     #i = api.reqUserLogout({}, 1)
@@ -152,15 +152,15 @@ def main():
     #i = api.exit()
     
     ## 获取交易日，目前输出为空
-    #day = api.getTradingDay()
+    day = api.getTradingDay()
     #print(Trading Day is:' + str(day))
-    #sleep(0.5)
+    sleep(0.5)
     
     ## 订阅合约，测试通过
-    i = api.subscribeMarketData('IF1805')
-    
+    i = api.subscribeMarketData('IF1809')
+    print(i)
     ## 退订合约，测试通过
-    #i = api.unSubscribeMarketData('IF1805')
+    #i = api.unSubscribeMarketData('IF1809')
     
     # 订阅询价，测试通过
     i = api.subscribeForQuoteRsp('IO1804-C-3900')
