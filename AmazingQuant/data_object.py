@@ -1,5 +1,11 @@
 # -*- coding: utf-8 -*-
 
+# ------------------------------
+# @Time    : 2019/11/14
+# @Author  : gao
+# @File    : data_object.py.py
+# @Project : AmazingQuant
+
 __author__ = "gao"
 
 from AmazingQuant.constant import Empty
