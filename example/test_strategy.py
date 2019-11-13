@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-__author__ = "gao"
+# ------------------------------
+# @Time    : 2019/11/14
+# @Author  : gao
+# @File    : test_strategy.py.py
+# @Project : AmazingQuant
+# ------------------------------
 
 import numpy as np
 import talib
