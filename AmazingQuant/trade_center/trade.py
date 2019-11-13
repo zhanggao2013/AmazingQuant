@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
-__author__ = "gao"
-
+# ------------------------------
+# @Time    : 2019/11/14
+# @Author  : gao
+# @File    : trade.py.py
+# @Project : AmazingQuant
+# ------------------------------
 
 from AmazingQuant.constant import *
 from AmazingQuant.data_object import OrderData

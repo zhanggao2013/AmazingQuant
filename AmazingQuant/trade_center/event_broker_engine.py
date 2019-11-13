@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
-__author__ = "gao"
-
+# ------------------------------
+# @Time    : 2019/11/14
+# @Author  : gao
+# @File    : event_broker_engine.py.py
+# @Project : AmazingQuant
+# ------------------------------
 from AmazingQuant.event_engine.event_engine_base import Event, EventEngineBase
 from AmazingQuant.constant import EventType
 from AmazingQuant.event_engine.event_deal import EventDeal
