@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+
+# ------------------------------
+# @Time    : 2019/11/14
+# @Author  : gao
+# @File    : pymongo_test.py.py
+# @Project : AmazingQuant
+# ------------------------------
+
 """
 check 是否启动服务 mongodb
 """
