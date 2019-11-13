@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-__author__ = "gao"
+# ------------------------------
+# @Time    : 2019/11/14
+# @Author  : gao
+# @File    : event_analysis_engine.py
+# @Project : AmazingQuant
+# ------------------------------
 
 from AmazingQuant.event_engine.event_backtesting_analysis import *
 from AmazingQuant.event_engine.event_engine_base import EventEngineBase
