@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
-__author__ = "gao"
+# ------------------------------
+# @Time    : 2019/11/14
+# @Author  : gao
+# @File    : market_data_daily_to_MongoDB.py
+# @Project : AmazingQuant
+# ------------------------------
+
 
 import os
 import re
