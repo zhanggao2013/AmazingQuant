@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-__author__ = "gao"
+# ------------------------------
+# @Time    : 2019/11/14
+# @Author  : gao
+# @File    : event_risk_management.py.py
+# @Project : AmazingQuant
+# ------------------------------
 
 from datetime import datetime
 

@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 
-__author__ = "gao"
+# ------------------------------
+# @Time    : 2019/11/14
+# @Author  : gao
+# @File    : __init__.py.py
+# @Project : AmazingQuant
+# ------------------------------
 
 from AmazingQuant.event_engine.event_engine_base import Event
 from AmazingQuant.environment import Environment

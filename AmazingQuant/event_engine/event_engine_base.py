@@ -1,7 +1,11 @@
-# -*- coding: utf8 -*-
+# -*- coding: utf-8 -*-
 
-_author_ = "gao"
-
+# ------------------------------
+# @Time    : 2019/11/14
+# @Author  : gao
+# @File    : event_engine_base.py.py
+# @Project : AmazingQuant
+# ------------------------------
 from queue import Queue, Empty
 from threading import Thread, RLock
 from time import sleep
