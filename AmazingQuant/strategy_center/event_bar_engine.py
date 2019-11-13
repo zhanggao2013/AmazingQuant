@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
-__author__ = "gao"
+# ------------------------------
+# @Time    : 2019/11/14
+# @Author  : gao
+# @File    : event_bar_engine.py.py
+# @Project : AmazingQuant
+# ------------------------------
+
 
 from AmazingQuant.event_engine.event_market import *
 from AmazingQuant.event_engine.event_save_record import *

@@ -1,6 +1,12 @@
 # -*- coding: utf-8 -*-
 
-__author__ = "gao"
+# ------------------------------
+# @Time    : 2019/11/14
+# @Author  : gao
+# @File    : strategy.py.py
+# @Project : AmazingQuant
+# ------------------------------
+
 
 from abc import ABCMeta, abstractmethod
 
