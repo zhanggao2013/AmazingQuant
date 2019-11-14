@@ -11,6 +11,7 @@ from mongoengine import connection
 
 from AmazingQuant.data_center.singleton import singleton
 
+
 @singleton
 class MongoConnect(object):
     def __init__(self, database_alias="Account_Analysis"):
