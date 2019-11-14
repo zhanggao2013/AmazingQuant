@@ -12,26 +12,12 @@ import sys
 import traceback
 import pymongo
 
-MONGODB_CONFIG = {
-    'host': '127.0.0.1',
-    'port': 40001,
-    'db_name': None,
-    'username': None,
-    'password': None
-}
+from AmazingQuant.data_center.singleton import singleton
 
 
 
-class Singleton(object):
-    # 单例模式
-    def __new__(cls, *args, **kwargs):
-        if not hasattr(cls, '_instance'):
-            orig = super(Singleton, cls)
-            cls._instance = orig.__new__(cls, *args, **kwargs)
-        return cls._instance
-
-
-class MongoConn(Singleton):
+@singleton
+class MongoConn(object):
     def __init__(self):
         # connect db
         try:
@@ -134,6 +120,7 @@ class MongoConn(Singleton):
         except Exception:
             print(traceback.format_exc())
 
+
 if __name__ == "__main__":
     db_name = "market_data_daily"
     collection_name = "test"
@@ -152,8 +139,8 @@ if __name__ == "__main__":
     ]
     # 插入数据，'mytest'是上文中创建的表名
     # db["test0"].insert(datas)
-    my_conn.insert(db_name, collection_name, datas)
-    # 查询数据，'mytest'是上文中创建的表名
-    res = my_conn.find(db_name, collection_name, {})
-    for k in res:
-        print(k)
+    # my_conn.insert(db_name, collection_name, datas)
+    # # 查询数据，'mytest'是上文中创建的表名
+    # res = my_conn.find(db_name, collection_name, {})
+    # for k in res:
+    #     print(k)
