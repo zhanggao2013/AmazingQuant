@@ -19,8 +19,9 @@ from AmazingQuant.config.database_info import MongodbConfig
 
 @singleton
 class MongoConnect(object):
-    def __init__(self, database_alias="AmazingQuant"):
+    def __init__(self, database, database_alias="AmazingQuant"):
         self.alias = database_alias
+        self.database = database
         try:
             self.conn = pymongo.MongoClient(MongodbConfig.host, MongodbConfig.port)
             self.username = MongodbConfig.username
@@ -38,12 +39,12 @@ class MongoConnect(object):
             sys.exit(1)
 
     def __enter__(self):
-        connection.connect(MongodbConfig.db_name, host=MongodbConfig.host, port=MongodbConfig.port,
-                           password=MongodbConfig.password, username=MongodbConfig.username, alias=self.alias)
+        connection.connect(db=self.database, host=MongodbConfig.host, port=MongodbConfig.port,
+                           password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
         print("AmazingQuant Database Connect")
 
     def __exit__(self, *args):
-        connection.disconnect(alias=self.alias)
+        connection.disconnect()
         print("AmazingQuant Database Disconnect")
 
     def connect_db(self, db_name):
@@ -52,16 +53,17 @@ class MongoConnect(object):
 
 
 if __name__ == '__main__':
-    with MongoConnect():
+    # 分片建表
+    database = "kline"
+
+    with MongoConnect(database):
         print("done")
 
-    # 分片建表
-    db_name = "market_data_daily"
-    collection_name = "test"
+    collection_name = "kline_daily"
     my_conn = MongoConnect()
-    db = my_conn.connect_db(db_name)
+    db = my_conn.connect_db(database)
     # 激活数据库分片功能
     db_admin = my_conn.connect_db("admin")
-    db_admin.command('enablesharding', db_name)
+    db_admin.command('enablesharding', database)
     # 为集合开启分片
-    db_admin.command('shardcollection', db_name + '.' + collection_name, key={'_id': 1})
+    db_admin.command('shardcollection', database + '.' + collection_name, key={'_id': 1})
