@@ -8,7 +8,7 @@
 
 from datetime import datetime
 import os
-import threading
+from multiprocessing import Pool
 
 import pandas as pd
 import numpy as np
@@ -38,36 +38,37 @@ class SaveKlineDaily(object):
             path = self.data_path + market + '/MultDate/'
             file_list = os.listdir(path)
             file_num = 0
+            p = Pool(20)
             for file_name in file_list:
                 file_num += 1
                 print('完成数量：', file_num)
-                t = threading.Thread(target=self.insert_security_code, args=(market, file_name, path))  #线程对象
-                t.start()
+                p.apply_async(self.insert_security_code, args=(market, file_name, path))
+                # self.insert_security_code(market, file_name, path)
 
     def insert_security_code(self, market, file_name, path):
-        print(path + file_name + '\n')
-        kline_daily_data = pd.read_csv(path + file_name, encoding='unicode_escape')
-        date = kline_daily_data['date'][0]
-        if not np.isnan(date):
-            time_tag = kline_daily_data['time'][0]
-            security_code = str(kline_daily_data['code'][0]) + '.' + market
-            kline_daily_data = kline_daily_data.reindex(columns=['open', 'high', 'low', 'close', 'volumw',
-                                                                 'turover', 'match_items', 'interest'])
-            kline_daily_data.rename(columns={'volumw': 'volume', 'turover': 'amount'},  inplace=True)
-            doc_list = []
-            for index, row in kline_daily_data.iterrows():
-                data = {key: int(value) for key, value in dict(row).items()}
-                doc = KlineDaily(security_code=security_code,
-                                 date=int(date),
-                                 time_tag=int(time_tag),
-                                 data=data)
-                doc_list.append(doc)
-            KlineDaily.objects.insert(doc_list)
+        database = 'kline'
+        with MongoConnect(database):
+            print(path + file_name + '\n')
+            kline_daily_data = pd.read_csv(path + file_name, encoding='unicode_escape')
+            date = kline_daily_data['date'][0]
+            if not np.isnan(date):
+                time_tag = kline_daily_data['time'][0]
+                security_code = str(kline_daily_data['code'][0]) + '.' + market
+                kline_daily_data = kline_daily_data.reindex(columns=['open', 'high', 'low', 'close', 'volumw',
+                                                                     'turover', 'match_items', 'interest'])
+                kline_daily_data.rename(columns={'volumw': 'volume', 'turover': 'amount'},  inplace=True)
+                doc_list = []
+                for index, row in kline_daily_data.iterrows():
+                    data = {key: int(value) for key, value in dict(row).items()}
+                    doc = KlineDaily(security_code=security_code,
+                                     date=int(date),
+                                     time_tag=int(time_tag),
+                                     data=data)
+                    doc_list.append(doc)
+                KlineDaily.objects.insert(doc_list)
 
 
 if __name__ == '__main__':
     with Timer(True):
-        database = 'kline'
-        with MongoConnect(database):
-            save_kline_object = SaveKlineDaily('../../../../data/KLine_daily/KLine/')
-            save_kline_object.insert_security_code_list()
+        save_kline_object = SaveKlineDaily('../../../../data/KLine_daily/KLine/')
+        save_kline_object.insert_security_code_list()
