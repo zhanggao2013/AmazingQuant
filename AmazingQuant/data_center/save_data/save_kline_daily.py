@@ -23,8 +23,8 @@ class KlineDaily(Document):
     security_code = StringField(required=True)
     date = IntField(required=True)
     time_tag = IntField(required=True)
-    data = DictField(required=True)
-    meta = {'indexes': ['security_code', 'time_tag']}
+    data = ListField(required=True)
+    meta = {'indexes': ['security_code', 'time_tag'], 'shard_key': ('security_code', 'time_tag',)}
 
 
 class SaveKlineDaily(object):
@@ -53,13 +53,15 @@ class SaveKlineDaily(object):
             date = kline_daily_data['date'][0]
             if not np.isnan(date):
                 time_tag = kline_daily_data['time'][0]
-                security_code = str(kline_daily_data['code'][0]) + '.' + market
+                security_code = file_name.split('.')[0] + '.' + market
                 kline_daily_data = kline_daily_data.reindex(columns=['open', 'high', 'low', 'close', 'volumw',
                                                                      'turover', 'match_items', 'interest'])
                 kline_daily_data.rename(columns={'volumw': 'volume', 'turover': 'amount'},  inplace=True)
                 doc_list = []
                 for index, row in kline_daily_data.iterrows():
-                    data = {key: int(value) for key, value in dict(row).items()}
+                    data = [int(value) for value in dict(row).values()]
+                    data = [int(row['open']), int(row['high']), int(row['low']), int(row['close']), int(row['volume']),
+                            int(row['amount']), int(row['match_items']), int(row['interest']), ]
                     doc = KlineDaily(security_code=security_code,
                                      date=int(date),
                                      time_tag=int(time_tag),
