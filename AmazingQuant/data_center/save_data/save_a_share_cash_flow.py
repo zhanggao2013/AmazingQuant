@@ -277,43 +277,65 @@ def transfer_field(path):
 def save_a_share_cash_flow(data_df):
     doc_list = []
     a = 0
-    for index, row in data_df.iterrows():
+    p = Pool(4)
+    # data_df_list = range(len(data_df.index.values))
+    data_df_list = list(range(1000))
+    for i in data_df_list:
         a += 1
         print("完成条数：", a)
-        row_dict = dict(row)
-        row_dict['security_code'] = row_dict['WIND_CODE']
-        row_dict.pop('S_INFO_WINDCODE')
-        row_dict.pop('OBJECT_ID')
-        row_dict.pop('WIND_CODE')
+        test(data_df.iloc[i, :])
+        # p.apply(test, args=(data_df.iloc[i, :], field_is_str_list))
+        # test(row)
+    # for index, row in data_df.iloc[:100, :].iterrows():
+    #     a += 1
+    #     print("完成条数：", a)
+    #     p.apply_async(test, args=(copy.copy(row), ))
+    #     # test(row)
+    p.map(test, data_df_list)
+    p.close()
+    p.join()
 
-        doc = AShareCashFlow()
-        for key, value in row_dict.items():
-            if key.lower() in field_is_str_list:
-                if key.lower() in ['ann_dt', 'report_period', 'statement_type', 'actual_ann_dt']:
-                    if np.isnan(value):
-                        setattr(doc, key.lower(), -1)
-                    else:
-                        setattr(doc, key.lower(), int(value))
+
+def test(row):
+    print('row', row)
+    row_dict = dict(row)
+    row_dict['security_code'] = row_dict['WIND_CODE']
+    row_dict.pop('S_INFO_WINDCODE')
+    row_dict.pop('OBJECT_ID')
+    row_dict.pop('WIND_CODE')
+
+    path = 'field_a_share_cash_flow.txt'
+    field_is_str_list = transfer_field(path)
+
+    doc = AShareCashFlow()
+    for key, value in row_dict.items():
+        print('row_dict.items()', key, value)
+        if key.lower() in field_is_str_list:
+            if key.lower() in ['ann_dt', 'report_period', 'statement_type', 'actual_ann_dt']:
+                if np.isnan(value):
+                    setattr(doc, key.lower(), -1)
                 else:
-                    setattr(doc, key.lower(), str(value))
+                    setattr(doc, key.lower(), int(value))
             else:
-                setattr(doc, key.lower(), value)
-        # doc.save()
-        doc_list.append(doc)
-        if len(doc_list) > 4999:
-            print("完成条数：", a)
-            AShareCashFlow.objects.insert(doc_list)
-            doc_list = []
-    else:
-        if doc_list:
-            print("done, 完成总条数：", a)
-            AShareCashFlow.objects.insert(doc_list)
+                setattr(doc, key.lower(), str(value))
+        else:
+            setattr(doc, key.lower(), value)
+    print('doc2', doc)
+    doc.save()
+    #     doc_list.append(doc)
+    #     if len(doc_list) > 4999:
+    #         print("完成条数：", a)
+    #         AShareCashFlow.objects.insert(doc_list)
+    #         doc_list = []
+    # else:
+    #     if doc_list:
+    #         print("done, 完成总条数：", a)
+    #         AShareCashFlow.objects.insert(doc_list)
 
 
 if __name__ == '__main__':
+    from multiprocessing import Pool
     database = "stock_base_data"
     with MongoConnect(database):
-        path = 'field_a_share_cash_flow.txt'
-        field_is_str_list = transfer_field(path)
         data_df = pd.read_csv('../../../../data/finance/AShareCashFlow.csv', low_memory=False)
         save_a_share_cash_flow(data_df)
