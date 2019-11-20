@@ -294,6 +294,6 @@ class SaveCashFlow(object):
 
 if __name__ == '__main__':
     data_path = '../../../../data/finance/AShareCashFlow.csv'
-    field_path = '../../config/field_a_share_income.txt'
+    field_path = '../../config/field_a_share_cash_flow.txt'
     save_cash_flow_obj = SaveCashFlow(data_path, field_path)
     save_cash_flow_obj.save_a_share_cash_flow()
