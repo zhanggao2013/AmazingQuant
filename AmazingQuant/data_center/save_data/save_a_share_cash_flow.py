@@ -277,7 +277,7 @@ def transfer_field(path):
 def save_a_share_cash_flow(data_df):
     doc_list = []
     a = 0
-    for index, row in data_df.iloc.iterrows():
+    for index, row in data_df.iterrows():
         a += 1
         print("完成条数：", a)
         row_dict = dict(row)
