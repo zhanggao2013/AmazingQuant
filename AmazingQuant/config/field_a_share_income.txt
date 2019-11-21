@@ -208,3 +208,5 @@
 	fin_exp_int_inc = FloatField(required=True, null=True)
 # 是否计算报表
 	is_calculation = FloatField(required=True, null=True)
+# 其他资产减值损失
+	other_impair_loss_assets = FloatField(required=True, null=True)
