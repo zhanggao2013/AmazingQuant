@@ -16,7 +16,7 @@ if __name__ == '__main__':
     database = 'stock_base_data'
     with MongoConnect(database):
         with Timer(True):
-            security_code_list = AShareCashFlow.objects.distinct('security_code')
-            data = AShareCashFlow.objects(security_code__in=security_code_list, statement_type=408009000)
+            security_code_list = AShareIncome.objects.distinct('security_code')
+            data = AShareIncome.objects(security_code__in=security_code_list, statement_type=408009000)
             for i in data:
                 print(i.security_code)
