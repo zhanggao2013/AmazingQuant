@@ -469,7 +469,7 @@ class AShareIncome(Document):
     meta = {'indexes': ['security_code', 'ann_dt', 'report_period', 'statement_type']}
 
 
-class AshareBalanceSheet(Document):
+class AShareBalanceSheet(Document):
     """
     A股资产负债表
     """

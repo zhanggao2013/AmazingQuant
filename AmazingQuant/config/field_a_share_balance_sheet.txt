@@ -1,0 +1,360 @@
+# 对象ID
+	object_id = StringField(required=True, null=True)
+# Wind代码
+	s_info_windcode = StringField(required=True, null=True)
+# Wind代码
+	wind_code = StringField(required=True, null=True)
+# 公告日期
+	ann_dt = StringField(required=True, null=True)
+# 报告期
+	report_period = StringField(required=True, null=True)
+# 报表类型
+	statement_type = StringField(required=True, null=True)
+# 货币代码
+	crncy_code = StringField(required=True, null=True)
+# 货币资金
+	monetary_cap = FloatField(required=True, null=True)
+# 交易性金融资产
+	tradable_fin_assets = FloatField(required=True, null=True)
+# 应收票据
+	notes_rcv = FloatField(required=True, null=True)
+# 应收账款
+	acct_rcv = FloatField(required=True, null=True)
+# 其他应收款
+	oth_rcv = FloatField(required=True, null=True)
+# 预付款项
+	prepay = FloatField(required=True, null=True)
+# 应收股利
+	dvd_rcv = FloatField(required=True, null=True)
+# 应收利息
+	int_rcv = FloatField(required=True, null=True)
+# 存货
+	inventories = FloatField(required=True, null=True)
+# 消耗性生物资产
+	consumptive_bio_assets = FloatField(required=True, null=True)
+# 待摊费用
+	deferred_exp = FloatField(required=True, null=True)
+# 一年内到期的非流动资产
+	non_cur_assets_due_within_1y = FloatField(required=True, null=True)
+# 结算备付金
+	settle_rsrv = FloatField(required=True, null=True)
+# 拆出资金
+	loans_to_oth_banks = FloatField(required=True, null=True)
+# 应收保费
+	prem_rcv = FloatField(required=True, null=True)
+# 应收分保账款
+	rcv_from_reinsurer = FloatField(required=True, null=True)
+# 应收分保合同准备金
+	rcv_from_ceded_insur_cont_rsrv = FloatField(required=True, null=True)
+# 买入返售金融资产
+	red_monetary_cap_for_sale = FloatField(required=True, null=True)
+# 其他流动资产
+	oth_cur_assets = FloatField(required=True, null=True)
+# 流动资产合计
+	tot_cur_assets = FloatField(required=True, null=True)
+# 可供出售金融资产
+	fin_assets_avail_for_sale = FloatField(required=True, null=True)
+# 持有至到期投资
+	held_to_mty_invest = FloatField(required=True, null=True)
+# 长期股权投资
+	long_term_eqy_invest = FloatField(required=True, null=True)
+# 投资性房地产
+	invest_real_estate = FloatField(required=True, null=True)
+# 定期存款
+	time_deposits = FloatField(required=True, null=True)
+# 其他资产
+	oth_assets = FloatField(required=True, null=True)
+# 长期应收款
+	long_term_rec = FloatField(required=True, null=True)
+# 固定资产
+	fix_assets = FloatField(required=True, null=True)
+# 在建工程
+	const_in_prog = FloatField(required=True, null=True)
+# 工程物资
+	proj_matl = FloatField(required=True, null=True)
+# 固定资产清理
+	fix_assets_disp = FloatField(required=True, null=True)
+# 生产性生物资产
+	productive_bio_assets = FloatField(required=True, null=True)
+# 油气资产
+	oil_and_natural_gas_assets = FloatField(required=True, null=True)
+# 无形资产
+	intang_assets = FloatField(required=True, null=True)
+# 开发支出
+	r_and_d_costs = FloatField(required=True, null=True)
+# 商誉
+	goodwill = FloatField(required=True, null=True)
+# 长期待摊费用
+	long_term_deferred_exp = FloatField(required=True, null=True)
+# 递延所得税资产
+	deferred_tax_assets = FloatField(required=True, null=True)
+# 发放贷款及垫款
+	loans_and_adv_granted = FloatField(required=True, null=True)
+# 其他非流动资产
+	oth_non_cur_assets = FloatField(required=True, null=True)
+# 非流动资产合计
+	tot_non_cur_assets = FloatField(required=True, null=True)
+# 现金及存放中央银行款项
+	cash_deposits_central_bank = FloatField(required=True, null=True)
+# 存放同业和其它金融机构款项
+	asset_dep_oth_banks_fin_inst = FloatField(required=True, null=True)
+# 贵金属
+	precious_metals = FloatField(required=True, null=True)
+# 衍生金融资产
+	derivative_fin_assets = FloatField(required=True, null=True)
+# 代理业务资产
+	agency_bus_assets = FloatField(required=True, null=True)
+# 应收代位追偿款
+	subr_rec = FloatField(required=True, null=True)
+# 应收分保未到期责任准备金
+	rcv_ceded_unearned_prem_rsrv = FloatField(required=True, null=True)
+# 应收分保未决赔款准备金
+	rcv_ceded_claim_rsrv = FloatField(required=True, null=True)
+# 应收分保寿险责任准备金
+	rcv_ceded_life_insur_rsrv = FloatField(required=True, null=True)
+# 应收分保长期健康险责任准备金
+	rcv_ceded_lt_health_insur_rsrv = FloatField(required=True, null=True)
+# 存出保证金
+	mrgn_paid = FloatField(required=True, null=True)
+# 保户质押贷款
+	insured_pledge_loan = FloatField(required=True, null=True)
+# 存出资本保证金
+	cap_mrgn_paid = FloatField(required=True, null=True)
+# 独立账户资产
+	independent_acct_assets = FloatField(required=True, null=True)
+# 客户资金存款
+	clients_cap_deposit = FloatField(required=True, null=True)
+# 客户备付金
+	clients_rsrv_settle = FloatField(required=True, null=True)
+# 其中:交易席位费
+	incl_seat_fees_exchange = FloatField(required=True, null=True)
+# 应收款项类投资
+	rcv_invest = FloatField(required=True, null=True)
+# 资产总计
+	tot_assets = FloatField(required=True, null=True)
+# 短期借款
+	st_borrow = FloatField(required=True, null=True)
+# 向中央银行借款
+	borrow_central_bank = FloatField(required=True, null=True)
+# 吸收存款及同业存放
+	deposit_received_ib_deposits = FloatField(required=True, null=True)
+# 拆入资金
+	loans_oth_banks = FloatField(required=True, null=True)
+# 交易性金融负债
+	tradable_fin_liab = FloatField(required=True, null=True)
+# 应付票据
+	notes_payable = FloatField(required=True, null=True)
+# 应付账款
+	acct_payable = FloatField(required=True, null=True)
+# 预收款项
+	adv_from_cust = FloatField(required=True, null=True)
+# 卖出回购金融资产款
+	fund_sales_fin_assets_rp = FloatField(required=True, null=True)
+# 应付手续费及佣金
+	handling_charges_comm_payable = FloatField(required=True, null=True)
+# 应付职工薪酬
+	empl_ben_payable = FloatField(required=True, null=True)
+# 应交税费
+	taxes_surcharges_payable = FloatField(required=True, null=True)
+# 应付利息
+	int_payable = FloatField(required=True, null=True)
+# 应付股利
+	dvd_payable = FloatField(required=True, null=True)
+# 其他应付款
+	oth_payable = FloatField(required=True, null=True)
+# 预提费用
+	acc_exp = FloatField(required=True, null=True)
+# 递延收益
+	deferred_inc = FloatField(required=True, null=True)
+# 应付短期债券
+	st_bonds_payable = FloatField(required=True, null=True)
+# 应付分保账款
+	payable_to_reinsurer = FloatField(required=True, null=True)
+# 保险合同准备金
+	rsrv_insur_cont = FloatField(required=True, null=True)
+# 代理买卖证券款
+	acting_trading_sec = FloatField(required=True, null=True)
+# 代理承销证券款
+	acting_uw_sec = FloatField(required=True, null=True)
+# 一年内到期的非流动负债
+	non_cur_liab_due_within_1y = FloatField(required=True, null=True)
+# 其他流动负债
+	oth_cur_liab = FloatField(required=True, null=True)
+# 流动负债合计
+	tot_cur_liab = FloatField(required=True, null=True)
+# 长期借款
+	lt_borrow = FloatField(required=True, null=True)
+# 应付债券
+	bonds_payable = FloatField(required=True, null=True)
+# 长期应付款
+	lt_payable = FloatField(required=True, null=True)
+# 专项应付款
+	specific_item_payable = FloatField(required=True, null=True)
+# 预计负债
+	provisions = FloatField(required=True, null=True)
+# 递延所得税负债
+	deferred_tax_liab = FloatField(required=True, null=True)
+# 递延收益-非流动负债
+	deferred_inc_non_cur_liab = FloatField(required=True, null=True)
+# 其他非流动负债
+	oth_non_cur_liab = FloatField(required=True, null=True)
+# 非流动负债合计
+	tot_non_cur_liab = FloatField(required=True, null=True)
+# 同业和其它金融机构存放款项
+	liab_dep_oth_banks_fin_inst = FloatField(required=True, null=True)
+# 衍生金融负债
+	derivative_fin_liab = FloatField(required=True, null=True)
+# 吸收存款
+	cust_bank_dep = FloatField(required=True, null=True)
+# 代理业务负债
+	agency_bus_liab = FloatField(required=True, null=True)
+# 其他负债
+	oth_liab = FloatField(required=True, null=True)
+# 预收保费
+	prem_received_adv = FloatField(required=True, null=True)
+# 存入保证金
+	deposit_received = FloatField(required=True, null=True)
+# 保户储金及投资款
+	insured_deposit_invest = FloatField(required=True, null=True)
+# 未到期责任准备金
+	unearned_prem_rsrv = FloatField(required=True, null=True)
+# 未决赔款准备金
+	out_loss_rsrv = FloatField(required=True, null=True)
+# 寿险责任准备金
+	life_insur_rsrv = FloatField(required=True, null=True)
+# 长期健康险责任准备金
+	lt_health_insur_v = FloatField(required=True, null=True)
+# 独立账户负债
+	independent_acct_liab = FloatField(required=True, null=True)
+# 其中:质押借款
+	incl_pledge_loan = FloatField(required=True, null=True)
+# 应付赔付款
+	claims_payable = FloatField(required=True, null=True)
+# 应付保单红利
+	dvd_payable_insured = FloatField(required=True, null=True)
+# 负债合计
+	tot_liab = FloatField(required=True, null=True)
+# 股本
+	cap_stk = FloatField(required=True, null=True)
+# 资本公积金
+	cap_rsrv = FloatField(required=True, null=True)
+# 专项储备
+	special_rsrv = FloatField(required=True, null=True)
+# 盈余公积金
+	surplus_rsrv = FloatField(required=True, null=True)
+# 未分配利润
+	undistributed_profit = FloatField(required=True, null=True)
+# 减:库存股
+	less_tsy_stk = FloatField(required=True, null=True)
+# 一般风险准备
+	prov_nom_risks = FloatField(required=True, null=True)
+# 外币报表折算差额
+	cnvd_diff_foreign_curr_stat = FloatField(required=True, null=True)
+# 未确认的投资损失
+	unconfirmed_invest_loss = FloatField(required=True, null=True)
+# 少数股东权益
+	minority_int = FloatField(required=True, null=True)
+# 股东权益合计(不含少数股东权益)
+	tot_shrhldr_eqy_excl_min_int = FloatField(required=True, null=True)
+# 股东权益合计(含少数股东权益)
+	tot_shrhldr_eqy_incl_min_int = FloatField(required=True, null=True)
+# 负债及股东权益总计
+	tot_liab_shrhldr_eqy = FloatField(required=True, null=True)
+# 公司类型代码
+	comp_type_code = StringField(required=True, null=True)
+# 实际公告日期
+	actual_ann_dt = StringField(required=True, null=True)
+# 流动资产差额(特殊报表科目)
+	spe_cur_assets_diff = FloatField(required=True, null=True)
+# 流动资产差额(合计平衡项目)
+	tot_cur_assets_diff = FloatField(required=True, null=True)
+# 非流动资产差额(特殊报表科目)
+	spe_non_cur_assets_diff = FloatField(required=True, null=True)
+# 非流动资产差额(合计平衡项目)
+	tot_non_cur_assets_diff = FloatField(required=True, null=True)
+# 资产差额(特殊报表科目)
+	spe_bal_assets_diff = FloatField(required=True, null=True)
+# 资产差额(合计平衡项目)
+	tot_bal_assets_diff = FloatField(required=True, null=True)
+# 流动负债差额(特殊报表科目)
+	spe_cur_liab_diff = FloatField(required=True, null=True)
+# 流动负债差额(合计平衡项目)
+	tot_cur_liab_diff = FloatField(required=True, null=True)
+# 非流动负债差额(特殊报表科目)
+	spe_non_cur_liab_diff = FloatField(required=True, null=True)
+# 非流动负债差额(合计平衡项目)
+	tot_non_cur_liab_diff = FloatField(required=True, null=True)
+# 负债差额(特殊报表科目)
+	spe_bal_liab_diff = FloatField(required=True, null=True)
+# 负债差额(合计平衡项目)
+	tot_bal_liab_diff = FloatField(required=True, null=True)
+# 股东权益差额(特殊报表科目)
+	spe_bal_shrhldr_eqy_diff = FloatField(required=True, null=True)
+# 股东权益差额(合计平衡项目)
+	tot_bal_shrhldr_eqy_diff = FloatField(required=True, null=True)
+# 负债及股东权益差额(特殊报表项目)
+	spe_bal_liab_eqy_diff = FloatField(required=True, null=True)
+# 负债及股东权益差额(合计平衡项目)
+	tot_bal_liab_eqy_diff = FloatField(required=True, null=True)
+# 长期应付职工薪酬
+	lt_payroll_payable = FloatField(required=True, null=True)
+# 其他综合收益
+	other_comp_income = FloatField(required=True, null=True)
+# 其他权益工具
+	other_equity_tools = FloatField(required=True, null=True)
+# 其他权益工具:优先股
+	other_equity_tools_p_shr = FloatField(required=True, null=True)
+# 融出资金
+	lending_funds = FloatField(required=True, null=True)
+# 应收款项
+	accounts_receivable = FloatField(required=True, null=True)
+# 应付短期融资款
+	st_financing_payable = FloatField(required=True, null=True)
+# 应付款项
+	payables = FloatField(required=True, null=True)
+# 公司ID
+	s_info_compcode = StringField(required=True, null=True)
+# 期末总股本
+	tot_shr = FloatField(required=True, null=True)
+# 持有待售的资产
+	hfs_assets = FloatField(required=True, null=True)
+# 持有待售的负债
+	hfs_sales = FloatField(required=True, null=True)
+# 以摊余成本计量的金融资产
+	fin_assets_cost_sharing = FloatField(required=True, null=True)
+# 以公允价值计量且其变动计入其他综合收益的金融资产
+	fin_assets_fair_value = FloatField(required=True, null=True)
+# 合同资产
+	contractual_assets = FloatField(required=True, null=True)
+# 合同负债
+	contract_liabilities = FloatField(required=True, null=True)
+# 应收票据及应收账款
+	accounts_receivable_bill = FloatField(required=True, null=True)
+# 应付票据及应付账款
+	accounts_payable = FloatField(required=True, null=True)
+# 其他应收款(合计)（元）
+	oth_rcv_tot = FloatField(required=True, null=True)
+# 固定资产(合计)(元)
+	stm_bs_tot = FloatField(required=True, null=True)
+# 在建工程(合计)(元)
+	const_in_prog_tot = FloatField(required=True, null=True)
+# 其他应付款(合计)(元)
+	oth_payable_tot = FloatField(required=True, null=True)
+# 长期应付款(合计)(元)
+	lt_payable_tot = FloatField(required=True, null=True)
+# 债权投资(元)
+	debt_investment = FloatField(required=True, null=True)
+# 其他债权投资(元)
+	other_debt_investment = FloatField(required=True, null=True)
+# 其他权益工具投资(元)
+	other_equity_investment = FloatField(required=True, null=True)
+# 其他非流动金融资产(元)
+	other_illiquidfinancial_assets = FloatField(required=True, null=True)
+# 其他权益工具:永续债(元)
+	other_sustainable_bond = FloatField(required=True, null=True)
+# 应收款项融资
+	receivables_financing = FloatField(required=True, null=True)
+# 使用权资产
+	right_use_assets = FloatField(required=True, null=True)
+# 租赁负债
+	lease_liab = FloatField(required=True, null=True)
