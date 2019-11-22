@@ -184,9 +184,7 @@ if __name__ == "__main__":
 * 自动生成回测报告<br>
 [回测报告](https://github.com/zhanggao2013/AmazingQuant/blob/master/example/test_strategy_strategy%20backtesting%20indicator1530494371000.html)是html格式，可在浏览器中打开查看，效果如下图： 
 ![](https://github.com/zhanggao2013/AmazingQuant/raw/master/documents/backtesting_result.jpg)  
-# 5.实盘交易
-目前已实现根据vnpy的方式封装的使用boost对CTP的C++接口进行python3.5的封装，后续将实现与broker_engine的对接
-# 6.已实现和即将实现的功能
+# 5.已实现和即将实现的功能
 * 已实现
    * 数据库搭建
    * 读取数据
@@ -204,4 +202,4 @@ if __name__ == "__main__":
       
 # 7.联系方式     
 欢迎加qq群讨论: 788279189 [qq群链接](https://jq.qq.com/?_wv=1027&k=5gK6IDW) <br>
-我的qq：82045571
+我的qq：37475036
