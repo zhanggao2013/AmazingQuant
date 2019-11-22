@@ -948,7 +948,6 @@ class AShareProfitExpress(Document):
     # [内部]实际公告日期
     actual_ann_dt = IntField(required=True, null=True)
 
-
-meta = {'indexes': ['security_code', 'ann_dt', 'report_period', 'actual_ann_dt']}
+    meta = {'indexes': ['security_code', 'ann_dt', 'report_period', 'actual_ann_dt']}
 
 
