@@ -9,7 +9,7 @@
 
 
 def transfer_field(path):
-    with open(path) as f:
+    with open(path, encoding='UTF-8') as f:
         data = f.readlines()
         out_put = []
         for i in range(0, len(data), 3):
@@ -35,7 +35,7 @@ def get_field_str_list(path):
 
 
 if __name__ == '__main__':
-    field_path = '../config/field_a_share_profit_notice.txt'
+    field_path = '../config/field_a_share_profit_express.txt'
     # transfer_field(field_path)
     print(get_field_str_list(field_path))
 
