@@ -35,7 +35,7 @@ def get_field_str_list(path):
 
 
 if __name__ == '__main__':
-    field_path = '../config/field_a_share_profit_express.txt'
+    field_path = '../config/field_a_index_members.txt'
     # transfer_field(field_path)
     print(get_field_str_list(field_path))
 
