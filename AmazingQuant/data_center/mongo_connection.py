@@ -54,16 +54,16 @@ class MongoConnect(object):
 
 if __name__ == '__main__':
     # 分片建表
-    database = "kline"
+    database = "test"
 
     with MongoConnect(database):
         print("done")
 
-    collection_name = "kline_daily"
-    my_conn = MongoConnect()
-    db = my_conn.connect_db(database)
-    # 激活数据库分片功能
+    collection_name = "kline_daily00"
+    my_conn = MongoConnect(database)
+    db = my_conn.connect_db(collection_name)
+    # # 激活数据库分片功能
     db_admin = my_conn.connect_db("admin")
-    db_admin.command('enablesharding', database)
-    # 为集合开启分片
-    db_admin.command('shardcollection', database + '.' + collection_name, key={'_id': 1})
+    # db_admin.command('enablesharding', database)
+    # # 为集合开启分片
+    # db_admin.command('shardcollection', database + '.' + collection_name, key={'_id': 1})

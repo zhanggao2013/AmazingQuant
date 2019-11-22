@@ -832,6 +832,50 @@ class AShareBalanceSheet(Document):
     # 租赁负债
     lease_liab = FloatField(required=True, null=True)
 
+    meta = {'indexes': ['security_code', 'ann_dt', 'report_period', 'statement_type']}
+
+
+class AShareProfitNotice(Document):
+    """
+    A股业绩预告
+    """
+    # 更新时间
+    update_date = DateTimeField(default=datetime.utcnow())
+    # 证券代码
+    security_code = StringField(required=True, null=True)
+    # 公告日期
+    s_profitnotice_date = IntField(required=True, null=True)
+    # 报告期
+    s_profitnotice_period = IntField(required=True, null=True)
+    # 业绩预告类型代码
+    s_profitnotice_style = FloatField(required=True, null=True)
+    # 是否变脸
+    s_profitnotice_signchange = StringField(required=True, null=True)
+    # 预告净利润变动幅度下限（%）
+    s_profitnotice_changemin = FloatField(required=True, null=True)
+    # 预告净利润变动幅度上限（%）
+    s_profitnotice_changemax = FloatField(required=True, null=True)
+    # 预告净利润下限（万元）
+    s_profitnotice_netprofitmin = FloatField(required=True, null=True)
+    # 预告净利润上限（万元）
+    s_profitnotice_netprofitmax = FloatField(required=True, null=True)
+    # 公布次数
+    s_profitnotice_number = FloatField(required=True, null=True)
+    # 首次公告日
+    s_profitnotice_firstanndate = IntField(required=True, null=True)
+    # 业绩预告摘要
+    s_profitnotice_abstract = StringField(required=True, null=True)
+    # 业绩变动原因
+    s_profitnotice_reason = StringField(required=True, null=True)
+    # 上年同期归母净利润
+    s_profitnotice_net_parent_firm = FloatField(required=True, null=True)
+    # 公司ID
+    s_info_compcode = StringField(required=True, null=True)
+
+    meta = {'indexes': ['security_code', 's_profitnotice_date', 's_profitnotice_period', 's_profitnotice_firstanndate']}
+
+
+
 
 
 

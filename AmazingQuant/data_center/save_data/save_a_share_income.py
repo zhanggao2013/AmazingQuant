@@ -26,10 +26,10 @@ class SaveIncome(object):
             doc_list = []
             for index, row in self.data_df.iterrows():
                 row_dict = dict(row)
-                row_dict['security_code'] = row_dict['WIND_CODE']
-                row_dict.pop('S_INFO_WINDCODE')
-                row_dict.pop('OBJECT_ID')
+                row_dict['security_code'] = row_dict['S_INFO_WINDCODE']
                 row_dict.pop('WIND_CODE')
+                row_dict.pop('OBJECT_ID')
+                row_dict.pop('S_INFO_WINDCODE')
 
                 doc = AShareIncome()
                 for key, value in row_dict.items():
