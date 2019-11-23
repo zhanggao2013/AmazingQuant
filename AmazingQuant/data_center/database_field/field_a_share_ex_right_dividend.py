@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/11/23
 # @Author  : gao
-# @File    : field_ex_right_dividend.py
+# @File    : field_a_share_ex_right_dividend.py
 # @Project : AmazingQuant 
 # ------------------------------
 

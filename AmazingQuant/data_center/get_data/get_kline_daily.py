@@ -14,6 +14,7 @@ from multiprocessing import Pool
 import pandas as pd
 import numpy as np
 from mongoengine import Document
+from mongoengine.context_managers import switch_collection
 from mongoengine.fields import DictField, ListField, StringField, FloatField, IntField, DateTimeField
 from AmazingQuant.data_center.mongo_connection import MongoConnect
 from AmazingQuant.utils.performance_test import Timer
@@ -21,11 +22,9 @@ from AmazingQuant.utils.performance_test import Timer
 
 class KlineDaily(Document):
     update_date = DateTimeField(default=datetime.utcnow())
-    security_code = StringField(required=True)
     date = IntField(required=True)
-    time_tag = IntField(required=True)
     data = ListField(required=True)
-    meta = {'indexes': ['security_code', 'time_tag'], 'shard_key': ('security_code', 'time_tag',)}
+    meta = {'indexes': ['date'], 'shard_key': ('date',)}
 
 
 class SaveKlineDaily(object):
@@ -4062,13 +4061,28 @@ class SaveKlineDaily(object):
             "H06881.SH",
             "H06886.SH"
         ]
-        # for stock in stock_list[:300]:
-        a = stock_list[:1000]
+
+
+        num = 0
+        import copy
+        stock_list1 = copy.copy(stock_list[:1000])
+        p = Pool(8)
+        for stock in stock_list:
+            num += 1
+            print(num)
+            p.apply_async(self.test, args=(database, stock))
+        p.close()
+        p.join()
+
+    def test(self, database, stock):
+        print("test")
         with MongoConnect(database):
-            data = KlineDaily.objects(security_code__in=a, date__gte=20080101)
-            for obj in data:
-                a = obj.data
-                # print(a)
+            with switch_collection(KlineDaily, stock) as KlineDaily_security_code:
+                # KlineDaily_security_code.drop_collection()
+                data = KlineDaily_security_code.objects()
+                for obj in data:
+                    a = obj.data
+                    # print(obj.data)
 
 
 if __name__ == '__main__':

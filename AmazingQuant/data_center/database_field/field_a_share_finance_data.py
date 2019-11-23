@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/11/21
 # @Author  : gao
-# @File    : field_finance_data.py
+# @File    : field_a_share_finance_data.py
 # @Project : AmazingQuant
 # ------------------------------
 

@@ -12,7 +12,7 @@
 import pandas as pd
 import numpy as np
 
-from AmazingQuant.data_center.database_field.field_finance_data import AShareProfitExpress
+from AmazingQuant.data_center.database_field.field_a_share_finance_data import AShareProfitExpress
 from AmazingQuant.data_center.mongo_connection import MongoConnect
 from AmazingQuant.utils.transfer_field import get_field_str_list
 

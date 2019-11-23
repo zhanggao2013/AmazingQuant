@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/11/22
 # @Author  : gao
-# @File    : field_index_members.py
+# @File    : field_a_share_index_members.py
 # @Project : AmazingQuant
 # ------------------------------
 
@@ -13,7 +13,7 @@ from mongoengine import Document
 from mongoengine.fields import StringField, FloatField, IntField, DateTimeField
 
 
-class AIndexMembers(Document):
+class AShareIndexMembers(Document):
     """
     A股指数成分股
     """
