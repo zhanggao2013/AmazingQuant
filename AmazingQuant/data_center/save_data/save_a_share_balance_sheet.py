@@ -7,6 +7,8 @@
 # @Project : AmazingQuant
 # ------------------------------
 
+from datetime import datetime
+
 import pandas as pd
 import numpy as np
 
@@ -37,8 +39,10 @@ class SaveBalanceSheet(object):
                         if key.lower() in ['ann_dt', 'report_period', 'statement_type', 'actual_ann_dt']:
                             if np.isnan(value):
                                 setattr(doc, key.lower(), None)
-                            else:
+                            elif key.lower() == 'statement_type':
                                 setattr(doc, key.lower(), str(int(value)))
+                            else:
+                                setattr(doc, key.lower(), datetime.strptime(str(int(value)), "%Y%m%d"))
                         else:
                             setattr(doc, key.lower(), str(value))
                     else:

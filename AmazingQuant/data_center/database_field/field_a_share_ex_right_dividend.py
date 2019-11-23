@@ -22,7 +22,7 @@ class AShareExRightDividend(Document):
     # 证券代码
     security_code = StringField(required=True, null=True)
     # 除权除息日
-    ex_date = StringField(required=True, null=True)
+    ex_date = DateTimeField(required=True, null=True)
     # 除权类型
     ex_type = StringField(required=True, null=True)
     # 除权说明

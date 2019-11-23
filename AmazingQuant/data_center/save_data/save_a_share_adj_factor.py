@@ -3,25 +3,26 @@
 # ------------------------------
 # @Time    : 2019/11/23
 # @Author  : gao
-# @File    : save_a_share_ex_right_dividend.py
+# @File    : save_a_share_adj_factor.py
 # @Project : AmazingQuant 
 # ------------------------------
-from datetime import datetime
 
 import pandas as pd
 import numpy as np
 
 from AmazingQuant.data_center.database_field.field_a_share_ex_right_dividend import AShareExRightDividend
+from AmazingQuant.data_center.database_field.field_a_share_adj_factor import AShareAdjFactor
+from AmazingQuant.data_center.database_field.f
 from AmazingQuant.data_center.mongo_connection import MongoConnect
 from AmazingQuant.utils.transfer_field import get_field_str_list
 
 
-class SaveAShareExRightDividend(object):
+class SaveAShareAdjFactor(object):
     def __init__(self, data_path, field_path):
         self.data_df = pd.read_csv(data_path, low_memory=False)
         self.field_is_str_list = get_field_str_list(field_path)
 
-    def save_a_share_ex_right_dividend(self):
+    def save_a_share_adj_factor(self):
         database = 'stock_base_data'
         with MongoConnect(database):
             doc_list = []
@@ -39,7 +40,7 @@ class SaveAShareExRightDividend(object):
                             if np.isnan(value):
                                 setattr(doc, key.lower(), None)
                             else:
-                                setattr(doc, key.lower(), datetime.strptime(str(int(value)), "%Y%m%d"))
+                                setattr(doc, key.lower(), str(int(value)))
                         else:
                             setattr(doc, key.lower(), str(value))
                     else:
@@ -55,5 +56,5 @@ class SaveAShareExRightDividend(object):
 if __name__ == '__main__':
     data_path = '../../../../data/finance/AShareEXRightDividendRecord.csv'
     field_path = '../../config/field_a_share_ex_right_dividend.txt'
-    save_cash_flow_obj = SaveAShareExRightDividend(data_path, field_path)
-    save_cash_flow_obj.save_a_share_ex_right_dividend()
+    save_cash_flow_obj = SaveAShareAdjFactor(data_path, field_path)
+    save_cash_flow_obj.save_a_share_adj_factor()

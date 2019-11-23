@@ -24,9 +24,9 @@ class AShareIndexMembers(Document):
     # 成份股代码
     security_code = StringField(required=True, null=True)
     # 纳入日期
-    in_date = StringField(required=True, null=True)
+    in_date = DateTimeField(required=True, null=True)
     # 剔除日期
-    out_date = StringField(required=True, null=True)
+    out_date = DateTimeField(required=True, null=True)
     # 最新标志
     current_sign = StringField(required=True, null=True)
 

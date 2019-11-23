@@ -7,6 +7,7 @@
 # @Project : AmazingQuant
 # ------------------------------
 
+from datetime import datetime
 
 import pandas as pd
 import numpy as np
@@ -40,15 +41,17 @@ class SaveAShareIndexMembers(object):
                 row_dict.pop('S_CON_INDATE')
                 row_dict.pop('S_CON_OUTDATE')
                 row_dict.pop('CUR_SIGN')
-
+                self.field_is_str_list = self.field_is_str_list + ['in_date', 'out_date']
                 doc = AShareIndexMembers()
                 for key, value in row_dict.items():
                     if key.lower() in self.field_is_str_list:
-                        if key.lower() in ['s_con_indate', 's_con_outdate', 'current_sign']:
+                        if key.lower() in ['in_date', 'out_date', 'current_sign']:
                             if np.isnan(value):
                                 setattr(doc, key.lower(), None)
-                            else:
+                            elif key.lower() == 'current_sign':
                                 setattr(doc, key.lower(), str(int(value)))
+                            else:
+                                setattr(doc, key.lower(), datetime.strptime(str(int(value)), "%Y%m%d"))
                         else:
                             setattr(doc, key.lower(), str(value))
                     else:
