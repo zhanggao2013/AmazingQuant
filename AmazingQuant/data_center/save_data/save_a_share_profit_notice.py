@@ -36,9 +36,9 @@ class SaveProfitNotice(object):
                     if key.lower() in self.field_is_str_list:
                         if key.lower() in ['s_profitnotice_date', 's_profitnotice_period', 's_profitnotice_firstanndate']:
                             if np.isnan(value):
-                                setattr(doc, key.lower(), -1)
+                                setattr(doc, key.lower(), None)
                             else:
-                                setattr(doc, key.lower(), int(value))
+                                setattr(doc, key.lower(), str(int(value)))
                         else:
                             setattr(doc, key.lower(), str(value))
                     else:

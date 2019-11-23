@@ -21,10 +21,9 @@ from AmazingQuant.utils.performance_test import Timer
 
 class KlineDaily(Document):
     update_date = DateTimeField(default=datetime.utcnow())
-    security_code = StringField(required=True)
     date = IntField(required=True)
     data = ListField(required=True)
-    meta = {'indexes': ['security_code', 'date'], 'shard_key': ('security_code', 'date',)}
+    meta = {'indexes': ['date'], 'shard_key': ('date',)}
 
 
 class SaveKlineDaily(object):
@@ -38,7 +37,7 @@ class SaveKlineDaily(object):
             path = self.data_path + market + '/MultDate/'
             file_list = os.listdir(path)
             file_num = 0
-            p = Pool(20)
+            p = Pool(10)
             for file_name in file_list:
                 file_num += 1
                 print('完成数量：', file_num)
@@ -48,7 +47,7 @@ class SaveKlineDaily(object):
             p.join()
 
     def insert_security_code(self, market, file_name, path):
-        database = 'kline'
+        database = 'a_share_kline_daily'
         with MongoConnect(database):
             print(path + file_name + '\n')
             kline_daily_data = pd.read_csv(path + file_name, encoding='unicode_escape')
@@ -64,9 +63,7 @@ class SaveKlineDaily(object):
                         data = [int(value) for value in dict(row).values()]
                         data = [int(row['open']), int(row['high']), int(row['low']), int(row['close']), int(row['volume']),
                                 int(row['amount']), int(row['match_items']), int(row['interest']), ]
-                        doc = KlineDaily_security_code(security_code=security_code,
-                                                       date=int(date),
-                                                       data=data)
+                        doc = KlineDaily_security_code(date=int(date), data=data)
                         doc_list.append(doc)
 
                     KlineDaily_security_code.objects.insert(doc_list)

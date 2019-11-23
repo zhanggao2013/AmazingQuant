@@ -22,11 +22,11 @@ class AShareCashFlow(Document):
     # 证券代码
     security_code = StringField(required=True, null=True)
     # 公告日期
-    ann_dt = IntField(required=True, null=True)
+    ann_dt = StringField(required=True, null=True)
     # 报告期
-    report_period = IntField(required=True, null=True)
+    report_period = StringField(required=True, null=True)
     # 报表类型
-    statement_type = IntField(required=True, null=True)
+    statement_type = StringField(required=True, null=True)
     # 货币代码
     crncy_code = StringField(required=True, null=True)
     # 销售商品、提供劳务收到的现金
@@ -200,7 +200,7 @@ class AShareCashFlow(Document):
     # 公司类型代码
     comp_type_code = StringField(required=True, null=True)
     # 实际公告日期
-    actual_ann_dt = IntField(required=True, null=True)
+    actual_ann_dt = StringField(required=True, null=True)
     # 经营活动现金流入差额(特殊报表科目)
     spe_bal_cash_inflows_oper = FloatField(required=True, null=True)
     # 经营活动现金流入差额(合计平衡项目)
@@ -262,11 +262,11 @@ class AShareIncome(Document):
     # 证券代码
     security_code = StringField(required=True, null=True)
     # 公告日期
-    ann_dt = IntField(required=True, null=True)
+    ann_dt = StringField(required=True, null=True)
     # 报告期
-    report_period = IntField(required=True, null=True)
+    report_period = StringField(required=True, null=True)
     # 报表类型
-    statement_type = IntField(required=True, null=True)
+    statement_type = StringField(required=True, null=True)
     # 货币代码
     crncy_code = StringField(required=True, null=True)
     # 营业总收入
@@ -392,7 +392,7 @@ class AShareIncome(Document):
     # 稀释每股收益
     s_fa_eps_diluted = FloatField(required=True, null=True)
     # 实际公告日期
-    actual_ann_dt = IntField(required=True, null=True)
+    actual_ann_dt = StringField(required=True, null=True)
     # 保险业务支出
     insurance_expense = FloatField(required=True, null=True)
     # 营业利润差额(特殊报表科目)
@@ -478,11 +478,11 @@ class AShareBalanceSheet(Document):
     # 证券代码
     security_code = StringField(required=True, null=True)
     # 公告日期
-    ann_dt = IntField(required=True, null=True)
+    ann_dt = StringField(required=True, null=True)
     # 报告期
-    report_period = IntField(required=True, null=True)
+    report_period = StringField(required=True, null=True)
     # 报表类型
-    statement_type = IntField(required=True, null=True)
+    statement_type = StringField(required=True, null=True)
     # 货币代码
     crncy_code = StringField(required=True, null=True)
     # 货币资金
@@ -736,7 +736,7 @@ class AShareBalanceSheet(Document):
     # 公司类型代码
     comp_type_code = StringField(required=True, null=True)
     # 实际公告日期
-    actual_ann_dt = IntField(required=True, null=True)
+    actual_ann_dt = StringField(required=True, null=True)
     # 流动资产差额(特殊报表科目)
     spe_cur_assets_diff = FloatField(required=True, null=True)
     # 流动资产差额(合计平衡项目)
@@ -844,9 +844,9 @@ class AShareProfitNotice(Document):
     # 证券代码
     security_code = StringField(required=True, null=True)
     # 公告日期
-    s_profitnotice_date = IntField(required=True, null=True)
+    s_profitnotice_date = StringField(required=True, null=True)
     # 报告期
-    s_profitnotice_period = IntField(required=True, null=True)
+    s_profitnotice_period = StringField(required=True, null=True)
     # 业绩预告类型代码
     s_profitnotice_style = FloatField(required=True, null=True)
     # 是否变脸
@@ -862,7 +862,7 @@ class AShareProfitNotice(Document):
     # 公布次数
     s_profitnotice_number = FloatField(required=True, null=True)
     # 首次公告日
-    s_profitnotice_firstanndate = IntField(required=True, null=True)
+    s_profitnotice_firstanndate = StringField(required=True, null=True)
     # 业绩预告摘要
     s_profitnotice_abstract = StringField(required=True, null=True)
     # 业绩变动原因
@@ -884,9 +884,9 @@ class AShareProfitExpress(Document):
     # 证券代码
     security_code = StringField(required=True, null=True)
     # 公告日期
-    ann_dt = IntField(required=True, null=True)
+    ann_dt = StringField(required=True, null=True)
     # 报告期
-    report_period = IntField(required=True, null=True)
+    report_period = StringField(required=True, null=True)
     # 营业收入(元)
     oper_rev = FloatField(required=True, null=True)
     # 营业利润(元)
@@ -946,7 +946,7 @@ class AShareProfitExpress(Document):
     # 期初每股净资产
     s_early_bps = FloatField(required=True, null=True)
     # [内部]实际公告日期
-    actual_ann_dt = IntField(required=True, null=True)
+    actual_ann_dt = StringField(required=True, null=True)
 
     meta = {'indexes': ['security_code', 'ann_dt', 'report_period', 'actual_ann_dt']}
 

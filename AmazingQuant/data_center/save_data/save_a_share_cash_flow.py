@@ -36,9 +36,9 @@ class SaveCashFlow(object):
                     if key.lower() in self.field_is_str_list:
                         if key.lower() in ['ann_dt', 'report_period', 'statement_type', 'actual_ann_dt']:
                             if np.isnan(value):
-                                setattr(doc, key.lower(), -1)
+                                setattr(doc, key.lower(), None)
                             else:
-                                setattr(doc, key.lower(), int(value))
+                                setattr(doc, key.lower(), str(int(value)))
                         else:
                             setattr(doc, key.lower(), str(value))
                     else:

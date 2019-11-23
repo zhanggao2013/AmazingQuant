@@ -12,9 +12,11 @@ def transfer_field(path):
     with open(path, encoding='UTF-8') as f:
         data = f.readlines()
         out_put = []
+
         for i in range(0, len(data), 3):
             # line_list = data.lower().split('\t')
             data_type = 'error error error error error error error error error '
+            print(data)
             if 'number(' in data[i+2].lower():
                 data_type = 'FloatField(required=True, null=True)'
             elif 'varchar' in data[i+2].lower():
@@ -35,7 +37,7 @@ def get_field_str_list(path):
 
 
 if __name__ == '__main__':
-    field_path = '../config/field_a_index_members.txt'
+    field_path = '../config/field_a_share_ex_right_dividend.txt'
     # transfer_field(field_path)
     print(get_field_str_list(field_path))
 

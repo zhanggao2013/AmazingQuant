@@ -46,9 +46,9 @@ class SaveAIndexMembers(object):
                     if key.lower() in self.field_is_str_list:
                         if key.lower() in ['s_con_indate', 's_con_outdate', 'current_sign']:
                             if np.isnan(value):
-                                setattr(doc, key.lower(), -1)
+                                setattr(doc, key.lower(), None)
                             else:
-                                setattr(doc, key.lower(), int(value))
+                                setattr(doc, key.lower(), str(int(value)))
                         else:
                             setattr(doc, key.lower(), str(value))
                     else:
