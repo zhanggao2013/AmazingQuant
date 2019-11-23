@@ -13,9 +13,9 @@ from mongoengine import Document
 from mongoengine.fields import StringField, FloatField, IntField, DateTimeField
 
 
-class AExRightDividend(Document):
+class AShareExRightDividend(Document):
     """
-    A股除权出息
+    A股除权除息
     """
     # 更新时间
     update_date = DateTimeField(default=datetime.utcnow())
