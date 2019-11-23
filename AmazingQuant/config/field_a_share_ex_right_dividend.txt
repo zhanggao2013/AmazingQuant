@@ -1,0 +1,26 @@
+# 对象ID
+	object_id = StringField(required=True, null=True)
+# Wind代码
+	s_info_windcode = StringField(required=True, null=True)
+# 除权除息日
+	ex_date = StringField(required=True, null=True)
+# 除权类型
+	ex_type = StringField(required=True, null=True)
+# 除权说明
+	ex_description = StringField(required=True, null=True)
+# 派息比例
+	cash_dividend_ratio = FloatField(required=True, null=True)
+# 送股比例
+	bonus_share_ratio = FloatField(required=True, null=True)
+# 配股比例
+	rightsissue_ratio = FloatField(required=True, null=True)
+# 配股价格
+	rightsissue_price = FloatField(required=True, null=True)
+# 转增比例
+	conversed_ratio = FloatField(required=True, null=True)
+# 增发价格
+	seo_price = FloatField(required=True, null=True)
+# 增发比例
+	seo_ratio = FloatField(required=True, null=True)
+# 缩减比例
+	consolidate_split_ratio = FloatField(required=True, null=True)
