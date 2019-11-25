@@ -11,16 +11,17 @@ from datetime import datetime
 
 import pandas as pd
 import numpy as np
+from mongoengine.fields import ListField, FloatField, IntField, DateTimeField, StringField
 
 from AmazingQuant.data_center.database_field.field_a_share_index_members import AShareIndexMembers
 from AmazingQuant.data_center.mongo_connection import MongoConnect
-from AmazingQuant.utils.transfer_field import get_field_str_list
+from AmazingQuant.utils.transfer_field import get_collection_property_list
 
 
 class SaveAShareIndexMembers(object):
-    def __init__(self, data_path, field_path):
+    def __init__(self, data_path):
         self.data_df = pd.read_csv(data_path, low_memory=False)
-        self.field_is_str_list = get_field_str_list(field_path)
+        self.collection_property_list = get_collection_property_list(AShareIndexMembers)
 
     def save_a_share_index_members(self):
         database = 'stock_base_data'
@@ -43,19 +44,19 @@ class SaveAShareIndexMembers(object):
                 row_dict.pop('CUR_SIGN')
                 self.field_is_str_list = self.field_is_str_list + ['in_date', 'out_date']
                 doc = AShareIndexMembers()
+
                 for key, value in row_dict.items():
-                    if key.lower() in self.field_is_str_list:
-                        if key.lower() in ['in_date', 'out_date', 'current_sign']:
+                    if key.lower() in self.collection_property_list:
+                        property_name = AShareIndexMembers.__dict__[key.lower()]
+                        if isinstance(property_name, StringField):
+                            setattr(doc, key.lower(), str(value))
+                        elif isinstance(property_name, DateTimeField):
                             if np.isnan(value):
                                 setattr(doc, key.lower(), None)
-                            elif key.lower() == 'current_sign':
-                                setattr(doc, key.lower(), str(int(value)))
                             else:
                                 setattr(doc, key.lower(), datetime.strptime(str(int(value)), "%Y%m%d"))
                         else:
-                            setattr(doc, key.lower(), str(value))
-                    else:
-                        setattr(doc, key.lower(), value)
+                            setattr(doc, key.lower(), value)
                 doc_list.append(doc)
                 if len(doc_list) > 999:
                     AShareIndexMembers.objects.insert(doc_list)
@@ -66,6 +67,5 @@ class SaveAShareIndexMembers(object):
 
 if __name__ == '__main__':
     data_path = '../../../../data/finance/AINDEXMEMBERS.csv'
-    field_path = '../../config/field_a_share_index_members.txt'
-    save_cash_flow_obj = SaveAShareIndexMembers(data_path, field_path)
+    save_cash_flow_obj = SaveAShareIndexMembers(data_path)
     save_cash_flow_obj.save_a_share_index_members()

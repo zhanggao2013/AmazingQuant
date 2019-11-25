@@ -7,6 +7,9 @@
 # @Project : AmazingQuant 
 # ------------------------------
 
+from mongoengine import document
+
+from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
 
 def transfer_field(path):
     with open(path, encoding='UTF-8') as f:
@@ -26,18 +29,16 @@ def transfer_field(path):
             file_to_read.writelines(out_put)
 
 
-def get_field_str_list(path):
-    with open(path, encoding='UTF-8') as f:
-        data = f.readlines()
-        field_str_list = []
-        for i in data:
-            if 'StringField' in i:
-                field_str_list.append(i.split('=')[0].split()[0])
-        return field_str_list
+def get_collection_property_list(collection_name):
+    return [i for i in list(set(collection_name.__dict__).difference(set(document.__dict__)))
+            if i[0] != "_" and i not in ['DoesNotExist', 'objects', 'MultipleObjectsReturned', 'id', 'update_date']]
 
 
 if __name__ == '__main__':
     field_path = '../config/field_a_share_ex_right_dividend.txt'
     # transfer_field(field_path)
-    print(get_field_str_list(field_path))
+
+    property_list = get_collection_property_list(Kline)
+    for i in property_list:
+        print(i)
 
