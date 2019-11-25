@@ -10,21 +10,25 @@ __author__ = "gao"
 
 from enum import Enum, unique
 
+
 @unique
 class RunMode(Enum):
-    BACKTESTING= "backtesting"
-    TRADE= "trade"
+    BACKTESTING = "backtesting"
+    TRADE = "trade"
+
 
 @unique
 class Period(Enum):
     DAILY = "daily"
     ONE_MIN = "1min"
 
+
 @unique
 class RightsAdjustment(Enum):
     NONE = "none"
     FROWARD = "forward"
     BACKWARD = "backward"
+
 
 @unique
 class DatabaseName(Enum):
@@ -46,6 +50,7 @@ class EventType(Enum):
     EVENR_ERROR = "event_error"
     EVENT_BACKTESTING_ANALYSIS = "event_backtesting_analysis"
 
+
 @unique
 class ID(Enum):
     BROKER_ID = "broker"
@@ -53,15 +58,18 @@ class ID(Enum):
     ORDER_ID = "order"
     DEAL_ID = "deal"
 
+
 class Empty(Enum):
     EMPTY_STRING = ""
     EMPTY_INT = 0
     EMPTY_FLOAT = 0.0
 
+
 @unique
 class RunMode(Enum):
     TRADE = "trade"
     BACKTESTING = "backtesting"
+
 
 @unique
 class Offset(Enum):
@@ -80,21 +88,25 @@ class Status(Enum):
     REJECTED = "rejected"
     UNKNOWN = "unknown"
 
+
 @unique
 class PriceType(Enum):
     LIMIT = "limit"
     MARKET = "market"
+
 
 @unique
 class SlippageType(Enum):
     SLIPPAGE_FIX = "slippage_fix"
     SLIPPAGE_PERCENT = "slippage_percent"
 
+
 @unique
 class StockType(Enum):
     STOCK_SH = "stock_SZ"
     STOCK_SZ = "stock_SH"
     STOCK = "stock"
+
 
 @unique
 class RecordDataType(Enum):

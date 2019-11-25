@@ -9,22 +9,15 @@
 
 from datetime import datetime
 import os
-from multiprocessing import Pool
+from multiprocessing import Pool, Queue, Manager
 
 import pandas as pd
 import numpy as np
-from mongoengine import Document
 from mongoengine.context_managers import switch_collection
-from mongoengine.fields import DictField, ListField, StringField, FloatField, IntField, DateTimeField
+
 from AmazingQuant.data_center.mongo_connection import MongoConnect
+from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
 from AmazingQuant.utils.performance_test import Timer
-
-
-class KlineDaily(Document):
-    update_date = DateTimeField(default=datetime.utcnow())
-    date = IntField(required=True)
-    data = ListField(required=True)
-    meta = {'indexes': ['date'], 'shard_key': ('date',)}
 
 
 class SaveKlineDaily(object):
@@ -72,7 +65,7 @@ class SaveKlineDaily(object):
                 KlineDaily.objects.insert(doc_list)
 
     def get_kline_data(self):
-        database = 'kline'
+        database = 'a_share_kline_daily'
         stock_list = [
             "000001.SZ",
             "000002.SZ",
@@ -4061,31 +4054,36 @@ class SaveKlineDaily(object):
             "H06881.SH",
             "H06886.SH"
         ]
-
-
         num = 0
-        import copy
-        stock_list1 = copy.copy(stock_list[:1000])
-        p = Pool(8)
-        for stock in stock_list:
-            num += 1
-            print(num)
-            p.apply_async(self.test, args=(database, stock))
-        p.close()
-        p.join()
+        p = Pool(2)
+        with Manager() as manager:
+            q = manager.dict()
+            for stock in stock_list[:2]:
+                num += 1
+                print(num)
+                p.apply_async(self.test, args=(database, stock, q, ))
+                # self.test(database, stock, q)
+            p.close()
+            p.join()
+            print(q)
+            return q
+        # for i in range(q.qsize()):
+        #     print(q.get_nowait())
 
-    def test(self, database, stock):
-        print("test")
+    def test(self, database, stock, q):
+        # print("test")
         with MongoConnect(database):
-            with switch_collection(KlineDaily, stock) as KlineDaily_security_code:
+            with switch_collection(Kline, stock) as KlineDaily_security_code:
                 # KlineDaily_security_code.drop_collection()
                 data = KlineDaily_security_code.objects()
+                stock_df = pd.DataFrame(
+                    columns=['open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest'])
                 for obj in data:
-                    a = obj.data
-                    # print(obj.data)
+                    stock_df.loc[obj.time_tag] = obj.data
+                q[KlineDaily_security_code] = stock_df
 
 
 if __name__ == '__main__':
     with Timer(True):
         save_kline_object = SaveKlineDaily('../../../../data/KLine_daily/KLine/')
-        save_kline_object.get_kline_data()
+        a = save_kline_object.get_kline_data()
