@@ -55,11 +55,11 @@ class SaveKlineDaily(object):
                     if not np.isnan(date_int):
                         date_int = str(date_int)
                         time_tag = datetime.strptime(date_int, "%Y%m%d")
-                        data = [int(row['open']), int(row['high']), int(row['low']), int(row['close']), int(row['volume']),
-                                int(row['amount']), int(row['match_items']), int(row['interest']), ]
-                        doc = KlineDaily_security_code(time_tag=time_tag, data=data)
+                        doc = KlineDaily_security_code(time_tag=time_tag, open=int(row['open']), high=int(row['high']),
+                                                       low=int(row['low']), close=int(row['close']),
+                                                       volume=int(row['volume']), amount=int(row['amount']),
+                                                       match_items=int(row['match_items']), interest=int(row['interest']))
                         doc_list.append(doc)
-
                 KlineDaily_security_code.objects.insert(doc_list)
 
 

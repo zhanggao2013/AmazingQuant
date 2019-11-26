@@ -4061,8 +4061,8 @@ class SaveKlineDaily(object):
             for stock in stock_list[:2]:
                 num += 1
                 print(num)
-                p.apply_async(self.test, args=(database, stock, q, ))
-                # self.test(database, stock, q)
+                # p.apply_async(self.test, args=(database, stock, q, ))
+                self.test(database, stock, q)
             p.close()
             p.join()
             print(q)
@@ -4075,15 +4075,16 @@ class SaveKlineDaily(object):
         with MongoConnect(database):
             with switch_collection(Kline, stock) as KlineDaily_security_code:
                 # KlineDaily_security_code.drop_collection()
-                data = KlineDaily_security_code.objects()
-                stock_df = pd.DataFrame(
-                    columns=['open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest'])
-                for obj in data:
-                    stock_df.loc[obj.time_tag] = obj.data
-                q[KlineDaily_security_code] = stock_df
+                data = KlineDaily_security_code.objects().as_pymongo()
+                # print(pd.DataFrame(list(data)))
+                data_df = pd.DataFrame(list(data)).reindex(
+                    columns=['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest'])
+                data_df.set_index(["time_tag"], inplace=True)
+                print(data_df)
+                # q[KlineDaily_security_code] = stock_df
 
 
 if __name__ == '__main__':
     with Timer(True):
         save_kline_object = SaveKlineDaily('../../../../data/KLine_daily/KLine/')
-        a = save_kline_object.get_kline_data()
+        save_kline_object.get_kline_data()

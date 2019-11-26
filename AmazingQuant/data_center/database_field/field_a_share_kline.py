@@ -11,7 +11,7 @@
 from datetime import datetime
 
 from mongoengine import Document
-from mongoengine.fields import ListField, DateTimeField
+from mongoengine.fields import IntField, DateTimeField
 
 
 class Kline(Document):
@@ -22,7 +22,21 @@ class Kline(Document):
     update_date = DateTimeField(default=datetime.utcnow())
     # 时间戳
     time_tag = DateTimeField(required=True)
-    # 数据，按照开、高、低、收、成交量、成交额、成交笔数、【持仓量(期货)、IOPV(基金)、利息(债券)】
-    data = ListField(required=True)
+    # 开
+    open = IntField(required=True)
+    # 高
+    high = IntField(required=True)
+    # 低
+    low = IntField(required=True)
+    # 收
+    close = IntField(required=True)
+    # 成交量
+    volume = IntField(required=True)
+    # 成交额
+    amount = IntField(required=True)
+    # 成交笔数
+    match_items = IntField(required=True)
+    # 持仓量(期货)、IOPV(基金)、利息(债券)
+    interest = IntField(required=True)
 
     meta = {'indexes': ['time_tag'], 'shard_key': ('time_tag',)}
