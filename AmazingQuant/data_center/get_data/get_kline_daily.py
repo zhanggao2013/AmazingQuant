@@ -4055,31 +4055,39 @@ class SaveKlineDaily(object):
             "H06886.SH"
         ]
         num = 0
-        p = Pool(4)
-        with Manager() as manager:
-            q = manager.dict()
-            for stock in stock_list[:1000]:
-                num += 1
-                print(num)
-                p.apply_async(self.test, args=(database, stock, q, ))
-                # self.test(database, stock, q)
-            p.close()
-            p.join()
-            # print(q, type(q))
-            return dict(q)
-        # for i in range(q.qsize()):
-        #     print(q.get_nowait())
+        # p = Pool(20)
+        from concurrent.futures import ThreadPoolExecutor
+        # with Manager() as manager:
+        #     q = manager.dict()
+        #     for stock in stock_list:
+        #         num += 1
+        #         print(num)
+        #         # p.apply_async(self.test, args=(database, stock, q, ))
+        #         self.test(database, stock, q)
+        #     # p.close()
+        #     # p.join()
+        #     # print(q, type(q))
+        #     # return dict(q)
+        #     return q
+
+        with MongoConnect(database):
+            with ThreadPoolExecutor(4) as executor:
+                q = {}
+                for stock in stock_list:
+                    executor.submit(self.test, database, stock, q)
+            # for i in range(q.qsize()):
+            #     print(q.get_nowait())
+        return q
 
     def test(self, database, stock, q):
         # print("test")
-        with MongoConnect(database):
             with switch_collection(Kline, stock) as KlineDaily_security_code:
                 # KlineDaily_security_code.drop_collection()
                 data = KlineDaily_security_code.objects().as_pymongo()
                 data_df = pd.DataFrame(list(data)).reindex(
                     columns=['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest'])
                 data_df.set_index(["time_tag"], inplace=True)
-                # print('KlineDaily_security_code', stock)
+                print('KlineDaily_security_code', stock)
                 q[stock] = data_df
 
 
