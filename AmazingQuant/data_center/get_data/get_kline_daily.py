@@ -4055,18 +4055,18 @@ class SaveKlineDaily(object):
             "H06886.SH"
         ]
         num = 0
-        p = Pool(2)
+        p = Pool(4)
         with Manager() as manager:
             q = manager.dict()
-            for stock in stock_list[:2]:
+            for stock in stock_list[:1000]:
                 num += 1
                 print(num)
-                # p.apply_async(self.test, args=(database, stock, q, ))
-                self.test(database, stock, q)
+                p.apply_async(self.test, args=(database, stock, q, ))
+                # self.test(database, stock, q)
             p.close()
             p.join()
-            print(q)
-            return q
+            # print(q, type(q))
+            return dict(q)
         # for i in range(q.qsize()):
         #     print(q.get_nowait())
 
@@ -4076,15 +4076,14 @@ class SaveKlineDaily(object):
             with switch_collection(Kline, stock) as KlineDaily_security_code:
                 # KlineDaily_security_code.drop_collection()
                 data = KlineDaily_security_code.objects().as_pymongo()
-                # print(pd.DataFrame(list(data)))
                 data_df = pd.DataFrame(list(data)).reindex(
                     columns=['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest'])
                 data_df.set_index(["time_tag"], inplace=True)
-                print(data_df)
-                # q[KlineDaily_security_code] = stock_df
+                # print('KlineDaily_security_code', stock)
+                q[stock] = data_df
 
 
 if __name__ == '__main__':
     with Timer(True):
         save_kline_object = SaveKlineDaily('../../../../data/KLine_daily/KLine/')
-        save_kline_object.get_kline_data()
+        a = save_kline_object.get_kline_data()
