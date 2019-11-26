@@ -9,7 +9,8 @@
 
 from datetime import datetime
 import os
-from multiprocessing import Pool, Queue, Manager
+from multiprocessing import Pool, Queue, Manager, Process
+from concurrent.futures import ThreadPoolExecutor
 
 import pandas as pd
 import numpy as np
@@ -64,6 +65,7 @@ class SaveKlineDaily(object):
                     doc_list.append(doc)
                 KlineDaily.objects.insert(doc_list)
 
+    @property
     def get_kline_data(self):
         database = 'a_share_kline_daily'
         stock_list = [
@@ -4054,44 +4056,55 @@ class SaveKlineDaily(object):
             "H06881.SH",
             "H06886.SH"
         ]
-        num = 0
-        # p = Pool(20)
-        from concurrent.futures import ThreadPoolExecutor
-        # with Manager() as manager:
-        #     q = manager.dict()
-        #     for stock in stock_list:
-        #         num += 1
-        #         print(num)
-        #         # p.apply_async(self.test, args=(database, stock, q, ))
-        #         self.test(database, stock, q)
-        #     # p.close()
-        #     # p.join()
-        #     # print(q, type(q))
-        #     # return dict(q)
-        #     return q
+        manager = Manager()
+        q = manager.dict()
+        process_stock_num = 450
+        stock_list_new = []
+        for i in range(int(len(stock_list)/process_stock_num)+1):
+            if i < int(len(stock_list)/process_stock_num):
+                stock_list_new.append(stock_list[i*process_stock_num: (i+1)*process_stock_num])
+            else:
+                stock_list_new.append(stock_list[i*process_stock_num:])
 
+        process_list = []
+        for stock_list_new_i in range(len(stock_list_new)):
+            process_list.append(Process(target=self.test, args=(database, stock_list_new[stock_list_new_i], stock_list_new_i, q)))
+        for i in process_list:
+            i.start()
+        for i in process_list:
+            i.join()
+        print(q)
+        return dict(q)
+
+        # with MongoConnect(database):
+        #     with ThreadPoolExecutor(4) as executor:
+        #         q = {}
+        #         for stock in stock_list:
+        #             executor.submit(self.test, database, stock, q)
+
+        # return self.test(database, stock_list[:100])
+
+    def test(self, database, stock_list, i, q):
+        # print("test")
+        q[i] = {}
         with MongoConnect(database):
             with ThreadPoolExecutor(4) as executor:
-                q = {}
                 for stock in stock_list:
-                    executor.submit(self.test, database, stock, q)
-            # for i in range(q.qsize()):
-            #     print(q.get_nowait())
-        return q
+                    executor.submit(self.test_s, stock, i, q)
+            # return self.q[i]
 
-    def test(self, database, stock, q):
-        # print("test")
-            with switch_collection(Kline, stock) as KlineDaily_security_code:
-                # KlineDaily_security_code.drop_collection()
-                data = KlineDaily_security_code.objects().as_pymongo()
-                data_df = pd.DataFrame(list(data)).reindex(
-                    columns=['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest'])
-                data_df.set_index(["time_tag"], inplace=True)
-                print('KlineDaily_security_code', stock)
-                q[stock] = data_df
+    def test_s(self, stock, i, q):
+        with switch_collection(Kline, stock) as KlineDaily_security_code:
+            # KlineDaily_security_code.drop_collection()
+            data = KlineDaily_security_code.objects().as_pymongo()
+            data_df = pd.DataFrame(list(data)).reindex(
+                columns=['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest'])
+            data_df.set_index(["time_tag"], inplace=True)
+            print('KlineDaily_security_code', stock)
+            q[i][stock] = data_df
 
 
 if __name__ == '__main__':
     with Timer(True):
         save_kline_object = SaveKlineDaily('../../../../data/KLine_daily/KLine/')
-        a = save_kline_object.get_kline_data()
+        a = save_kline_object.get_kline_data
