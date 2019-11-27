@@ -169,12 +169,12 @@ class StrategyBase(metaclass=ABCMeta):
         stock_list.append(self.benchmark)
         stock_list = list(set(stock_list))
         if self._daily_data_cache:
-            Environment.daily_data = self._get_data.get_all_market_data(stock_code=stock_list,
+            Environment.daily_data = self._get_data.get_all_market_data(stock_list=stock_list,
                                                                         field=["open", "high", "low", "close",
                                                                                "volumn", "amount"],
                                                                         end=self.end, period=Period.DAILY.value)
         if self.one_min_data_cache:
-            Environment.one_min_data = self._get_data.get_all_market_data(stock_code=stock_list,
+            Environment.one_min_data = self._get_data.get_all_market_data(stock_list=stock_list,
                                                                           field=["open", "high", "low", "close",
                                                                                  "volumn", "amount"],
                                                                           end=self.end, period=Period.ONE_MIN.value)

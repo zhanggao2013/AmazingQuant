@@ -20,9 +20,9 @@ import numpy as np
 from AmazingQuant.event_engine.event_engine_base import Event, EventType
 from AmazingQuant.environment import Environment
 from AmazingQuant.constant import RecordDataType, Period
-from AmazingQuant.data_center.get_data import GetData
+from AmazingQuant.data_center.get_data.get_kline import GetKlineData
 from AmazingQuant.utils.data_transfer import millisecond_to_date
-from pyecharts import Line, Page, Grid
+# from pyecharts import Line, Page, Grid
 
 
 class EmptyClass(object):
@@ -192,7 +192,7 @@ class EventBacktestingAnalysis(Event):
     def get_benchmark_net_asset_value(self, event):
         period = event.event_data_dict["strategy"].period
 
-        data_class = GetData()
+        data_class = GetKlineData()
 
         benchmark = event.event_data_dict["strategy"].benchmark
 

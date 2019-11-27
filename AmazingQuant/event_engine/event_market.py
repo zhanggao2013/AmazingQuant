@@ -8,7 +8,7 @@
 # ------------------------------
 from AmazingQuant.environment import Environment
 from AmazingQuant.event_engine.event_engine_base import *
-from AmazingQuant.data_center.get_data import GetData
+from AmazingQuant.data_center.get_data.get_kline import GetKlineData
 from AmazingQuant.utils.data_transfer import *
 
 
@@ -64,7 +64,7 @@ class EventMarket(Event):
         if Environment.bar_position_data_list:
             current_timetag = event.event_data_dict["strategy_data"].timetag
             current_date = millisecond_to_date(current_timetag, format='%Y-%m-%d')
-            data_class = GetData()
+            data_class = GetKlineData()
             for position_data in Environment.bar_position_data_list:
                 stock_code = position_data.instrument + "." + position_data.exchange
                 current_close_price = data_class.get_market_data(Environment.daily_data, stock_code=[stock_code],
@@ -84,7 +84,7 @@ class EventMarket(Event):
         """
         current_timetag = event.event_data_dict["strategy_data"].timetag
         current_date = millisecond_to_date(current_timetag, format='%Y-%m-%d')
-        data_class = GetData()
+        data_class = GetKlineData()
 
         if Environment.bar_position_data_list:
             for account in Environment.bar_account_data_list:

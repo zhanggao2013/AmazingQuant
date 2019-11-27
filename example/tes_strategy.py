@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/11/14
 # @Author  : gao
-# @File    : test_strategy.py.py
+# @File    : tes_strategy.py.py
 # @Project : AmazingQuant
 # ------------------------------
 
@@ -28,7 +28,7 @@ class MaStrategy(StrategyBase):
         # 设置回测资金账号资金量
         self.capital = {"test0": 2000000, "test1": 1000}
         # 设置回测基准
-        self.benchmark = "000300.SH"
+        self.benchmark = "600000.SH"
         # 设置复权方式
         self.rights_adjustment = RightsAdjustment.NONE.value
         # 设置回测起止时间
@@ -99,6 +99,7 @@ class MaStrategy(StrategyBase):
                             close_today_commission=0, min_commission=5)
 
     def handle_bar(self, event):
+        print(self.timetag)
         # 取当前bar的持仓情况
         available_position_dict = {}
         for position in Environment.bar_position_data_list:
@@ -106,8 +107,8 @@ class MaStrategy(StrategyBase):
         # 当前bar的具体时间戳
         # current_date = data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y-%m-%d")
         # 时间戳转换成int，方便后面取数据
-        current_date_int = data_transfer.date_str_to_int(current_date)
-        print(current_date)
+        # current_date_int = data_transfer.date_str_to_int(current_date)
+        # print(current_date)
         # 取数据实例
         data_class = GetKlineData()
         # 循环遍历股票池
@@ -117,6 +118,7 @@ class MaStrategy(StrategyBase):
                                                      end=self.timetag)
             # print(self.start, current_date)
             close_array = np.array(close_price)
+            print(stock, close_array)
             if len(close_array) > 0:
                 # 利用talib计算MA
                 ma5 = talib.MA(np.array(close_price), timeperiod=5)
@@ -145,4 +147,4 @@ if __name__ == "__main__":
     time_test = Timer(True)
     with time_test:
         # 运行策略，设置是否保存委托，成交，资金，持仓
-        MaStrategy().run(save_trade_record=True)
+        MaStrategy().run(save_trade_record=False)

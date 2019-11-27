@@ -64,7 +64,7 @@ class GetKlineData(object):
             result = {}
             for value in process_dict.values():
                 result.update(value)
-            print(result)
+            # print(result)
             return pd.concat(list(result.values()), keys=list(result.keys()))
 
     def get_data_with_process_pool(self, database, stock_list, process_manager_dict, stock_list_i):
@@ -84,6 +84,11 @@ class GetKlineData(object):
             security_code_data_df.set_index(["time_tag"], inplace=True)
             # print('KlineDaily_security_code', stock)
             thread_data_dict[stock] = security_code_data_df
+
+    def get_market_data(self, market_data, stock_code=[], field=[], start="", end="", count=-1):
+        result = market_data.loc[stock_code].loc[market_data.index < end, field]
+        return result
+        pass
 
 
 if __name__ == '__main__':
