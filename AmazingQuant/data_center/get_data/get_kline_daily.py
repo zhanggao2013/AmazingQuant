@@ -10,6 +10,7 @@
 from datetime import datetime
 import os
 from multiprocessing import Pool, Queue, Manager
+from concurrent.futures import ThreadPoolExecutor
 
 import pandas as pd
 import numpy as np
@@ -39,30 +40,6 @@ class SaveKlineDaily(object):
                 # self.insert_security_code(market, file_name, path)
             p.close()
             p.join()
-
-    def insert_security_code(self, market, file_name, path):
-        database = 'kline'
-        with MongoConnect(database):
-            print(path + file_name + '\n')
-            kline_daily_data = pd.read_csv(path + file_name, encoding='unicode_escape')
-            date = kline_daily_data['date'][0]
-            if not np.isnan(date):
-                time_tag = kline_daily_data['time'][0]
-                security_code = file_name.split('.')[0] + '.' + market
-                kline_daily_data = kline_daily_data.reindex(columns=['open', 'high', 'low', 'close', 'volumw',
-                                                                     'turover', 'match_items', 'interest'])
-                kline_daily_data.rename(columns={'volumw': 'volume', 'turover': 'amount'},  inplace=True)
-                doc_list = []
-                for index, row in kline_daily_data.iterrows():
-                    data = [int(value) for value in dict(row).values()]
-                    data = [int(row['open']), int(row['high']), int(row['low']), int(row['close']), int(row['volume']),
-                            int(row['amount']), int(row['match_items']), int(row['interest']), ]
-                    doc = KlineDaily(security_code=security_code,
-                                     date=int(date),
-                                     time_tag=int(time_tag),
-                                     data=data)
-                    doc_list.append(doc)
-                KlineDaily.objects.insert(doc_list)
 
     def get_kline_data(self):
         database = 'a_share_kline_daily'
@@ -4054,41 +4031,46 @@ class SaveKlineDaily(object):
             "H06881.SH",
             "H06886.SH"
         ]
-        num = 0
-        # p = Pool(20)
-        from concurrent.futures import ThreadPoolExecutor
-        # with Manager() as manager:
-        #     q = manager.dict()
-        #     for stock in stock_list:
-        #         num += 1
-        #         print(num)
-        #         # p.apply_async(self.test, args=(database, stock, q, ))
-        #         self.test(database, stock, q)
-        #     # p.close()
-        #     # p.join()
-        #     # print(q, type(q))
-        #     # return dict(q)
-        #     return q
+        process_num = 6
+        p = Pool(process_num)
+        process_stock_num = int(len(stock_list) / process_num)
+        stock_list_new = []
+        for i in range(int(len(stock_list) / process_stock_num) + 1):
+            if i < int(len(stock_list) / process_stock_num):
+                stock_list_new.append(stock_list[i * process_stock_num: (i + 1) * process_stock_num])
+            else:
+                stock_list_new.append(stock_list[i * process_stock_num:])
 
+        with Manager() as manager:
+            q = manager.dict()
+            for stock_list_new_i in range(len(stock_list_new)):
+                p.apply_async(self.test, args=(database, stock_list_new[stock_list_new_i], q, stock_list_new_i))
+            p.close()
+            p.join()
+            q_dict = dict(q)
+            result = {}
+            for value in q_dict.values():
+                result.update(value)
+            # return result
+            return pd.concat(list(result.values()), keys=list(result.keys()))
+
+    def test(self, database, stock_list, q, q_i):
         with MongoConnect(database):
+            thread_data = {}
             with ThreadPoolExecutor(4) as executor:
-                q = {}
                 for stock in stock_list:
-                    executor.submit(self.test, database, stock, q)
-            # for i in range(q.qsize()):
-            #     print(q.get_nowait())
-        return q
+                    executor.submit(self.test_1, stock, thread_data)
+            q[q_i] = thread_data
 
-    def test(self, database, stock, q):
-        # print("test")
-            with switch_collection(Kline, stock) as KlineDaily_security_code:
-                # KlineDaily_security_code.drop_collection()
-                data = KlineDaily_security_code.objects().as_pymongo()
-                data_df = pd.DataFrame(list(data)).reindex(
-                    columns=['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest'])
-                data_df.set_index(["time_tag"], inplace=True)
-                print('KlineDaily_security_code', stock)
-                q[stock] = data_df
+    def test_1(self, stock, thread_data):
+        with switch_collection(Kline, stock) as KlineDaily_security_code:
+            # KlineDaily_security_code.drop_collection()
+            data = KlineDaily_security_code.objects(time_tag__gte=datetime(2008, 1, 1)).as_pymongo()
+            data_df = pd.DataFrame(list(data)).reindex(
+                columns=['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest'])
+            data_df.set_index(["time_tag"], inplace=True)
+            # print('KlineDaily_security_code', stock)
+            thread_data[stock] = data_df
 
 
 if __name__ == '__main__':
