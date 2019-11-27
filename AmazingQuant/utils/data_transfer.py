@@ -8,7 +8,7 @@
 __author__ = "gao"
 
 import time
-
+from datetime import datetime
 
 def millisecond_to_date(millisecond, format):
     return time.strftime(format, time.localtime(millisecond/1000))
@@ -22,5 +22,14 @@ def date_str_to_int(date="2010-01-01"):
     return int(date.replace("-", ""))
 
 
+def datetime_to_millisecond(datetime_obj=datetime.now()):
+    return int(time.mktime(datetime_obj.timetuple()) * 1000.0 + datetime_obj.microsecond / 1000.0)
+
+
+def millisecond_to_datetime(millisecond):
+    return datetime.fromtimestamp(millisecond/1000)
+
+
 if __name__ == "__main__":
     print(date_str_to_int(date="2010-01-01"))
+    a = datetime_to_millisecond()

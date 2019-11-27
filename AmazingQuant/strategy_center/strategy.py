@@ -14,6 +14,7 @@ from AmazingQuant.utils import data_transfer, generate_random_id
 from AmazingQuant.constant import RunMode, Period, RightsAdjustment, SlippageType, StockType, RecordDataType
 from AmazingQuant.data_object import *
 from AmazingQuant.analysis_center.event_analysis_engine import run_backtesting_analysis_engine
+from AmazingQuant.data_center.get_data.get_kline import GetKlineData
 from .event_bar_engine import *
 
 
@@ -33,7 +34,7 @@ class StrategyBase(metaclass=ABCMeta):
         self._daily_data_cache = False
         self._one_min_data_cache = False
         # 取数据
-        self._get_data = GetData()
+        self._get_data = GetKlineData()
         self.bar_index = 0
 
     @property
@@ -156,8 +157,8 @@ class StrategyBase(metaclass=ABCMeta):
                 Environment.current_account_data.available = self.capital[account]
                 Environment.bar_account_data_list.append(Environment.current_account_data)
 
-        if self.run_mode == RunMode.TRADE.value:
-            self.end = self._get_data.get_end_timetag(benchmark=self.benchmark, period=Period.DAILY.value)
+        # if self.run_mode == RunMode.TRADE.value:
+        #     self.end = self._get_data.get_end_timetag(benchmark=self.benchmark, period=Period.DAILY.value)
 
         # 缓存数据开关，和bar_index的计算
         if self.period == Period.DAILY.value:
@@ -179,9 +180,9 @@ class StrategyBase(metaclass=ABCMeta):
                                                                           end=self.end, period=Period.ONE_MIN.value)
 
         if self.period == Period.DAILY.value:
-            Environment.benchmark_index = [data_transfer.date_to_millisecond(str(int(i)), '%Y%m%d') for i in
-                                           Environment.daily_data["open"].ix[self.benchmark].index
-                                           if i >= data_transfer.date_str_to_int(self.start)]
+            Environment.benchmark_index = [i for i in
+                                           Environment.daily_data.loc[self.benchmark].index
+                                           if i >= self.start]
 
         elif self.period == Period.ONE_MIN.value:
             Environment.benchmark_index = [data_transfer.date_to_millisecond(str(int(i)), '%Y%m%d') for i in

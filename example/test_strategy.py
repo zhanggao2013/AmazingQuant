@@ -9,6 +9,7 @@
 
 import numpy as np
 import talib
+from datetime import datetime
 
 # import strategy基类
 from AmazingQuant.strategy_center.strategy import *
@@ -31,7 +32,7 @@ class MaStrategy(StrategyBase):
         # 设置复权方式
         self.rights_adjustment = RightsAdjustment.NONE.value
         # 设置回测起止时间
-        self.start = "2015-01-11"
+        self.start = datetime(2018, 1, 1)
         self.end = "2016-01-16"
         # 设置运行周期
         self.period = "daily"
@@ -103,17 +104,17 @@ class MaStrategy(StrategyBase):
         for position in Environment.bar_position_data_list:
             available_position_dict[position.instrument + "." + position.exchange] = position.position - position.frozen
         # 当前bar的具体时间戳
-        current_date = data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y-%m-%d")
+        # current_date = data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y-%m-%d")
         # 时间戳转换成int，方便后面取数据
         current_date_int = data_transfer.date_str_to_int(current_date)
         print(current_date)
         # 取数据实例
-        data_class = GetData()
+        data_class = GetKlineData()
         # 循环遍历股票池
         for stock in self.universe:
             # 取当前股票的收盘价
             close_price = data_class.get_market_data(Environment.daily_data, stock_code=[stock], field=["close"],
-                                                     end=current_date)
+                                                     end=self.timetag)
             # print(self.start, current_date)
             close_array = np.array(close_price)
             if len(close_array) > 0:
