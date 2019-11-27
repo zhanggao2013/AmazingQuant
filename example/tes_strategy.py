@@ -8,7 +8,7 @@
 # ------------------------------
 
 import numpy as np
-import talib
+# import talib
 from datetime import datetime
 
 # import strategy基类
@@ -32,7 +32,7 @@ class MaStrategy(StrategyBase):
         # 设置复权方式
         self.rights_adjustment = RightsAdjustment.NONE.value
         # 设置回测起止时间
-        self.start = datetime(2018, 1, 1)
+        self.start = datetime(2015, 1, 1)
         self.end = "2016-01-16"
         # 设置运行周期
         self.period = "daily"
@@ -117,27 +117,30 @@ class MaStrategy(StrategyBase):
             close_price = data_class.get_market_data(Environment.daily_data, stock_code=[stock], field=["close"],
                                                      end=self.timetag)
             # print(self.start, current_date)
-            close_array = np.array(close_price)
-            print(stock, close_array)
+            # print(stock, close_price)
+            close_array = np.array(close_price['close'])
+            # print(stock,  close_price.index)
             if len(close_array) > 0:
                 # 利用talib计算MA
-                ma5 = talib.MA(np.array(close_price), timeperiod=5)
-                ma20 = talib.MA(np.array(close_price), timeperiod=20)
+                # ma5 = talib.MA(np.array(close_price), timeperiod=5)
+                # ma20 = talib.MA(np.array(close_price), timeperiod=20)
+                ma5 = 1
+                ma20 = 0
                 # print(type(close_price.keys()))
                 # 过滤因为停牌没有数据
-                if current_date_int in close_price.keys():
+                if self.timetag in close_price.index:
                     # 如果5日均线突破20日均线，并且没有持仓，则买入这只股票100股，以收盘价为指定价交易
-                    if ma5[-1] > ma20[-1] and stock not in available_position_dict.keys():
+                    if ma5 > ma20 and stock not in available_position_dict.keys():
                         Trade(self).order_shares(stock_code=stock, shares=100, price_type="fix",
-                                                 order_price=close_price[current_date_int],
+                                                 order_price=close_price[self.timetag],
                                                  account=self.account[0])
-                        print("buy", stock, 1, "fix", close_price[current_date_int], self.account)
+                        print("buy", stock, 1, "fix", close_price[self.timetag], self.account)
                     # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
-                    elif ma5[-1] < ma20[-1] and stock in available_position_dict.keys():
+                    elif ma5 < ma20 and stock in available_position_dict.keys():
                         Trade(self).order_shares(stock_code=stock, shares=-100, price_type="fix",
-                                                 order_price=close_price[current_date_int],
+                                                 order_price=close_price[self.timetag],
                                                  account=self.account[0])
-                        print("sell", stock, -1, "fix", close_price[current_date_int], self.account)
+                        print("sell", stock, -1, "fix", close_price[self.timetag], self.account)
 
 
 if __name__ == "__main__":

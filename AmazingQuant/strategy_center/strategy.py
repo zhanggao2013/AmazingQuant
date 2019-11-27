@@ -166,17 +166,18 @@ class StrategyBase(metaclass=ABCMeta):
         elif self.period == Period.ONE_MIN.value:
             self.one_min_data_cache = True
         stock_list = copy.copy(self.universe)
-        stock_list.append(self.benchmark)
+        if self.benchmark not in stock_list:
+            stock_list.append(self.benchmark)
         stock_list = list(set(stock_list))
         if self._daily_data_cache:
             Environment.daily_data = self._get_data.get_all_market_data(stock_list=stock_list,
                                                                         field=["open", "high", "low", "close",
-                                                                               "volumn", "amount"],
+                                                                               "volume", "amount"],
                                                                         end=self.end, period=Period.DAILY.value)
         if self.one_min_data_cache:
             Environment.one_min_data = self._get_data.get_all_market_data(stock_list=stock_list,
                                                                           field=["open", "high", "low", "close",
-                                                                                 "volumn", "amount"],
+                                                                                 "volume", "amount"],
                                                                           end=self.end, period=Period.ONE_MIN.value)
 
         if self.period == Period.DAILY.value:
@@ -190,6 +191,7 @@ class StrategyBase(metaclass=ABCMeta):
                                            if i >= data_transfer.date_str_to_int(self.start)]
 
         # print(self.benchmark, self.start, self.end, self.period, self.rights_adjustment, self.run_mode)
+
         self.bar_index = 0
         while True:
             try:
@@ -210,8 +212,8 @@ class StrategyBase(metaclass=ABCMeta):
                     pass
 
             else:
-
-                date = int(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y%m%d"))
+                print('self.timetag', self.timetag)
+                # date = int(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y%m%d"))
                 run_bar_engine(self)
 
         @abstractmethod
