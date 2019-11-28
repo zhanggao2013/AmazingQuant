@@ -13,7 +13,7 @@ from abc import ABCMeta, abstractmethod
 from AmazingQuant.utils import data_transfer, generate_random_id
 from AmazingQuant.constant import RunMode, Period, RightsAdjustment, SlippageType, StockType, RecordDataType
 from AmazingQuant.data_object import *
-from AmazingQuant.analysis_center.event_analysis_engine import run_backtesting_analysis_engine
+# from AmazingQuant.analysis_center.event_analysis_engine import run_backtesting_analysis_engine
 from AmazingQuant.data_center.get_data.get_kline import GetKlineData
 from .event_bar_engine import *
 
@@ -166,9 +166,8 @@ class StrategyBase(metaclass=ABCMeta):
         elif self.period == Period.ONE_MIN.value:
             self.one_min_data_cache = True
         stock_list = copy.copy(self.universe)
-        if self.benchmark not in stock_list:
-            stock_list.append(self.benchmark)
         stock_list = list(set(stock_list))
+        stock_list.append(self.benchmark)
         if self._daily_data_cache:
             Environment.daily_data = self._get_data.get_all_market_data(stock_list=stock_list,
                                                                         field=["open", "high", "low", "close",
@@ -191,30 +190,30 @@ class StrategyBase(metaclass=ABCMeta):
                                            if i >= data_transfer.date_str_to_int(self.start)]
 
         # print(self.benchmark, self.start, self.end, self.period, self.rights_adjustment, self.run_mode)
-
+        # print(Environment.daily_data)
         self.bar_index = 0
         while True:
             try:
                 self.timetag = Environment.benchmark_index[self.bar_index]
             except IndexError:
-                if self.run_mode == RunMode.BACKTESTING.value:
-                    if save_trade_record:
-                        run_backtesting_analysis_engine(self)
+                # if self.run_mode == RunMode.BACKTESTING.value:
+                #     if save_trade_record:
+                #         run_backtesting_analysis_engine(self)
 
-                    break
-                elif self.run_mode == RunMode.TRADE.value:
-                    '''读取最新tick, 更新最新的分钟或者日线
-                    if 读取最新tick, 更新最新的分钟或者日线 == done:
-                        daily_data.append(new_day_data)
-                        self.bar_index += 1
-                        benchmark_index.append(new_day_timetag)
-                    '''
-                    pass
+                break
+                # elif self.run_mode == RunMode.TRADE.value:
+                #     读取最新tick, 更新最新的分钟或者日线
+                #     if 读取最新tick, 更新最新的分钟或者日线 == done:
+                #         daily_data.append(new_day_data)
+                #         self.bar_index += 1
+                #         benchmark_index.append(new_day_timetag)
+
+                    # pass
 
             else:
-                print('self.timetag', self.timetag)
                 # date = int(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y%m%d"))
                 run_bar_engine(self)
+                pass
 
         @abstractmethod
         def initialize(self):
@@ -222,4 +221,5 @@ class StrategyBase(metaclass=ABCMeta):
 
         @abstractmethod
         def handle_bar(self, event):
+            print('abstractmethod handle_bar')
             pass

@@ -86,10 +86,18 @@ class GetKlineData(object):
             thread_data_dict[stock] = security_code_data_df
 
     def get_market_data(self, market_data, stock_code=[], field=[], start="", end="", count=-1):
-        market_data_stock_code = market_data.loc[stock_code[0]]
-        # print('market_data_stock_code, ', type(market_data_stock_code),  market_data_stock_code.index, market_data_stock_code)
-        market_data_stock_code = market_data_stock_code.loc[market_data_stock_code.index < end][field]
-        return market_data_stock_code
+        # print('stock_code[0]', stock_code[0])
+        # print('market_data', market_data.index.levels[0])
+        result = None
+        if len(stock_code) == 1 and len(field) == 1 and (start < end) and count == -1:
+            market_data_stock_code = market_data.loc[(stock_code[0], )]
+            result = market_data_stock_code.loc[market_data_stock_code.index <= end][field]
+        elif len(stock_code) == 1 and len(field) == 1 and (start == end) and count == -1:
+            try:
+                result = float(market_data.loc[(stock_code[0], end), field])
+            except KeyError:
+                result = 0
+        return result
         pass
 
 
@@ -4084,5 +4092,7 @@ if __name__ == '__main__':
                   ]
     with Timer(True):
         kline_object = GetKlineData()
-        a = kline_object.get_all_market_data(stock_list=['600000.SH', '600004.SH'], field=['close'], end=datetime(2018, 10, 10))
+        a = kline_object.get_all_market_data(stock_list=['600000.SH', '600004.SH'],
+                                             field=["open", "high", "low", "close", "volume", "amount"],
+                                             end=datetime(2018, 10, 10))
         print(a.loc['600000.SH'].index)
