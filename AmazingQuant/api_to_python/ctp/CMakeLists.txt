@@ -1,11 +1,13 @@
 cmake_minimum_required(VERSION 2.8)
 project(AQ_ctp_api)
 
+
 # 设置使用的编译器
 set(CMAKE_BUILD_TYPE "Release")
 if (CMAKE_COMPILER_IS_GNUC OR CMAKE_COMPILER_IS_GNUCXX) 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC  -std=c++11")
 endif ()
+
 
 # 设置输出目录
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
@@ -45,16 +47,16 @@ if (BUILD_CTP_MD)
   add_definitions(-DBUILD_CTP_MD)
   set(CTP_MD_PATH AQctpmd/AQctpmd)
   include_directories(CTP_MD_PATH)
-  set(VN_CTP_MD_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/AQctpmd/AQctpmd/AQctpmd.cpp)
-  add_library(AQctpmd SHARED ${VN_CTP_MD_SOURCE})
+  set(AQ_CTP_MD_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/AQctpmd/AQctpmd/AQctpmd.cpp)
+  add_library(AQctpmd SHARED ${AQ_CTP_MD_SOURCE})
 endif()
 option(BUILD_CTP_TD "build ctp td" ON)
 if (BUILD_CTP_TD)
   add_definitions(-DBUILD_CTP_TD)
   set(CTP_TD_PATH AQctptd/AQctptd)
   include_directories(CTP_TD_PATH)
-  set(VN_CTP_TD_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/AQctptd/AQctptd/AQctptd.cpp)
-  add_library(AQctptd SHARED ${VN_CTP_TD_SOURCE})  
+  set(AQ_CTP_TD_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/AQctptd/AQctptd/AQctptd.cpp)
+  add_library(AQctptd SHARED ${AQ_CTP_TD_SOURCE})  
 endif()
 
 # 设置Python所在的目录
@@ -62,28 +64,32 @@ set(PYTHON_LIBRARY )
 if (UNIX)
 set(PYTHON_INCLUDE_PATH /home/zhanggao/anaconda3/include/bin)
 find_library(PYTHON_LIBRARY
-  NAMES python3.5m
+  NAMES python3.7m
   PATHS /usr/lib/x86_64-linux-gnu)
 include_directories(${PYTHON_INCLUDE_PATH})
 endif()
 
 # 链接boost库，anaconda
 set(Boost_USE_MULTITHREADED      ON)
-find_package(Boost 1.66.0 COMPONENTS python locale thread date_time system chrono REQUIRED) # 如果boost库没有完全编译，需要将编译的库明确地指出，否者message(${Boost_LIBRARIES})会出错
+find_package(Boost 1.71.0 COMPONENTS python locale system thread date_time system chrono REQUIRED) 
 if(Boost_FOUND)
   include_directories(/usr/local/lib)
-  include_directories(/home/zhanggao/tools/boost_1_66_0/boost)
+  include_directories(/usr/local/include)
+
 endif()
+
+
+
 
 # 去掉生成的so文件名中前缀的lib
 set_target_properties(AQctpmd PROPERTIES PREFIX "")
 
 # 链接生成.so文件
-target_link_libraries(AQctpmd  ${Boost_LIBRARIES} ${PYTHON_LIBRARY} ${CTPAPI_MD_LIBRARY})
+target_link_libraries(AQctpmd  ${Boost_LIBRARIES} ${PYTHON_LIBRARY} ${CTPAPI_MD_LIBRARY} ${PTHREAD_LIBRARY})
 
 # 和上面的MD相同
 set_target_properties(AQctptd PROPERTIES PREFIX "")
-target_link_libraries(AQctptd  ${Boost_LIBRARIES} ${PYTHON_LIBRARY} ${CTPAPI_TD_LIBRARY})
+target_link_libraries(AQctptd  ${Boost_LIBRARIES} ${PYTHON_LIBRARY} ${CTPAPI_TD_LIBRARY} ${PTHREAD_LIBRARY})
 
 
 
