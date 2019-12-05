@@ -156,38 +156,38 @@ class EventBacktestingAnalysis(Event):
             timetag_date = [millisecond_to_date(millisecond=i, format="%Y-%m-%d %H:%M:%S") for i in
                             Environment.benchmark_index]
 
-        page = Page("strategy backtesting indicator")
-        line_net_asset_value = Line("net_asset_value", width=1300, height=400, title_pos="8%")
-        line_net_asset_value.add("benchmark_net_asset_value", timetag_date,
-                                 [round(i, 4) for i in benchmark_net_asset_value],
-                                 tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
-        line_net_asset_value.add("strategy_net_asset_value", timetag_date,
-                                 [round(i, 4) for i in strategy_net_asset_value],
-                                 tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
-        page.add(line_net_asset_value)
+        # page = Page("strategy backtesting indicator")
+        # line_net_asset_value = Line("net_asset_value", width=1300, height=400, title_pos="8%")
+        # line_net_asset_value.add("benchmark_net_asset_value", timetag_date,
+        #                          [round(i, 4) for i in benchmark_net_asset_value],
+        #                          tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
+        # line_net_asset_value.add("strategy_net_asset_value", timetag_date,
+        #                          [round(i, 4) for i in strategy_net_asset_value],
+        #                          tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
+        # page.add(line_net_asset_value)
+        #
+        # line_year_yield = Line("year_yield", width=1300, height=400, title_pos="8%")
+        # line_year_yield.add("benchmark_year_yield", timetag_date,
+        #                     [round(i, 4) for i in benchmark_year_yield],
+        #                     tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
+        # line_year_yield.add("strategy_year_yield", timetag_date,
+        #                     [round(i, 4) for i in strategy_year_yield],
+        #                     tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
+        # page.add(line_year_yield)
+        #
+        # for indicator_name, indicator in indicator_dict.items():
+        #     cls().add_to_page(page, indicator, indicator_name, timetag_date)
+        #     # print(indicator_name)
+        #
+        # millisecond_timetag = str(int(time.time()) * 1000)
+        # page.render(path=sys.argv[0][sys.argv[0].rfind(os.sep) + 1:][
+        #                  :-3] + "_" + "strategy backtesting indicator" + millisecond_timetag + ".html")  # 生成本地 HTML 文件
 
-        line_year_yield = Line("year_yield", width=1300, height=400, title_pos="8%")
-        line_year_yield.add("benchmark_year_yield", timetag_date,
-                            [round(i, 4) for i in benchmark_year_yield],
-                            tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
-        line_year_yield.add("strategy_year_yield", timetag_date,
-                            [round(i, 4) for i in strategy_year_yield],
-                            tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
-        page.add(line_year_yield)
-
-        for indicator_name, indicator in indicator_dict.items():
-            cls().add_to_page(page, indicator, indicator_name, timetag_date)
-            # print(indicator_name)
-
-        millisecond_timetag = str(int(time.time()) * 1000)
-        page.render(path=sys.argv[0][sys.argv[0].rfind(os.sep) + 1:][
-                         :-3] + "_" + "strategy backtesting indicator" + millisecond_timetag + ".html")  # 生成本地 HTML 文件
-
-    def add_to_page(self, page, indicator, indicator_name, timetag_date):
-        line = Line(indicator_name, width=1300, height=400, title_pos="8%")
-        line.add(indicator_name, timetag_date, [round(i, 4) for i in indicator],
-                 tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
-        page.add(line)
+    # def add_to_page(self, page, indicator, indicator_name, timetag_date):
+    #     line = Line(indicator_name, width=1300, height=400, title_pos="8%")
+    #     line.add(indicator_name, timetag_date, [round(i, 4) for i in indicator],
+    #              tooltip_tragger="axis", legend_top="3%", is_datazoom_show=True)
+    #     page.add(line)
 
     def get_benchmark_net_asset_value(self, event):
         period = event.event_data_dict["strategy"].period
