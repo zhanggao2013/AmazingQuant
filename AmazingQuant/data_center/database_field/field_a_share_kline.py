@@ -16,12 +16,14 @@ from mongoengine.fields import IntField, DateTimeField
 
 class Kline(Document):
     """
-    日线行情
+    K线
     """
     # 更新时间
     update_date = DateTimeField(default=datetime.utcnow())
     # 时间戳
     time_tag = DateTimeField(required=True)
+    # 昨收
+    pre_close = IntField()
     # 开
     open = IntField(required=True)
     # 高
