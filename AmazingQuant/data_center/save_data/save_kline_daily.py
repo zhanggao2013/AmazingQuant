@@ -20,8 +20,12 @@ from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
 
 
 class SaveKlineDaily(object):
-    def __init__(self, data_path):
+    def __init__(self, data_path, data_path_pre_close):
         self.data_path = data_path
+        data_df = pd.read_csv(data_path_pre_close, low_memory=False)
+        grouped = data_df.groupby("S_INFO_WINDCODE")
+        self.data_dict = {str(i[0]): i[1].reset_index(drop=True) for i in grouped}
+
         self.security_code_list = []
         self.market_list = ['SH', 'SZ']
 
@@ -50,12 +54,20 @@ class SaveKlineDaily(object):
             kline_daily_data.rename(columns={'volumw': 'volume', 'turover': 'amount'},  inplace=True)
             with switch_collection(Kline, security_code) as KlineDaily_security_code:
                 doc_list = []
+                security_code_data = pd.DataFrame()
+                if security_code in self.data_dict.keys():
+                    security_code_data = self.data_dict[security_code].set_index(["TRADE_DT"])
                 for index, row in kline_daily_data.iterrows():
                     date_int = int(row['date'])
                     if not np.isnan(date_int):
+                        try:
+                            pre_close = int(10000 * security_code_data.loc[date_int, 'S_DQ_PRECLOSE'])
+                        except KeyError:
+                            pre_close = None
                         date_int = str(date_int)
                         time_tag = datetime.strptime(date_int, "%Y%m%d")
-                        doc = KlineDaily_security_code(time_tag=time_tag, open=int(row['open']), high=int(row['high']),
+                        doc = KlineDaily_security_code(time_tag=time_tag, pre_close=pre_close,
+                                                       open=int(row['open']), high=int(row['high']),
                                                        low=int(row['low']), close=int(row['close']),
                                                        volume=int(row['volume']), amount=int(row['amount']),
                                                        match_items=int(row['match_items']), interest=int(row['interest']))
@@ -65,5 +77,6 @@ class SaveKlineDaily(object):
 
 if __name__ == '__main__':
     with Timer(True):
-        save_kline_object = SaveKlineDaily('../../../../data/KLine_daily/KLine/')
+        save_kline_object = SaveKlineDaily('../../../../data/KLine_daily/KLine/', '../../../../data/KLine_daily/ASHAREEODPRICES.csv')
+
         save_kline_object.insert_security_code_list()
