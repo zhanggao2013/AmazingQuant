@@ -13,18 +13,18 @@ from multiprocessing import Pool
 import pandas as pd
 import numpy as np
 from mongoengine.context_managers import switch_collection
+from multiprocessing import Pool, Manager
 
 from AmazingQuant.data_center.mongo_connection import MongoConnect
 from AmazingQuant.utils.performance_test import Timer
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
+from AmazingQuant.utils.security_type import is_security_type
 
 
 class SaveKlineDaily(object):
-    def __init__(self, data_path, data_path_pre_close):
+    def __init__(self, data_path, data_dict):
         self.data_path = data_path
-        data_df = pd.read_csv(data_path_pre_close, low_memory=False)
-        grouped = data_df.groupby("S_INFO_WINDCODE")
-        self.data_dict = {str(i[0]): i[1].reset_index(drop=True) for i in grouped}
+        self.data_dict = data_dict
 
         self.security_code_list = []
         self.market_list = ['SH', 'SZ']
@@ -34,7 +34,7 @@ class SaveKlineDaily(object):
             path = self.data_path + market + '/MultDate/'
             file_list = os.listdir(path)
             file_num = 0
-            p = Pool(10)
+            p = Pool(8)
             for file_name in file_list:
                 file_num += 1
                 print('完成数量：', file_num)
@@ -49,34 +49,40 @@ class SaveKlineDaily(object):
             print(path + file_name + '\n')
             kline_daily_data = pd.read_csv(path + file_name, encoding='unicode_escape')
             security_code = file_name.split('.')[0] + '.' + market
-            kline_daily_data = kline_daily_data.reindex(columns=['date', 'open', 'high', 'low', 'close', 'volumw',
-                                                                 'turover', 'match_items', 'interest'])
-            kline_daily_data.rename(columns={'volumw': 'volume', 'turover': 'amount'},  inplace=True)
-            with switch_collection(Kline, security_code) as KlineDaily_security_code:
-                doc_list = []
-                security_code_data = pd.DataFrame()
-                if security_code in self.data_dict.keys():
-                    security_code_data = self.data_dict[security_code].set_index(["TRADE_DT"])
-                for index, row in kline_daily_data.iterrows():
-                    date_int = int(row['date'])
-                    if not np.isnan(date_int):
-                        try:
-                            pre_close = int(10000 * security_code_data.loc[date_int, 'S_DQ_PRECLOSE'])
-                        except KeyError:
-                            pre_close = None
-                        date_int = str(date_int)
-                        time_tag = datetime.strptime(date_int, "%Y%m%d")
-                        doc = KlineDaily_security_code(time_tag=time_tag, pre_close=pre_close,
-                                                       open=int(row['open']), high=int(row['high']),
-                                                       low=int(row['low']), close=int(row['close']),
-                                                       volume=int(row['volume']), amount=int(row['amount']),
-                                                       match_items=int(row['match_items']), interest=int(row['interest']))
-                        doc_list.append(doc)
-                KlineDaily_security_code.objects.insert(doc_list)
+            if is_security_type(security_code, 'EXTRA_STOCK_A'):
+                kline_daily_data = kline_daily_data.reindex(columns=['date', 'open', 'high', 'low', 'close', 'volumw',
+                                                                     'turover', 'match_items', 'interest'])
+                kline_daily_data.rename(columns={'volumw': 'volume', 'turover': 'amount'},  inplace=True)
+                with switch_collection(Kline, security_code) as KlineDaily_security_code:
+                    doc_list = []
+                    security_code_data = pd.DataFrame()
+                    if security_code in self.data_dict.keys():
+                        security_code_data = self.data_dict[security_code].set_index(["TRADE_DT"])
+                    for index, row in kline_daily_data.iterrows():
+                        date_int = int(row['date'])
+                        if not np.isnan(date_int):
+                            try:
+                                pre_close = int(10000 * security_code_data.loc[date_int, 'S_DQ_PRECLOSE'])
+                            except KeyError:
+                                pre_close = None
+                            date_int = str(date_int)
+                            time_tag = datetime.strptime(date_int, "%Y%m%d")
+                            doc = KlineDaily_security_code(time_tag=time_tag, pre_close=pre_close,
+                                                           open=int(row['open']), high=int(row['high']),
+                                                           low=int(row['low']), close=int(row['close']),
+                                                           volume=int(row['volume']), amount=int(row['amount']),
+                                                           match_items=int(row['match_items']), interest=int(row['interest']))
+                            doc_list.append(doc)
+                    KlineDaily_security_code.objects.insert(doc_list)
 
 
 if __name__ == '__main__':
     with Timer(True):
-        save_kline_object = SaveKlineDaily('../../../../data/KLine_daily/KLine/', '../../../../data/KLine_daily/ASHAREEODPRICES.csv')
+        with Manager() as manager:
+            data_df = pd.read_csv('../../../../data/KLine_daily/ASHAREEODPRICES.csv', low_memory=False)
+            grouped = data_df.groupby("S_INFO_WINDCODE")
+            data_dict = manager.dict({str(i[0]): i[1].reset_index(drop=True) for i in grouped})
 
-        save_kline_object.insert_security_code_list()
+            save_kline_object = SaveKlineDaily('../../../../data/KLine_daily/KLine/', data_dict)
+
+            save_kline_object.insert_security_code_list()
