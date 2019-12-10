@@ -8,11 +8,10 @@
 # ------------------------------
 
 import pandas as pd
-import numpy as np
-from mongoengine.context_managers import switch_collection
+from _datetime import datetime
+from AmazingQuant.utils.security_type import is_security_type
 
 from AmazingQuant.data_center.database_field.field_a_share_ex_right_dividend import AShareExRightDividend
-from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
 from AmazingQuant.data_center.get_data.get_kline import GetKlineData
 from AmazingQuant.data_center.mongo_connection import MongoConnect
 
@@ -28,33 +27,36 @@ class SaveAShareAdjFactor(object):
         再计算复权因子更新到AShareExRightDividend, 复权因子adj_factor
         比例 = 送股比例 + 转增比例 + 缩减比例
         单次复权因子 = 股权登记日收盘价 * (1 + 比例 + 配股比例 + 增发比例) /
-        (股权登记日收盘价 - 派息比例 + 股权登记日收盘价*比例 + 配股价格 * 配股比例 + 增发价格 * 增发比例)
+        (股权登记日收盘价 - 派息比例 + 股权登记日收盘价 * 比例 + 配股价格 * 配股比例 + 增发价格 * 增发比例)
         :return:
         """
         database = 'stock_base_data'
         with MongoConnect(database):
             self.data = pd.DataFrame(AShareExRightDividend.objects.as_pymongo())
-            self.data['close'] = self.data.apply(lambda x: self.get_close(x['security_code'], x['ex_date'], all_market_data), axis=1)
+            self.data['close'] = self.data.apply(
+                lambda x: self.get_adj_day_close(x['security_code'], x['ex_date'], all_market_data), axis=1)
             self.data = self.data.fillna(0)
             ratio = self.data['bonus_share_ratio'] + self.data['conversed_ratio'] + self.data['consolidate_split_ratio']
             self.data['adj_factor'] = self.data['close'] * (1 + ratio) / \
                                       (self.data['close'] - self.data['cash_dividend_ratio'] + self.data['close'] * ratio
                                        + self.data['rightsissue_price'] * self.data['rightsissue_ratio']
                                        + self.data['seo_price'] * self.data['seo_ratio'])
+
+            for index, row in self.data.iterrows():
+                AShareExRightDividend.objects(security_code=row['security_code'], ex_date=row['ex_date']) \
+                    .update(set__adj_factor=row['adj_factor'])
             pass
 
-    def get_close(self, security_code, date, all_market_data):
-        a = 0
+    def get_adj_day_close(self, security_code, date, all_market_data):
+        security_code_market_data = 0
         try:
-            a = all_market_data[security_code].loc[date, 'close']
+            security_code_market_data = all_market_data[security_code].loc[date, 'close']
         except KeyError:
             print(security_code, date)
-        return a
-
+        return security_code_market_data
 
 
 if __name__ == '__main__':
-    from _datetime import datetime
     save_a_share_adj_factor_obj = SaveAShareAdjFactor()
     stock_code = ['000001.SZ',
                   '000002.SZ',
@@ -4043,10 +4045,9 @@ if __name__ == '__main__':
                   'H06881.SH',
                   'H06886.SH',
                   ]
+    stock_code = [i for i in stock_code if is_security_type(i, 'EXTRA_STOCK_A')]
     kline_object = GetKlineData()
     all_market_data = kline_object.get_all_market_data(stock_list=stock_code, field=["close"], end=datetime.now())
     # save_a_share_adj_factor_obj.save_a_share_adj_factor(all_market_data)
-    # database = 'a_share_kline_daily'
-    # with MongoConnect(database):
-    #     a = save_a_share_adj_factor_obj.get_close('600000.SH', datetime(2002, 1, 7))
+
 
