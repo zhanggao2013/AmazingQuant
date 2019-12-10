@@ -27,7 +27,7 @@ class SaveKlineDaily(object):
         self.data_dict = data_dict
 
         self.security_code_list = []
-        self.market_list = ['SH', 'SZ']
+        self.market_list = ['SZ', 'SH']
 
     def insert_security_code_list(self):
         for market in self.market_list:
@@ -58,23 +58,6 @@ class SaveKlineDaily(object):
                     security_code_data = pd.DataFrame()
                     if security_code in self.data_dict.keys():
                         security_code_data = self.data_dict[security_code].set_index(["TRADE_DT"])
-                        security_code_data = security_code_data[security_code_data.index < 20020104]
-                        # 用csv全表补充20020104之前的日线数据，match_items为0
-                        for index, row in security_code_data.iterrows():
-                            date_int = int(index)
-                            try:
-                                pre_close = int(10000 * security_code_data.loc[date_int, 'S_DQ_PRECLOSE'])
-                            except KeyError:
-                                pre_close = None
-                            date_int = str(date_int)
-                            time_tag = datetime.strptime(date_int, "%Y%m%d")
-
-                            doc = KlineDaily_security_code(time_tag=time_tag, pre_close=int(row['S_DQ_PRECLOSE']*10000),
-                                                           open=int(row['S_DQ_OPEN']*10000), high=int(row['S_DQ_HIGH']*10000),
-                                                           low=int(row['S_DQ_LOW']*10000), close=int(row['S_DQ_CLOSE']*10000),
-                                                           volume=int(row['S_DQ_VOLUME']*100), amount=int(row['S_DQ_AMOUNT']*1000),
-                                                           match_items=0, interest=0)
-                            doc_list.append(doc)
 
                     for index, row in kline_daily_data.iterrows():
                         date_int = int(row['date'])
@@ -90,6 +73,28 @@ class SaveKlineDaily(object):
                                                            low=int(row['low']), close=int(row['close']),
                                                            volume=int(row['volume']), amount=int(row['amount']),
                                                            match_items=int(row['match_items']), interest=int(row['interest']))
+                            doc_list.append(doc)
+
+                    # 用csv全表补充20020104之前的日线数据，match_items为0
+                    security_code_data = security_code_data[security_code_data.index < 20020104]
+                    for index, row in security_code_data.iterrows():
+                        # 排除成交量为0的，停牌
+                        if row['S_DQ_AMOUNT'] > 0:
+                            try:
+                                pre_close = int(row['S_DQ_PRECLOSE'] * 10000)
+                            except KeyError:
+                                pre_close = None
+                            date_int = int(index)
+                            date_int = str(date_int)
+                            time_tag = datetime.strptime(date_int, "%Y%m%d")
+                            doc = KlineDaily_security_code(time_tag=time_tag, pre_close=pre_close,
+                                                           open=int(row['S_DQ_OPEN'] * 10000),
+                                                           high=int(row['S_DQ_HIGH'] * 10000),
+                                                           low=int(row['S_DQ_LOW'] * 10000),
+                                                           close=int(row['S_DQ_CLOSE'] * 10000),
+                                                           volume=int(row['S_DQ_VOLUME'] * 100),
+                                                           amount=int(row['S_DQ_AMOUNT'] * 1000),
+                                                           match_items=0, interest=0)
                             doc_list.append(doc)
                     KlineDaily_security_code.objects.insert(doc_list)
 
