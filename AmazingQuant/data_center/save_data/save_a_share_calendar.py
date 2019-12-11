@@ -7,12 +7,11 @@
 # @Project : AmazingQuant
 # ------------------------------
 
-from datetime import datetime
-
 import pandas as pd
 
 from AmazingQuant.data_center.database_field.filed_a_share_calendar import AShareCalendar
 from AmazingQuant.data_center.mongo_connection import MongoConnect
+from AmazingQuant.utils.data_transfer import date_to_datetime
 
 
 class SaveCalendar(object):
@@ -27,10 +26,11 @@ class SaveCalendar(object):
             data_dict = {i[0]: list(i[1]['TRADE_DAYS']) for i in data_grouped}
             print(data_dict)
             for market, trade_days in data_dict.items():
-                if market == 'SHN':
+                if market == 'SSE':
                     market = 'SH'
-                elif market == 'SZN':
+                elif market == 'SZSE':
                     market = 'SZ'
+                trade_days = [date_to_datetime(str(i)) for i in sorted(trade_days)]
                 doc = AShareCalendar(market=market, trade_days=trade_days)
                 doc_list.append(doc)
             AShareCalendar.objects.insert(doc_list)
