@@ -30,6 +30,12 @@ def millisecond_to_datetime(millisecond):
     return datetime.fromtimestamp(millisecond/1000)
 
 
+def date_to_datetime(date='20090101'):
+    return datetime.strptime(date, "%Y%m%d")
+
+
 if __name__ == "__main__":
     print(date_str_to_int(date="2010-01-01"))
     a = datetime_to_millisecond()
+    b = date_to_datetime()
+    print(b)
