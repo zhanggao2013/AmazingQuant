@@ -59,5 +59,5 @@ class SaveBalanceSheet(object):
 
 if __name__ == '__main__':
     data_path = '../../../../data/finance/AShareBalanceSheet.csv'
-    save_cash_flow_obj = SaveBalanceSheet(data_path)
-    save_cash_flow_obj.save_a_share_balance_sheet()
+    save_balance_sheet_obj = SaveBalanceSheet(data_path)
+    save_balance_sheet_obj.save_a_share_balance_sheet()
