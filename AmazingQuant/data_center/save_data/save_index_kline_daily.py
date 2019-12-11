@@ -18,7 +18,7 @@ from mongoengine.context_managers import switch_collection
 from AmazingQuant.data_center.mongo_connection import MongoConnect
 from AmazingQuant.utils.performance_test import Timer
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
-from AmazingQuant.utils.security_type import is_security_type
+from AmazingQuant.constant import DatabaseName
 
 
 class SaveIndexKlineDaily(object):
@@ -41,7 +41,7 @@ class SaveIndexKlineDaily(object):
             p.join()
 
     def insert_security_code(self, market, file_name, path):
-        database = 'index_kline_daily'
+        database = DatabaseName.INDEX_KLINE_DAILY.value
         with MongoConnect(database):
             print(path + file_name + '\n')
             kline_daily_data = pd.read_csv(path + file_name, encoding='unicode_escape')
