@@ -22,8 +22,8 @@ class Kline(Document):
     update_date = DateTimeField(default=datetime.utcnow())
     # 时间戳
     time_tag = DateTimeField(required=True)
-    # 昨收
-    pre_close = IntField()
+    # 昨收，只有日线有
+    pre_close = IntField(required=True)
     # 开
     open = IntField(required=True)
     # 高

@@ -24,7 +24,6 @@ class SaveCalendar(object):
             doc_list = []
             data_grouped = self.data_df.groupby("S_INFO_EXCHMARKET")
             data_dict = {i[0]: list(i[1]['TRADE_DAYS']) for i in data_grouped}
-            print(data_dict)
             for market, trade_days in data_dict.items():
                 if market == 'SSE':
                     market = 'SH'

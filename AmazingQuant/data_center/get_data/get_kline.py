@@ -10,7 +10,7 @@
 from datetime import datetime
 import os
 from multiprocessing import Pool, Queue, Manager
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 
 import pandas as pd
 import numpy as np
@@ -19,6 +19,7 @@ from mongoengine.context_managers import switch_collection
 from AmazingQuant.data_center.mongo_connection import MongoConnect
 from AmazingQuant.constant import DatabaseName, Period, RightsAdjustment
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
+from AmazingQuant.data_center.get_data.get_calendar import GetCalendar
 from AmazingQuant.utils.performance_test import Timer
 
 
@@ -26,6 +27,8 @@ class GetKlineData(object):
     def __init__(self):
         self.field = []
         self.end = datetime.now()
+        calendar_obj = GetCalendar()
+        self.calendar_SZ = calendar_obj.get_calendar('SZ')
 
     def get_all_market_data(self, stock_list=[], field=[], start="", end=datetime.now(), period=Period.DAILY.value,
                             rights_adjustment=RightsAdjustment.NONE.value):
@@ -44,7 +47,7 @@ class GetKlineData(object):
             self.field = ['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
         self.end = end
         database = DatabaseName.A_SHARE_KLINE_DAILY.value
-        process_num = 10
+        process_num = 6
         process_pool = Pool(process_num)
         process_stock_num = int(len(stock_list) / process_num) + 1
         stock_list_split = []
@@ -57,23 +60,29 @@ class GetKlineData(object):
         with Manager() as manager:
             process_manager_dict = manager.dict()
             for stock_list_i in range(len(stock_list_split)):
-                process_pool.apply_async(self.get_data_with_process_pool, args=(database, stock_list_split[stock_list_i], process_manager_dict, stock_list_i))
+                process_pool.apply_async(self.get_data_with_process_pool, args=(
+                database, stock_list_split[stock_list_i], process_manager_dict, stock_list_i))
             process_pool.close()
             process_pool.join()
             process_dict = dict(process_manager_dict)
+
             result = {}
-            for value in process_dict.values():
-                result.update(value)
-            # print(result)
-            return pd.concat(list(result.values()), keys=list(result.keys()))
+            for single_stock_data in process_dict.values():
+                single_stock_data = {key: value.reindex(self.calendar_SZ).fillna(method='ffill') for key, value in
+                                     single_stock_data.items()}
+                result.update(single_stock_data)
+            return result
+            # return pd.concat(list(result.values()), keys=list(result.keys()))
 
     def get_data_with_process_pool(self, database, stock_list, process_manager_dict, stock_list_i):
         with MongoConnect(database):
             thread_data_dict = {}
             with ThreadPoolExecutor(4) as executor:
-                for stock in stock_list:
-                    executor.submit(self.get_data_with_thread_pool, stock, thread_data_dict)
+                all_task = [executor.submit(self.get_data_with_thread_pool, stock, thread_data_dict)for stock in stock_list]
+                # for stock in stock_list:
+                #     executor.submit(self.get_data_with_thread_pool, stock, thread_data_dict)
             process_manager_dict[stock_list_i] = thread_data_dict
+            wait(all_task, return_when=ALL_COMPLETED)
 
     def get_data_with_thread_pool(self, stock, thread_data_dict):
         with switch_collection(Kline, stock) as KlineDaily_security_code:
@@ -4088,11 +4097,15 @@ if __name__ == '__main__':
                   'H06837.SH',
                   'H06881.SH',
                   'H06886.SH',
-
                   ]
+    from AmazingQuant.utils.security_type import is_security_type
+    a = [i for i in stock_code if is_security_type(i, 'EXTRA_STOCK_A')]
+    print(len(a))
     with Timer(True):
         kline_object = GetKlineData()
-        a = kline_object.get_all_market_data(stock_list=['600000.SH', '600004.SH'],
-                                             field=["open", "high", "low", "close", "volume", "amount"],
-                                             end=datetime(2018, 10, 10))
-        print(a.loc['600000.SH'].index)
+        a = kline_object.get_all_market_data(stock_list=['000013.SZ'],
+                                             field=["close"],
+                                             end=datetime.now())
+        print(a['000013.SZ'].index)
+
+

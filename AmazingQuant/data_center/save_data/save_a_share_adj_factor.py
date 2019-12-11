@@ -52,7 +52,7 @@ class SaveAShareAdjFactor(object):
         try:
             security_code_market_data = all_market_data[security_code].loc[date, 'close']
         except KeyError:
-            print(security_code, date)
+            print(security_code, date, security_code_market_data)
         return security_code_market_data
 
 
