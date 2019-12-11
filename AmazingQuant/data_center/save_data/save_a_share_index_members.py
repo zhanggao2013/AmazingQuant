@@ -34,7 +34,6 @@ class SaveAShareIndexMembers(object):
                 row_dict['security_code'] = row_dict['S_CON_WINDCODE']
                 row_dict['in_date'] = row_dict['S_CON_INDATE']
                 row_dict['out_date'] = row_dict['S_CON_OUTDATE']
-                row_dict['current_sign'] = row_dict['CUR_SIGN']
 
                 row_dict.pop('OBJECT_ID')
                 row_dict.pop('S_INFO_WINDCODE')
@@ -42,7 +41,6 @@ class SaveAShareIndexMembers(object):
                 row_dict.pop('S_CON_INDATE')
                 row_dict.pop('S_CON_OUTDATE')
                 row_dict.pop('CUR_SIGN')
-                self.field_is_str_list = self.field_is_str_list + ['in_date', 'out_date']
                 doc = AShareIndexMembers()
 
                 for key, value in row_dict.items():
