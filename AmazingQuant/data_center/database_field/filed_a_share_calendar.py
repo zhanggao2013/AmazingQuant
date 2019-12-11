@@ -15,7 +15,7 @@ from mongoengine.fields import ListField, DateTimeField, StringField
 
 class AShareCalendar(Document):
     """
-    K线
+    A股交易日列表
     """
     # 更新时间
     update_date = DateTimeField(default=datetime.utcnow())
