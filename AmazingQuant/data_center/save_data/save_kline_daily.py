@@ -52,6 +52,7 @@ class SaveKlineDaily(object):
                 kline_daily_data = kline_daily_data.reindex(columns=['date', 'open', 'high', 'low', 'close', 'volumw',
                                                                      'turover', 'match_items', 'interest'])
                 kline_daily_data.rename(columns={'volumw': 'volume', 'turover': 'amount'},  inplace=True)
+                kline_daily_data = kline_daily_data[kline_daily_data.date >= 20020104]
                 with switch_collection(Kline, security_code) as KlineDaily_security_code:
                     doc_list = []
                     security_code_data = pd.DataFrame()
@@ -77,22 +78,23 @@ class SaveKlineDaily(object):
                     # 用csv全表补充20020104之前的日线数据，match_items为0
                     security_code_data = security_code_data[security_code_data.index < 20020104]
                     for index, row in security_code_data.iterrows():
-                        date_int = int(index)
-                        date_int = str(date_int)
-                        time_tag = datetime.strptime(date_int, "%Y%m%d")
-                        try:
-                            pre_close = int(row['S_DQ_PRECLOSE'] * 10000)
-                        except KeyError:
-                            pre_close = None
-                        doc = KlineDaily_security_code(time_tag=time_tag, pre_close=pre_close,
-                                                       open=int(row['S_DQ_OPEN'] * 10000),
-                                                       high=int(row['S_DQ_HIGH'] * 10000),
-                                                       low=int(row['S_DQ_LOW'] * 10000),
-                                                       close=int(row['S_DQ_CLOSE'] * 10000),
-                                                       volume=int(row['S_DQ_VOLUME'] * 100),
-                                                       amount=int(row['S_DQ_AMOUNT'] * 1000),
-                                                       match_items=0, interest=0)
-                        doc_list.append(doc)
+                        if row['S_DQ_AMOUNT'] > 0:
+                            date_int = int(index)
+                            date_int = str(date_int)
+                            time_tag = datetime.strptime(date_int, "%Y%m%d")
+                            try:
+                                pre_close = int(row['S_DQ_PRECLOSE'] * 10000)
+                            except KeyError:
+                                pre_close = None
+                            doc = KlineDaily_security_code(time_tag=time_tag, pre_close=pre_close,
+                                                           open=int(row['S_DQ_OPEN'] * 10000),
+                                                           high=int(row['S_DQ_HIGH'] * 10000),
+                                                           low=int(row['S_DQ_LOW'] * 10000),
+                                                           close=int(row['S_DQ_CLOSE'] * 10000),
+                                                           volume=int(row['S_DQ_VOLUME'] * 100),
+                                                           amount=int(row['S_DQ_AMOUNT'] * 1000),
+                                                           match_items=0, interest=0)
+                            doc_list.append(doc)
                     KlineDaily_security_code.objects.insert(doc_list)
 
 
