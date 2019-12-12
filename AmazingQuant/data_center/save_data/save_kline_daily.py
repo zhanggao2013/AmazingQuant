@@ -29,9 +29,11 @@ class SaveKlineDaily(object):
         self.market_list = ['SZ', 'SH']
 
     def insert_security_code_list(self):
+        stock_code_list = []
         for market in self.market_list:
             path = self.data_path + market + '/MultDate/'
             file_list = os.listdir(path)
+            stock_code_list += [i.split('.')[0] + '.' + market for i in file_list]
             file_num = 0
             p = Pool(8)
             for file_name in file_list:
@@ -41,6 +43,33 @@ class SaveKlineDaily(object):
                 # self.insert_security_code(market, file_name, path)
             p.close()
             p.join()
+
+        delist = list(set(self.data_dict.keys()).difference(set(stock_code_list)))
+        database = 'a_share_kline_daily'
+        with MongoConnect(database):
+            for security_code in delist:
+                with switch_collection(Kline, security_code) as KlineDaily_security_code:
+                    doc_list = []
+                    security_code_data = self.data_dict[security_code].set_index(["TRADE_DT"])
+                    for index, row in security_code_data.iterrows():
+                        if row['S_DQ_AMOUNT'] > 0:
+                            date_int = int(index)
+                            date_int = str(date_int)
+                            time_tag = datetime.strptime(date_int, "%Y%m%d")
+                            try:
+                                pre_close = int(row['S_DQ_PRECLOSE'] * 10000)
+                            except KeyError:
+                                pre_close = None
+                            doc = KlineDaily_security_code(time_tag=time_tag, pre_close=pre_close,
+                                                           open=int(row['S_DQ_OPEN'] * 10000),
+                                                           high=int(row['S_DQ_HIGH'] * 10000),
+                                                           low=int(row['S_DQ_LOW'] * 10000),
+                                                           close=int(row['S_DQ_CLOSE'] * 10000),
+                                                           volume=int(row['S_DQ_VOLUME'] * 100),
+                                                           amount=int(row['S_DQ_AMOUNT'] * 1000),
+                                                           match_items=0, interest=0)
+                            doc_list.append(doc)
+                    KlineDaily_security_code.objects.insert(doc_list)
 
     def insert_security_code(self, market, file_name, path):
         database = 'a_share_kline_daily'
