@@ -8,12 +8,10 @@
 # ------------------------------
 
 from datetime import datetime
-import os
-from multiprocessing import Pool, Queue, Manager
+from multiprocessing import Pool, Manager
 from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 
 import pandas as pd
-import numpy as np
 from mongoengine.context_managers import switch_collection
 
 from AmazingQuant.data_center.mongo_connection import MongoConnect
