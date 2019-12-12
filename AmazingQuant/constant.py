@@ -5,8 +5,7 @@
 # @Author  : gao
 # @File    : constant.py.py
 # @Project : AmazingQuant
-
-__author__ = "gao"
+# ------------------------------
 
 from enum import Enum, unique
 
