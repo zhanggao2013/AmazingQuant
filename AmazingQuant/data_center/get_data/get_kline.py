@@ -77,13 +77,10 @@ class GetKlineData(object):
     def get_data_with_process_pool(self, database, stock_list, process_manager_dict, stock_list_i):
         with MongoConnect(database):
             thread_data_dict = {}
-            with ThreadPoolExecutor(4) as executor:
-                all_task = [executor.submit(self.get_data_with_thread_pool, stock, thread_data_dict)for stock in stock_list]
-                # for stock in stock_list:
-                #     executor.submit(self.get_data_with_thread_pool, stock, thread_data_dict)
-                wait(all_task, return_when=ALL_COMPLETED)
+            executor = ThreadPoolExecutor(max_workers=4)
+            all_task = [executor.submit(self.get_data_with_thread_pool, stock, thread_data_dict)for stock in stock_list]
+            wait(all_task, return_when=ALL_COMPLETED)
             process_manager_dict[stock_list_i] = thread_data_dict
-
 
     def get_data_with_thread_pool(self, stock, thread_data_dict):
         with switch_collection(Kline, stock) as KlineDaily_security_code:
