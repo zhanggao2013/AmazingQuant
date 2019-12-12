@@ -8,7 +8,7 @@
 # ------------------------------
 
 from datetime import datetime
-from multiprocessing import Pool, Manager
+from multiprocessing import Pool, Manager, cpu_count
 from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 
 import pandas as pd
@@ -45,7 +45,7 @@ class GetKlineData(object):
             self.field = ['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
         self.end = end
         database = DatabaseName.A_SHARE_KLINE_DAILY.value
-        process_num = 6
+        process_num = cpu_count()
         process_pool = Pool(process_num)
         process_stock_num = int(len(stock_list) / process_num) + 1
         stock_list_split = []
