@@ -8,7 +8,8 @@
 # ------------------------------
 
 import pandas as pd
-from _datetime import datetime
+import numpy as np
+from datetime import datetime
 from AmazingQuant.utils.security_type import is_security_type
 
 from AmazingQuant.data_center.database_field.field_a_share_ex_right_dividend import AShareExRightDividend
@@ -37,10 +38,11 @@ class SaveAShareAdjFactor(object):
                 lambda x: self.get_adj_day_close(x['security_code'], x['ex_date'], all_market_data), axis=1)
             self.data = self.data.fillna(0)
             ratio = self.data['bonus_share_ratio'] + self.data['conversed_ratio'] + self.data['consolidate_split_ratio']
-            self.data['adj_factor'] = self.data['close'] * (1 + ratio) / \
-                                      (self.data['close'] - self.data['cash_dividend_ratio'] + self.data['close'] * ratio
-                                       + self.data['rightsissue_price'] * self.data['rightsissue_ratio']
-                                       + self.data['seo_price'] * self.data['seo_ratio'])
+            self.data['adj_factor'] = self.data['close'] * (
+                        1 + ratio + self.data['rightsissue_ratio'] + self.data['seo_ratio']) / (
+                        self.data['close'] - self.data['cash_dividend_ratio'] + self.data['close'] * ratio +
+                        self.data['rightsissue_price'] * self.data['rightsissue_ratio'] +
+                        self.data['seo_price'] * self.data['seo_ratio'])
 
             for index, row in self.data.iterrows():
                 AShareExRightDividend.objects(security_code=row['security_code'], ex_date=row['ex_date']) \
@@ -613,5 +615,4 @@ if __name__ == '__main__':
     stock_code = [i for i in stock_code if is_security_type(i, 'EXTRA_STOCK_A')]
     kline_object = GetKlineData()
     all_market_data = kline_object.get_all_market_data(stock_list=stock_code, field=["close"], end=datetime.now())
-    print(len(all_market_data.keys()))
     save_a_share_adj_factor_obj.save_a_share_adj_factor(all_market_data)
