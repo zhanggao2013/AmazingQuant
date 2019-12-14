@@ -10,7 +10,6 @@
 from datetime import datetime
 
 import pandas as pd
-from mongoengine import connection
 
 from AmazingQuant.data_center.mongo_connection import MongoConnect
 from AmazingQuant.utils.security_type import is_security_type
@@ -34,8 +33,6 @@ class SaveAShareAdjFactor(object):
         (股权登记日收盘价 - 派息比例 + 股权登记日收盘价 * 比例 + 配股价格 * 配股比例 + 增发价格 * 增发比例)
         :return:
         """
-        # connection.connect(db=self.database, host=MongodbConfig.host, port=MongodbConfig.port,
-        #                    password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
         with MongoConnect(self.database):
             self.data = pd.DataFrame(AShareExRightDividend.objects.as_pymongo())
             self.data['close'] = self.data.apply(
