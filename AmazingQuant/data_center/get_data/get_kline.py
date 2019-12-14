@@ -9,7 +9,6 @@
 
 from datetime import datetime
 from multiprocessing import Pool, Manager, cpu_count
-from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED, as_completed
 
 import pandas as pd
 from mongoengine.context_managers import switch_collection
