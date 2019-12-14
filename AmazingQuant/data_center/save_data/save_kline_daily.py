@@ -18,12 +18,14 @@ from AmazingQuant.data_center.mongo_connection import MongoConnect
 from AmazingQuant.utils.performance_test import Timer
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
 from AmazingQuant.utils.security_type import is_security_type
+from AmazingQuant.constant import DatabaseName
 
 
 class SaveKlineDaily(object):
     def __init__(self, data_path, data_dict):
         self.data_path = data_path
         self.data_dict = data_dict
+        self.database = DatabaseName.A_SHARE_KLINE_DAILY.value
 
         self.security_code_list = []
         self.market_list = ['SZ', 'SH']
@@ -40,13 +42,11 @@ class SaveKlineDaily(object):
                 file_num += 1
                 print('完成数量：', file_num)
                 p.apply_async(self.insert_security_code, args=(market, file_name, path))
-                # self.insert_security_code(market, file_name, path)
             p.close()
             p.join()
 
         delist = list(set(self.data_dict.keys()).difference(set(stock_code_list)))
-        database = 'a_share_kline_daily'
-        with MongoConnect(database):
+        with MongoConnect(self.database):
             for security_code in delist:
                 with switch_collection(Kline, security_code) as KlineDaily_security_code:
                     doc_list = []
@@ -72,8 +72,7 @@ class SaveKlineDaily(object):
                     KlineDaily_security_code.objects.insert(doc_list)
 
     def insert_security_code(self, market, file_name, path):
-        database = 'a_share_kline_daily'
-        with MongoConnect(database):
+        with MongoConnect(self.database):
             print(path + file_name + '\n')
             kline_daily_data = pd.read_csv(path + file_name, encoding='unicode_escape')
             security_code = file_name.split('.')[0] + '.' + market
