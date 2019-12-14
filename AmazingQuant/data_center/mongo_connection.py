@@ -41,11 +41,11 @@ class MongoConnect(object):
     def __enter__(self):
         connection.connect(db=self.database, host=MongodbConfig.host, port=MongodbConfig.port,
                            password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
-        print("AmazingQuant Database Connect")
+        print("AmazingQuant Database Connect", self.database)
 
     def __exit__(self, *args):
         connection.disconnect()
-        print("AmazingQuant Database Disconnect")
+        print("AmazingQuant Database Disconnect", self.database)
 
     def connect_db(self, db_name):
         db = self.conn[db_name]
