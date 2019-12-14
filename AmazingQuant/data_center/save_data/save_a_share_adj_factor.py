@@ -10,16 +10,19 @@
 from datetime import datetime
 
 import pandas as pd
+from mongoengine import connection
 
+from AmazingQuant.data_center.mongo_connection import MongoConnect
 from AmazingQuant.utils.security_type import is_security_type
 from AmazingQuant.data_center.database_field.field_a_share_ex_right_dividend import AShareExRightDividend
 from AmazingQuant.data_center.get_data.get_kline import GetKlineData
-from AmazingQuant.data_center.mongo_connection import MongoConnect
+from AmazingQuant.constant import DatabaseName
 
 
 class SaveAShareAdjFactor(object):
     def __init__(self):
         self.data = pd.DataFrame()
+        self.database = DatabaseName.STOCK_BASE_DATA.value
         pass
 
     def save_a_share_adj_factor(self, all_market_data):
@@ -31,8 +34,9 @@ class SaveAShareAdjFactor(object):
         (股权登记日收盘价 - 派息比例 + 股权登记日收盘价 * 比例 + 配股价格 * 配股比例 + 增发价格 * 增发比例)
         :return:
         """
-        database = 'stock_base_data'
-        with MongoConnect(database):
+        # connection.connect(db=self.database, host=MongodbConfig.host, port=MongodbConfig.port,
+        #                    password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
+        with MongoConnect(self.database):
             self.data = pd.DataFrame(AShareExRightDividend.objects.as_pymongo())
             self.data['close'] = self.data.apply(
                 lambda x: self.get_adj_day_close(x['security_code'], x['ex_date'], all_market_data), axis=1)
@@ -47,7 +51,6 @@ class SaveAShareAdjFactor(object):
             for index, row in self.data.iterrows():
                 AShareExRightDividend.objects(security_code=row['security_code'], ex_date=row['ex_date']) \
                     .update(set__adj_factor=row['adj_factor'])
-            pass
 
     def get_adj_day_close(self, security_code, date, all_market_data):
         security_code_market_data = 0
