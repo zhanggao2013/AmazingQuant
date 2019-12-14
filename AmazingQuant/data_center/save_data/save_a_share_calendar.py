@@ -12,6 +12,7 @@ import pandas as pd
 from AmazingQuant.data_center.database_field.filed_a_share_calendar import AShareCalendar
 from AmazingQuant.data_center.mongo_connection import MongoConnect
 from AmazingQuant.utils.data_transfer import date_to_datetime
+from AmazingQuant.constant import DatabaseName
 
 
 class SaveCalendar(object):
@@ -19,7 +20,7 @@ class SaveCalendar(object):
         self.data_df = pd.read_csv(data_path, low_memory=False)
 
     def save_a_share_calendar(self):
-        database = 'stock_base_data'
+        database = DatabaseName.STOCK_BASE_DATA.value
         with MongoConnect(database):
             doc_list = []
             data_grouped = self.data_df.groupby("S_INFO_EXCHMARKET")
