@@ -13,8 +13,9 @@ from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED, as_compl
 
 import pandas as pd
 from mongoengine.context_managers import switch_collection
+from mongoengine import connection
 
-from AmazingQuant.data_center.mongo_connection import MongoConnect
+from AmazingQuant.config.database_info import MongodbConfig
 from AmazingQuant.constant import DatabaseName, Period, RightsAdjustment
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
 from AmazingQuant.data_center.get_data.get_calendar import GetCalendar
@@ -26,13 +27,11 @@ class GetKlineData(object):
         self.field = []
         self.end = datetime.now()
         calendar_obj = GetCalendar()
-        manager = Manager()
-        self.calendar_SZ = manager.list(calendar_obj.get_calendar('SZ'))
+        self.calendar_SZ = calendar_obj.get_calendar('SZ')
 
     def get_all_market_data(self, stock_list=[], field=[], start="", end=datetime.now(), period=Period.DAILY.value,
                             rights_adjustment=RightsAdjustment.NONE.value):
         """
-
         :param stock_list:
         :param field: 默认['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
         :param start:
@@ -59,8 +58,8 @@ class GetKlineData(object):
         with Manager() as manager:
             process_manager_dict = manager.dict()
             for stock_list_i in range(len(stock_list_split)):
-                process_pool.apply_async(self.get_data_with_process_pool, args=(
-                database, stock_list_split[stock_list_i], process_manager_dict, stock_list_i))
+                process_pool.apply_async(self.get_data_with_process_pool,
+                                         args=(database, stock_list_split[stock_list_i], process_manager_dict, stock_list_i))
             process_pool.close()
             process_pool.join()
             process_dict = dict(process_manager_dict)
@@ -69,39 +68,26 @@ class GetKlineData(object):
             for single_stock_data in process_dict.values():
                 stock_data_dict.update(single_stock_data)
 
-            # 补查机制，防止因多线程造成的某些股票数据缺失，入参stock_list中有，但stock_data_dict中没有的股票
-            missing_stock_list = list(set(stock_list).difference(set(stock_data_dict.keys())))
-            with MongoConnect(database):
-                for security_code in missing_stock_list:
-                    print('missing data', security_code)
-                    with switch_collection(Kline, security_code) as KlineDaily_security_code:
-                        security_code_data = KlineDaily_security_code.objects(time_tag__lte=self.end).as_pymongo()
-                        security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
-                        security_code_data_df.set_index(["time_tag"], inplace=True)
-                        stock_data_dict[security_code] = security_code_data_df
-            # return stock_data_dict
             field_data_dict = {}
-            field_data_dict_test = {}
             for i in field:
-                field_data_dict[i] = pd.DataFrame({key: value['close'] for key, value in stock_data_dict.items()})
+                field_data_pd = pd.DataFrame({key: value['close'] for key, value in stock_data_dict.items()})
                 # 原始数据的开高低收除以10000
                 if i in ['open', 'high', 'low', 'close']:
-                    field_data_dict_test[i] = field_data_dict[i].reindex(self.calendar_SZ).fillna(method='ffill')/10000
-            return field_data_dict, field_data_dict_test
+                    field_data_dict[i] = field_data_pd
+            return field_data_dict
 
     def get_data_with_process_pool(self, database, stock_list, process_manager_dict, stock_list_i):
-        with MongoConnect(database):
-            thread_data_dict = {}
-            for stock in stock_list:
-                thread_data_dict[stock] = self.get_data_with_thread_pool(stock)
-            process_manager_dict[stock_list_i] = thread_data_dict
-
-    def get_data_with_thread_pool(self, stock):
-        with switch_collection(Kline, stock) as KlineDaily_security_code:
-            security_code_data = KlineDaily_security_code.objects(time_tag__lte=self.end).as_pymongo()
-            security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
-            security_code_data_df.set_index(["time_tag"], inplace=True)
-            return security_code_data_df
+        connection.connect(db=database, host=MongodbConfig.host, port=MongodbConfig.port,
+                           password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
+        thread_data_dict = {}
+        for stock in stock_list:
+            with switch_collection(Kline, stock) as KlineDaily_security_code:
+                security_code_data = KlineDaily_security_code.objects(time_tag__lte=self.end).as_pymongo()
+                security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
+                security_code_data_df.set_index(["time_tag"], inplace=True)
+                thread_data_dict[stock] = security_code_data_df.reindex(self.calendar_SZ).fillna(method='ffill')/10000
+        process_manager_dict[stock_list_i] = thread_data_dict
+        connection.disconnect()
 
     def get_market_data(self, market_data, stock_code=[], field=[], start="", end="", count=-1):
         result = None
@@ -674,9 +660,6 @@ if __name__ == '__main__':
     print(len(a))
     with Timer(True):
         kline_object = GetKlineData()
-        a, b = kline_object.get_all_market_data(stock_list=['000002.SZ', '600000.SH'],
+        all_market_data = kline_object.get_all_market_data(stock_list=a,
                                              field=['open', 'close'],
                                              end=datetime.now())
-
-
-
