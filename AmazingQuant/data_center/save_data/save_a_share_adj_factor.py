@@ -4,14 +4,14 @@
 # @Time    : 2019/11/23
 # @Author  : gao
 # @File    : save_a_share_adj_factor.py
-# @Project : AmazingQuant 
+# @Project : AmazingQuant
 # ------------------------------
 
-import pandas as pd
-import numpy as np
 from datetime import datetime
-from AmazingQuant.utils.security_type import is_security_type
 
+import pandas as pd
+
+from AmazingQuant.utils.security_type import is_security_type
 from AmazingQuant.data_center.database_field.field_a_share_ex_right_dividend import AShareExRightDividend
 from AmazingQuant.data_center.get_data.get_kline import GetKlineData
 from AmazingQuant.data_center.mongo_connection import MongoConnect
@@ -52,7 +52,7 @@ class SaveAShareAdjFactor(object):
     def get_adj_day_close(self, security_code, date, all_market_data):
         security_code_market_data = 0
         try:
-            security_code_market_data = all_market_data[security_code].loc[date, 'close']
+            security_code_market_data = all_market_data['close'].loc[date, security_code]
         except KeyError:
             print(security_code, date, security_code_market_data)
         return security_code_market_data
