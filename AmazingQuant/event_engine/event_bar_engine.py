@@ -8,8 +8,8 @@
 # ------------------------------
 
 
-from AmazingQuant.event_engine.event_market import *
-from AmazingQuant.analysis_center.event_save_record import *
+from AmazingQuant.strategy_center.event_market import *
+from AmazingQuant.strategy_center.event_save_record import *
 
 
 def run_bar_engine(strategy):
