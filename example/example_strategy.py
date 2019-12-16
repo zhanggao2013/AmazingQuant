@@ -80,7 +80,7 @@ class MaStrategy(StrategyBase):
             for stock in self.universe:
                 # 取当前股票的收盘价
                 close_price = self.data_class.get_market_data(Environment.daily_data, stock_code=[stock], field=['close'],
-                                                         start=self.start, end=self.time_tag)
+                                                              start=self.start, end=self.time_tag)
                 # print(close_price)
                 close_array = np.array(close_price)
 
