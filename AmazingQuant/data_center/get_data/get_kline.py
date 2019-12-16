@@ -28,10 +28,10 @@ class GetKlineData(object):
         calendar_obj = GetCalendar()
         self.calendar_SZ = calendar_obj.get_calendar('SZ')
 
-    def get_all_market_data(self, stock_list=[], field=[], start="", end=datetime.now(), period=Period.DAILY.value,
+    def get_all_market_data(self, security_list=[], field=[], start="", end=datetime.now(), period=Period.DAILY.value,
                             rights_adjustment=RightsAdjustment.NONE.value):
         """
-        :param stock_list:
+        :param security_list:
         :param field: 默认['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
         :param start:
         :param end:
@@ -46,19 +46,19 @@ class GetKlineData(object):
         database = DatabaseName.A_SHARE_KLINE_DAILY.value
         process_num = 2 * cpu_count()
         process_pool = Pool(process_num)
-        process_stock_num = int(len(stock_list) / process_num) + 1
-        stock_list_split = []
-        for i in range(int(len(stock_list) / process_stock_num)):
-            if i < int(len(stock_list) / process_stock_num)-1:
-                stock_list_split.append(stock_list[i * process_stock_num: (i + 1) * process_stock_num])
+        process_stock_num = int(len(security_list) / process_num) + 1
+        security_list_split = []
+        for i in range(int(len(security_list) / process_stock_num)):
+            if i < int(len(security_list) / process_stock_num)-1:
+                security_list_split.append(security_list[i * process_stock_num: (i + 1) * process_stock_num])
             else:
-                stock_list_split.append(stock_list[i * process_stock_num:])
+                security_list_split.append(security_list[i * process_stock_num:])
 
         with Manager() as manager:
             process_manager_dict = manager.dict()
-            for stock_list_i in range(len(stock_list_split)):
-                process_pool.apply_async(self.get_data_with_process_pool,
-                                         args=(database, stock_list_split[stock_list_i], process_manager_dict, stock_list_i))
+            for security_list_i in range(len(security_list_split)):
+                process_pool.apply_async(self._get_data_with_process_pool,
+                                         args=(database, security_list_split[security_list_i], process_manager_dict, security_list_i))
             process_pool.close()
             process_pool.join()
             process_dict = dict(process_manager_dict)
@@ -69,24 +69,57 @@ class GetKlineData(object):
 
             field_data_dict = {}
             for i in field:
-                field_data_pd = pd.DataFrame({key: value['close'] for key, value in stock_data_dict.items()})
+                field_data_pd = pd.DataFrame({key: value[i] for key, value in stock_data_dict.items()})
                 # 原始数据的开高低收除以10000
                 if i in ['open', 'high', 'low', 'close']:
-                    field_data_dict[i] = field_data_pd
+                    field_data_dict[i] = field_data_pd.div(10000)
             return field_data_dict
 
-    def get_data_with_process_pool(self, database, stock_list, process_manager_dict, stock_list_i):
+    def _get_data_with_process_pool(self, database, security_list, process_manager_dict, security_list_i):
         connection.connect(db=database, host=MongodbConfig.host, port=MongodbConfig.port,
                            password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
         thread_data_dict = {}
-        for stock in stock_list:
+        for stock in security_list:
             with switch_collection(Kline, stock) as KlineDaily_security_code:
                 security_code_data = KlineDaily_security_code.objects(time_tag__lte=self.end).as_pymongo()
                 security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
                 security_code_data_df.set_index(["time_tag"], inplace=True)
-                thread_data_dict[stock] = security_code_data_df.reindex(self.calendar_SZ).fillna(method='ffill')/10000
-        process_manager_dict[stock_list_i] = thread_data_dict
+                thread_data_dict[stock] = security_code_data_df.reindex(self.calendar_SZ).fillna(method='ffill')
+        process_manager_dict[security_list_i] = thread_data_dict
         connection.disconnect()
+
+    def get_index_data(self, index_list=[], field=[], start="", end=datetime.now(), period=Period.DAILY.value):
+        """
+        :param index_list:
+        :param field: 默认['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount']
+        :param start:
+        :param end:
+        :param period:
+        :return:
+        """
+
+        self.field = ['time_tag'] + field
+        if len(self.field) == 1:
+            self.field = ['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount']
+        self.end = end
+        database = DatabaseName.INDEX_KLINE_DAILY.value
+        connection.connect(db=database, host=MongodbConfig.host, port=MongodbConfig.port,
+                           password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
+        index_data_dict = {}
+        for index_code in index_list:
+            with switch_collection(Kline, index_code) as KlineDaily_index_code:
+                security_code_data = KlineDaily_index_code.objects(time_tag__lte=self.end).as_pymongo()
+                security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
+                security_code_data_df.set_index(["time_tag"], inplace=True)
+                index_data_dict[index_code] = security_code_data_df.reindex(self.calendar_SZ).fillna(method='ffill')
+        connection.disconnect()
+        field_data_dict = {}
+        for i in field:
+            field_data_pd = pd.DataFrame({key: value[i] for key, value in index_data_dict.items()})
+            # 原始数据的开高低收除以10000
+            if i in ['open', 'high', 'low', 'close']:
+                field_data_dict[i] = field_data_pd.div(10000)
+        return field_data_dict
 
     def get_market_data(self, market_data, stock_code=[], field=[], start="", end="", count=-1):
         result = None
@@ -659,6 +692,7 @@ if __name__ == '__main__':
     print(len(a))
     with Timer(True):
         kline_object = GetKlineData()
-        all_market_data = kline_object.get_all_market_data(stock_list=a,
-                                             field=['open', 'close'],
-                                             end=datetime.now())
+        # all_market_data = kline_object.get_all_market_data(security_list=a,
+        #                                      field=['open', 'close'],
+        #                                      end=datetime.now())
+        index_data = kline_object.get_index_data(index_list=['000001.SH'], field=['open', 'close'], end=datetime.now())
