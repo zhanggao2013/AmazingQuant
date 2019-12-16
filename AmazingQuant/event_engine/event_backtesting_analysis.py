@@ -246,67 +246,26 @@ class EventBacktestingAnalysis(Event):
                 np.array(benchmark_net_asset_value)[1:] - np.array(benchmark_net_asset_value)[:-1])
         strategy_net_asset_value_change = np.array([0]) + (
                 np.array(strategy_net_asset_value)[1:] - np.array(strategy_net_asset_value)[:-1])
-        beta_list = []
-        for time_tag_index in range(len(Environment.benchmark_index)):
-            benchmark_net_asset_value_time_tag = benchmark_net_asset_value_change[:time_tag_index + 1]
-            strategy_net_asset_value_time_tag = strategy_net_asset_value_change[:time_tag_index + 1]
-            if len(benchmark_net_asset_value_time_tag) > 1:
-                beta = (np.cov(benchmark_net_asset_value_time_tag, strategy_net_asset_value_time_tag)[0, 1]) / np.var(
-                    benchmark_net_asset_value_time_tag)
-            else:
-                beta = 0
-            beta_list.append(beta)
-        return beta_list
+        return np.cov(benchmark_net_asset_value_change, strategy_net_asset_value_change)[0, 1] / np.var(
+            benchmark_net_asset_value_change)
 
     def get_alpha(self, benchmark_year_yield, strategy_year_yield, beta):
-        alpha_list = []
-        for i in range(len(benchmark_year_yield)):
-            alpha = strategy_year_yield[i] - (3.0 + beta[i] * (benchmark_year_yield[i] - 3.0))
-            alpha_list.append(alpha)
-        return alpha_list
+        return strategy_year_yield[-1] - (3.0 + beta * (benchmark_year_yield[-1] - 3.0))
 
     def get_volatility(self, strategy_net_asset_value):
         strategy_net_asset_value_change = np.array([0]) + (
                 np.array(strategy_net_asset_value)[1:] - np.array(strategy_net_asset_value)[:-1])
-        volatility_list = []
-        for time_tag_index in range(len(strategy_net_asset_value)):
-            if time_tag_index > 0:
-                volatility = math.sqrt(252) * np.std(strategy_net_asset_value_change[:time_tag_index + 1])
-            else:
-                volatility = 0
-            volatility_list.append(volatility)
-        return volatility_list
+        return math.sqrt(252) * np.std(strategy_net_asset_value_change)
 
     def get_sharp(self, strategy_year_yield, volatility):
-        sharp_list = []
-        for time_tag_index in range(len(strategy_year_yield)):
-            if volatility[time_tag_index] > 0:
-                sharp = (strategy_year_yield[time_tag_index] - 3.0) / volatility[time_tag_index]
-            else:
-                sharp = 0
-            sharp_list.append(sharp)
-        return sharp_list
+        return (strategy_year_yield[-1] - 3.0) / volatility
 
     def get_downside_risk(self, strategy_year_yield):
         downside_strategy_year_yield = [i if i > 3.0 else i == 0 for i in strategy_year_yield]
-        downside_risk_list = []
-        for time_tag_index in range(len(downside_strategy_year_yield)):
-            if time_tag_index > 0:
-                downside_risk = np.std(downside_strategy_year_yield[:time_tag_index + 1])
-            else:
-                downside_risk = 0
-            downside_risk_list.append(downside_risk)
-        return downside_risk_list
+        return np.std(downside_strategy_year_yield)
 
     def get_sortino_ratio(self, strategy_year_yield, downside_risk):
-        sortino_ratio_list = []
-        for time_tag_index in range(len(Environment.benchmark_index)):
-            if downside_risk[time_tag_index] > 0:
-                sortino_ratio = (strategy_year_yield[time_tag_index] - 3.0) / downside_risk[time_tag_index]
-            else:
-                sortino_ratio = 0
-            sortino_ratio_list.append(sortino_ratio)
-        return sortino_ratio_list
+        return (strategy_year_yield[-1] - 3.0) / downside_risk
 
     def get_tracking_error(self, benchmark_net_asset_value, strategy_net_asset_value):
         benchmark_net_asset_value_change = np.array([0]) + (
@@ -314,26 +273,10 @@ class EventBacktestingAnalysis(Event):
         strategy_net_asset_value_change = np.array([0]) + (
                 np.array(strategy_net_asset_value)[1:] - np.array(strategy_net_asset_value)[:-1])
         benchmark_strategy_diff = benchmark_net_asset_value_change - strategy_net_asset_value_change
-        # print(benchmark_strategy_diff)
-        tracking_error_list = []
-        for time_tag_index in range(len(strategy_net_asset_value)):
-            if time_tag_index > 0:
-                tracking_error = math.sqrt(252) * np.std(benchmark_strategy_diff[:time_tag_index + 1])
-            else:
-                tracking_error = 0
-            tracking_error_list.append(tracking_error)
-        return tracking_error_list
+        return math.sqrt(252) * np.std(benchmark_strategy_diff)
 
     def get_information_ratio(self, benchmark_year_yield, strategy_year_yield, tracking_error):
-        information_ratio_list = []
-        for time_tag_index in range(len(strategy_year_yield)):
-            if tracking_error[time_tag_index] > 0:
-                information_ratio = (strategy_year_yield[time_tag_index] - benchmark_year_yield[time_tag_index]) / \
-                                    tracking_error[time_tag_index]
-            else:
-                information_ratio = 0
-            information_ratio_list.append(information_ratio)
-        return information_ratio_list
+        return (strategy_year_yield[-1] - benchmark_year_yield[-1]) / tracking_error
 
     def get_max_drawdown(self, strategy_net_asset_value):
         drawdown_list = []
