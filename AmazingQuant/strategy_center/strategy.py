@@ -13,7 +13,7 @@ from abc import ABCMeta, abstractmethod
 from AmazingQuant.utils import data_transfer, generate_random_id
 from AmazingQuant.constant import RunMode, Period, RightsAdjustment, SlippageType, StockType, RecordDataType
 from AmazingQuant.data_object import *
-# from AmazingQuant.analysis_center.event_analysis_engine import run_backtesting_analysis_engine
+from AmazingQuant.analysis_center.event_analysis_engine import run_backtesting_analysis_engine
 from AmazingQuant.data_center.get_data.get_kline import GetKlineData
 from .event_bar_engine import *
 
@@ -199,9 +199,9 @@ class StrategyBase(metaclass=ABCMeta):
             try:
                 self.timetag = Environment.benchmark_index[self.bar_index]
             except IndexError:
-                # if self.run_mode == RunMode.BACKTESTING.value:
-                #     if save_trade_record:
-                #         run_backtesting_analysis_engine(self)
+                if self.run_mode == RunMode.BACKTESTING.value:
+                    if save_trade_record:
+                        run_backtesting_analysis_engine(self)
 
                 break
                 # elif self.run_mode == RunMode.TRADE.value:

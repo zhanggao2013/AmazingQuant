@@ -33,7 +33,7 @@ class MaStrategy(StrategyBase):
         self.rights_adjustment = RightsAdjustment.NONE.value
         # 设置回测起止时间
         self.start = datetime(2018, 1, 1)
-        self.end = datetime(2019, 1, 1)
+        self.end = datetime(2018, 3, 1)
         # 设置运行周期
         self.period = 'daily'
         # 设置股票池
@@ -150,4 +150,4 @@ if __name__ == '__main__':
     with Timer(True):
         # 运行策略，设置是否保存委托，成交，资金，持仓
         ma_strategy = MaStrategy()
-        ma_strategy.run(save_trade_record=False)
+        ma_strategy.run(save_trade_record=True)
