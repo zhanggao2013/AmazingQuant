@@ -41,7 +41,7 @@ class Trade(object):
 
 
         # CTP相关
-        Environment.current_order_data.order_time = self._strategy.timetag
+        Environment.current_order_data.order_time = self._strategy.time_tag
         for account_data in Environment.bar_account_data_list:
             if account_data.account_id[:-9] == account:
                 Environment.current_order_data.session_id = account_data.account_id
