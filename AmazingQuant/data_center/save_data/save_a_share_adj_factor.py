@@ -614,5 +614,5 @@ if __name__ == '__main__':
 
     stock_code = [i for i in stock_code if is_security_type(i, 'EXTRA_STOCK_A')]
     kline_object = GetKlineData()
-    all_market_data = kline_object.get_all_market_data(stock_list=stock_code, field=["close"], end=datetime.now())
+    all_market_data = kline_object.get_all_market_data(security_list=stock_code, field=["close"], end=datetime.now())
     save_a_share_adj_factor_obj.save_a_share_adj_factor(all_market_data)
