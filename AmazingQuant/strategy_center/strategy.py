@@ -7,7 +7,7 @@
 # @Project : AmazingQuant
 # ------------------------------
 
-
+from datetime import datetime
 from abc import ABCMeta, abstractmethod
 
 from AmazingQuant.utils import data_transfer, generate_random_id
@@ -22,8 +22,8 @@ class StrategyBase(metaclass=ABCMeta):
         self._run_mode = RunMode.BACKTESTING.value
         self._account = []
         self._capital = 1000000
-        self._start = '2017-01-01'
-        self._end = '2018-01-02'
+        self._start = datetime(2017, 1, 1)
+        self._end = datetime(2018, 1, 1)
         self._benchmark = '000300.SH'
         self._period = Period.DAILY.value  # 后续支持1min 3min 5min 等多周期
         self._universe = []
@@ -191,8 +191,6 @@ class StrategyBase(metaclass=ABCMeta):
                                            Environment.one_min_data['open'].ix[self.benchmark].index
                                            if i >= data_transfer.date_str_to_int(self.start)]
 
-        # print(self.benchmark, self.start, self.end, self.period, self.rights_adjustment, self.run_mode)
-        # print(Environment.daily_data)
         self.bar_index = 0
         while True:
             try:
@@ -201,21 +199,15 @@ class StrategyBase(metaclass=ABCMeta):
                 if self.run_mode == RunMode.BACKTESTING.value:
                     if save_trade_record:
                         run_backtesting_analysis_engine(self)
-
-                break
+                        break
                 # elif self.run_mode == RunMode.TRADE.value:
                 #     读取最新tick, 更新最新的分钟或者日线
                 #     if 读取最新tick, 更新最新的分钟或者日线 == done:
                 #         daily_data.append(new_day_data)
                 #         self.bar_index += 1
                 #         benchmark_index.append(new_day_timetag)
-
-                    # pass
-
             else:
-                # date = int(data_transfer.millisecond_to_date(millisecond=self.timetag, format='%Y%m%d'))
                 run_bar_engine(self)
-                pass
 
         @abstractmethod
         def initialize(self):
