@@ -24,7 +24,7 @@ class EventMarket(Event):
         """
         if event.event_data_dict["strategy_data"].bar_index > 0:
             if Environment.bar_position_data_list:
-                current_day = event.event_data_dict["strategy_data"].timetag
+                current_day = event.event_data_dict["strategy_data"].time_tag
                 last_day = Environment.benchmark_index[event.event_data_dict["strategy_data"].bar_index - 1]
                 for position_data in Environment.bar_position_data_list:
                     if last_day != current_day:
@@ -60,7 +60,7 @@ class EventMarket(Event):
         :return:
         """
         if Environment.bar_position_data_list:
-            current_date = event.event_data_dict["strategy_data"].timetag
+            current_date = event.event_data_dict["strategy_data"].time_tag
             data_class = GetKlineData()
             for position_data in Environment.bar_position_data_list:
                 stock_code = position_data.instrument + "." + position_data.exchange
@@ -79,7 +79,7 @@ class EventMarket(Event):
         :param event:
         :return:
         """
-        current_date = event.event_data_dict["strategy_data"].timetag
+        current_date = event.event_data_dict["strategy_data"].time_tag
         data_class = GetKlineData()
 
         if Environment.bar_position_data_list:
