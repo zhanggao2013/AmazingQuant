@@ -33,6 +33,8 @@ class Environment(object):
     daily_data = pd.DataFrame()
     one_min_data = pd.DataFrame()
 
+    index_daily_data = pd.DataFrame()
+
     benchmark_index = []
 
     # 风控部分
@@ -56,7 +58,6 @@ class Environment(object):
     backtesting_record_deal = pd.DataFrame()
     backtesting_record_position = pd.DataFrame()
     backtesting_record_account = pd.DataFrame()
-
 
     # 每次下单交易完成，经过回测broker之后清空order和deal的数据，重置是否通过风控
     @classmethod

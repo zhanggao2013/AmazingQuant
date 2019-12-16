@@ -165,16 +165,20 @@ class StrategyBase(metaclass=ABCMeta):
             self.daily_data_cache = True
         elif self.period == Period.ONE_MIN.value:
             self.one_min_data_cache = True
-        stock_list = copy.copy(self.universe)
-        stock_list = list(set(stock_list))
-        stock_list.append(self.benchmark)
+        # 
+        security_list = copy.copy(self.universe)
+        security_list = list(set(security_list))
         if self._daily_data_cache:
-            Environment.daily_data = self._get_data.get_all_market_data(security_list=stock_list,
+            Environment.daily_data = self._get_data.get_all_market_data(security_list=security_list,
                                                                         field=["open", "high", "low", "close",
                                                                                "volume", "amount"],
                                                                         end=self.end, period=Period.DAILY.value)
+            Environment.index_daily_data = self._get_data.get_index_data(index_list=[self.benchmark],
+                                                                         field=["open", "high", "low", "close",
+                                                                                "volume", "amount"],
+                                                                         end=self.end, period=Period.DAILY.value)
         if self.one_min_data_cache:
-            Environment.one_min_data = self._get_data.get_all_market_data(security_list=stock_list,
+            Environment.one_min_data = self._get_data.get_all_market_data(security_list=security_list,
                                                                           field=["open", "high", "low", "close",
                                                                                  "volume", "amount"],
                                                                           end=self.end, period=Period.ONE_MIN.value)
