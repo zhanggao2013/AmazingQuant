@@ -184,9 +184,8 @@ class StrategyBase(metaclass=ABCMeta):
                                                                           end=self.end, period=Period.ONE_MIN.value)
 
         if self.period == Period.DAILY.value:
-            Environment.benchmark_index = [i for i in
-                                           Environment.index_daily_data['close'][self.benchmark].index
-                                           if i >= self.start]
+            Environment.benchmark_index = [i for i in Environment.index_daily_data['close'][self.benchmark].index
+                                           if self.start <= i <= self.end]
 
         elif self.period == Period.ONE_MIN.value:
             Environment.benchmark_index = [data_transfer.date_to_millisecond(str(int(i)), '%Y%m%d') for i in
