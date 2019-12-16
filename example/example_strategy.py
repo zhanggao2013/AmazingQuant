@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/11/14
 # @Author  : gao
-# @File    : tes_strategy.py.py
+# @File    : example_strategy.py.py
 # @Project : AmazingQuant
 # ------------------------------
 
@@ -28,12 +28,12 @@ class MaStrategy(StrategyBase):
         # 设置回测资金账号资金量
         self.capital = {"test0": 2000000, "test1": 1000}
         # 设置回测基准
-        self.benchmark = "600000.SH"
+        self.benchmark = "000300.SH"
         # 设置复权方式
         self.rights_adjustment = RightsAdjustment.NONE.value
         # 设置回测起止时间
-        self.start = datetime(2015, 1, 1)
-        self.end = datetime(2016, 1, 1)
+        self.start = datetime(2010, 1, 1)
+        self.end = datetime(2019, 1, 1)
         # 设置运行周期
         self.period = "daily"
         # 设置股票池
@@ -134,10 +134,10 @@ class MaStrategy(StrategyBase):
                 if self.timetag in close_price.index:
                     # 如果5日均线突破20日均线，并且没有持仓，则买入这只股票100股，以收盘价为指定价交易
                     if ma5[-1] > ma20[-1] and stock not in available_position_dict.keys():
-                        print("buy", stock, 1, "fix", float(close_price.loc[self.timetag]), type(float(close_price.loc[self.timetag])), self.account)
                         Trade(self).order_shares(stock_code=stock, shares=100, price_type="fix",
                                                  order_price=float(close_price.loc[self.timetag])/10000.0,
                                                  account=self.account[0])
+                        print("sell", stock, -1, "fix", close_price.loc[self.timetag], self.account)
                     # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
                     elif ma5[-1] < ma20[-1] and stock in available_position_dict.keys():
                         Trade(self).order_shares(stock_code=stock, shares=-100, price_type="fix",
