@@ -121,7 +121,7 @@ class GetKlineData(object):
                 field_data_dict[i] = field_data_pd.div(10000)
         return field_data_dict
 
-    def get_market_data(self, market_data, stock_code=[], field=[], start="", end="", count=-1):
+    def get_market_data(self, market_data, stock_code=[], field=[], start="", end="", period=Period.DAILY.value, count=-1):
         result = None
         if len(stock_code) == 1 and len(field) == 1 and (start < end) and count == -1:
             result = market_data[field[0]].loc[start: end, stock_code[0]]
