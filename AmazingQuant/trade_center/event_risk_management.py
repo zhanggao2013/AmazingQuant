@@ -38,7 +38,7 @@ class EventRiskManagement(Event):
     def send_order(cls, event):
         if Environment.current_order_data.status == Status.NOT_REPORTED.value:
             Environment.current_order_data.status = Status.NOT_TRADED.value
-            Environment.current_order_data.order_time = event.event_data_dict["strategy"].timetag
+            Environment.current_order_data.order_time = event.event_data_dict["strategy"].time_tag
             Environment.is_send_order = True
         pass
 
