@@ -124,15 +124,11 @@ class GetKlineData(object):
     def get_market_data(self, market_data, stock_code=[], field=[], start="", end="", count=-1):
         result = None
         if len(stock_code) == 1 and len(field) == 1 and (start < end) and count == -1:
-            market_data_stock_code = market_data.loc[(stock_code[0], )]
-            result = market_data_stock_code.loc[market_data_stock_code.index <= end][field]
+            result = market_data[field[0]].loc[start: end, stock_code[0]]
         elif len(stock_code) == 1 and len(field) == 1 and (start == end) and count == -1:
-            try:
-                result = float(market_data.loc[(stock_code[0], end), field])
-            except KeyError:
-                result = 0
+            result = market_data[field[0]].loc[start, stock_code[0]]
         return result
-        pass
+
 
 
 if __name__ == '__main__':

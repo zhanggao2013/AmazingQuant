@@ -23,9 +23,9 @@ class StrategyBase(metaclass=ABCMeta):
         self._run_mode = RunMode.BACKTESTING.value
         self._account = []
         self._capital = 1000000
-        self._start = "2017-01-01"
-        self._end = "2018-01-02"
-        self._benchmark = "000300.SH"
+        self._start = '2017-01-01'
+        self._end = '2018-01-02'
+        self._benchmark = '000300.SH'
         self._period = Period.DAILY.value  # 后续支持1min 3min 5min 等多周期
         self._universe = []
         self._rights_adjustment = RightsAdjustment.NONE.value
@@ -135,15 +135,15 @@ class StrategyBase(metaclass=ABCMeta):
 
     # 回测滑点设置
     def set_slippage(self, stock_type=StockType.STOCK.value, slippage_type=SlippageType.SLIPPAGE_FIX.value, value=0):
-        Environment.slippage_dict[stock_type] = {"slippage_type": slippage_type, "value": value}
+        Environment.slippage_dict[stock_type] = {'slippage_type': slippage_type, 'value': value}
 
     # 回测手续费和印花税
     def set_commission(self, stock_type=StockType.STOCK.value, tax=0, open_commission=0, close_commission=0,
                        close_today_commission=0, min_commission=0):
-        Environment.commission_dict[stock_type] = {"tax": tax, "open_commission": open_commission,
-                                                   "close_commission": close_commission,
-                                                   "close_today_commission": close_today_commission,
-                                                   "min_commission": min_commission}
+        Environment.commission_dict[stock_type] = {'tax': tax, 'open_commission': open_commission,
+                                                   'close_commission': close_commission,
+                                                   'close_today_commission': close_today_commission,
+                                                   'min_commission': min_commission}
 
     def run(self, save_trade_record=False):
         self.initialize()
@@ -170,27 +170,27 @@ class StrategyBase(metaclass=ABCMeta):
         security_list = list(set(security_list))
         if self._daily_data_cache:
             Environment.daily_data = self._get_data.get_all_market_data(security_list=security_list,
-                                                                        field=["open", "high", "low", "close",
-                                                                               "volume", "amount"],
+                                                                        field=['open', 'high', 'low', 'close',
+                                                                               'volume', 'amount'],
                                                                         end=self.end, period=Period.DAILY.value)
             Environment.index_daily_data = self._get_data.get_index_data(index_list=[self.benchmark],
-                                                                         field=["open", "high", "low", "close",
-                                                                                "volume", "amount"],
+                                                                         field=['open', 'high', 'low', 'close',
+                                                                                'volume', 'amount'],
                                                                          end=self.end, period=Period.DAILY.value)
         if self.one_min_data_cache:
             Environment.one_min_data = self._get_data.get_all_market_data(security_list=security_list,
-                                                                          field=["open", "high", "low", "close",
-                                                                                 "volume", "amount"],
+                                                                          field=['open', 'high', 'low', 'close',
+                                                                                 'volume', 'amount'],
                                                                           end=self.end, period=Period.ONE_MIN.value)
 
         if self.period == Period.DAILY.value:
             Environment.benchmark_index = [i for i in
-                                           Environment.daily_data.loc[self.benchmark].index
+                                           Environment.index_daily_data['close'][self.benchmark].index
                                            if i >= self.start]
 
         elif self.period == Period.ONE_MIN.value:
             Environment.benchmark_index = [data_transfer.date_to_millisecond(str(int(i)), '%Y%m%d') for i in
-                                           Environment.one_min_data["open"].ix[self.benchmark].index
+                                           Environment.one_min_data['open'].ix[self.benchmark].index
                                            if i >= data_transfer.date_str_to_int(self.start)]
 
         # print(self.benchmark, self.start, self.end, self.period, self.rights_adjustment, self.run_mode)
@@ -215,7 +215,7 @@ class StrategyBase(metaclass=ABCMeta):
                     # pass
 
             else:
-                # date = int(data_transfer.millisecond_to_date(millisecond=self.timetag, format="%Y%m%d"))
+                # date = int(data_transfer.millisecond_to_date(millisecond=self.timetag, format='%Y%m%d'))
                 run_bar_engine(self)
                 pass
 

@@ -32,7 +32,7 @@ class MaStrategy(StrategyBase):
         # 设置复权方式
         self.rights_adjustment = RightsAdjustment.NONE.value
         # 设置回测起止时间
-        self.start = datetime(2010, 1, 1)
+        self.start = datetime(2018, 1, 1)
         self.end = datetime(2019, 1, 1)
         # 设置运行周期
         self.period = "daily"
@@ -117,16 +117,14 @@ class MaStrategy(StrategyBase):
             close_price = data_class.get_market_data(Environment.daily_data, stock_code=[stock], field=["close"],
                                                  start=self.start,
                                                  end=self.timetag)
-
-
             # print(self.start, current_date)
             # print(stock, close_price)
-            close_array = np.array(close_price['close'])
+            close_array = np.array(close_price)
             # print(stock,  close_price.index)
             if len(close_array) > 0:
                 # 利用talib计算MA
-                ma5 = talib.MA(np.array(close_price['close']/10000.0)[-20:], timeperiod=5)
-                ma20 = talib.MA(np.array(close_price['close']/10000.0)[-20:], timeperiod=20)
+                ma5 = talib.MA(close_array[-20:], timeperiod=5)
+                ma20 = talib.MA(close_array[-20:], timeperiod=20)
 
                 # print('ma5', ma5)
 
@@ -135,13 +133,13 @@ class MaStrategy(StrategyBase):
                     # 如果5日均线突破20日均线，并且没有持仓，则买入这只股票100股，以收盘价为指定价交易
                     if ma5[-1] > ma20[-1] and stock not in available_position_dict.keys():
                         Trade(self).order_shares(stock_code=stock, shares=100, price_type="fix",
-                                                 order_price=float(close_price.loc[self.timetag])/10000.0,
+                                                 order_price=close_price.loc[self.timetag],
                                                  account=self.account[0])
                         print("sell", stock, -1, "fix", close_price.loc[self.timetag], self.account)
                     # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
                     elif ma5[-1] < ma20[-1] and stock in available_position_dict.keys():
                         Trade(self).order_shares(stock_code=stock, shares=-100, price_type="fix",
-                                                 order_price=float(close_price.loc[self.timetag])/10000.0,
+                                                 order_price=close_price.loc[self.timetag],
                                                  account=self.account[0])
                         print("sell", stock, -1, "fix", close_price.loc[self.timetag], self.account)
 
@@ -149,9 +147,7 @@ class MaStrategy(StrategyBase):
 if __name__ == "__main__":
     # 测试运行完整个策略所需时间
     from AmazingQuant.utils.performance_test import Timer
-
-    time_test = Timer(True)
-    with time_test:
+    with Timer(True):
         # 运行策略，设置是否保存委托，成交，资金，持仓
         ma_strategy = MaStrategy()
         ma_strategy.run(save_trade_record=False)
