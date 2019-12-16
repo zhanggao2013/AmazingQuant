@@ -28,7 +28,7 @@ class StrategyBase(metaclass=ABCMeta):
         self._period = Period.DAILY.value  # 后续支持1min 3min 5min 等多周期
         self._universe = []
         self._rights_adjustment = RightsAdjustment.NONE.value
-        self._timetag = 0
+        self._time_tag = 0
         # 数据缓存开关
         self._daily_data_cache = False
         self._one_min_data_cache = False
@@ -109,12 +109,12 @@ class StrategyBase(metaclass=ABCMeta):
         self._rights_adjustment = value
 
     @property
-    def timetag(self):
-        return self._timetag
+    def time_tag(self):
+        return self._time_tag
 
-    @timetag.setter
-    def timetag(self, value):
-        self._timetag = value
+    @time_tag.setter
+    def time_tag(self, value):
+        self._time_tag = value
 
     @property
     def daily_data_cache(self):
@@ -157,7 +157,7 @@ class StrategyBase(metaclass=ABCMeta):
                 Environment.bar_account_data_list.append(Environment.current_account_data)
 
         # if self.run_mode == RunMode.TRADE.value:
-        #     self.end = self._get_data.get_end_timetag(benchmark=self.benchmark, period=Period.DAILY.value)
+        #     self.end = self._get_data.get_end_time_tag(benchmark=self.benchmark, period=Period.DAILY.value)
 
         # 缓存数据开关，和bar_index的计算
         if self.period == Period.DAILY.value:
@@ -194,7 +194,7 @@ class StrategyBase(metaclass=ABCMeta):
         self.bar_index = 0
         while True:
             try:
-                self.timetag = Environment.benchmark_index[self.bar_index]
+                self.time_tag = Environment.benchmark_index[self.bar_index]
             except IndexError:
                 if self.run_mode == RunMode.BACKTESTING.value:
                     if save_trade_record:
@@ -205,7 +205,7 @@ class StrategyBase(metaclass=ABCMeta):
                 #     if 读取最新tick, 更新最新的分钟或者日线 == done:
                 #         daily_data.append(new_day_data)
                 #         self.bar_index += 1
-                #         benchmark_index.append(new_day_timetag)
+                #         benchmark_index.append(new_day_time_tag)
             else:
                 run_bar_engine(self)
 

@@ -65,19 +65,19 @@ class MaStrategy(StrategyBase):
                             close_today_commission=0, min_commission=5)
 
     def handle_bar(self, event):
-        print('self.timetag', self.timetag)
+        print('self.time_tag', self.time_tag)
         # 取当前bar的持仓情况
         available_position_dict = {}
         for position in Environment.bar_position_data_list:
             available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
-        index_member_list = self.index_member_obj.get_index_member_in_date(self.timetag)
+        index_member_list = self.index_member_obj.get_index_member_in_date(self.time_tag)
         # 取数据实例
         data_class = GetKlineData()
         # 循环遍历股票池
         for stock in self.universe:
             # 取当前股票的收盘价
             close_price = data_class.get_market_data(Environment.daily_data, stock_code=[stock], field=['close'],
-                                                     start=self.start, end=self.timetag)
+                                                     start=self.start, end=self.time_tag)
             # print(close_price)
             close_array = np.array(close_price.dropna())
             # print(stock,  close_price.index)
@@ -89,24 +89,24 @@ class MaStrategy(StrategyBase):
                 # print('ma5', ma5[-1], ma20[-1], ma5[-1] > ma20[-1], len(available_position_dict.keys()))
 
                 # 过滤因为停牌没有数据
-                if self.timetag in close_price.index:
+                if self.time_tag in close_price.index:
                     # 如果5日均线突破20日均线，并且没有持仓，则买入这只股票100股，以收盘价为指定价交易
                     if ma5[-1] > ma20[-1] and stock not in available_position_dict.keys() and stock in index_member_list:
                         Trade(self).order_shares(stock_code=stock, shares=100, price_type='fix',
-                                                 order_price=close_price.loc[self.timetag],
+                                                 order_price=close_price.loc[self.time_tag],
                                                  account=self.account[0])
-                        print('buy', stock, -1, 'fix', close_price.loc[self.timetag], self.account)
+                        print('buy', stock, -1, 'fix', close_price.loc[self.time_tag], self.account)
                     # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
                     elif ma5[-1] < ma20[-1] and stock in available_position_dict.keys():
                         Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
-                                                 order_price=close_price.loc[self.timetag],
+                                                 order_price=close_price.loc[self.time_tag],
                                                  account=self.account[0])
-                        print('sell', stock, -1, 'fix', close_price.loc[self.timetag], self.account)
+                        print('sell', stock, -1, 'fix', close_price.loc[self.time_tag], self.account)
                     elif stock in available_position_dict.keys() and stock not in index_member_list:
                         Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
-                                                 order_price=close_price.loc[self.timetag],
+                                                 order_price=close_price.loc[self.time_tag],
                                                  account=self.account[0])
-                        print('sell not in index_member_list', stock, -1, 'fix', close_price.loc[self.timetag], self.account)
+                        print('sell not in index_member_list', stock, -1, 'fix', close_price.loc[self.time_tag], self.account)
 
 
 if __name__ == '__main__':
