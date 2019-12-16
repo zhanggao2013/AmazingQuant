@@ -11,10 +11,9 @@
 from abc import ABCMeta, abstractmethod
 
 from AmazingQuant.utils import data_transfer, generate_random_id
-from AmazingQuant.constant import RunMode, Period, RightsAdjustment, SlippageType, StockType, RecordDataType
+from AmazingQuant.constant import RunMode, Period, RightsAdjustment, SlippageType, StockType
 from AmazingQuant.data_object import *
-from AmazingQuant.analysis_center.event_analysis_engine import run_backtesting_analysis_engine
-from AmazingQuant.data_center.get_data.get_kline import GetKlineData
+from AmazingQuant.event_engine.event_analysis_engine import run_backtesting_analysis_engine
 from .event_bar_engine import *
 
 

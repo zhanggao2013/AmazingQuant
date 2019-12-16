@@ -9,8 +9,8 @@
 
 
 from AmazingQuant.event_engine.event_engine_base import EventEngineBase
-from AmazingQuant.event_engine.event_order import *
-from AmazingQuant.event_engine.event_risk_management import *
+from AmazingQuant.trade_center.event_order import *
+from AmazingQuant.trade_center.event_risk_management import *
 
 
 def run_mission_engine(strategy):

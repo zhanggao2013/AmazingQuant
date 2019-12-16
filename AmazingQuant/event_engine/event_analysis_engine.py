@@ -7,7 +7,7 @@
 # @Project : AmazingQuant
 # ------------------------------
 
-from AmazingQuant.event_engine.event_backtesting_analysis import *
+from AmazingQuant.analysis_center.event_backtesting_analysis import *
 from AmazingQuant.event_engine.event_engine_base import EventEngineBase
 
 

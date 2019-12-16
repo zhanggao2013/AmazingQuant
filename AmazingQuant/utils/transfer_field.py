@@ -11,6 +11,7 @@ from mongoengine import document
 
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
 
+
 def transfer_field(path):
     with open(path, encoding='UTF-8') as f:
         data = f.readlines()

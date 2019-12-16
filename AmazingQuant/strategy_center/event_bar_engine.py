@@ -9,7 +9,7 @@
 
 
 from AmazingQuant.event_engine.event_market import *
-from AmazingQuant.event_engine.event_save_record import *
+from AmazingQuant.analysis_center.event_save_record import *
 
 
 def run_bar_engine(strategy):

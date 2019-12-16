@@ -6,9 +6,9 @@
 # @File    : event_broker_engine.py.py
 # @Project : AmazingQuant
 # ------------------------------
-from AmazingQuant.event_engine.event_engine_base import Event, EventEngineBase
+from AmazingQuant.event_engine.event_engine_base import EventEngineBase
 from AmazingQuant.constant import EventType
-from AmazingQuant.event_engine.event_deal import EventDeal
+from AmazingQuant.trade_center.event_deal import EventDeal
 from AmazingQuant.environment import Environment
 
 

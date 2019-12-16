@@ -33,7 +33,7 @@ class MaStrategy(StrategyBase):
         self.rights_adjustment = RightsAdjustment.NONE.value
         # 设置回测起止时间
         self.start = datetime(2018, 1, 1)
-        self.end = datetime(2018, 3, 1)
+        self.end = datetime(2018, 2, 1)
         # 设置运行周期
         self.period = 'daily'
         # 设置股票池

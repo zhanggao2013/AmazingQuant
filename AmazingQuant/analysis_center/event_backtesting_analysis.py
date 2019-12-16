@@ -12,7 +12,6 @@ import os
 import time
 import copy
 import math
-import collections
 
 import pandas as pd
 import numpy as np
@@ -92,10 +91,11 @@ class EventBacktestingAnalysis(Event):
 
     @classmethod
     def show_backtesting_indicator(cls, event):
+        period = event.event_data_dict['strategy'].period
+        benchmark = event.event_data_dict['strategy'].benchmark
         indicator_dict = {}
-        indicator_dict = collections.OrderedDict()
         # （１）基准净值
-        benchmark_net_asset_value = cls().get_benchmark_net_asset_value(event)
+        benchmark_net_asset_value = cls().get_benchmark_net_asset_value(period, benchmark)
         print('benchmark_net_asset_value', benchmark_net_asset_value)
 
         # （２）策略净值
@@ -196,30 +196,23 @@ class EventBacktestingAnalysis(Event):
     #              tooltip_tragger='axis', legend_top='3%', is_datazoom_show=True)
     #     page.add(line)
 
-    def get_benchmark_net_asset_value(self, event):
-        period = event.event_data_dict['strategy'].period
-
+    def get_benchmark_net_asset_value(self, period, benchmark):
         data_class = GetKlineData()
-
-        benchmark = event.event_data_dict['strategy'].benchmark
         benchmark_close = None
         if period == Period.DAILY.value:
             start_time = Environment.benchmark_index[0]
             end_time = Environment.benchmark_index[-1]
 
             benchmark_close = data_class.get_market_data(Environment.index_daily_data, stock_code=[benchmark],
-                                                         field=['close'], start=start_time, end=end_time)
+                                                         field=['close'], start=start_time, end=end_time, period=period)
         elif period == Period.ONE_MIN.value:
             start_time = millisecond_to_date(millisecond=Environment.benchmark_index[0], format='%Y-%m-%d %H:%M:%S')
             end_time = millisecond_to_date(millisecond=Environment.benchmark_index[-1], format='%Y-%m-%d %H:%M:%S')
-
             benchmark_close = data_class.get_market_data(Environment.index_daily_data, stock_code=[benchmark],
                                                          field=['close'], start=start_time, end=end_time)
 
         benchmark_close = list(benchmark_close)
-
         benchmark_net_asset_value = [current_close / benchmark_close[0] for current_close in benchmark_close]
-
         return benchmark_net_asset_value
 
     def get_strategy_net_asset_value(self):
@@ -234,11 +227,9 @@ class EventBacktestingAnalysis(Event):
 
     def get_year_yield(self, net_asset_value):
         # 分钟回测的年化处理，　（计算不对，必须取交易日列表,改变benchmark_time_tag_to_day[value]）
-        benchmark_index = Environment.benchmark_index
         # benchmark_time_tag_to_day = [int(time_tag - benchmark_index[0]) / 86400000 for time_tag in benchmark_index]
         year_yield = [100 * (pow(net_asset_value[value], 252.0 / value) - 1) if
-                      value > 0 else 1 for value in
-                      range(len(net_asset_value))]
+                      value > 0 else 1 for value in range(len(net_asset_value))]
         return year_yield
 
     def get_beta(self, benchmark_net_asset_value, strategy_net_asset_value):

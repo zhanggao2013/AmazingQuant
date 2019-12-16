@@ -29,4 +29,4 @@ def is_security_type(stock_code, security_type):
 
 
 if __name__ == '__main__':
-    print(is_security_type("300792.SZ", "SZ_GEM_BORAD"))
+    print(is_security_type("H00914.SH", "EXTRA_STOCK_A"))
