@@ -124,7 +124,7 @@ class GetKlineData(object):
     def get_market_data(self, market_data, stock_code=[], field=[], start="", end="", period=Period.DAILY.value, count=-1):
         result = None
         if len(stock_code) == 1 and len(field) == 1 and (start < end) and count == -1:
-            result = market_data[field[0]].loc[start: end, stock_code[0]]
+            result = market_data[field[0]][stock_code[0]][start: end]
         elif len(stock_code) == 1 and len(field) == 1 and (start == end) and count == -1:
             result = market_data[field[0]].loc[start, stock_code[0]]
         return result
