@@ -7,6 +7,7 @@
 # @Project : AmazingQuant
 # ------------------------------
 
+import time
 import numpy as np
 import pandas as pd
 import talib
@@ -67,15 +68,17 @@ class MaStrategy(StrategyBase):
         self.set_commission(stock_type=StockType.STOCK_SZ.value, tax=0.001, open_commission=0.0003,
                             close_commission=0.0005,
                             close_today_commission=0, min_commission=5)
+        self.now = time.time()
 
     def handle_bar(self, event):
-        print('self.time_tag', self.time_tag, datetime.now())
+        print('self.time_tag', self.time_tag, datetime.now(), (time.time()-self.now)*1000)
         # 取当前bar的持仓情况
-        available_position_dict = {}
-        for position in Environment.bar_position_data_list:
-            available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
-        index_member_list = self.index_member_obj.get_index_member_in_date(self.time_tag)
         with Timer(True):
+            available_position_dict = {}
+            for position in Environment.bar_position_data_list:
+                available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
+            index_member_list = self.index_member_obj.get_index_member_in_date(self.time_tag)
+
             # 循环遍历股票池
             for stock in self.universe:
                 # 取当前股票的收盘价
@@ -114,11 +117,11 @@ class MaStrategy(StrategyBase):
                                                      order_price=close_price.loc[self.time_tag],
                                                      account=self.account[0])
                             print('sell not in index_member_list', stock, -1, 'fix', close_price.loc[self.time_tag], self.account)
+        self.now = time.time()
 
 
 if __name__ == '__main__':
     # 测试运行完整个策略所需时间
-
     with Timer(True):
         # 运行策略，设置是否保存委托，成交，资金，持仓
         ma_strategy = MaStrategy()
