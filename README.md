@@ -42,6 +42,7 @@ AmazingQuant是一款基于event-driven的量化回测交易开源框架，下�
 # @Project : AmazingQuant
 # ------------------------------
 
+import time
 import numpy as np
 import pandas as pd
 import talib
@@ -106,20 +107,20 @@ class MaStrategy(StrategyBase):
     def handle_bar(self, event):
         print('self.time_tag', self.time_tag, datetime.now())
         # 取当前bar的持仓情况
-        available_position_dict = {}
-        for position in Environment.bar_position_data_list:
-            available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
-        index_member_list = self.index_member_obj.get_index_member_in_date(self.time_tag)
         with Timer(True):
+            available_position_dict = {}
+            for position in Environment.bar_position_data_list:
+                available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
+            index_member_list = self.index_member_obj.get_index_member_in_date(self.time_tag)
+
+            close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=self.universe, field=['close'],
+                                                              start=self.start, end=self.time_tag)
             # 循环遍历股票池
             for stock in self.universe:
                 # 取当前股票的收盘价
-                close_price = self.data_class.get_market_data(Environment.daily_data, stock_code=[stock], field=['close'],
-                                                              start=self.start, end=self.time_tag)
-                # print(close_price)
+                close_price = close_price_all['close'][stock]
                 close_array = np.array(close_price)
 
-                # print(stock,  close_price.index)
                 if len(close_array) > 0:
                     # 利用talib计算MA
                     try:
@@ -152,13 +153,11 @@ class MaStrategy(StrategyBase):
 
 
 if __name__ == '__main__':
-    # 测试运行完整个策略所需时间,动态股票池沪深３００，一年时间，全过程大约４９秒
-
+    # 测试运行完整个策略所需时间，沪深300动态股票池，一年数据，均线策略
     with Timer(True):
         # 运行策略，设置是否保存委托，成交，资金，持仓
         ma_strategy = MaStrategy()
         ma_strategy.run(save_trade_record=True)
-
 
 ```
 # 4.回测结果分析
