@@ -12,6 +12,8 @@ from AmazingQuant.data_center.get_data.get_kline import GetKlineData
 
 
 class EventMarket(Event):
+    current_close_price_all = None
+
     def __init__(self):
         super().__init__(event_type=EventType.EVENT_MARKET.value)
 
@@ -37,6 +39,17 @@ class EventMarket(Event):
         event.event_data_dict["strategy_data"].bar_index += 1
 
     @classmethod
+    def update_market_data(cls, event):
+        current_date = event.event_data_dict["strategy_data"].time_tag
+        data_class = GetKlineData()
+        stock_code_list = []
+        for position_data in Environment.bar_position_data_list:
+            stock_code_list.append(position_data.instrument + "." + position_data.exchange)
+        stock_code_list = list(set(stock_code_list))
+        cls.current_close_price_all = data_class.get_market_data(Environment.daily_data, stock_code=stock_code_list,
+                                                                 field=["close"], start=current_date, end=current_date)
+
+    @classmethod
     def delete_position_zero(cls, event):
         """
         删除持仓数量为０的position
@@ -55,14 +68,9 @@ class EventMarket(Event):
         :return:
         """
         if Environment.bar_position_data_list:
-            current_date = event.event_data_dict["strategy_data"].time_tag
-            data_class = GetKlineData()
             for position_data in Environment.bar_position_data_list:
                 stock_code = position_data.instrument + "." + position_data.exchange
-                current_close_price = data_class.get_market_data(Environment.daily_data, stock_code=[stock_code],
-                                                                 field=["close"],
-                                                                 start=current_date,
-                                                                 end=current_date)
+                current_close_price = cls.current_close_price_all["close"][stock_code]
                 position_data.position_profit = position_data.position * (
                         current_close_price - position_data.average_price)
         # print("更新bar_close持仓盈亏")
@@ -74,9 +82,6 @@ class EventMarket(Event):
         :param event:
         :return:
         """
-        current_date = event.event_data_dict["strategy_data"].time_tag
-        data_class = GetKlineData()
-
         if Environment.bar_position_data_list:
             for account in Environment.bar_account_data_list:
                 # 分资金账号update
@@ -84,10 +89,7 @@ class EventMarket(Event):
                 for position_data in Environment.bar_position_data_list:
                     if account.account_id == position_data.account_id:
                         stock_code = position_data.instrument + "." + position_data.exchange
-                        current_close_price = data_class.get_market_data(Environment.daily_data, stock_code=[stock_code],
-                                                                         field=["close"],
-                                                                         start=current_date,
-                                                                         end=current_date)
+                        current_close_price = cls.current_close_price_all["close"][stock_code]
                         hold_balance += position_data.position * current_close_price
                     account.total_balance = account.available + hold_balance
                 pass

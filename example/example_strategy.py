@@ -79,15 +79,14 @@ class MaStrategy(StrategyBase):
                 available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
             index_member_list = self.index_member_obj.get_index_member_in_date(self.time_tag)
 
+            close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=self.universe, field=['close'],
+                                                              start=self.start, end=self.time_tag)
             # 循环遍历股票池
             for stock in self.universe:
                 # 取当前股票的收盘价
-                close_price = self.data_class.get_market_data(Environment.daily_data, stock_code=[stock], field=['close'],
-                                                              start=self.start, end=self.time_tag)
-                # print(close_price)
+                close_price = close_price_all['close'][stock]
                 close_array = np.array(close_price)
 
-                # print(stock,  close_price.index)
                 if len(close_array) > 0:
                     # 利用talib计算MA
                     try:
