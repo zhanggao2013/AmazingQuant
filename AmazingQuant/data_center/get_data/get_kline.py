@@ -24,9 +24,8 @@ from AmazingQuant.utils.performance_test import Timer
 class GetKlineData(object):
     def __init__(self):
         self.field = []
-        self.end = datetime.now()
-        calendar_obj = GetCalendar()
-        self.calendar_SZ = calendar_obj.get_calendar('SZ')
+        self.end = ''
+        self.calendar_SZ = []
 
     def get_all_market_data(self, security_list=[], field=[], start="", end=datetime.now(), period=Period.DAILY.value,
                             rights_adjustment=RightsAdjustment.NONE.value):
@@ -39,6 +38,8 @@ class GetKlineData(object):
         :param rights_adjustment:
         :return:
         """
+        calendar_obj = GetCalendar()
+        self.calendar_SZ = calendar_obj.get_calendar('SZ')
         self.field = ['time_tag'] + field
         if len(self.field) == 1:
             self.field = ['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
