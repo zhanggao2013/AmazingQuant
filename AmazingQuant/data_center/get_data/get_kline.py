@@ -128,8 +128,11 @@ class GetKlineData(object):
             result = market_data[field[0]][stock_code[0]][start: end]
         elif len(stock_code) == 1 and len(field) == 1 and (start == end) and count == -1:
             result = market_data[field[0]].loc[start, stock_code[0]]
+        elif len(stock_code) > 1 and (start == end) and count == -1:
+            result = {i: market_data[i].loc[start, stock_code] for i in field}
+        elif len(stock_code) > 1 and (start != end) and count == -1:
+            result = {i: market_data[i].loc[start: end, stock_code] for i in field}
         return result
-
 
 
 if __name__ == '__main__':
@@ -689,7 +692,11 @@ if __name__ == '__main__':
     print(len(a))
     with Timer(True):
         kline_object = GetKlineData()
-        # all_market_data = kline_object.get_all_market_data(security_list=a,
-        #                                      field=['open', 'close'],
-        #                                      end=datetime.now())
+        all_market_data = kline_object.get_all_market_data(security_list=a,
+                                             field=['open', 'close'],
+                                             end=datetime.now())
         index_data = kline_object.get_index_data(index_list=['000001.SH'], field=['open', 'close'], end=datetime.now())
+        market_data = kline_object.get_market_data(all_market_data, stock_code=a[:20], field=['open', 'close'],
+                                                   start=datetime(2019, 7, 5), end=datetime(2019, 7, 5))
+
+
