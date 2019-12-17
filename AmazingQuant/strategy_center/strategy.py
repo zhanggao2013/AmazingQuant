@@ -209,11 +209,11 @@ class StrategyBase(metaclass=ABCMeta):
             else:
                 run_bar_engine(self)
 
-        @abstractmethod
-        def initialize(self):
-            pass
+    @abstractmethod
+    def initialize(self):
+        pass
 
-        @abstractmethod
-        def handle_bar(self, event):
-            print('abstractmethod handle_bar')
-            pass
+    @abstractmethod
+    def handle_bar(self, event):
+        print('abstractmethod handle_bar')
+        pass
