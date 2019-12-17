@@ -103,9 +103,10 @@ class MaStrategy(StrategyBase):
         self.set_commission(stock_type=StockType.STOCK_SZ.value, tax=0.001, open_commission=0.0003,
                             close_commission=0.0005,
                             close_today_commission=0, min_commission=5)
+        self.now = time.time()
 
     def handle_bar(self, event):
-        print('self.time_tag', self.time_tag, datetime.now())
+        print('self.time_tag', self.time_tag, datetime.now(), (time.time()-self.now)*1000)
         # 取当前bar的持仓情况
         with Timer(True):
             available_position_dict = {}
@@ -113,10 +114,10 @@ class MaStrategy(StrategyBase):
                 available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
             index_member_list = self.index_member_obj.get_index_member_in_date(self.time_tag)
 
-            close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=self.universe, field=['close'],
+            close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=index_member_list, field=['close'],
                                                               start=self.start, end=self.time_tag)
             # 循环遍历股票池
-            for stock in self.universe:
+            for stock in index_member_list:
                 # 取当前股票的收盘价
                 close_price = close_price_all['close'][stock]
                 close_array = np.array(close_price)
@@ -145,19 +146,22 @@ class MaStrategy(StrategyBase):
                                                      order_price=close_price.loc[self.time_tag],
                                                      account=self.account[0])
                             print('sell', stock, -1, 'fix', close_price.loc[self.time_tag], self.account)
-                        elif stock in available_position_dict.keys() and stock not in index_member_list:
-                            Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
-                                                     order_price=close_price.loc[self.time_tag],
-                                                     account=self.account[0])
-                            print('sell not in index_member_list', stock, -1, 'fix', close_price.loc[self.time_tag], self.account)
+            for stock in available_position_dict.keys():
+                if stock not in index_member_list:
+                    Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
+                                             order_price=close_price.loc[self.time_tag],
+                                             account=self.account[0])
+                    print('sell not in index_member_list', stock, -1, 'fix', close_price.loc[self.time_tag], self.account)
+        self.now = time.time()
 
 
 if __name__ == '__main__':
-    # 测试运行完整个策略所需时间，沪深300动态股票池，一年数据，均线策略,18s完成
+    # 测试运行完整个策略所需时间，沪深300动态股票池，一年数据，均线策略,11s完成
     with Timer(True):
         # 运行策略，设置是否保存委托，成交，资金，持仓
         ma_strategy = MaStrategy()
         ma_strategy.run(save_trade_record=True)
+
 
 ```
 # 4.回测结果分析
