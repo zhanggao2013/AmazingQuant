@@ -168,10 +168,12 @@ class StrategyBase(metaclass=ABCMeta):
         security_list = copy.copy(self.universe)
         security_list = list(set(security_list))
         if self._daily_data_cache:
-            Environment.daily_data = self._get_data.get_all_market_data(security_list=security_list,
-                                                                        field=['open', 'high', 'low', 'close',
-                                                                               'volume', 'amount'],
-                                                                        end=self.end, period=Period.DAILY.value)
+            # Environment.daily_data = self._get_data.get_all_market_data(security_list=security_list,
+            #                                                             field=['open', 'high', 'low', 'close',
+            #                                                                    'volume', 'amount'],
+            #                                                             end=self.end, period=Period.DAILY.value)
+            import pandas as pd
+            Environment.daily_data = {'close': pd.read_hdf('close.h5', key='close')}
             Environment.index_daily_data = self._get_data.get_index_data(index_list=[self.benchmark],
                                                                          field=['open', 'high', 'low', 'close',
                                                                                 'volume', 'amount'],
@@ -192,8 +194,10 @@ class StrategyBase(metaclass=ABCMeta):
                                            if i >= data_transfer.date_str_to_int(self.start)]
 
         self.bar_index = 0
+
         while True:
             try:
+                # print(self.time_tag, Environment.benchmark_index)
                 self.time_tag = Environment.benchmark_index[self.bar_index]
             except IndexError:
                 if self.run_mode == RunMode.BACKTESTING.value:
