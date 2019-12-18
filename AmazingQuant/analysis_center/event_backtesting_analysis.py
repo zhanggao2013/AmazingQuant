@@ -34,6 +34,7 @@ class EventBacktestingAnalysis(Event):
 
     @classmethod
     def save_backtesting_record_to_csv(cls, event):
+        millisecond_time_tag = str(int(time.time() * 1000))
         for data_type in RecordDataType.__members__.values():
             data_type_value = data_type.value
             data_obj = None
@@ -80,14 +81,10 @@ class EventBacktestingAnalysis(Event):
 
             elif data_type_value == RecordDataType.ACCOUNT_DATA.value:
                 Environment.backtesting_record_account = all_data
-
-            millisecond_time_tag = str(int(time.time() * 1000))
             save_path_dir = sys.argv[0][sys.argv[0].rfind(os.sep) + 1:][:-3] + millisecond_time_tag
             is_exists = os.path.exists(save_path_dir)
             if not is_exists:
                 os.mkdir(save_path_dir)
-            # all_data.to_csv(
-            #     sys.argv[0][sys.argv[0].rfind(os.sep) + 1:][:-3] + '_' + data_type_value + millisecond_time_tag + '.csv')
             all_data.to_csv(save_path_dir + '/' + data_type_value + '.csv')
 
     @classmethod

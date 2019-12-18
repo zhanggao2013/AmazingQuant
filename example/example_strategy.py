@@ -72,6 +72,7 @@ class MaStrategy(StrategyBase):
 
     def handle_bar(self, event):
         print('self.time_tag', self.time_tag, datetime.now(), (time.time()-self.now)*1000)
+        print(len(Environment.bar_position_data_list))
         # 取当前bar的持仓情况
         with Timer(True):
             available_position_dict = {}
