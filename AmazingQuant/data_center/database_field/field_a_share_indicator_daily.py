@@ -9,7 +9,7 @@
 from datetime import datetime
 
 from mongoengine import Document
-from mongoengine.fields import DictField, DateTimeField, ListField, BinaryField
+from mongoengine.fields import StringField, DateTimeField, ListField, BinaryField
 
 
 class AShareIndicatorDaily(Document):
@@ -18,10 +18,11 @@ class AShareIndicatorDaily(Document):
     """
     # 更新时间
     update_date = DateTimeField(default=datetime.utcnow())
-    # 时间戳
-    # time_tag = DateTimeField(required=True)
-    # security_code_list = ListField(required=True)
-    # 指标数据，key：security_code
+    # 数据截止时间戳
+    end_time = DateTimeField(required=True)
+    # 指标周期
+    period = StringField(required=True)
+    # 指标数据, dataframe转二进制
     data = BinaryField(required=True)
 
-    # meta = {'indexes': ['time_tag']}
+    meta = {'indexes': ['end_time']}

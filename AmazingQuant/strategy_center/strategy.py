@@ -168,15 +168,9 @@ class StrategyBase(metaclass=ABCMeta):
         security_list = copy.copy(self.universe)
         security_list = list(set(security_list))
         if self._daily_data_cache:
-            # Environment.daily_data = self._get_data.get_all_market_data(security_list=security_list,
-            #                                                             field=['open', 'high', 'low', 'close',
-            #                                                                    'volume', 'amount'],
-            #                                                             end=self.end, period=Period.DAILY.value)
-            import pandas as pd
-            Environment.daily_data = {'close': pd.read_hdf('close.h5', key='close')}
+            Environment.daily_data = self._get_data.get_all_market_data(security_list=security_list,
+                                                                        end=self.end, period=Period.DAILY.value)
             Environment.index_daily_data = self._get_data.get_index_data(index_list=[self.benchmark],
-                                                                         field=['open', 'high', 'low', 'close',
-                                                                                'volume', 'amount'],
                                                                          end=self.end, period=Period.DAILY.value)
         if self.one_min_data_cache:
             Environment.one_min_data = self._get_data.get_all_market_data(security_list=security_list,

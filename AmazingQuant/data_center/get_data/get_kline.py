@@ -698,9 +698,6 @@ if __name__ == '__main__':
     from AmazingQuant.utils.security_type import is_security_type
     stock_code_a_share = [i for i in stock_code if is_security_type(i, 'EXTRA_STOCK_A')]
     print(len(stock_code_a_share))
-    import json
-    from AmazingQuant.data_center.save_data.save_a_share_indicator_daily import save_a_share_indicator_daily
-
     with Timer(True):
         kline_object = GetKlineData()
         all_market_data = kline_object.get_all_market_data(security_list=stock_code_a_share,
@@ -712,9 +709,7 @@ if __name__ == '__main__':
         # market_data = kline_object.get_market_data(all_market_data, stock_code=a[:20], field=['open', 'close'],
         #                                            start=datetime(2019, 7, 5), end=datetime(2019, 7, 5))
     with Timer(True):
-        save_a_share_indicator_daily('close', all_market_data['close'])
-    #     # all_market_data['close'].to_hdf('test.h5', key='this_is_a_key')
-    #     open = pd.read_hdf('open.h5', key='open')
-    #     close = pd.read_hdf('close.h5', key='close')
-
+        from AmazingQuant.data_center.indicator_data.save_a_share_indicator_daily import SaveGetIndicator
+        from AmazingQuant.constant import Period
+        SaveGetIndicator('close', Period.DAILY.value).save_indicator(all_market_data['close'])
 
