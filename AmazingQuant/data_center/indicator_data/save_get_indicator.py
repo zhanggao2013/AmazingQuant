@@ -37,9 +37,10 @@ class SaveGetIndicator(object):
                 # 每次存之前都情况上一次的数据
                 indicator.drop_collection()
                 doc_list = []
+                start_time = min(input_data.index)
                 end_time = max(input_data.index)
                 for i in input_data.columns:
-                    doc = indicator(end_time=end_time, period=self.period, data=pickle.dumps(input_data[i], protocol=4))
+                    doc = indicator(start_time=start_time, end_time=end_time, period=self.period, data=pickle.dumps(input_data[i], protocol=4))
                     doc_list.append(doc)
                 indicator.objects.insert(doc_list)
 
@@ -52,9 +53,10 @@ class SaveGetIndicator(object):
                 for i in obj_list:
                     result.append(pickle.loads(i.data))
                 result = pd.concat(result, axis=1)
-        return result
+        return result, i.start_time, i.end_time, i.period
 
 
 if __name__ == '__main__':
     with Timer(True):
-        a = SaveGetIndicator('close', period=Period.DAILY.value).get_indicator()
+        indicator_data, start_time, end_time, period = SaveGetIndicator('close', period=Period.DAILY.value).get_indicator()
+

@@ -18,6 +18,8 @@ class AShareIndicatorDaily(Document):
     """
     # 更新时间
     update_date = DateTimeField(default=datetime.utcnow())
+    # 数据开始时间戳
+    start_time = DateTimeField(required=True)
     # 数据截止时间戳
     end_time = DateTimeField(required=True)
     # 指标周期

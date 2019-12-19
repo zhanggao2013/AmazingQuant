@@ -709,7 +709,7 @@ if __name__ == '__main__':
         # market_data = kline_object.get_market_data(all_market_data, stock_code=a[:20], field=['open', 'close'],
         #                                            start=datetime(2019, 7, 5), end=datetime(2019, 7, 5))
     with Timer(True):
-        from AmazingQuant.data_center.indicator_data.save_a_share_indicator_daily import SaveGetIndicator
+        from AmazingQuant.data_center.indicator_data.save_get_indicator import SaveGetIndicator
         from AmazingQuant.constant import Period
         SaveGetIndicator('close', Period.DAILY.value).save_indicator(all_market_data['close'])
 
