@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/12/18
 # @Author  : gao
-# @File    : field_a_share_indicator_daily.py
+# @File    : field_indicator.py
 # @Project : AmazingQuant 
 # ------------------------------
 from datetime import datetime
@@ -12,7 +12,7 @@ from mongoengine import Document
 from mongoengine.fields import StringField, DateTimeField, ListField, BinaryField
 
 
-class AShareIndicatorDaily(Document):
+class Indicator(Document):
     """
     K线
     """
@@ -22,9 +22,6 @@ class AShareIndicatorDaily(Document):
     start_time = DateTimeField(required=True)
     # 数据截止时间戳
     end_time = DateTimeField(required=True)
-    # 指标周期
-    period = StringField(required=True)
     # 指标数据, dataframe转二进制
     data = BinaryField(required=True)
 
-    meta = {'indexes': ['end_time']}

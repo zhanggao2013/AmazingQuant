@@ -711,5 +711,5 @@ if __name__ == '__main__':
     with Timer(True):
         from AmazingQuant.data_center.indicator_data.save_get_indicator import SaveGetIndicator
         from AmazingQuant.constant import Period
-        SaveGetIndicator('close', Period.DAILY.value).save_indicator(all_market_data['close'])
+        SaveGetIndicator('close').save_indicator(all_market_data['close'])
 
