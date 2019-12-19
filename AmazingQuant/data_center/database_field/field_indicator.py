@@ -18,6 +18,8 @@ class Indicator(Document):
     """
     # 更新时间
     update_date = DateTimeField(default=datetime.utcnow())
+    # 证券代码
+    security_code = StringField(required=True)
     # 数据开始时间戳
     start_time = DateTimeField(required=True)
     # 数据截止时间戳
@@ -25,3 +27,4 @@ class Indicator(Document):
     # 指标数据, dataframe转二进制
     data = BinaryField(required=True)
 
+    meta = {'indexes': ['security_code']}

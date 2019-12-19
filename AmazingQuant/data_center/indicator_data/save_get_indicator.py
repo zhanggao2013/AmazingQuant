@@ -39,7 +39,7 @@ class SaveGetIndicator(object):
                 start_time = min(input_data.index)
                 end_time = max(input_data.index)
                 for i in input_data.columns:
-                    doc = indicator(start_time=start_time, end_time=end_time, data=pickle.dumps(input_data[i], protocol=4))
+                    doc = indicator(start_time=start_time, end_time=end_time, security_code=i, data=pickle.dumps(input_data[i], protocol=4))
                     doc_list.append(doc)
                 indicator.objects.insert(doc_list)
 
