@@ -33,7 +33,7 @@ class RightsAdjustment(Enum):
 class DatabaseName(Enum):
     A_SHARE_KLINE_DAILY = "a_share_kline_daily"
     STOCK_BASE_DATA = 'stock_base_data'
-    A_SHARE_INDICATOR_DAILY = "a_share_indicator_daily"
+    INDICATOR = "indicator"
     INDEX_KLINE_DAILY = 'index_kline_daily'
     MARKET_DATA_ONE_MIN = "market_data_1min"
 
