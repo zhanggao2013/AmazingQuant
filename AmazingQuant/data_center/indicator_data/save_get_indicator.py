@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/12/18
 # @Author  : gao
-# @File    : save_a_share_indicator_daily.py
+# @File    : save_get_indicator.py
 # @Project : AmazingQuant 
 # ------------------------------
 
