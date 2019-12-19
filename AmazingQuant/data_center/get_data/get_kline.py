@@ -69,11 +69,14 @@ class GetKlineData(object):
                 stock_data_dict.update(single_stock_data)
 
             field_data_dict = {}
-            for i in field:
-                field_data_pd = pd.DataFrame({key: value[i] for key, value in stock_data_dict.items()})
-                # 原始数据的开高低收除以10000
-                if i in ['open', 'high', 'low', 'close']:
-                    field_data_dict[i] = field_data_pd.div(10000)
+            for i in self.field:
+                if i != 'time_tag':
+                    field_data_pd = pd.DataFrame({key: value[i] for key, value in stock_data_dict.items()})
+                    # 原始数据的开高低收除以10000
+                    if i in ['open', 'high', 'low', 'close']:
+                        field_data_dict[i] = field_data_pd.div(10000)
+                    else:
+                        field_data_dict[i] = field_data_pd
             return field_data_dict
 
     def _get_data_with_process_pool(self, database, security_list, process_manager_dict, security_list_i):
@@ -117,11 +120,14 @@ class GetKlineData(object):
                 index_data_dict[index_code] = security_code_data_df.reindex(self.calendar_SZ).fillna(method='ffill')
         connection.disconnect()
         field_data_dict = {}
-        for i in field:
-            field_data_pd = pd.DataFrame({key: value[i] for key, value in index_data_dict.items()})
-            # 原始数据的开高低收除以10000
-            if i in ['open', 'high', 'low', 'close']:
-                field_data_dict[i] = field_data_pd.div(10000)
+        for i in self.field:
+            if i != 'time_tag':
+                field_data_pd = pd.DataFrame({key: value[i] for key, value in index_data_dict.items()})
+                # 原始数据的开高低收除以10000
+                if i in ['open', 'high', 'low', 'close']:
+                    field_data_dict[i] = field_data_pd.div(10000)
+                else:
+                    field_data_dict[i] = field_data_pd
         return field_data_dict
 
     def get_market_data(self, market_data, stock_code=[], field=[], start=None, end=None, period=Period.DAILY.value, count=-1):
@@ -129,11 +135,11 @@ class GetKlineData(object):
         if len(stock_code) == 1 and len(field) == 1 and (start < end) and count == -1:
             result = market_data[field[0]][stock_code[0]][start: end]
         elif len(stock_code) == 1 and len(field) == 1 and (start == end) and count == -1:
-            result = market_data[field[0]].loc[start, stock_code[0]]
+            result = market_data[field[0]][stock_code[0]][start]
         elif len(stock_code) > 1 and (start == end) and count == -1:
-            result = {i: market_data[i].loc[start, stock_code] for i in field}
+            result = {i: market_data[i].reindex(columns=stock_code).loc[start] for i in field}
         elif len(stock_code) > 1 and (start != end) and count == -1:
-            result = {i: market_data[i].loc[start: end, stock_code] for i in field}
+            result = {i: market_data[i].reindex(columns=stock_code).loc[start: end] for i in field}
         return result
 
 
@@ -690,23 +696,23 @@ if __name__ == '__main__':
                   '000153.SZ', '300212.SZ', '000892.SZ', '601939.SH', '002830.SZ', '300438.SZ', '601500.SH',
                   '600035.SH', '002862.SZ', '600718.SH', '603701.SH', '600475.SH']
     from AmazingQuant.utils.security_type import is_security_type
-    a = [i for i in stock_code if is_security_type(i, 'EXTRA_STOCK_A')]
-    print(len(a))
+    stock_code_a_share = [i for i in stock_code if is_security_type(i, 'EXTRA_STOCK_A')]
+    print(len(stock_code_a_share))
     import json
     from AmazingQuant.data_center.save_data.save_a_share_indicator_daily import save_a_share_indicator_daily
 
     with Timer(True):
         kline_object = GetKlineData()
-        all_market_data = kline_object.get_all_market_data(security_list=a,
+        all_market_data = kline_object.get_all_market_data(security_list=stock_code_a_share,
                                                            field=['open', 'high', 'low', 'close', 'volume', 'amount'],
                                                            end=datetime.now())
-        for i in all_market_data:
-            all_market_data[i].to_hdf(i+'.h5', key=i)
+        # for i in all_market_data:
+        #     all_market_data[i].to_hdf(i+'.h5', key=i)
         # index_data = kline_object.get_index_data(index_list=['000001.SH'], field=['open', 'close'], end=datetime.now())
         # market_data = kline_object.get_market_data(all_market_data, stock_code=a[:20], field=['open', 'close'],
         #                                            start=datetime(2019, 7, 5), end=datetime(2019, 7, 5))
-    # with Timer(True):
-    #     # save_a_share_indicator_daily('close', all_market_data['close'])
+    with Timer(True):
+        save_a_share_indicator_daily('close', all_market_data['close'])
     #     # all_market_data['close'].to_hdf('test.h5', key='this_is_a_key')
     #     open = pd.read_hdf('open.h5', key='open')
     #     close = pd.read_hdf('close.h5', key='close')
