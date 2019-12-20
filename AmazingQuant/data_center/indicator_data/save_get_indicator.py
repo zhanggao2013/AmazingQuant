@@ -7,9 +7,6 @@
 # @Project : AmazingQuant 
 # ------------------------------
 
-from datetime import datetime
-import pickle
-
 import pandas as pd
 from mongoengine.context_managers import switch_collection
 
@@ -17,6 +14,7 @@ from AmazingQuant.data_center.mongo_connection import MongoConnect
 from AmazingQuant.utils.performance_test import Timer
 from AmazingQuant.data_center.database_field.field_indicator import Indicator
 from AmazingQuant.constant import DatabaseName
+from AmazingQuant.data_center.get_data.get_calendar import GetCalendar
 from AmazingQuant.constant import Period
 
 
@@ -38,19 +36,24 @@ class SaveGetIndicator(object):
                 doc_list = []
                 start_time = min(input_data.index)
                 end_time = max(input_data.index)
+
                 for i in input_data.columns:
-                    doc = indicator(start_time=start_time, end_time=end_time, security_code=i, data=pickle.dumps(input_data[i], protocol=4))
+                    doc = indicator(start_time=start_time, end_time=end_time, security_code=i, data=list(input_data[i]))
                     doc_list.append(doc)
                 indicator.objects.insert(doc_list)
 
     def get_indicator(self):
+        calendar_obj = GetCalendar()
+        calendar_SZ = calendar_obj.get_calendar('SZ')
         database = DatabaseName.INDICATOR.value
         with MongoConnect(database):
             with switch_collection(Indicator, self.indicator_name) as indicator:
                 obj_list = indicator.objects()
                 result = []
                 for i in obj_list:
-                    result.append(pickle.loads(i.data))
+                    result.append(pd.DataFrame({i.security_code: i.data},
+                                               index=[date for date in calendar_SZ if
+                                                      i.start_time <= date <= i.end_time]))
                 result = pd.concat(result, axis=1)
         return result, i.start_time, i.end_time
 

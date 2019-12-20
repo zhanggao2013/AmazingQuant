@@ -24,7 +24,7 @@ class Indicator(Document):
     start_time = DateTimeField(required=True)
     # 数据截止时间戳
     end_time = DateTimeField(required=True)
-    # 指标数据, dataframe转二进制
-    data = BinaryField(required=True)
+    # 指标数据，注意按照时间有序
+    data = ListField(required=True)
 
     meta = {'indexes': ['security_code']}

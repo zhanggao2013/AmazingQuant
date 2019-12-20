@@ -700,7 +700,7 @@ if __name__ == '__main__':
     print(len(stock_code_a_share))
     with Timer(True):
         kline_object = GetKlineData()
-        all_market_data = kline_object.get_all_market_data(security_list=stock_code_a_share,
+        all_market_data = kline_object.get_all_market_data(security_list=stock_code_a_share[:10],
                                                            field=['open', 'high', 'low', 'close', 'volume', 'amount'],
                                                            end=datetime.now())
         # for i in all_market_data:
