@@ -14,7 +14,7 @@ import pandas as pd
 from AmazingQuant.data_center.mongo_connection import MongoConnect
 from AmazingQuant.utils.security_type import is_security_type
 from AmazingQuant.data_center.database_field.field_a_share_ex_right_dividend import AShareExRightDividend
-from AmazingQuant.data_center.get_data.get_kline import GetKlineData
+from AmazingQuant.data_center.update_local_data.get_kline import GetKlineData
 from AmazingQuant.constant import DatabaseName
 
 
