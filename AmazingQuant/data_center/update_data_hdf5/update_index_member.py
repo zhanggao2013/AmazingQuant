@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/12/13
 # @Author  : gao
-# @File    : get_index_member.py
+# @File    : update_index_member.py
 # @Project : AmazingQuant 
 # ------------------------------
 

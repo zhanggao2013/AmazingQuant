@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/11/21
 # @Author  : gao
-# @File    : get_finance_data.py
+# @File    : update_finance_data.py
 # @Project : AmazingQuant
 # ------------------------------
 

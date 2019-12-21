@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/11/19
 # @Author  : gao
-# @File    : get_kline.py
+# @File    : update_kline.py
 # @Project : AmazingQuant
 # ------------------------------
 
@@ -17,7 +17,7 @@ from mongoengine import connection
 from AmazingQuant.config.database_info import MongodbConfig
 from AmazingQuant.constant import DatabaseName, Period, RightsAdjustment
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
-from AmazingQuant.data_center.get_data.get_calendar import GetCalendar
+from AmazingQuant.data_center.update_data_hdf5.get_calendar import GetCalendar
 from AmazingQuant.utils.performance_test import Timer
 
 
@@ -46,7 +46,6 @@ class GetKlineData(object):
         self.end = end
         database = DatabaseName.A_SHARE_KLINE_DAILY.value
         process_num = 2 * cpu_count()
-        process_pool = Pool(process_num)
         process_stock_num = int(len(security_list) / process_num) + 1
         security_list_split = []
         for i in range(int(len(security_list) / process_stock_num)):
@@ -56,6 +55,7 @@ class GetKlineData(object):
                 security_list_split.append(security_list[i * process_stock_num:])
 
         with Manager() as manager:
+            process_pool = Pool(process_num)
             process_manager_dict = manager.dict()
             for security_list_i in range(len(security_list_split)):
                 process_pool.apply_async(self._get_data_with_process_pool,
@@ -63,7 +63,6 @@ class GetKlineData(object):
             process_pool.close()
             process_pool.join()
             process_dict = dict(process_manager_dict)
-
             stock_data_dict = {}
             for single_stock_data in process_dict.values():
                 stock_data_dict.update(single_stock_data)
@@ -700,7 +699,7 @@ if __name__ == '__main__':
     print(len(stock_code_a_share))
     with Timer(True):
         kline_object = GetKlineData()
-        all_market_data = kline_object.get_all_market_data(security_list=stock_code_a_share,
+        all_market_data = kline_object.get_all_market_data(security_list=stock_code_a_share[:2],
                                                            field=['open', 'high', 'low', 'close', 'volume', 'amount'],
                                                            end=datetime.now())
         # for i in all_market_data:

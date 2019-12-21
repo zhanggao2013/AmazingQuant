@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/12/11
 # @Author  : gao
-# @File    : get_calendar.py
+# @File    : update_calendar.py
 # @Project : AmazingQuant
 # ------------------------------
 
