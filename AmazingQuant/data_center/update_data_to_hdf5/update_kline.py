@@ -17,7 +17,7 @@ from mongoengine import connection
 from AmazingQuant.config.database_info import MongodbConfig
 from AmazingQuant.constant import DatabaseName, Period, RightsAdjustment
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
-from AmazingQuant.data_center.update_data_hdf5.get_calendar import GetCalendar
+from AmazingQuant.data_center.update_data_to_hdf5.get_calendar import GetCalendar
 from AmazingQuant.utils.performance_test import Timer
 
 
