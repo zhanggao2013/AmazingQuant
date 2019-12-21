@@ -700,7 +700,7 @@ if __name__ == '__main__':
     print(len(stock_code_a_share))
     with Timer(True):
         kline_object = GetKlineData()
-        all_market_data = kline_object.get_all_market_data(security_list=stock_code_a_share[:10],
+        all_market_data = kline_object.get_all_market_data(security_list=stock_code_a_share,
                                                            field=['open', 'high', 'low', 'close', 'volume', 'amount'],
                                                            end=datetime.now())
         # for i in all_market_data:
@@ -709,7 +709,7 @@ if __name__ == '__main__':
         # market_data = kline_object.get_market_data(all_market_data, stock_code=a[:20], field=['open', 'close'],
         #                                            start=datetime(2019, 7, 5), end=datetime(2019, 7, 5))
     with Timer(True):
-        from AmazingQuant.data_center.indicator_data.save_get_indicator import SaveGetIndicator
+        from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
         from AmazingQuant.constant import Period
-        SaveGetIndicator('close').save_indicator(all_market_data['close'])
+        SaveGetIndicator().save_indicator('close', all_market_data['close'])
 
