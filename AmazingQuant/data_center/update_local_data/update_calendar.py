@@ -14,7 +14,7 @@ from mongoengine import connection
 
 from AmazingQuant.config.database_info import MongodbConfig
 from AmazingQuant.data_center.database_field.filed_a_share_calendar import AShareCalendar
-from AmazingQuant.constant import DatabaseName
+from AmazingQuant.constant import DatabaseName, LocalDataFolderName
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
 
 
@@ -30,9 +30,10 @@ class UpdateCalendar(object):
         data_df = pd.DataFrame(data)
         data_df.set_index('market', inplace=True)
         data_df = data_df.drop(['_id', 'update_date'], axis=1)
+        folder_name = LocalDataFolderName.CALENDAR.value
         for index, row in data_df.iterrows():
-            path = '../../../../data/calendar/'
-            data_name = 'calendar_' + str(index)
+            path = '../../../../data/' + folder_name + '/'
+            data_name = folder_name + '_' + str(index)
             save_data_to_hdf5(path, data_name, pd.DataFrame(data_df.loc[index, 'trade_days']))
 
 

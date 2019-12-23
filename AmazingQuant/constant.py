@@ -38,6 +38,10 @@ class DatabaseName(Enum):
     MARKET_DATA_ONE_MIN = "market_data_1min"
 
 
+@unique
+class LocalDataFolderName(Enum):
+    CALENDAR = 'calendar'
+
 
 @unique
 class EventType(Enum):
