@@ -21,7 +21,8 @@ from AmazingQuant.strategy_center.strategy import *
 from AmazingQuant.trade_center.trade import Trade
 
 # 取各种数据
-from AmazingQuant.data_center.get_data.get_index_member import GetIndexMember
+from AmazingQuant.data_center.update_local_data.get_index_member import GetIndexMember
+from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
 
 
 # 继承strategy基类
@@ -32,6 +33,8 @@ class MaStrategy(StrategyBase):
         self.index_member_obj = GetIndexMember()
         # 取K线数据实例
         self.data_class = GetKlineData()
+        # 取指标实例
+        self.indicator = SaveGetIndicator()
 
     def initialize(self):
         # 设置运行模式，回测或者交易
@@ -68,6 +71,10 @@ class MaStrategy(StrategyBase):
         self.set_commission(stock_type=StockType.STOCK_SZ.value, tax=0.001, open_commission=0.0003,
                             close_commission=0.0005,
                             close_today_commission=0, min_commission=5)
+
+        # 取指标数据
+        self.ma5 = self.indicator.get_indicator('ma5')
+        self.ma10 = self.indicator.get_indicator('ma10')
         self.now = time.time()
 
     def handle_bar(self, event):
@@ -81,43 +88,48 @@ class MaStrategy(StrategyBase):
             index_member_list = self.index_member_obj.get_index_member_in_date(self.time_tag)
 
             close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=index_member_list, field=['close'],
-                                                              start=self.start, end=self.time_tag)
+                                                              start=self.time_tag, end=self.time_tag)
             # 循环遍历股票池
             for stock in index_member_list:
                 # 取当前股票的收盘价
                 close_price = close_price_all['close'][stock]
-                close_array = np.array(close_price)
-
-                if len(close_array) > 0:
-                    # 利用talib计算MA
-                    try:
-                        ma5 = talib.MA(close_array[-20:], timeperiod=5)
-                        ma20 = talib.MA(close_array[-20:], timeperiod=20)
-                    except Exception as e:
-                        continue
+                # print(close_price, type(close_price))
+                # close_array = np.array(close_price)
+                if close_price:
+                # if len(close_array) > 0:
+                    # # 利用talib计算MA
+                    # try:
+                    #     ma5 = talib.MA(close_array[-20:], timeperiod=5)
+                    #     ma20 = talib.MA(close_array[-20:], timeperiod=20)
+                    # except Exception as e:
+                    #     continue
 
                     # print('ma5', ma5[-1], ma20[-1], ma5[-1] > ma20[-1], len(available_position_dict.keys()))
 
                     # 过滤因为停牌没有数据
-                    if self.time_tag in close_price.index:
-                        # 如果5日均线突破20日均线，并且没有持仓，则买入这只股票100股，以收盘价为指定价交易
-                        if ma5[-1] > ma20[-1] and stock not in available_position_dict.keys() and stock in index_member_list:
-                            Trade(self).order_shares(stock_code=stock, shares=100, price_type='fix',
-                                                     order_price=close_price.loc[self.time_tag],
-                                                     account=self.account[0])
-                            print('buy', stock, -1, 'fix', close_price.loc[self.time_tag], self.account)
-                        # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
-                        elif ma5[-1] < ma20[-1] and stock in available_position_dict.keys():
-                            Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
-                                                     order_price=close_price.loc[self.time_tag],
-                                                     account=self.account[0])
-                            print('sell', stock, -1, 'fix', close_price.loc[self.time_tag], self.account)
+                    # if self.time_tag in close_price.index:
+                    #     print("qqqqqq", type(self.ma5), self.ma5)
+                        ma5 = self.ma5[stock][self.time_tag]
+                        ma20 = self.ma10[stock][self.time_tag]
+                        if ma5 and ma20:
+                            # 如果5日均线突破20日均线，并且没有持仓，则买入这只股票100股，以收盘价为指定价交易
+                            if ma5 > ma20 and stock not in available_position_dict.keys() and stock in index_member_list:
+                                Trade(self).order_shares(stock_code=stock, shares=100, price_type='fix',
+                                                         order_price=close_price,
+                                                         account=self.account[0])
+                                print('buy', stock, -1, 'fix', close_price, self.account)
+                            # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
+                            elif ma5 < ma20 and stock in available_position_dict.keys():
+                                Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
+                                                         order_price=close_price,
+                                                         account=self.account[0])
+                                print('sell', stock, -1, 'fix', close_price, self.account)
             for stock in available_position_dict.keys():
                 if stock not in index_member_list:
                     Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
-                                             order_price=close_price.loc[self.time_tag],
+                                             order_price=close_price,
                                              account=self.account[0])
-                    print('sell not in index_member_list', stock, -1, 'fix', close_price.loc[self.time_tag], self.account)
+                    print('sell not in index_member_list', stock, -1, 'fix', close_price, self.account)
         self.now = time.time()
 
 
