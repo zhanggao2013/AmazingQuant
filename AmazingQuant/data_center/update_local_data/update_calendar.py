@@ -21,6 +21,7 @@ from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hd
 class UpdateCalendar(object):
     def __init__(self):
         self.database = DatabaseName.STOCK_BASE_DATA.value
+        self.a = 1
 
     def save_calendar_hdf5(self):
         connection.connect(db=self.database, host=MongodbConfig.host, port=MongodbConfig.port,
@@ -29,16 +30,10 @@ class UpdateCalendar(object):
         data_df = pd.DataFrame(data)
         data_df.set_index('market', inplace=True)
         data_df = data_df.drop(['_id', 'update_date'], axis=1)
-        # data_df['trade_days'] = data_df['trade_days'].apply(lambda x: pickle.dumps(x, protocol=4))
-        print(data_df.dtypes)
-        path = '../../../../data/calendar/'
-        data_name = 'a_share_calendar'
-        # save_data_to_hdf5(path, data_name, data_df)
-        if not os.path.exists(path):
-            os.mkdir(path)
-        hdf_store = pd.HDFStore(path + data_name + '.h5', mode='w')
-        hdf_store.put(data_name, data_df, format='table', append=False)
-        hdf_store.close()
+        for index, row in data_df.iterrows():
+            path = '../../../../data/calendar/'
+            data_name = 'calendar_' + str(index)
+            save_data_to_hdf5(path, data_name, pd.DataFrame(data_df.loc[index, 'trade_days']))
 
 
 if __name__ == '__main__':
