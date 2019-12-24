@@ -17,9 +17,9 @@ from mongoengine import connection
 from AmazingQuant.config.database_info import MongodbConfig
 from AmazingQuant.constant import DatabaseName, Period, RightsAdjustment
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
-from AmazingQuant.data_center.update_local_data.get_calendar import GetCalendar
+from AmazingQuant.data_center.api_data.get_calender import GetCalendar
 from AmazingQuant.utils.performance_test import Timer
-
+from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
 
 class GetKlineData(object):
     def __init__(self):
@@ -699,7 +699,7 @@ if __name__ == '__main__':
     print(len(stock_code_a_share))
     with Timer(True):
         kline_object = GetKlineData()
-        all_market_data = kline_object.get_all_market_data(security_list=stock_code_a_share[:2],
+        all_market_data = kline_object.get_all_market_data(security_list=stock_code_a_share,
                                                            field=['open', 'high', 'low', 'close', 'volume', 'amount'],
                                                            end=datetime.now())
         # for i in all_market_data:
@@ -708,7 +708,8 @@ if __name__ == '__main__':
         # market_data = kline_object.get_market_data(all_market_data, stock_code=a[:20], field=['open', 'close'],
         #                                            start=datetime(2019, 7, 5), end=datetime(2019, 7, 5))
     with Timer(True):
-        from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
-        from AmazingQuant.constant import Period
-        SaveGetIndicator().save_indicator('close', all_market_data['close'])
+        for field in ['open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']:
+            path = '../../../../data/' + field + '/'
+            data_name = field
+            save_data_to_hdf5(path, data_name, pd.DataFrame(all_market_data[field]))
 
