@@ -21,7 +21,6 @@ from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hd
 class UpdateCalendar(object):
     def __init__(self):
         self.database = DatabaseName.STOCK_BASE_DATA.value
-        self.a = 1
 
     def save_calendar_hdf5(self):
         connection.connect(db=self.database, host=MongodbConfig.host, port=MongodbConfig.port,
