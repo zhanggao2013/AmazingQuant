@@ -48,7 +48,7 @@ class GetIndexMember(object):
 
 if __name__ == '__main__':
     index_member_obj = GetIndexMember()
-    index_members_df, index_members_all = index_member_obj.get_index_members('000300.SH')
+    index_members_df, index_members_all = index_member_obj.get_index_members('000002.SH')
     index_member_in_date = index_member_obj.get_index_member_in_date()
 
 
