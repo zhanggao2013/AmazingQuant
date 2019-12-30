@@ -41,6 +41,7 @@ class DatabaseName(Enum):
 @unique
 class LocalDataFolderName(Enum):
     CALENDAR = 'calendar'
+    INDEX_MEMBER = 'index_member'
 
 
 @unique
