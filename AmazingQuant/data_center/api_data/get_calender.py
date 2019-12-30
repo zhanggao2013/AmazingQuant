@@ -8,6 +8,7 @@
 # ------------------------------
 
 import pandas as pd
+from AmazingQuant.constant import LocalDataFolderName
 
 
 class GetCalendar(object):
@@ -15,7 +16,8 @@ class GetCalendar(object):
         pass
 
     def get_calendar(self, market):
-        path = '../../../../data/calendar/'
+        folder_name = LocalDataFolderName.CALENDAR.value
+        path = '../../../../data/' + folder_name + '/'
         data_name = 'calendar_' + market + '.h5'
         data = pd.read_hdf(path + data_name)
         return list(data[0])
