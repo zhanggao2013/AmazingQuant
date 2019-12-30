@@ -23,7 +23,7 @@ class UpdateCalendar(object):
         self.database = DatabaseName.STOCK_BASE_DATA.value
         self.a = 1
 
-    def save_calendar_hdf5(self):
+    def update_calendar_hdf5(self):
         connection.connect(db=self.database, host=MongodbConfig.host, port=MongodbConfig.port,
                            password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
         data = AShareCalendar.objects().as_pymongo()
@@ -39,7 +39,7 @@ class UpdateCalendar(object):
 
 if __name__ == '__main__':
     calendar_obj = UpdateCalendar()
-    calendar_obj.save_calendar_hdf5()
+    calendar_obj.update_calendar_hdf5()
     # print(result)
 
 
