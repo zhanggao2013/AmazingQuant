@@ -29,7 +29,8 @@ class GetIndexMember(object):
     def get_index_members(self, index_code):
         self.index_members_df = self.all_index_members_df[self.all_index_members_df.index_code == index_code]
         self.index_members_df = self.index_members_df.fillna(datetime.now()).reset_index(drop=True)
-        return self.index_members_df
+        self.index_members_all = list(set(self.index_members_df['security_code']))
+        return self.index_members_df, self.index_members_all
 
     def get_index_member_in_date(self, members_date=datetime.now()):
         """
@@ -45,5 +46,8 @@ class GetIndexMember(object):
 if __name__ == '__main__':
     index_member_obj = GetIndexMember()
     all_index_members_df = index_member_obj.get_all_index_members()
-    index_members_df = index_member_obj.get_index_members('000300.SH')
+    # 深证综指
+    index_members_df_SZ, index_members_all_SZ = index_member_obj.get_index_members('399106.SZ')
+    # 上证Ａ股
+    index_members_df_SH, index_members_all_SH = index_member_obj.get_index_members('000002.SH')
     index_member_in_date = index_member_obj.get_index_member_in_date()
