@@ -71,7 +71,7 @@ class SaveIndexKlineDaily(object):
                                                        open=int(row['open']), high=int(row['high']),
                                                        low=int(row['low']), close=int(row['close']),
                                                        volume=int(row['volume']), amount=int(row['amount']),
-                                                       match_items=None, interest=None)
+                                                       match_items=int(row['match_items']), interest=int(row['interest']))
                         doc_list.append(doc)
 
                 KlineDaily_security_code.objects.insert(doc_list)
