@@ -62,6 +62,7 @@ if __name__ == '__main__':
     collection_name = "kline_daily"
     my_conn = MongoConnect(database)
     db = my_conn.connect_db(collection_name)
+
     # # 激活数据库分片功能
     db_admin = my_conn.connect_db("admin")
     # db_admin.command('enablesharding', database)

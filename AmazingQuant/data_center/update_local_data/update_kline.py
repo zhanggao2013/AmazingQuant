@@ -26,7 +26,7 @@ from AmazingQuant.utils.security_type import is_security_type
 
 class UpdateKlineData(object):
     def __init__(self):
-        self.field = []
+        self.field = ['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
         self.end = ''
         self.calendar_SZ = []
         self.index_members_all_SZ = []
@@ -44,7 +44,6 @@ class UpdateKlineData(object):
         """
         calendar_obj = GetCalendar()
         self.calendar_SZ = calendar_obj.get_calendar('SZ')
-        self.field = ['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
         self.end = end
         database = DatabaseName.A_SHARE_KLINE_DAILY.value
         process_num = 2 * cpu_count()
@@ -118,15 +117,12 @@ class UpdateKlineData(object):
     def update_index_data(self, index_list=[], start=None, end=datetime.now()):
         """
         :param index_list:
-        :param field: 默认['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount']
+        :param field: 默认['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
         :param start:
         :param end:
         :param period:
         :return:
         """
-        self.field = ['time_tag'] + field
-        if len(self.field) == 1:
-            self.field = ['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount']
         self.end = end
         database = DatabaseName.INDEX_KLINE_DAILY.value
         connection.connect(db=database, host=MongodbConfig.host, port=MongodbConfig.port,

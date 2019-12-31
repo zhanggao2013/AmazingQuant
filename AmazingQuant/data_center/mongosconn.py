@@ -7,13 +7,12 @@
 # @Project : AmazingQuant
 # ------------------------------
 
-
 import sys
 import traceback
 import pymongo
 
 from AmazingQuant.data_center.singleton import singleton
-
+from AmazingQuant.config.database_info import MongodbConfig
 
 
 @singleton
@@ -21,9 +20,9 @@ class MongoConn(object):
     def __init__(self):
         # connect db
         try:
-            self.conn = pymongo.MongoClient(MONGODB_CONFIG['host'], MONGODB_CONFIG['port'])
-            self.username = MONGODB_CONFIG['username']
-            self.password = MONGODB_CONFIG['password']
+            self.conn = pymongo.MongoClient(MongodbConfig.host, MongodbConfig.port)
+            self.username = MongodbConfig.username
+            self.password = MongodbConfig.password
             if self.username and self.password:
                 self.connected = self.db.authenticate(self.username, self.password)
             else:
@@ -39,6 +38,9 @@ class MongoConn(object):
     def connect_db(self, db_name):
         db = self.conn[db_name]
         return db
+
+    def disconnect(self):
+        self.conn.close()
 
     def check_connected(self):
         # 检查是否连接成功
@@ -122,21 +124,25 @@ class MongoConn(object):
 
 
 if __name__ == "__main__":
-    db_name = "market_data_daily"
+    db_name = "a_share_kline_daily"
     collection_name = "test"
     my_conn = MongoConn()
     db = my_conn.connect_db(db_name)
-    # 激活数据库分片功能
-    db_admin = my_conn.connect_db('admin')
-    db_admin.command('enablesharding', db_name)
-    # 为集合开启分片
-    db_admin.command('shardcollection', db_name + '.' + collection_name, key={'_id': 1})
+    a = db.list_collection_names(session=None)
 
-    datas = [
-        {'data': 12},
-        {'data': 22},
-        {'data': 'cc'}
-    ]
+    # my_conn.disconnect()
+    print(len(list(set(a))))
+    # 激活数据库分片功能
+    # db_admin = my_conn.connect_db('admin')
+    # db_admin.command('enablesharding', db_name)
+    # 为集合开启分片
+    # db_admin.command('shardcollection', db_name + '.' + collection_name, key={'_id': 1})
+    #
+    # datas = [
+    #     {'data': 12},
+    #     {'data': 22},
+    #     {'data': 'cc'}
+    # ]
     # 插入数据，'mytest'是上文中创建的表名
     # db["test0"].insert(datas)
     # my_conn.insert(db_name, collection_name, datas)
