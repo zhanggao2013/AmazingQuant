@@ -39,6 +39,10 @@ class MongoConn(object):
         db = self.conn[db_name]
         return db
 
+    def get_list_collection_names(self, db_name):
+        db = self.conn[db_name]
+        return db.list_collection_names(session=None)
+
     def disconnect(self):
         self.conn.close()
 
@@ -129,9 +133,8 @@ if __name__ == "__main__":
     my_conn = MongoConn()
     db = my_conn.connect_db(db_name)
     a = db.list_collection_names(session=None)
-
-    # my_conn.disconnect()
     print(len(list(set(a))))
+    my_conn.disconnect()
     # 激活数据库分片功能
     # db_admin = my_conn.connect_db('admin')
     # db_admin.command('enablesharding', db_name)
