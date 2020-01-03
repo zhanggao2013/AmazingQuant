@@ -18,7 +18,7 @@ from AmazingQuant.config.database_info import MongodbConfig
 from AmazingQuant.constant import DatabaseName, Period, LocalDataFolderName
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
 from AmazingQuant.data_center.api_data.get_calender import GetCalendar
-from AmazingQuant.data_center.api_data.get_index_member import GetIndexMember
+from AmazingQuant.data_center.api_data.get_collection_list import GetCollectionList
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
 from AmazingQuant.utils.performance_test import Timer
 from AmazingQuant.utils.security_type import is_security_type
@@ -32,7 +32,7 @@ class UpdateKlineData(object):
         self.index_members_all_SZ = []
         self.index_members_all_SH = []
 
-    def get_all_market_data(self, security_list, start=None, end=datetime.now()):
+    def get_all_market_data(self, security_list, end=datetime.now()):
         """
         :param security_list:
         :param field: 默认['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
@@ -92,18 +92,11 @@ class UpdateKlineData(object):
         process_manager_dict[security_list_i] = thread_data_dict
         connection.disconnect()
 
-    def get_all_stock_code(self):
-        index_member_obj = GetIndexMember()
-        index_member_obj.get_all_index_members()
-        # 深证综指
-        _, self.index_members_all_SZ = index_member_obj.get_index_members('399106.SZ')
-        # 上证Ａ股
-        _, self.index_members_all_SH = index_member_obj.get_index_members('000002.SH')
-
     def update_all_market_data(self):
-        stock_code = self.index_members_all_SZ + self.index_members_all_SH
-        stock_code_a_share = [i for i in stock_code if is_security_type(i, 'EXTRA_STOCK_A')]
-        all_market_data = self.get_all_market_data(security_list=stock_code_a_share, end=datetime.now())
+        get_collection_list = GetCollectionList()
+        a_share_list = get_collection_list.get_a_share_list()
+        a_share_list = [i for i in a_share_list if is_security_type(i, 'EXTRA_STOCK_A')]
+        all_market_data = self.get_all_market_data(security_list=a_share_list, end=datetime.now())
         folder_name = LocalDataFolderName.MARKET_DATA.value
         sub_folder_name = LocalDataFolderName.KLINE_DAILY.value
         sub_sub_folder_name = LocalDataFolderName.A_SHARE.value
@@ -114,7 +107,7 @@ class UpdateKlineData(object):
                 save_data_to_hdf5(path, data_name, pd.DataFrame(all_market_data[field]))
         return all_market_data
 
-    def update_index_data(self, index_list=[], start=None, end=datetime.now()):
+    def update_index_data(self, end=datetime.now()):
         """
         :param index_list:
         :param field: 默认['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
@@ -123,6 +116,8 @@ class UpdateKlineData(object):
         :param period:
         :return:
         """
+        get_collection_list = GetCollectionList()
+        index_list = get_collection_list.get_index_list()
         self.end = end
         database = DatabaseName.INDEX_KLINE_DAILY.value
         connection.connect(db=database, host=MongodbConfig.host, port=MongodbConfig.port,
@@ -144,6 +139,14 @@ class UpdateKlineData(object):
                     field_data_dict[i] = field_data_pd.div(10000)
                 else:
                     field_data_dict[i] = field_data_pd
+        folder_name = LocalDataFolderName.MARKET_DATA.value
+        sub_folder_name = LocalDataFolderName.KLINE_DAILY.value
+        sub_sub_folder_name = LocalDataFolderName.INDEX.value
+        for field in self.field:
+            if field != 'time_tag':
+                path = '../../../../data/' + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
+                data_name = field
+                save_data_to_hdf5(path, data_name, pd.DataFrame(field_data_dict[field]))
         return field_data_dict
 
     def get_market_data(self, market_data, stock_code=[], field=[], start=None, end=None, period=Period.DAILY.value, count=-1):
@@ -162,5 +165,5 @@ class UpdateKlineData(object):
 if __name__ == '__main__':
     with Timer(True):
         kline_object = UpdateKlineData()
-        kline_object.get_all_stock_code()
-        all_market_data = kline_object.update_all_market_data()
+        # all_market_data = kline_object.update_all_market_data()
+        field_data_dict = kline_object.update_index_data()

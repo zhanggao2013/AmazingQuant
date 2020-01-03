@@ -45,6 +45,7 @@ class LocalDataFolderName(Enum):
     MARKET_DATA = 'market_data'
     KLINE_DAILY = 'kline_daily'
     A_SHARE = 'a_share'
+    INDEX = 'index'
 
 
 @unique
