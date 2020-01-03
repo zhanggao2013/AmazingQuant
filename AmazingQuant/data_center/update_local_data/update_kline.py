@@ -105,7 +105,6 @@ class UpdateKlineData(object):
                 path = '../../../../data/' + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
                 data_name = field
                 save_data_to_hdf5(path, data_name, pd.DataFrame(all_market_data[field]))
-        return all_market_data
 
     def update_index_data(self, end=datetime.now()):
         """
@@ -147,11 +146,10 @@ class UpdateKlineData(object):
                 path = '../../../../data/' + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
                 data_name = field
                 save_data_to_hdf5(path, data_name, pd.DataFrame(field_data_dict[field]))
-        return field_data_dict
 
 
 if __name__ == '__main__':
     with Timer(True):
         kline_object = UpdateKlineData()
-        all_market_data = kline_object.update_all_market_data()
-        field_data_dict = kline_object.update_index_data()
+        kline_object.update_all_market_data()
+        kline_object.update_index_data()
