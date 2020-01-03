@@ -16,7 +16,7 @@ from AmazingQuant.config.database_info import MongodbConfig
 
 
 @singleton
-class MongoConn(object):
+class MongoConnectPm(object):
     def __init__(self):
         # connect db
         try:
@@ -130,9 +130,8 @@ class MongoConn(object):
 if __name__ == "__main__":
     db_name = "a_share_kline_daily"
     collection_name = "test"
-    my_conn = MongoConn()
-    db = my_conn.connect_db(db_name)
-    a = db.list_collection_names(session=None)
+    my_conn = MongoConnectPm()
+    a = my_conn.get_list_collection_names(db_name)
     print(len(list(set(a))))
     my_conn.disconnect()
     # 激活数据库分片功能
