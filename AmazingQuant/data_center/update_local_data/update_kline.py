@@ -92,11 +92,11 @@ class UpdateKlineData(object):
         process_manager_dict[security_list_i] = thread_data_dict
         connection.disconnect()
 
-    def update_all_market_data(self):
+    def update_all_market_data(self, end=datetime.now()):
         get_collection_list = GetCollectionList()
         a_share_list = get_collection_list.get_a_share_list()
         a_share_list = [i for i in a_share_list if is_security_type(i, 'EXTRA_STOCK_A')]
-        all_market_data = self.get_all_market_data(security_list=a_share_list, end=datetime.now())
+        all_market_data = self.get_all_market_data(security_list=a_share_list, end=end)
         folder_name = LocalDataFolderName.MARKET_DATA.value
         sub_folder_name = LocalDataFolderName.KLINE_DAILY.value
         sub_sub_folder_name = LocalDataFolderName.A_SHARE.value
@@ -149,21 +149,9 @@ class UpdateKlineData(object):
                 save_data_to_hdf5(path, data_name, pd.DataFrame(field_data_dict[field]))
         return field_data_dict
 
-    def get_market_data(self, market_data, stock_code=[], field=[], start=None, end=None, period=Period.DAILY.value, count=-1):
-        result = None
-        if len(stock_code) == 1 and len(field) == 1 and (start < end) and count == -1:
-            result = market_data[field[0]][stock_code[0]][start: end]
-        elif len(stock_code) == 1 and len(field) == 1 and (start == end) and count == -1:
-            result = market_data[field[0]][stock_code[0]][start]
-        elif len(stock_code) > 1 and (start == end) and count == -1:
-            result = {i: market_data[i].reindex(columns=stock_code).loc[start] for i in field}
-        elif len(stock_code) > 1 and (start != end) and count == -1:
-            result = {i: market_data[i].reindex(columns=stock_code).loc[start: end] for i in field}
-        return result
-
 
 if __name__ == '__main__':
     with Timer(True):
         kline_object = UpdateKlineData()
-        # all_market_data = kline_object.update_all_market_data()
+        all_market_data = kline_object.update_all_market_data()
         field_data_dict = kline_object.update_index_data()
