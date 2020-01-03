@@ -11,7 +11,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from AmazingQuant.data_center.mongo_connection import MongoConnect
+from AmazingQuant.data_center.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.security_type import is_security_type
 from AmazingQuant.data_center.database_field.field_a_share_ex_right_dividend import AShareExRightDividend
 from AmazingQuant.data_center.update_local_data.get_kline import GetKlineData
