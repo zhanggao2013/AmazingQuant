@@ -101,7 +101,7 @@ class UpdateKlineData(object):
         sub_folder_name = LocalDataFolderName.KLINE_DAILY.value
         sub_sub_folder_name = LocalDataFolderName.A_SHARE.value
         for field in self.field:
-            if field != 'time_tag':
+            if field not in ['time_tag', 'interest']:
                 path = '../../../../data/' + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
                 data_name = field
                 save_data_to_hdf5(path, data_name, pd.DataFrame(all_market_data[field]))
@@ -142,7 +142,7 @@ class UpdateKlineData(object):
         sub_folder_name = LocalDataFolderName.KLINE_DAILY.value
         sub_sub_folder_name = LocalDataFolderName.INDEX.value
         for field in self.field:
-            if field != 'time_tag':
+            if field not in ['time_tag', 'interest']:
                 path = '../../../../data/' + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
                 data_name = field
                 save_data_to_hdf5(path, data_name, pd.DataFrame(field_data_dict[field]))
