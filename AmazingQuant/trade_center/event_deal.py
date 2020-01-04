@@ -9,7 +9,6 @@
 
 from AmazingQuant.event_engine.event_engine_base import Event
 from AmazingQuant.environment import Environment
-from AmazingQuant.data_center.update_local_data.get_kline import GetKlineData
 from AmazingQuant.constant import *
 from AmazingQuant.utils.generate_random_id import generate_random_id
 

@@ -11,6 +11,7 @@ from datetime import datetime
 import pandas as pd
 
 from AmazingQuant.constant import LocalDataFolderName
+from AmazingQuant.config.local_data_path import LocalDataPath
 
 
 class GetIndexMember(object):
@@ -21,7 +22,7 @@ class GetIndexMember(object):
 
     def get_all_index_members(self):
         folder_name = LocalDataFolderName.INDEX_MEMBER.value
-        path = '../../../../data/' + folder_name + '/'
+        path = LocalDataPath.path + folder_name + '/'
         data_name = folder_name + '.h5'
         self.all_index_members_df = pd.read_hdf(path + data_name)
         return self.all_index_members_df
@@ -49,5 +50,6 @@ if __name__ == '__main__':
     # 深证综指
     index_members_df_SZ, index_members_all_SZ = index_member_obj.get_index_members('399106.SZ')
     # 上证Ａ股
-    index_members_df_SH, index_members_all_SH = index_member_obj.get_index_members('000002.SH')
+    index_members_df_SH, index_members_all_SH = index_member_obj.get_index_members('000001.SH')
+    print()
     index_member_in_date = index_member_obj.get_index_member_in_date()

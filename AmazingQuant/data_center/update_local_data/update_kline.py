@@ -29,8 +29,6 @@ class UpdateKlineData(object):
         self.field = ['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
         self.end = ''
         self.calendar_SZ = []
-        self.index_members_all_SZ = []
-        self.index_members_all_SH = []
 
     def get_all_market_data(self, security_list, end=datetime.now()):
         """

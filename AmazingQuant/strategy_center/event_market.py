@@ -8,7 +8,7 @@
 # ------------------------------
 from AmazingQuant.environment import Environment
 from AmazingQuant.event_engine.event_engine_base import *
-from AmazingQuant.data_center.update_local_data.get_kline import GetKlineData
+from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 
 
 class EventMarket(Event):

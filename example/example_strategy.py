@@ -21,7 +21,7 @@ from AmazingQuant.strategy_center.strategy import *
 from AmazingQuant.trade_center.trade import Trade
 
 # 取各种数据
-from AmazingQuant.data_center.update_local_data.get_index_member import GetIndexMember
+from AmazingQuant.data_center.api_data.get_index_member import GetIndexMember
 from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
 
 
@@ -52,6 +52,7 @@ class MaStrategy(StrategyBase):
         self.end = datetime(2019, 1, 1)
         # 设置运行周期
         self.period = 'daily'
+        self.index_member_obj.get_all_index_members()
         _, index_members_all = self.index_member_obj.get_index_members('000300.SH')
         self.universe = index_members_all
 
@@ -109,6 +110,7 @@ class MaStrategy(StrategyBase):
                     # 过滤因为停牌没有数据
                     # if self.time_tag in close_price.index:
                     #     print("qqqqqq", type(self.ma5), self.ma5)
+
                         ma5 = self.ma5[stock][self.time_tag]
                         ma20 = self.ma10[stock][self.time_tag]
                         if ma5 and ma20:

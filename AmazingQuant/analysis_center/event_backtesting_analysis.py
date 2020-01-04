@@ -19,7 +19,7 @@ import numpy as np
 from AmazingQuant.event_engine.event_engine_base import Event, EventType
 from AmazingQuant.environment import Environment
 from AmazingQuant.constant import RecordDataType, Period
-from AmazingQuant.data_center.update_local_data.get_kline import GetKlineData
+from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.utils.data_transfer import millisecond_to_date
 # from pyecharts import Line, Page, Grid
 

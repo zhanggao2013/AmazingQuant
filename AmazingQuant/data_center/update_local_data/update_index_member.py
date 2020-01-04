@@ -32,6 +32,7 @@ class UpdateGIndexMember(object):
 
         field_list = ['index_code', 'security_code', 'in_date', 'out_date']
         self.index_members_df = pd.DataFrame(list(index_members_data)).reindex(columns=field_list)
+        print(self.index_members_df)
         folder_name = LocalDataFolderName.INDEX_MEMBER.value
         path = '../../../../data/' + folder_name + '/'
         data_name = folder_name

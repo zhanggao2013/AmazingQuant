@@ -11,21 +11,22 @@ from datetime import datetime
 
 import pandas as pd
 
-from AmazingQuant.constant import DatabaseName, Period, RightsAdjustment, LocalDataFolderName
+from AmazingQuant.constant import Period, RightsAdjustment, LocalDataFolderName
 from AmazingQuant.utils.performance_test import Timer
+from AmazingQuant.config.local_data_path import LocalDataPath
 
 
-class UpdateKlineData(object):
+class GetKlineData(object):
     def __init__(self):
         self.field = ['open', 'high', 'low', 'close', 'volume', 'amount', 'match_items']
         self.end = ''
         self.calendar_SZ = []
 
-    def cache_all_stock_date(self):
+    def cache_all_stock_data(self, period=Period.DAILY.value):
         folder_name = LocalDataFolderName.MARKET_DATA.value
         sub_folder_name = LocalDataFolderName.KLINE_DAILY.value
         sub_sub_folder_name = LocalDataFolderName.A_SHARE.value
-        path = '../../../../data/' + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
+        path = LocalDataPath.path + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
         all_market_date = {}
         for i in self.field:
             data_name = i + '.h5'
@@ -34,21 +35,23 @@ class UpdateKlineData(object):
 
     def get_market_data(self, market_data, stock_code=None, field=None, start=None, end=None, period=Period.DAILY.value, count=-1):
         result = None
-        if len(stock_code) == 1 and len(field) == 1 and (start < end) and count == -1:
+        if len(stock_code) == 1 and len(field) == 1 and start < end and count == -1:
             result = market_data[field[0]][stock_code[0]][start: end]
-        elif len(stock_code) == 1 and len(field) == 1 and (start == end) and count == -1:
+        elif len(stock_code) == 1 and len(field) == 1 and start == end and count == -1:
             result = market_data[field[0]][stock_code[0]][start]
-        elif len(stock_code) > 1 and (start == end) and count == -1:
+        elif len(stock_code) > 1 and (start == end and start is not None) and count == -1:
             result = {i: market_data[i].reindex(columns=stock_code).loc[start] for i in field}
-        elif len(stock_code) > 1 and (start != end) and count == -1:
+        elif len(stock_code) > 1 and (end is None and start is None) and count == -1:
+            result = {i: market_data[i].reindex(columns=stock_code) for i in field}
+        elif len(stock_code) > 1 and start != end and count == -1:
             result = {i: market_data[i].reindex(columns=stock_code).loc[start: end] for i in field}
         return result
 
-    def cache_all_index_data(self):
+    def cache_all_index_data(self, period=Period.DAILY.value):
         folder_name = LocalDataFolderName.MARKET_DATA.value
         sub_folder_name = LocalDataFolderName.KLINE_DAILY.value
         sub_sub_folder_name = LocalDataFolderName.INDEX.value
-        path = '../../../../data/' + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
+        path = LocalDataPath.path + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
         index_date = {}
         for i in self.field:
             data_name = i + '.h5'
@@ -61,8 +64,8 @@ class UpdateKlineData(object):
 
 if __name__ == '__main__':
     with Timer(True):
-        kline_object = UpdateKlineData()
-        all_market_data = kline_object.cache_all_stock_date()
+        kline_object = GetKlineData()
+        all_market_data = kline_object.cache_all_stock_data()
         all_index_data = kline_object.cache_all_index_data()
         
         index_data = kline_object.get_index_data(all_index_data, index_code=['000001.SH'], field=['open', 'close'], end=datetime.now())
