@@ -10,6 +10,7 @@
 from AmazingQuant.data_center.mongo_connection_pm import MongoConnectPm
 from AmazingQuant.constant import DatabaseName
 
+
 class GetCollectionList(object):
     def __init__(self):
         self.connect = MongoConnectPm()
