@@ -34,12 +34,9 @@ class UpdateKlineData(object):
 
     def get_all_market_data(self, security_list, end=datetime.now()):
         """
+
         :param security_list:
-        :param field: 默认['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
-        :param start:
         :param end:
-        :param period:
-        :param rights_adjustment:
         :return:
         """
         calendar_obj = GetCalendar()
@@ -108,11 +105,8 @@ class UpdateKlineData(object):
 
     def update_index_data(self, end=datetime.now()):
         """
-        :param index_list:
-        :param field: 默认['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
-        :param start:
+
         :param end:
-        :param period:
         :return:
         """
         get_collection_list = GetCollectionList()
