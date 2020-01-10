@@ -22,7 +22,7 @@ class GetKlineData(object):
         self.end = ''
         self.calendar_SZ = []
 
-    def cache_all_stock_data(self, period=Period.DAILY.value):
+    def cache_all_stock_data(self, period=Period.DAILY.value, adj=RightsAdjustment.NONE.value):
         folder_name = LocalDataFolderName.MARKET_DATA.value
         sub_folder_name = LocalDataFolderName.KLINE_DAILY.value
         sub_sub_folder_name = LocalDataFolderName.A_SHARE.value
@@ -33,7 +33,7 @@ class GetKlineData(object):
             all_market_date[i] = pd.read_hdf(path + data_name)
         return all_market_date
 
-    def get_market_data(self, market_data, stock_code=None, field=None, start=None, end=None, period=Period.DAILY.value, count=-1):
+    def get_market_data(self, market_data, stock_code=None, field=None, start=None, end=None, count=-1):
         result = None
         if len(stock_code) == 1 and len(field) == 1 and start < end and count == -1:
             result = market_data[field[0]][stock_code[0]][start: end]
