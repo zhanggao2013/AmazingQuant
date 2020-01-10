@@ -15,6 +15,7 @@ from mongoengine.context_managers import switch_collection
 from mongoengine import connection
 
 from AmazingQuant.config.database_info import MongodbConfig
+from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.constant import DatabaseName, Period, LocalDataFolderName
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
 from AmazingQuant.data_center.api_data.get_calender import GetCalendar
@@ -97,7 +98,7 @@ class UpdateKlineData(object):
         sub_sub_folder_name = LocalDataFolderName.A_SHARE.value
         for field in self.field:
             if field not in ['time_tag', 'interest']:
-                path = '../../../../data/' + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
+                path = LocalDataPath.path + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
                 data_name = field
                 save_data_to_hdf5(path, data_name, pd.DataFrame(all_market_data[field]))
 
@@ -135,7 +136,7 @@ class UpdateKlineData(object):
         sub_sub_folder_name = LocalDataFolderName.INDEX.value
         for field in self.field:
             if field not in ['time_tag', 'interest']:
-                path = '../../../../data/' + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
+                path = LocalDataPath.path + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
                 data_name = field
                 save_data_to_hdf5(path, data_name, pd.DataFrame(field_data_dict[field]))
 

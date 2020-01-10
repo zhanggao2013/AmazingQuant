@@ -14,6 +14,7 @@ from mongoengine import connection
 
 from AmazingQuant.constant import DatabaseName, LocalDataFolderName
 from AmazingQuant.config.database_info import MongodbConfig
+from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.data_center.database_field.field_a_share_index_members import AShareIndexMembers
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
 
@@ -34,7 +35,7 @@ class UpdateGIndexMember(object):
         self.index_members_df = pd.DataFrame(list(index_members_data)).reindex(columns=field_list)
         print(self.index_members_df)
         folder_name = LocalDataFolderName.INDEX_MEMBER.value
-        path = '../../../../data/' + folder_name + '/'
+        path = LocalDataPath.path + folder_name + '/'
         data_name = folder_name
         save_data_to_hdf5(path, data_name, self.index_members_df)
 
