@@ -43,7 +43,5 @@ class AShareExRightDividend(Document):
     seo_ratio = FloatField(required=True, null=True)
     # 缩减比例
     consolidate_split_ratio = FloatField(required=True, null=True)
-    # 复权因子
-    adj_factor = FloatField()
 
     meta = {'indexes': ['security_code', 'ex_date']}
