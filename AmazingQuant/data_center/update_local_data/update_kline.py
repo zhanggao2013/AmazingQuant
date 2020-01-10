@@ -12,11 +12,10 @@ from multiprocessing import Pool, Manager, cpu_count
 
 import pandas as pd
 from mongoengine.context_managers import switch_collection
-from mongoengine import connection
 
-from AmazingQuant.config.database_info import MongodbConfig
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.constant import DatabaseName, Period, LocalDataFolderName
+from AmazingQuant.data_center.mongo_connection_me import MongoConnect
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
 from AmazingQuant.data_center.api_data.get_calender import GetCalendar
 from AmazingQuant.data_center.api_data.get_collection_list import GetCollectionList
@@ -76,17 +75,15 @@ class UpdateKlineData(object):
             return field_data_dict
 
     def _get_data_with_process_pool(self, database, security_list, process_manager_dict, security_list_i):
-        connection.connect(db=database, host=MongodbConfig.host, port=MongodbConfig.port,
-                           password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
-        thread_data_dict = {}
-        for stock in security_list:
-            with switch_collection(Kline, stock) as KlineDaily_security_code:
-                security_code_data = KlineDaily_security_code.objects(time_tag__lte=self.end).as_pymongo()
-                security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
-                security_code_data_df.set_index(["time_tag"], inplace=True)
-                thread_data_dict[stock] = security_code_data_df.reindex(self.calendar_SZ).fillna(method='ffill')
-        process_manager_dict[security_list_i] = thread_data_dict
-        connection.disconnect()
+        with MongoConnect(database):
+            thread_data_dict = {}
+            for stock in security_list:
+                with switch_collection(Kline, stock) as KlineDaily_security_code:
+                    security_code_data = KlineDaily_security_code.objects(time_tag__lte=self.end).as_pymongo()
+                    security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
+                    security_code_data_df.set_index(["time_tag"], inplace=True)
+                    thread_data_dict[stock] = security_code_data_df.reindex(self.calendar_SZ).fillna(method='ffill')
+            process_manager_dict[security_list_i] = thread_data_dict
 
     def update_all_market_data(self, end=datetime.now()):
         get_collection_list = GetCollectionList()
@@ -112,16 +109,14 @@ class UpdateKlineData(object):
         index_list = get_collection_list.get_index_list()
         self.end = end
         database = DatabaseName.INDEX_KLINE_DAILY.value
-        connection.connect(db=database, host=MongodbConfig.host, port=MongodbConfig.port,
-                           password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
-        index_data_dict = {}
-        for index_code in index_list:
-            with switch_collection(Kline, index_code) as KlineDaily_index_code:
-                security_code_data = KlineDaily_index_code.objects(time_tag__lte=self.end).as_pymongo()
-                security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
-                security_code_data_df.set_index(["time_tag"], inplace=True)
-                index_data_dict[index_code] = security_code_data_df
-        connection.disconnect()
+        with MongoConnect(database):
+            index_data_dict = {}
+            for index_code in index_list:
+                with switch_collection(Kline, index_code) as KlineDaily_index_code:
+                    security_code_data = KlineDaily_index_code.objects(time_tag__lte=self.end).as_pymongo()
+                    security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
+                    security_code_data_df.set_index(["time_tag"], inplace=True)
+                    index_data_dict[index_code] = security_code_data_df
         field_data_dict = {}
         for i in self.field:
             if i != 'time_tag':

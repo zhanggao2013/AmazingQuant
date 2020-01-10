@@ -6,17 +6,14 @@
 # @File    : update_calendar.py
 # @Project : AmazingQuant
 # ------------------------------
-import os
-import pickle
 
 import pandas as pd
-from mongoengine import connection
 
 from AmazingQuant.config.local_data_path import LocalDataPath
-from AmazingQuant.config.database_info import MongodbConfig
 from AmazingQuant.data_center.database_field.filed_a_share_calendar import AShareCalendar
 from AmazingQuant.constant import DatabaseName, LocalDataFolderName
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
+from AmazingQuant.data_center.mongo_connection_me import MongoConnect
 
 
 class UpdateCalendar(object):
@@ -24,17 +21,16 @@ class UpdateCalendar(object):
         self.database = DatabaseName.STOCK_BASE_DATA.value
 
     def update_calendar_hdf5(self):
-        connection.connect(db=self.database, host=MongodbConfig.host, port=MongodbConfig.port,
-                           password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
-        data = AShareCalendar.objects().as_pymongo()
-        data_df = pd.DataFrame(data)
-        data_df.set_index('market', inplace=True)
-        data_df = data_df.drop(['_id', 'update_date'], axis=1)
-        folder_name = LocalDataFolderName.CALENDAR.value
-        for index, row in data_df.iterrows():
-            path = LocalDataPath.path + folder_name + '/'
-            data_name = folder_name + '_' + str(index)
-            save_data_to_hdf5(path, data_name, pd.DataFrame(data_df.loc[index, 'trade_days']))
+        with MongoConnect(self.database):
+            data = AShareCalendar.objects().as_pymongo()
+            data_df = pd.DataFrame(data)
+            data_df.set_index('market', inplace=True)
+            data_df = data_df.drop(['_id', 'update_date'], axis=1)
+            folder_name = LocalDataFolderName.CALENDAR.value
+            for index, row in data_df.iterrows():
+                path = LocalDataPath.path + folder_name + '/'
+                data_name = folder_name + '_' + str(index)
+                save_data_to_hdf5(path, data_name, pd.DataFrame(data_df.loc[index, 'trade_days']))
 
 
 if __name__ == '__main__':
