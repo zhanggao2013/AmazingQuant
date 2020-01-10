@@ -30,6 +30,12 @@ class RightsAdjustment(Enum):
 
 
 @unique
+class AdjustmentMode(Enum):
+    RIGHT = 'right'
+    GEOMETRIC = 'geometric'
+
+
+@unique
 class DatabaseName(Enum):
     A_SHARE_KLINE_DAILY = "a_share_kline_daily"
     STOCK_BASE_DATA = 'stock_base_data'
