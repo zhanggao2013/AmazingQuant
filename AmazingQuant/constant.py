@@ -42,6 +42,8 @@ class DatabaseName(Enum):
 class LocalDataFolderName(Enum):
     CALENDAR = 'calendar'
     INDEX_MEMBER = 'index_member'
+    ADJ_FACTOR = 'adj_factor'
+
     MARKET_DATA = 'market_data'
     KLINE_DAILY = 'kline_daily'
     A_SHARE = 'a_share'
