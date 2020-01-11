@@ -59,7 +59,7 @@ class GetKlineData(object):
         return index_date
     
     def get_index_data(self, index_data, index_code=None, field=None, start=None, end=None, period=Period.DAILY.value, count=-1):
-        return self.get_market_data(index_data, stock_code=index_code, field=field, start=start, end=end, period=period, count=count)
+        return self.get_market_data(index_data, stock_code=index_code, field=field, start=start, end=end, count=count)
 
 
 if __name__ == '__main__':
