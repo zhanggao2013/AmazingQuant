@@ -6,19 +6,15 @@
 # @File    : update_adj_factor.py
 # @Project : AmazingQuant
 # ------------------------------
-
-from datetime import datetime
-
 import pandas as pd
 
 from AmazingQuant.data_center.mongo_connection_me import MongoConnect
-from AmazingQuant.utils.security_type import is_security_type
 from AmazingQuant.data_center.database_field.field_a_share_ex_right_dividend import AShareExRightDividend
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
 from AmazingQuant.constant import DatabaseName, LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
-
+from AmazingQuant.data_center.api_data.get_calender import GetCalendar
 
 class SaveAShareAdjFactor(object):
     def __init__(self):
@@ -50,8 +46,27 @@ class SaveAShareAdjFactor(object):
 
             folder_name = LocalDataFolderName.ADJ_FACTOR.value
             path = LocalDataPath.path + folder_name + '/'
-            data_name = folder_name + '_right'
-            save_data_to_hdf5(path, data_name, self.data.reindex(columns=['security_code', 'ex_date', 'adj_factor']))
+            self.data = self.data.reindex(columns=['security_code', 'ex_date', 'adj_factor'])
+            self.data.set_index(["ex_date"], inplace=True)
+            self.data.sort_index(inplace=True)
+            calendar_obj = GetCalendar()
+            calendar = calendar_obj.get_calendar('SZ')
+            backward_factor = pd.DataFrame(index=calendar)
+            adj_factor = pd.DataFrame(index=calendar)
+            data_dict = dict(list(self.data.groupby(self.data['security_code'])))
+            for security_code, adj_data in data_dict.items():
+                backward_factor[security_code] = self.cal_backward_factor(adj_data['adj_factor'])
+                adj_factor[security_code] = adj_data['adj_factor']
+            save_data_to_hdf5(path, 'backward_factor', backward_factor.fillna(method='ffill'))
+            save_data_to_hdf5(path, 'adj_factor', adj_factor.fillna(method='ffill'))
+
+    def cal_backward_factor(self, x):
+        result = pd.Series(index=x.index)
+        a = 1
+        for i in range(len(x)):
+            result[i] = x[i]*a
+            a = result[i]
+        return result
 
     def get_adj_day_close(self, security_code, date, all_market_data):
         security_code_market_data = 0
