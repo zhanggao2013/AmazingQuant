@@ -12,9 +12,10 @@ from AmazingQuant.data_center.mongo_connection_me import MongoConnect
 from AmazingQuant.data_center.database_field.field_a_share_ex_right_dividend import AShareExRightDividend
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
-from AmazingQuant.constant import DatabaseName, LocalDataFolderName
+from AmazingQuant.constant import DatabaseName, LocalDataFolderName, AdjustmentFactor
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.data_center.api_data.get_calender import GetCalendar
+
 
 class SaveAShareAdjFactor(object):
     def __init__(self):
@@ -57,8 +58,11 @@ class SaveAShareAdjFactor(object):
             for security_code, adj_data in data_dict.items():
                 backward_factor[security_code] = self.cal_backward_factor(adj_data['adj_factor'])
                 adj_factor[security_code] = adj_data['adj_factor']
-            save_data_to_hdf5(path, 'backward_factor', backward_factor.fillna(method='ffill'))
-            save_data_to_hdf5(path, 'adj_factor', adj_factor.fillna(method='ffill'))
+            backward_factor = backward_factor.fillna(method='ffill')
+            backward_factor = backward_factor.fillna(1)
+            save_data_to_hdf5(path, AdjustmentFactor.BACKWARD_ADJ_FACTOR.value, backward_factor)
+
+            save_data_to_hdf5(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value, backward_factor/backward_factor.iloc[-1, :])
 
     def cal_backward_factor(self, x):
         result = pd.Series(index=x.index)
