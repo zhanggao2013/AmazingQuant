@@ -12,8 +12,8 @@ import numpy as np
 import talib
 
 from AmazingQuant.utils.performance_test import Timer
-from AmazingQuant.data_center.update_local_data.get_index_member import GetIndexMember
-from AmazingQuant.data_center.update_local_data.get_kline import GetKlineData
+from AmazingQuant.data_center.api_data.get_index_member import GetIndexMember
+from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
 
 
@@ -24,14 +24,16 @@ class MaIndicator(object):
 
     def get_stock_list(self):
         index_member = GetIndexMember()
+        index_member.get_all_index_members()
         _, stock_list_SH = index_member.get_index_members('000001.SH')
-        _, stock_list_SZ = index_member.get_index_members('399001.SZ')
+        _, stock_list_SZ = index_member.get_index_members('399106.SZ')
         self.stock_list = stock_list_SH + stock_list_SZ
         return self.stock_list
 
     def get_kline_data(self):
         kline_data = GetKlineData()
-        self.kline = kline_data.get_all_market_data(security_list=self.stock_list, field=['close'])
+        all_stock_data = kline_data.cache_all_stock_data()
+        self.kline = kline_data.get_market_data(all_stock_data, stock_code=self.stock_list, field=['close'])
         return self.kline
 
     def save_ma(self, num):
@@ -46,8 +48,8 @@ if __name__ == '__main__':
         ma_indicator = MaIndicator()
         ma_indicator.get_stock_list()
         print(len(ma_indicator.stock_list))
-        # ma_indicator.get_kline_data()
-        # ma_indicator.save_ma(5)
-        # ma_indicator.save_ma(10)
+        ma_indicator.get_kline_data()
+        ma_indicator.save_ma(5)
+        ma_indicator.save_ma(10)
         # save_get_indicator = SaveGetIndicator()
         # a = save_get_indicator.get_indicator('ma5')
