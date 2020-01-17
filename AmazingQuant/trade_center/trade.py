@@ -18,7 +18,7 @@ class Trade(object):
     def __init__(self, strategy):
         self._strategy = strategy
 
-    def order_shares(self, stock_code="", shares=1, price_type=PriceType.LIMIT, order_price=None,
+    def order_shares(self, stock_code="", shares=1, price_type=PriceType.LIMIT.value, order_price=None,
                    account=""):
         """下单函数"""
         # 代码编号相关
@@ -37,8 +37,6 @@ class Trade(object):
         Environment.current_order_data.total_volume = abs(shares)
         Environment.current_order_data.deal_volume = 0
         Environment.current_order_data.status = Status.NOT_REPORTED.value
-
-
 
         # CTP相关
         Environment.current_order_data.order_time = self._strategy.time_tag

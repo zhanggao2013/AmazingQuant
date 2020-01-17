@@ -7,26 +7,21 @@
 # @Project : AmazingQuant 
 # ------------------------------
 
-from datetime import datetime
-from mongoengine import connection
-
-from AmazingQuant.config.database_info import MongodbConfig
-from AmazingQuant.data_center.database_field.filed_a_share_calendar import AShareCalendar
-from AmazingQuant.constant import DatabaseName
+import pandas as pd
+from AmazingQuant.constant import LocalDataFolderName
+from AmazingQuant.config.local_data_path import LocalDataPath
 
 
 class GetCalendar(object):
     def __init__(self):
-        self.database = DatabaseName.STOCK_BASE_DATA.value
+        pass
 
     def get_calendar(self, market):
-        connection.connect(db=self.database, host=MongodbConfig.host, port=MongodbConfig.port,
-                           password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
-        data = AShareCalendar.objects(market=market).as_pymongo()
-        trade_days = data[0]['trade_days']
-        trade_days = [i for i in trade_days if i < datetime.now()]
-        connection.disconnect()
-        return trade_days
+        folder_name = LocalDataFolderName.CALENDAR.value
+        path = LocalDataPath.path + folder_name + '/'
+        data_name = 'calendar_' + market + '.h5'
+        data = pd.read_hdf(path + data_name)
+        return list(data[0])
 
 
 if __name__ == '__main__':

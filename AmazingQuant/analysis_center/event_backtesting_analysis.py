@@ -19,7 +19,7 @@ import numpy as np
 from AmazingQuant.event_engine.event_engine_base import Event, EventType
 from AmazingQuant.environment import Environment
 from AmazingQuant.constant import RecordDataType, Period
-from AmazingQuant.data_center.update_local_data.get_kline import GetKlineData
+from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.utils.data_transfer import millisecond_to_date
 # from pyecharts import Line, Page, Grid
 
@@ -202,7 +202,7 @@ class EventBacktestingAnalysis(Event):
             end_time = Environment.benchmark_index[-1]
 
             benchmark_close = data_class.get_market_data(Environment.index_daily_data, stock_code=[benchmark],
-                                                         field=['close'], start=start_time, end=end_time, period=period)
+                                                         field=['close'], start=start_time, end=end_time)
         elif period == Period.ONE_MIN.value:
             start_time = millisecond_to_date(millisecond=Environment.benchmark_index[0], format='%Y-%m-%d %H:%M:%S')
             end_time = millisecond_to_date(millisecond=Environment.benchmark_index[-1], format='%Y-%m-%d %H:%M:%S')

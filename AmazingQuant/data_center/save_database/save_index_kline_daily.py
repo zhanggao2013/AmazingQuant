@@ -15,7 +15,7 @@ import pandas as pd
 import numpy as np
 from mongoengine.context_managers import switch_collection
 
-from AmazingQuant.data_center.mongo_connection import MongoConnect
+from AmazingQuant.data_center.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.performance_test import Timer
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
 from AmazingQuant.constant import DatabaseName
@@ -71,7 +71,7 @@ class SaveIndexKlineDaily(object):
                                                        open=int(row['open']), high=int(row['high']),
                                                        low=int(row['low']), close=int(row['close']),
                                                        volume=int(row['volume']), amount=int(row['amount']),
-                                                       match_items=None, interest=None)
+                                                       match_items=int(row['match_items']), interest=int(row['interest']))
                         doc_list.append(doc)
 
                 KlineDaily_security_code.objects.insert(doc_list)

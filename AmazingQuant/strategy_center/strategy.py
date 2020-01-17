@@ -15,6 +15,7 @@ from AmazingQuant.constant import RunMode, Period, RightsAdjustment, SlippageTyp
 from AmazingQuant.data_object import *
 from AmazingQuant.event_engine.event_analysis_engine import run_backtesting_analysis_engine
 from AmazingQuant.event_engine.event_bar_engine import *
+from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 
 
 class StrategyBase(metaclass=ABCMeta):
@@ -27,7 +28,7 @@ class StrategyBase(metaclass=ABCMeta):
         self._benchmark = '000300.SH'
         self._period = Period.DAILY.value  # 后续支持1min 3min 5min 等多周期
         self._universe = []
-        self._rights_adjustment = RightsAdjustment.NONE.value
+        self._rights_adjustment = RightsAdjustment.FROWARD.value
         self._time_tag = 0
         # 数据缓存开关
         self._daily_data_cache = False
@@ -146,7 +147,6 @@ class StrategyBase(metaclass=ABCMeta):
 
     def run(self, save_trade_record=False):
         self.initialize()
-
         # 初始化　account_data
         if self.account:
             for account in self.account:
@@ -154,8 +154,8 @@ class StrategyBase(metaclass=ABCMeta):
                 Environment.current_account_data.account_id = generate_random_id.generate_random_id(account)
                 Environment.current_account_data.total_balance = self.capital[account]
                 Environment.current_account_data.available = self.capital[account]
+                print(Environment.current_account_data.account_id, Environment.current_account_data.available)
                 Environment.bar_account_data_list.append(Environment.current_account_data)
-
         # if self.run_mode == RunMode.TRADE.value:
         #     self.end = self._get_data.get_end_time_tag(benchmark=self.benchmark, period=Period.DAILY.value)
 
@@ -168,15 +168,11 @@ class StrategyBase(metaclass=ABCMeta):
         security_list = copy.copy(self.universe)
         security_list = list(set(security_list))
         if self._daily_data_cache:
-            Environment.daily_data = self._get_data.get_all_market_data(security_list=security_list,
-                                                                        end=self.end, period=Period.DAILY.value)
-            Environment.index_daily_data = self._get_data.get_index_data(index_list=[self.benchmark],
-                                                                         end=self.end, period=Period.DAILY.value)
+            Environment.daily_data = self._get_data.cache_all_stock_data(dividend_type=self.rights_adjustment)
+            Environment.index_daily_data = self._get_data.cache_all_index_data()
+
         if self.one_min_data_cache:
-            Environment.one_min_data = self._get_data.get_all_market_data(security_list=security_list,
-                                                                          field=['open', 'high', 'low', 'close',
-                                                                                 'volume', 'amount'],
-                                                                          end=self.end, period=Period.ONE_MIN.value)
+            Environment.one_min_data = self._get_data.cache_all_stock_data(period=Period.ONE_MIN.value)
 
         if self.period == Period.DAILY.value:
             Environment.benchmark_index = [i for i in Environment.index_daily_data['close'][self.benchmark].index

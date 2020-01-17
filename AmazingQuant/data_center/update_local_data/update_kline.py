@@ -12,37 +12,33 @@ from multiprocessing import Pool, Manager, cpu_count
 
 import pandas as pd
 from mongoengine.context_managers import switch_collection
-from mongoengine import connection
 
-from AmazingQuant.config.database_info import MongodbConfig
-from AmazingQuant.constant import DatabaseName, Period, RightsAdjustment
+from AmazingQuant.config.local_data_path import LocalDataPath
+from AmazingQuant.constant import DatabaseName, Period, LocalDataFolderName
+from AmazingQuant.data_center.mongo_connection_me import MongoConnect
 from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
-from AmazingQuant.data_center.update_local_data.get_calendar import GetCalendar
+from AmazingQuant.data_center.api_data.get_calender import GetCalendar
+from AmazingQuant.data_center.api_data.get_collection_list import GetCollectionList
+from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
 from AmazingQuant.utils.performance_test import Timer
+from AmazingQuant.utils.security_type import is_security_type
 
 
-class GetKlineData(object):
+class UpdateKlineData(object):
     def __init__(self):
-        self.field = []
+        self.field = ['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
         self.end = ''
         self.calendar_SZ = []
 
-    def get_all_market_data(self, security_list=[], field=[], start="", end=datetime.now(), period=Period.DAILY.value,
-                            rights_adjustment=RightsAdjustment.NONE.value):
+    def get_all_market_data(self, security_list, end=datetime.now()):
         """
+
         :param security_list:
-        :param field: 默认['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
-        :param start:
         :param end:
-        :param period:
-        :param rights_adjustment:
         :return:
         """
         calendar_obj = GetCalendar()
         self.calendar_SZ = calendar_obj.get_calendar('SZ')
-        self.field = ['time_tag'] + field
-        if len(self.field) == 1:
-            self.field = ['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount', 'match_items', 'interest']
         self.end = end
         database = DatabaseName.A_SHARE_KLINE_DAILY.value
         process_num = 2 * cpu_count()
@@ -79,45 +75,48 @@ class GetKlineData(object):
             return field_data_dict
 
     def _get_data_with_process_pool(self, database, security_list, process_manager_dict, security_list_i):
-        connection.connect(db=database, host=MongodbConfig.host, port=MongodbConfig.port,
-                           password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
-        thread_data_dict = {}
-        for stock in security_list:
-            with switch_collection(Kline, stock) as KlineDaily_security_code:
-                security_code_data = KlineDaily_security_code.objects(time_tag__lte=self.end).as_pymongo()
-                security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
-                security_code_data_df.set_index(["time_tag"], inplace=True)
-                thread_data_dict[stock] = security_code_data_df.reindex(self.calendar_SZ).fillna(method='ffill')
-        process_manager_dict[security_list_i] = thread_data_dict
-        connection.disconnect()
+        with MongoConnect(database):
+            thread_data_dict = {}
+            for stock in security_list:
+                with switch_collection(Kline, stock) as KlineDaily_security_code:
+                    security_code_data = KlineDaily_security_code.objects(time_tag__lte=self.end).as_pymongo()
+                    security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
+                    security_code_data_df.set_index(["time_tag"], inplace=True)
+                    thread_data_dict[stock] = security_code_data_df.reindex(self.calendar_SZ).fillna(method='ffill')
+            process_manager_dict[security_list_i] = thread_data_dict
 
-    def get_index_data(self, index_list=[], field=[], start="", end=datetime.now(), period=Period.DAILY.value):
+    def update_all_market_data(self, end=datetime.now()):
+        get_collection_list = GetCollectionList()
+        a_share_list = get_collection_list.get_a_share_list()
+        a_share_list = [i for i in a_share_list if is_security_type(i, 'EXTRA_STOCK_A')]
+        all_market_data = self.get_all_market_data(security_list=a_share_list, end=end)
+        folder_name = LocalDataFolderName.MARKET_DATA.value
+        sub_folder_name = LocalDataFolderName.KLINE_DAILY.value
+        sub_sub_folder_name = LocalDataFolderName.A_SHARE.value
+        for field in self.field:
+            if field not in ['time_tag', 'interest']:
+                path = LocalDataPath.path + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
+                data_name = field
+                save_data_to_hdf5(path, data_name, pd.DataFrame(all_market_data[field]))
+
+    def update_index_data(self, end=datetime.now()):
         """
-        :param index_list:
-        :param field: 默认['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount']
-        :param start:
+
         :param end:
-        :param period:
         :return:
         """
-
-        calendar_obj = GetCalendar()
-        self.calendar_SZ = calendar_obj.get_calendar('SZ')
-        self.field = ['time_tag'] + field
-        if len(self.field) == 1:
-            self.field = ['time_tag', 'open', 'high', 'low', 'close', 'volume', 'amount']
+        get_collection_list = GetCollectionList()
+        index_list = get_collection_list.get_index_list()
         self.end = end
         database = DatabaseName.INDEX_KLINE_DAILY.value
-        connection.connect(db=database, host=MongodbConfig.host, port=MongodbConfig.port,
-                           password=MongodbConfig.password, username=MongodbConfig.username, retryWrites=False)
-        index_data_dict = {}
-        for index_code in index_list:
-            with switch_collection(Kline, index_code) as KlineDaily_index_code:
-                security_code_data = KlineDaily_index_code.objects(time_tag__lte=self.end).as_pymongo()
-                security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
-                security_code_data_df.set_index(["time_tag"], inplace=True)
-                index_data_dict[index_code] = security_code_data_df.reindex(self.calendar_SZ).fillna(method='ffill')
-        connection.disconnect()
+        with MongoConnect(database):
+            index_data_dict = {}
+            for index_code in index_list:
+                with switch_collection(Kline, index_code) as KlineDaily_index_code:
+                    security_code_data = KlineDaily_index_code.objects(time_tag__lte=self.end).as_pymongo()
+                    security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
+                    security_code_data_df.set_index(["time_tag"], inplace=True)
+                    index_data_dict[index_code] = security_code_data_df
         field_data_dict = {}
         for i in self.field:
             if i != 'time_tag':
@@ -127,588 +126,18 @@ class GetKlineData(object):
                     field_data_dict[i] = field_data_pd.div(10000)
                 else:
                     field_data_dict[i] = field_data_pd
-        return field_data_dict
-
-    def get_market_data(self, market_data, stock_code=[], field=[], start=None, end=None, period=Period.DAILY.value, count=-1):
-        result = None
-        if len(stock_code) == 1 and len(field) == 1 and (start < end) and count == -1:
-            result = market_data[field[0]][stock_code[0]][start: end]
-        elif len(stock_code) == 1 and len(field) == 1 and (start == end) and count == -1:
-            result = market_data[field[0]][stock_code[0]][start]
-        elif len(stock_code) > 1 and (start == end) and count == -1:
-            result = {i: market_data[i].reindex(columns=stock_code).loc[start] for i in field}
-        elif len(stock_code) > 1 and (start != end) and count == -1:
-            result = {i: market_data[i].reindex(columns=stock_code).loc[start: end] for i in field}
-        return result
+        folder_name = LocalDataFolderName.MARKET_DATA.value
+        sub_folder_name = LocalDataFolderName.KLINE_DAILY.value
+        sub_sub_folder_name = LocalDataFolderName.INDEX.value
+        for field in self.field:
+            if field not in ['time_tag', 'interest']:
+                path = LocalDataPath.path + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
+                data_name = field
+                save_data_to_hdf5(path, data_name, pd.DataFrame(field_data_dict[field]))
 
 
 if __name__ == '__main__':
-    stock_code = ['002937.SZ', '601117.SH', '000417.SZ', '300138.SZ', '600478.SH', '300763.SZ', '002806.SZ',
-                  '300803.SZ', '601908.SH', '000831.SZ', '600781.SH', '600995.SH', '002184.SZ', '603912.SH',
-                  '300221.SZ', '600303.SH', '002870.SZ', '600689.SH', '002162.SZ', '002473.SZ', '600385.SH',
-                  '300577.SZ', '600218.SH', '600487.SH', '600681.SH', '601166.SH', '300694.SZ', '002069.SZ',
-                  '600819.SH', '600068.SH', '600220.SH', '603811.SH', '002581.SZ', '603232.SH', '002051.SZ',
-                  '300625.SZ', '000955.SZ', '000800.SZ', '002450.SZ', '002056.SZ', '600816.SH', '300591.SZ',
-                  '000547.SZ', '002505.SZ', '002475.SZ', '002802.SZ', '002023.SZ', '002700.SZ', '603005.SH',
-                  '600522.SH', '600864.SH', '000016.SZ', '300094.SZ', '600362.SH', '603010.SH', '002859.SZ',
-                  '002361.SZ', '300230.SZ', '000525.SZ', '300400.SZ', '600968.SH', '603829.SH', '600569.SH',
-                  '300089.SZ', '000660.SZ', '600671.SH', '603578.SH', '000757.SZ', '603568.SH', '600556.SH',
-                  '300543.SZ', '002626.SZ', '000733.SZ', '600887.SH', '300730.SZ', '300419.SZ', '300498.SZ',
-                  '000619.SZ', '300036.SZ', '002113.SZ', '601688.SH', '002566.SZ', '601555.SH', '300186.SZ',
-                  '601360.SH', '300471.SZ', '300426.SZ', '600649.SH', '300531.SZ', '002652.SZ', '601992.SH',
-                  '000518.SZ', '002536.SZ', '002271.SZ', '300001.SZ', '002845.SZ', '002549.SZ', '300379.SZ',
-                  '600479.SH', '002703.SZ', '601226.SH', '603886.SH', '002333.SZ', '300364.SZ', '001979.SZ',
-                  '002397.SZ', '002136.SZ', '603517.SH', '600704.SH', '300068.SZ', '688023.SH', '300689.SZ',
-                  '300446.SZ', '600586.SH', '600429.SH', '002173.SZ', '600670.SH', '000678.SZ', '000995.SZ',
-                  '002114.SZ', '300103.SZ', '601212.SH', '300526.SZ', '603518.SH', '002597.SZ', '002697.SZ',
-                  '603220.SH', '002207.SZ', '600381.SH', '300115.SZ', '300365.SZ', '600829.SH', '603605.SH',
-                  '002151.SZ', '603726.SH', '002133.SZ', '603345.SH', '002601.SZ', '603650.SH', '600562.SH',
-                  '300688.SZ', '002689.SZ', '603322.SH', '002699.SZ', '603039.SH', '000759.SZ', '300739.SZ',
-                  '002423.SZ', '000811.SZ', '000953.SZ', '002419.SZ', '600571.SH', '002024.SZ', '000835.SZ',
-                  '002182.SZ', '300295.SZ', '600106.SH', '300678.SZ', '002297.SZ', '601699.SH', '000593.SZ',
-                  '603990.SH', '601579.SH', '300339.SZ', '300387.SZ', '600346.SH', '600345.SH', '600850.SH',
-                  '002260.SZ', '300120.SZ', '000621.SZ', '600869.SH', '603218.SH', '002752.SZ', '002811.SZ',
-                  '603817.SH', '002585.SZ', '000836.SZ', '601877.SH', '002040.SZ', '600495.SH', '600251.SH',
-                  '000809.SZ', '300434.SZ', '002259.SZ', '603188.SH', '603536.SH', '600148.SH', '300075.SZ',
-                  '002267.SZ', '601015.SH', '603003.SH', '000815.SZ', '002265.SZ', '600184.SH', '002913.SZ',
-                  '000699.SZ', '300203.SZ', '601777.SH', '300448.SZ', '002263.SZ', '600083.SH', '688019.SH',
-                  '600638.SH', '002175.SZ', '300262.SZ', '300106.SZ', '000692.SZ', '600859.SH', '000999.SZ',
-                  '600476.SH', '603933.SH', '002713.SZ', '688139.SH', '300499.SZ', '002433.SZ', '601900.SH',
-                  '603868.SH', '002469.SZ', '600097.SH', '002516.SZ', '603725.SH', '002030.SZ', '000588.SZ',
-                  '300652.SZ', '000591.SZ', '300147.SZ', '600674.SH', '600446.SH', '600456.SH', '002065.SZ',
-                  '002295.SZ', '002663.SZ', '688007.SH', '002724.SZ', '300721.SZ', '600332.SH', '002932.SZ',
-                  '300670.SZ', '601808.SH', '002345.SZ', '600082.SH', '300011.SZ', '002790.SZ', '600409.SH',
-                  '300431.SZ', '300669.SZ', '002558.SZ', '000556.SZ', '600102.SH', '603159.SH', '000687.SZ',
-                  '600327.SH', '603315.SH', '000609.SZ', '002081.SZ', '600209.SH', '300662.SZ', '600988.SH',
-                  '600222.SH', '000703.SZ', '600037.SH', '002365.SZ', '000509.SZ', '000548.SZ', '002043.SZ',
-                  '600027.SH', '002933.SZ', '601155.SH', '603339.SH', '000501.SZ', '603081.SH', '603359.SH',
-                  '000159.SZ', '002563.SZ', '002543.SZ', '000566.SZ', '600661.SH', '600846.SH', '002495.SZ',
-                  '600219.SH', '600119.SH', '002587.SZ', '000882.SZ', '002900.SZ', '002296.SZ', '600601.SH',
-                  '300290.SZ', '600172.SH', '002139.SZ', '600149.SH', '000918.SZ', '603158.SH', '600387.SH',
-                  '300740.SZ', '002552.SZ', '000796.SZ', '600800.SH', '600543.SH', '002743.SZ', '002105.SZ',
-                  '300143.SZ', '002102.SZ', '000791.SZ', '600640.SH', '600582.SH', '600230.SH', '002427.SZ',
-                  '603308.SH', '601718.SH', '002771.SZ', '000596.SZ', '000551.SZ', '002556.SZ', '300180.SZ',
-                  '601328.SH', '603085.SH', '002460.SZ', '600243.SH', '600886.SH', '002709.SZ', '603630.SH',
-                  '601800.SH', '000951.SZ', '002456.SZ', '300207.SZ', '000876.SZ', '600502.SH', '002650.SZ',
-                  '300249.SZ', '603380.SH', '600637.SH', '002401.SZ', '002435.SZ', '002060.SZ', '600666.SH',
-                  '002470.SZ', '000418.SZ', '688138.SH', '000820.SZ', '002785.SZ', '002215.SZ', '600275.SH',
-                  '002079.SZ', '300655.SZ', '600857.SH', '300126.SZ', '002634.SZ', '000666.SZ', '002481.SZ',
-                  '300041.SZ', '300407.SZ', '603958.SH', '300753.SZ', '600656.SH', '002893.SZ', '603813.SH',
-                  '300440.SZ', '002303.SZ', '600706.SH', '600421.SH', '300079.SZ', '603079.SH', '002891.SZ',
-                  '002732.SZ', '002789.SZ', '002823.SZ', '300780.SZ', '600757.SH', '688015.SH', '300403.SZ',
-                  '300676.SZ', '600647.SH', '000024.SZ', '603500.SH', '300687.SZ', '002797.SZ', '002228.SZ',
-                  '000026.SZ', '300286.SZ', '002779.SZ', '000950.SZ', '603615.SH', '600855.SH', '601899.SH',
-                  '300656.SZ', '600641.SH', '300733.SZ', '300274.SZ', '603599.SH', '600247.SH', '000939.SZ',
-                  '300491.SZ', '603629.SH', '002614.SZ', '002019.SZ', '000157.SZ', '002306.SZ', '300595.SZ',
-                  '002324.SZ', '601218.SH', '300724.SZ', '601838.SH', '601333.SH', '600092.SH', '603789.SH',
-                  '603348.SH', '600770.SH', '300408.SZ', '002812.SZ', '000782.SZ', '600099.SH', '600980.SH',
-                  '600795.SH', '601968.SH', '002178.SZ', '002376.SZ', '000673.SZ', '000912.SZ', '300749.SZ',
-                  '000627.SZ', '002545.SZ', '002966.SZ', '603133.SH', '603956.SH', '002326.SZ', '000956.SZ',
-                  '603676.SH', '600538.SH', '002183.SZ', '600722.SH', '600714.SH', '000920.SZ', '688368.SH',
-                  '000730.SZ', '002294.SZ', '300173.SZ', '600853.SH', '002605.SZ', '603444.SH', '688369.SH',
-                  '300701.SZ', '600678.SH', '600162.SH', '300086.SZ', '603185.SH', '600026.SH', '300124.SZ',
-                  '600076.SH', '600786.SH', '000958.SZ', '600936.SH', '600768.SH', '600607.SH', '002625.SZ',
-                  '603199.SH', '603505.SH', '601006.SH', '603319.SH', '300719.SZ', '002150.SZ', '002203.SZ',
-                  '300393.SZ', '600555.SH', '002847.SZ', '603031.SH', '603528.SH', '603289.SH', '002350.SZ',
-                  '601238.SH', '300226.SZ', '603885.SH', '300776.SZ', '002389.SZ', '600201.SH', '002537.SZ',
-                  '603351.SH', '600997.SH', '000033.SZ', '002753.SZ', '300502.SZ', '603680.SH', '300808.SZ',
-                  '002472.SZ', '300410.SZ', '300430.SZ', '000961.SZ', '300004.SZ', '600889.SH', '000787.SZ',
-                  '002955.SZ', '000848.SZ', '300179.SZ', '002702.SZ', '000608.SZ', '000066.SZ', '300288.SZ',
-                  '002118.SZ', '603299.SH', '300766.SZ', '600012.SH', '600749.SH', '002421.SZ', '300113.SZ',
-                  '000689.SZ', '002029.SZ', '600811.SH', '603938.SH', '300416.SZ', '600052.SH', '002218.SZ',
-                  '000996.SZ', '002636.SZ', '300107.SZ', '300570.SZ', '002276.SZ', '603336.SH', '603177.SH',
-                  '002305.SZ', '300281.SZ', '002711.SZ', '603027.SH', '300154.SZ', '603388.SH', '300227.SZ',
-                  '603590.SH', '300439.SZ', '600876.SH', '600723.SH', '002348.SZ', '002884.SZ', '300204.SZ',
-                  '000338.SZ', '300235.SZ', '000045.SZ', '000022.SZ', '600210.SH', '688196.SH', '600839.SH',
-                  '688001.SH', '300597.SZ', '600469.SH', '000972.SZ', '300256.SZ', '000695.SZ', '002174.SZ',
-                  '000971.SZ', '000936.SZ', '601099.SH', '603533.SH', '603103.SH', '603648.SH', '600018.SH',
-                  '600709.SH', '600510.SH', '000887.SZ', '603881.SH', '601186.SH', '600756.SH', '000801.SZ',
-                  '688099.SH', '002723.SZ', '603803.SH', '300078.SZ', '600713.SH', '601162.SH', '600405.SH',
-                  '600970.SH', '688108.SH', '601169.SH', '002722.SZ', '300769.SZ', '603026.SH', '000913.SZ',
-                  '002848.SZ', '600895.SH', '603168.SH', '002277.SZ', '603035.SH', '600509.SH', '002800.SZ',
-                  '000997.SZ', '600094.SH', '603080.SH', '300568.SZ', '300269.SZ', '300772.SZ', '002054.SZ',
-                  '000402.SZ', '300219.SZ', '300421.SZ', '603165.SH', '000768.SZ', '002579.SZ', '600348.SH',
-                  '603305.SH', '688366.SH', '000425.SZ', '002910.SZ', '000909.SZ', '002236.SZ', '300672.SZ',
-                  '601258.SH', '000677.SZ', '600127.SH', '300087.SZ', '300741.SZ', '002356.SZ', '000869.SZ',
-                  '300777.SZ', '603396.SH', '300752.SZ', '002837.SZ', '000536.SZ', '300536.SZ', '600378.SH',
-                  '600483.SH', '300720.SZ', '600758.SH', '300240.SZ', '300195.SZ', '600400.SH', '002792.SZ',
-                  '002244.SZ', '601038.SH', '300049.SZ', '601866.SH', '300196.SZ', '600772.SH', '002522.SZ',
-                  '300268.SZ', '603679.SH', '300298.SZ', '002112.SZ', '300095.SZ', '603117.SH', '600840.SH',
-                  '601200.SH', '300183.SZ', '300349.SZ', '002138.SZ', '000718.SZ', '002121.SZ', '300328.SZ',
-                  '603090.SH', '603385.SH', '300208.SZ', '688389.SH', '300494.SZ', '603516.SH', '600136.SH',
-                  '300301.SZ', '002010.SZ', '600521.SH', '002399.SZ', '603527.SH', '600079.SH', '000927.SZ',
-                  '601700.SH', '002299.SZ', '600969.SH', '603998.SH', '002611.SZ', '002637.SZ', '603393.SH',
-                  '600064.SH', '002104.SZ', '300380.SZ', '300696.SZ', '002478.SZ', '002358.SZ', '603707.SH',
-                  '600169.SH', '600730.SH', '002308.SZ', '002488.SZ', '603506.SH', '600751.SH', '002763.SZ',
-                  '300332.SZ', '603880.SH', '000789.SZ', '600302.SH', '600259.SH', '002708.SZ', '300456.SZ',
-                  '000851.SZ', '002312.SZ', '600103.SH', '603279.SH', '002212.SZ', '000506.SZ', '300624.SZ',
-                  '002285.SZ', '002384.SZ', '300483.SZ', '600490.SH', '600062.SH', '600489.SH', '300012.SZ',
-                  '002042.SZ', '300362.SZ', '601872.SH', '002853.SZ', '600467.SH', '300427.SZ', '600296.SH',
-                  '002695.SZ', '300253.SZ', '000652.SZ', '002584.SZ', '000738.SZ', '600575.SH', '600167.SH',
-                  '601858.SH', '300642.SZ', '002287.SZ', '000429.SZ', '002903.SZ', '300144.SZ', '000096.SZ',
-                  '600270.SH', '002631.SZ', '300072.SZ', '300715.SZ', '002649.SZ', '002373.SZ', '600626.SH',
-                  '000665.SZ', '600551.SH', '601388.SH', '002382.SZ', '300482.SZ', '002021.SZ', '600552.SH',
-                  '603002.SH', '000723.SZ', '300275.SZ', '601865.SH', '002403.SZ', '600295.SH', '603980.SH',
-                  '600965.SH', '000533.SZ', '601107.SH', '002240.SZ', '000858.SZ', '603888.SH', '300473.SZ',
-                  '002198.SZ', '002576.SZ', '600750.SH', '603871.SH', '002233.SZ', '300785.SZ', '002331.SZ',
-                  '300010.SZ', '600778.SH', '300558.SZ', '601077.SH', '600743.SH', '000933.SZ', '002778.SZ',
-                  '600238.SH', '300564.SZ', '300771.SZ', '603157.SH', '300232.SZ', '300313.SZ', '000880.SZ',
-                  '600116.SH', '300503.SZ', '603238.SH', '000422.SZ', '300626.SZ', '002020.SZ', '603300.SH',
-                  '002760.SZ', '002873.SZ', '603429.SH', '603666.SH', '002288.SZ', '300229.SZ', '002761.SZ',
-                  '600702.SH', '002057.SZ', '002449.SZ', '600125.SH', '688358.SH', '000889.SZ', '603508.SH',
-                  '300170.SZ', '000636.SZ', '000822.SZ', '002250.SZ', '002454.SZ', '300565.SZ', '603987.SH',
-                  '300762.SZ', '300307.SZ', '603515.SH', '603628.SH', '300099.SZ', '600545.SH', '600139.SH',
-                  '000737.SZ', '600372.SH', '600780.SH', '600833.SH', '300167.SZ', '601969.SH', '603368.SH',
-                  '300013.SZ', '600367.SH', '603786.SH', '600221.SH', '000061.SZ', '300497.SZ', '002122.SZ',
-                  '300445.SZ', '002616.SZ', '600517.SH', '603083.SH', '600583.SH', '002247.SZ', '002775.SZ',
-                  '002846.SZ', '601990.SH', '002413.SZ', '300613.SZ', '601139.SH', '002856.SZ', '300110.SZ',
-                  '002436.SZ', '601179.SH', '600512.SH', '002855.SZ', '002339.SZ', '600101.SH', '603977.SH',
-                  '603013.SH', '600060.SH', '600093.SH', '600356.SH', '603687.SH', '600216.SH', '300377.SZ',
-                  '300122.SZ', '600325.SH', '300495.SZ', '300254.SZ', '002770.SZ', '603713.SH', '600240.SH',
-                  '603617.SH', '000908.SZ', '000823.SZ', '300404.SZ', '600098.SH', '002146.SZ', '300255.SZ',
-                  '300578.SZ', '300252.SZ', '002477.SZ', '000584.SZ', '002098.SZ', '002582.SZ', '002196.SZ',
-                  '002321.SZ', '600297.SH', '002500.SZ', '300509.SZ', '002829.SZ', '000025.SZ', '600252.SH',
-                  '688068.SH', '002610.SZ', '002337.SZ', '600095.SH', '002088.SZ', '000510.SZ', '600006.SH',
-                  '300391.SZ', '603138.SH', '603318.SH', '000607.SZ', '601916.SH', '000861.SZ', '300306.SZ',
-                  '300296.SZ', '603993.SH', '600396.SH', '300027.SZ', '002672.SZ', '300335.SZ', '603611.SH',
-                  '603655.SH', '000582.SZ', '603992.SH', '000090.SZ', '002489.SZ', '002059.SZ', '000572.SZ',
-                  '002018.SZ', '603833.SH', '688030.SH', '600289.SH', '300441.SZ', '600160.SH', '000957.SZ',
-                  '600114.SH', '600593.SH', '300209.SZ', '603806.SH', '601233.SH', '000708.SZ', '601860.SH',
-                  '600527.SH', '000736.SZ', '300322.SZ', '002783.SZ', '603398.SH', '002686.SZ', '300058.SZ',
-                  '000528.SZ', '300460.SZ', '600250.SH', '600999.SH', '300464.SZ', '002383.SZ', '000922.SZ',
-                  '300639.SZ', '600408.SH', '603022.SH', '002370.SZ', '601098.SH', '601988.SH', '600071.SH',
-                  '603979.SH', '300583.SZ', '603779.SH', '300454.SZ', '000625.SZ', '601002.SH', '600058.SH',
-                  '300751.SZ', '600519.SH', '002320.SZ', '300690.SZ', '601577.SH', '300047.SZ', '002392.SZ',
-                  '600022.SH', '002411.SZ', '600271.SH', '600371.SH', '603116.SH', '002245.SZ', '600425.SH',
-                  '000597.SZ', '601698.SH', '300074.SZ', '600048.SH', '002555.SZ', '002485.SZ', '600141.SH',
-                  '000428.SZ', '603530.SH', '603113.SH', '002604.SZ', '601198.SH', '300452.SZ', '603636.SH',
-                  '000605.SZ', '603883.SH', '002429.SZ', '300757.SZ', '600286.SH', '603021.SH', '300581.SZ',
-                  '603966.SH', '600708.SH', '600158.SH', '002137.SZ', '002127.SZ', '000639.SZ', '002375.SZ',
-                  '600633.SH', '600630.SH', '603226.SH', '603738.SH', '603967.SH', '002346.SZ', '002451.SZ',
-                  '300176.SZ', '000503.SZ', '601601.SH', '603778.SH', '002091.SZ', '300025.SZ', '000151.SZ',
-                  '600862.SH', '603458.SH', '600186.SH', '600481.SH', '600057.SH', '601231.SH', '600892.SH',
-                  '600436.SH', '002380.SZ', '000792.SZ', '601886.SH', '600618.SH', '601336.SH', '000802.SZ',
-                  '600389.SH', '603330.SH', '603196.SH', '601598.SH', '603557.SH', '603136.SH', '002369.SZ',
-                  '000709.SZ', '300076.SZ', 'T00018.SH', '000767.SZ', '002728.SZ', '603088.SH', '300722.SZ',
-                  '300401.SZ', '600312.SH', '600868.SH', '601799.SH', '600070.SH', '002453.SZ', '300650.SZ',
-                  '600280.SH', '300671.SZ', '600715.SH', '002179.SZ', '002633.SZ', '300233.SZ', '600257.SH',
-                  '603127.SH', '300475.SZ', '000828.SZ', '601228.SH', '600847.SH', '300059.SZ', '002807.SZ',
-                  '300501.SZ', '300663.SZ', '002544.SZ', '300611.SZ', '000750.SZ', '603681.SH', '300479.SZ',
-                  '603587.SH', '600623.SH', '002535.SZ', '000573.SZ', '600740.SH', '002590.SZ', '002550.SZ',
-                  '002628.SZ', '000078.SZ', '000819.SZ', '002067.SZ', '603999.SH', '300141.SZ', '002188.SZ',
-                  '002027.SZ', '300224.SZ', '601128.SH', '603612.SH', '603356.SH', '300108.SZ', '300506.SZ',
-                  '300512.SZ', '600365.SH', '000973.SZ', '600782.SH', '002781.SZ', '300621.SZ', '002087.SZ',
-                  '600008.SH', '002457.SZ', '603335.SH', '300331.SZ', '002033.SZ', '300092.SZ', '600191.SH',
-                  '002310.SZ', '603369.SH', '300128.SZ', '600535.SH', '300132.SZ', '300549.SZ', '002935.SZ',
-                  '002920.SZ', '600113.SH', '300449.SZ', '002682.SZ', '300654.SZ', '300116.SZ', '002532.SZ',
-                  '300461.SZ', '300071.SZ', '300484.SZ', '603110.SH', '000028.SZ', '600655.SH', '000014.SZ',
-                  '600368.SH', '300462.SZ', '688363.SH', '300134.SZ', '300644.SZ', '600262.SH', '600078.SH',
-                  '603556.SH', '002484.SZ', '600410.SH', '300192.SZ', '002872.SZ', '002408.SZ', '002851.SZ',
-                  '002314.SZ', '300563.SZ', '601997.SH', '000549.SZ', '002871.SZ', '000682.SZ', '300718.SZ',
-                  '000785.SZ', '601989.SH', '600391.SH', '002953.SZ', '002594.SZ', '300707.SZ', '002540.SZ',
-                  '002400.SZ', '002266.SZ', '002204.SZ', '600720.SH', '300266.SZ', '603131.SH', '600881.SH',
-                  '603822.SH', '600848.SH', '002810.SZ', '300396.SZ', '600499.SH', '603367.SH', '688111.SH',
-                  '300697.SZ', '600973.SH', '002193.SZ', '600979.SH', '002080.SZ', '002446.SZ', '600260.SH',
-                  '300055.SZ', '300309.SZ', '603815.SH', '600293.SH', '000805.SZ', '603937.SH', '600540.SH',
-                  '002630.SZ', '002497.SZ', '603609.SH', '300442.SZ', '300383.SZ', '002055.SZ', '601377.SH',
-                  '002959.SZ', '601898.SH', '600992.SH', '600395.SH', '002662.SZ', '000550.SZ', '000421.SZ',
-                  '300057.SZ', '601088.SH', '600353.SH', '300258.SZ', '600627.SH', '603225.SH', '600170.SH',
-                  '603416.SH', '002230.SZ', '002231.SZ', '002510.SZ', '002899.SZ', '600755.SH', '002258.SZ',
-                  '002393.SZ', '603181.SH', '000895.SZ', '300556.SZ', '600871.SH', '002731.SZ', '300318.SZ',
-                  '603718.SH', '300336.SZ', '600118.SH', '300162.SZ', '600435.SH', '002015.SZ', '603915.SH',
-                  '600738.SH', '002755.SZ', '002332.SZ', '300320.SZ', '300272.SZ', '603197.SH', '300717.SZ',
-                  '600698.SH', '600885.SH', '300620.SZ', '000793.SZ', '600482.SH', '601009.SH', '600584.SH',
-                  '300758.SZ', '603332.SH', '002289.SZ', '002909.SZ', '603499.SH', '002327.SZ', '300436.SZ',
-                  '300114.SZ', '002757.SZ', '600213.SH', '300658.SZ', '002388.SZ', '300014.SZ', '600460.SH',
-                  '300759.SZ', '300664.SZ', '603331.SH', '603618.SH', '300607.SZ', '600403.SH', '002867.SZ',
-                  '002191.SZ', '603032.SH', '300314.SZ', '603089.SH', '000517.SZ', '300710.SZ', '002735.SZ',
-                  '601888.SH', '603790.SH', '300341.SZ', '000526.SZ', '688010.SH', '002214.SZ', '603848.SH',
-                  '300321.SZ', '600330.SH', '600087.SH', '600878.SH', '600537.SH', '001896.SZ', '603890.SH',
-                  '603688.SH', '601519.SH', '300043.SZ', '300191.SZ', '300798.SZ', '603037.SH', '600724.SH',
-                  '300573.SZ', '600754.SH', '601998.SH', '601299.SH', '002407.SZ', '603489.SH', '000522.SZ',
-                  '600198.SH', '002141.SZ', '300118.SZ', '002919.SZ', '300567.SZ', '000519.SZ', '600660.SH',
-                  '600880.SH', '603180.SH', '300156.SZ', '688036.SH', '300150.SZ', '603016.SH', '603326.SH',
-                  '000926.SZ', '000015.SZ', '002292.SZ', '000543.SZ', '300579.SZ', '002509.SZ', '300088.SZ',
-                  '300312.SZ', '002049.SZ', '002336.SZ', '000037.SZ', '300547.SZ', '300616.SZ', '603708.SH',
-                  '600337.SH', '002180.SZ', '601689.SH', '000839.SZ', '600183.SH', '300056.SZ', '601106.SH',
-                  '002282.SZ', '601118.SH', '300119.SZ', '603129.SH', '603535.SH', '600558.SH', '600797.SH',
-                  '002665.SZ', '601919.SH', '603656.SH', '603306.SH', '002129.SZ', '000910.SZ', '002831.SZ',
-                  '300428.SZ', '300033.SZ', '300796.SZ', '600117.SH', '000711.SZ', '002311.SZ', '603660.SH',
-                  '002205.SZ', '002965.SZ', '000816.SZ', '600165.SH', '300576.SZ', '000903.SZ', '300505.SZ',
-                  '603659.SH', '002116.SZ', '000413.SZ', '600882.SH', '600031.SH', '600733.SH', '002798.SZ',
-                  '300384.SZ', '300705.SZ', '000505.SZ', '300228.SZ', '603126.SH', '002093.SZ', '600687.SH',
-                  '002729.SZ', '300158.SZ', '300327.SZ', '000962.SZ', '300698.SZ', '000690.SZ', '603228.SH',
-                  '603390.SH', '603898.SH', '002569.SZ', '000655.SZ', '002172.SZ', '603311.SH', '002602.SZ',
-                  '000600.SZ', '000035.SZ', '600959.SH', '603366.SH', '603808.SH', '300594.SZ', '300139.SZ',
-                  '000859.SZ', '300155.SZ', '002589.SZ', '000856.SZ', '600761.SH', '603737.SH', '002622.SZ',
-                  '300165.SZ', '601339.SH', '688399.SH', '002216.SZ', '603859.SH', '002501.SZ', '688299.SH',
-                  '002157.SZ', '002052.SZ', '002153.SZ', '601766.SH', '300215.SZ', '000537.SZ', '300187.SZ',
-                  '600189.SH', '601618.SH', '002166.SZ', '300250.SZ', '300333.SZ', '601633.SH', '600231.SH',
-                  '600278.SH', '300017.SZ', '002011.SZ', '603208.SH', '601928.SH', '002599.SZ', '300605.SZ',
-                  '000540.SZ', '002160.SZ', '000410.SZ', '603963.SH', '002574.SZ', '600111.SH', '600977.SH',
-                  '600145.SH', '002895.SZ', '600650.SH', '600879.SH', '603045.SH', '002386.SZ', '300538.SZ',
-                  '002805.SZ', '603908.SH', '603200.SH', '600779.SH', '603059.SH', '000739.SZ', '000761.SZ',
-                  '002007.SZ', '002890.SZ', '601566.SH', '002786.SZ', '002241.SZ', '603685.SH', '000638.SZ',
-                  '600322.SH', '002202.SZ', '000776.SZ', '600732.SH', '300159.SZ', '002154.SZ', '000825.SZ',
-                  '600323.SH', '300510.SZ', '300007.SZ', '002335.SZ', '000675.SZ', '300561.SZ', '600171.SH',
-                  '000408.SZ', '002359.SZ', '300050.SZ', '603601.SH', '002567.SZ', '600570.SH', '300039.SZ',
-                  '601588.SH', '300003.SZ', '300569.SZ', '000150.SZ', '601066.SH', '300667.SZ', '002645.SZ',
-                  '300677.SZ', '601375.SH', '300551.SZ', '603985.SH', '300768.SZ', '002902.SZ', '688006.SH',
-                  '600472.SH', '300305.SZ', '002572.SZ', '002573.SZ', '601727.SH', '601020.SH', '601595.SH',
-                  '603360.SH', '000813.SZ', '603686.SH', '603283.SH', '002226.SZ', '002286.SZ', '000959.SZ',
-                  '000553.SZ', '600370.SH', '002155.SZ', '600985.SH', '000032.SZ', '603657.SH', '603889.SH',
-                  '603755.SH', '002431.SZ', '600746.SH', '300045.SZ', '300429.SZ', '600825.SH', '000568.SZ',
-                  '002467.SZ', '603086.SH', '601199.SH', '600560.SH', '603198.SH', '002249.SZ', '300787.SZ',
-                  '601966.SH', '601268.SH', '002499.SZ', '600485.SH', '300182.SZ', '603809.SH', '601100.SH',
-                  '603538.SH', '002391.SZ', '300345.SZ', '002167.SZ', '601929.SH', '002677.SZ', '601326.SH',
-                  '002928.SZ', '000663.SZ', '300726.SZ', '002654.SZ', '300018.SZ', '601636.SH', '000504.SZ',
-                  '300586.SZ', '002426.SZ', '300797.SZ', '600015.SH', '002759.SZ', '600926.SH', '603555.SH',
-                  '002642.SZ', '603236.SH', '002741.SZ', '603665.SH', '600505.SH', '600438.SH', '000886.SZ',
-                  '300417.SZ', '002917.SZ', '002504.SZ', '002675.SZ', '300584.SZ', '300394.SZ', '000027.SZ',
-                  '603626.SH', '603260.SH', '300188.SZ', '002465.SZ', '601666.SH', '300163.SZ', '600265.SH',
-                  '300636.SZ', '300447.SZ', '300217.SZ', '300283.SZ', '002813.SZ', '300371.SZ', '002852.SZ',
-                  '002097.SZ', '300609.SZ', '300412.SZ', '688020.SH', '600928.SH', '603816.SH', '000611.SZ',
-                  '600867.SH', '300152.SZ', '600239.SH', '601996.SH', '000885.SZ', '600234.SH', '300742.SZ',
-                  '000763.SZ', '603739.SH', '002684.SZ', '000623.SZ', '300372.SZ', '600752.SH', '688033.SH',
-                  '000930.SZ', '603608.SH', '600688.SH', '603607.SH', '300732.SZ', '002222.SZ', '002715.SZ',
-                  '000960.SZ', '600309.SH', '600128.SH', '300084.SZ', '603757.SH', '000012.SZ', '600787.SH',
-                  '600901.SH', '300659.SZ', '601619.SH', '002374.SZ', '000980.SZ', '600594.SH', '002145.SZ',
-                  '002463.SZ', '002110.SZ', '002523.SZ', '603303.SH', '688101.SH', '600759.SH', '601068.SH',
-                  '002313.SZ', '600773.SH', '002714.SZ', '603358.SH', '002242.SZ', '000866.SZ', '600155.SH',
-                  '000715.SZ', '600081.SH', '300214.SZ', '300789.SZ', '600577.SH', '600806.SH', '000720.SZ',
-                  '603156.SH', '300276.SZ', '603001.SH', '600822.SH', '601366.SH', '603297.SH', '300750.SZ',
-                  '000970.SZ', '000564.SZ', '300699.SZ', '300637.SZ', '002885.SZ', '000726.SZ', '000662.SZ',
-                  '002692.SZ', '603939.SH', '002653.SZ', '002094.SZ', '600803.SH', '600662.SH', '603559.SH',
-                  '600328.SH', '300810.SZ', '600196.SH', '600426.SH', '002658.SZ', '603033.SH', '603838.SH',
-                  '600983.SH', '600507.SH', '600004.SH', '300077.SZ', '600448.SH', '000902.SZ', '600329.SH',
-                  '600736.SH', '300778.SZ', '000411.SZ', '000004.SZ', '002925.SZ', '601881.SH', '600085.SH',
-                  '002685.SZ', '002409.SZ', '300575.SZ', '300432.SZ', '600616.SH', '002417.SZ', '688199.SH',
-                  '603028.SH', '603123.SH', '000888.SZ', '300478.SZ', '600805.SH', '000975.SZ', '002718.SZ',
-                  '300211.SZ', '002420.SZ', '002641.SZ', '600734.SH', '300236.SZ', '600009.SH', '002737.SZ',
-                  '300402.SZ', '300458.SZ', '002565.SZ', '600642.SH', '600836.SH', '603585.SH', '002507.SZ',
-                  '300083.SZ', '002865.SZ', '603978.SH', '002751.SZ', '300157.SZ', '603586.SH', '603496.SH',
-                  '600359.SH', '002396.SZ', '000544.SZ', '002229.SZ', '000585.SZ', '002861.SZ', '000562.SZ',
-                  '000576.SZ', '002506.SZ', '600771.SH', '002307.SZ', '300174.SZ', '300385.SZ', '600690.SH',
-                  '600777.SH', '600315.SH', '002676.SZ', '002588.SZ', '688300.SH', '600415.SH', '688098.SH',
-                  '002006.SZ', '300026.SZ', '600267.SH', '300259.SZ', '000981.SZ', '603637.SH', '000713.SZ',
-                  '300514.SZ', '601018.SH', '603111.SH', '000610.SZ', '002171.SZ', '002170.SZ', '600890.SH',
-                  '300034.SZ', '688321.SH', '300414.SZ', '601028.SH', '600789.SH', '002177.SZ', '002740.SZ',
-                  '002776.SZ', '002881.SZ', '600605.SH', '000628.SZ', '603214.SH', '300692.SZ', '000948.SZ',
-                  '002235.SZ', '001965.SZ', '000632.SZ', '002009.SZ', '002762.SZ', '688021.SH', '002683.SZ',
-                  '600157.SH', '002251.SZ', '600748.SH', '002679.SZ', '600493.SH', '300783.SZ', '300492.SZ',
-                  '300029.SZ', '000925.SZ', '002462.SZ', '603466.SH', '600033.SH', '300598.SZ', '000029.SZ',
-                  '002747.SZ', '603519.SH', '300048.SZ', '300802.SZ', '002803.SZ', '000653.SZ', '603600.SH',
-                  '002960.SZ', '002017.SZ', '000783.SZ', '000821.SZ', '300450.SZ', '002906.SZ', '002315.SZ',
-                  '603887.SH', '300560.SZ', '300409.SZ', '002201.SZ', '300493.SZ', '600606.SH', '300723.SZ',
-                  '002124.SZ', '600383.SH', '000561.SZ', '600518.SH', '002038.SZ', '603733.SH', '603223.SH',
-                  '600783.SH', '002340.SZ', '603023.SH', '002561.SZ', '300020.SZ', '002142.SZ', '300557.SZ',
-                  '600725.SH', '603278.SH', '600135.SH', '002404.SZ', '002922.SZ', '000560.SZ', '600225.SH',
-                  '600591.SH', '300111.SZ', '603936.SH', '300405.SZ', '600168.SH', '600604.SH', '600190.SH',
-                  '601789.SH', '000968.SZ', '603899.SH', '300125.SZ', '603030.SH', '603706.SH', '002877.SZ',
-                  '300588.SZ', '300053.SZ', '600030.SH', '603569.SH', '002243.SZ', '002640.SZ', '002073.SZ',
-                  '600123.SH', '000557.SZ', '603928.SH', '603128.SH', '600338.SH', '300289.SZ', '600628.SH',
-                  '300360.SZ', '300645.SZ', '600152.SH', '300024.SZ', '600900.SH', '600998.SH', '600290.SH',
-                  '600321.SH', '600311.SH', '002232.SZ', '300304.SZ', '002161.SZ', '002237.SZ', '600884.SH',
-                  '002493.SZ', '603901.SH', '000725.SZ', '002951.SZ', '300005.SZ', '000928.SZ', '600153.SH',
-                  '000707.SZ', '600595.SH', '600025.SH', '300486.SZ', '300413.SZ', '603063.SH', '600515.SH',
-                  '002956.SZ', '002613.SZ', '002189.SZ', '601208.SH', '000875.SZ', '600726.SH', '300629.SZ',
-                  '603589.SH', '000893.SZ', '603363.SH', '603580.SH', '002850.SZ', '600276.SH', '002284.SZ',
-                  '002031.SZ', '688088.SH', '600503.SH', '002968.SZ', '002194.SZ', '600065.SH', '300433.SZ',
-                  '300260.SZ', '603320.SH', '603099.SH', '000990.SZ', '000700.SZ', '002538.SZ', '603179.SH',
-                  '000905.SZ', '600899.SH', '603189.SH', '000827.SZ', '002035.SZ', '300002.SZ', '300518.SZ',
-                  '002832.SZ', '600675.SH', '002927.SZ', '600316.SH', '000412.SZ', '600728.SH', '688028.SH',
-                  '300781.SZ', '002926.SZ', '000534.SZ', '300073.SZ', '300153.SZ', '300668.SZ', '600063.SH',
-                  '002487.SZ', '002367.SZ', '600120.SH', '002319.SZ', '600263.SH', '000829.SZ', '300444.SZ',
-                  '603121.SH', '300790.SZ', '002264.SZ', '002898.SZ', '600331.SH', '601021.SH', '600598.SH',
-                  '300582.SZ', '601558.SH', '000817.SZ', '600272.SH', '300277.SZ', '600707.SH', '000567.SZ',
-                  '000498.SZ', '000589.SZ', '300529.SZ', '601880.SH', '300175.SZ', '300218.SZ', '300190.SZ',
-                  '601599.SH', '300151.SZ', '002896.SZ', '000766.SZ', '600712.SH', '600599.SH', '603727.SH',
-                  '300123.SZ', '300161.SZ', '601717.SH', '600459.SH', '603906.SH', '002660.SZ', '002283.SZ',
-                  '002849.SZ', '688116.SH', '300101.SZ', '002945.SZ', '600317.SH', '300193.SZ', '603730.SH',
-                  '000721.SZ', '300622.SZ', '600388.SH', '000688.SZ', '603613.SH', '603106.SH', '600375.SH',
-                  '002086.SZ', '603301.SH', '601368.SH', '000929.SZ', '300091.SZ', '600112.SH', '002620.SZ',
-                  '000949.SZ', '600406.SH', '600680.SH', '000524.SZ', '600731.SH', '002878.SZ', '603387.SH',
-                  '002444.SZ', '603068.SH', '002439.SZ', '600340.SH', '600491.SH', '000535.SZ', '000409.SZ',
-                  '603602.SH', '000538.SZ', '300508.SZ', '600877.SH', '603861.SH', '002943.SZ', '600300.SH',
-                  '603338.SH', '002437.SZ', '603012.SH', '600566.SH', '600420.SH', '002168.SZ', '002468.SZ',
-                  '600455.SH', '600866.SH', '600498.SH', '600760.SH', '300133.SZ', '600546.SH', '002076.SZ',
-                  '600653.SH', '000401.SZ', '603050.SH', '600059.SH', '600765.SH', '600986.SH', '600792.SH',
-                  '603860.SH', '300683.SZ', '300490.SZ', '002619.SZ', '600791.SH', '603309.SH', '300299.SZ',
-                  '600273.SH', '300760.SZ', '002664.SZ', '300451.SZ', '600984.SH', '600851.SH', '000155.SZ',
-                  '300090.SZ', '600939.SH', '000685.SZ', '300112.SZ', '603690.SH', '600279.SH', '002666.SZ',
-                  '600500.SH', '000021.SZ', '600796.SH', '002293.SZ', '600086.SH', '600874.SH', '300746.SZ',
-                  '600561.SH', '300347.SZ', '000622.SZ', '300610.SZ', '300550.SZ', '002448.SZ', '000056.SZ',
-                  '601016.SH', '600393.SH', '000406.SZ', '300117.SZ', '000166.SZ', '600814.SH', '601188.SH',
-                  '300172.SZ', '002547.SZ', '601318.SH', '603323.SH', '600268.SH', '600351.SH', '002414.SZ',
-                  '000531.SZ', '600721.SH', '300104.SZ', '002272.SZ', '000735.SZ', '300397.SZ', '002117.SZ',
-                  '300507.SZ', '600283.SH', '688202.SH', '600051.SH', '300601.SZ', '002681.SZ', '002028.SZ',
-                  '000935.SZ', '000877.SZ', '000542.SZ', '600648.SH', '600318.SH', '300302.SZ', '601949.SH',
-                  '002515.SZ', '601086.SH', '603926.SH', '002857.SZ', '002923.SZ', '300735.SZ', '600705.SH',
-                  '000426.SZ', '600766.SH', '600861.SH', '603869.SH', '603818.SH', '600380.SH', '603878.SH',
-                  '300030.SZ', '300064.SZ', '000592.SZ', '002498.SZ', '600843.SH', '300554.SZ', '002405.SZ',
-                  '002085.SZ', '601163.SH', '600176.SH', '300366.SZ', '002570.SZ', '600636.SH', '600335.SH',
-                  '002651.SZ', '600488.SH', '600614.SH', '600104.SH', '000508.SZ', '000036.SZ', '601011.SH',
-                  '002422.SZ', '002412.SZ', '002377.SZ', '600774.SH', '600548.SH', '002025.SZ', '000598.SZ',
-                  '600506.SH', '603337.SH', '300137.SZ', '600161.SH', '300350.SZ', '300682.SZ', '600107.SH',
-                  '600903.SH', '300472.SZ', '002360.SZ', '000719.SZ', '000602.SZ', '002907.SZ', '002876.SZ',
-                  '601869.SH', '300351.SZ', '300354.SZ', '002108.SZ', '300617.SZ', '600126.SH', '300801.SZ',
-                  '002144.SZ', '600419.SH', '603996.SH', '600211.SH', '603619.SH', '002888.SZ', '300169.SZ',
-                  '600077.SH', '601515.SH', '000430.SZ', '300343.SZ', '600735.SH', '002578.SZ', '002774.SZ',
-                  '000049.SZ', '002442.SZ', '002749.SZ', '000068.SZ', '000756.SZ', '300395.SZ', '600645.SH',
-                  '600379.SH', '600894.SH', '603863.SH', '300470.SZ', '300792.SZ', '600115.SH', '002432.SZ',
-                  '600177.SH', '000635.SZ', '600592.SH', '002726.SZ', '600710.SH', '600361.SH', '002211.SZ',
-                  '601952.SH', '600624.SH', '603879.SH', '600873.SH', '300399.SZ', '600547.SH', '300280.SZ',
-                  '000586.SZ', '601211.SH', '600975.SH', '600029.SH', '601965.SH', '603239.SH', '600386.SH',
-                  '300630.SZ', '000679.SZ', '002883.SZ', '603606.SH', '002659.SZ', '603959.SH', '000963.SZ',
-                  '600256.SH', '000899.SZ', '002301.SZ', '600679.SH', '000932.SZ', '002534.SZ', '300267.SZ',
-                  '002256.SZ', '300712.SZ', '000583.SZ', '601007.SH', '300571.SZ', '600001.SH', '600520.SH',
-                  '603895.SH', '002782.SZ', '300627.SZ', '000803.SZ', '600549.SH', '002824.SZ', '600663.SH',
-                  '603866.SH', '002434.SZ', '002942.SZ', '000039.SZ', '002618.SZ', '002187.SZ', '002546.SZ',
-                  '002459.SZ', '000915.SZ', '603558.SH', '000419.SZ', '000969.SZ', '601991.SH', '300695.SZ',
-                  '002918.SZ', '000650.SZ', '300647.SZ', '300265.SZ', '300398.SZ', '300782.SZ', '600644.SH',
-                  '000651.SZ', '002486.SZ', '002275.SZ', '600181.SH', '603819.SH', '603721.SH', '300096.SZ',
-                  '300199.SZ', '601225.SH', '002503.SZ', '603269.SH', '600376.SH', '002767.SZ', '002608.SZ',
-                  '000937.SZ', '002048.SZ', '600246.SH', '600695.SH', '300700.SZ', '000727.SZ', '002603.SZ',
-                  '300308.SZ', '600091.SH', '000594.SZ', '000403.SZ', '600559.SH', '600003.SH', '601901.SH',
-                  '002480.SZ', '002071.SZ', '002627.SZ', '600496.SH', '600691.SH', '600834.SH', '603192.SH',
-                  '000613.SZ', '002705.SZ', '603058.SH', '002609.SZ', '600668.SH', '300592.SZ', '300590.SZ',
-                  '601003.SH', '600978.SH', '300522.SZ', '603298.SH', '600588.SH', '688166.SH', '002441.SZ',
-                  '600557.SH', '002818.SZ', '600096.SH', '002134.SZ', '600917.SH', '000760.SZ', '000620.SZ',
-                  '000569.SZ', '300042.SZ', '000656.SZ', '600150.SH', '000046.SZ', '603663.SH', '600676.SH',
-                  '002514.SZ', '000952.SZ', '600802.SH', '002595.SZ', '603696.SH', '600343.SH', '600991.SH',
-                  '600967.SH', '603810.SH', '300231.SZ', '002131.SZ', '600497.SH', '000911.SZ', '002635.SZ',
-                  '300392.SZ', '601313.SH', '300729.SZ', '002156.SZ', '002125.SZ', '603909.SH', '002140.SZ',
-                  '600810.SH', '002099.SZ', '688058.SH', '002061.SZ', '601008.SH', '603056.SH', '000883.SZ',
-                  '600844.SH', '300632.SZ', '603222.SH', '000878.SZ', '300459.SZ', '002252.SZ', '002667.SZ',
-                  '300257.SZ', '002583.SZ', '002213.SZ', '000590.SZ', '603918.SH', '300100.SZ', '601677.SH',
-                  '600458.SH', '002471.SZ', '002897.SZ', '000581.SZ', '000881.SZ', '600007.SH', '300603.SZ',
-                  '601999.SH', '000976.SZ', '600568.SH', '002474.SZ', '603689.SH', '603693.SH', '601611.SH',
-                  '600203.SH', '002128.SZ', '002727.SZ', '600418.SH', '600615.SH', '300488.SZ', '600897.SH',
-                  '002224.SZ', '600891.SH', '603729.SH', '600659.SH', '000404.SZ', '300334.SZ', '600696.SH',
-                  '600610.SH', '002528.SZ', '600960.SH', '603227.SH', '600741.SH', '300674.SZ', '000967.SZ',
-                  '300216.SZ', '002461.SZ', '300271.SZ', '601311.SH', '000658.SZ', '002623.SZ', '002527.SZ',
-                  '300278.SZ', '603328.SH', '002866.SZ', '600195.SH', '002580.SZ', '002912.SZ', '300711.SZ',
-                  '002262.SZ', '002821.SZ', '300660.SZ', '000917.SZ', '002947.SZ', '000595.SZ', '300516.SZ',
-                  '002143.SZ', '603728.SH', '300129.SZ', '603101.SH', '000420.SZ', '000938.SZ', '300303.SZ',
-                  '600452.SH', '000010.SZ', '600808.SH', '002655.SZ', '002838.SZ', '300279.SZ', '000578.SZ',
-                  '002466.SZ', '300519.SZ', '002279.SZ', '300201.SZ', '002181.SZ', '002014.SZ', '300353.SZ',
-                  '002863.SZ', '300467.SZ', '603603.SH', '600005.SH', '002147.SZ', '002765.SZ', '600753.SH',
-                  '603041.SH', '603703.SH', '603108.SH', '002519.SZ', '300130.SZ', '300619.SZ', '300535.SZ',
-                  '603773.SH', '002443.SZ', '300273.SZ', '300489.SZ', '300062.SZ', '603383.SH', '600629.SH',
-                  '300135.SZ', '603716.SH', '300615.SZ', '600129.SH', '300761.SZ', '002343.SZ', '002077.SZ',
-                  '300292.SZ', '002281.SZ', '300340.SZ', '002195.SZ', '002559.SZ', '002430.SZ', '600080.SH',
-                  '000554.SZ', '600054.SH', '600619.SH', '601116.SH', '002185.SZ', '603858.SH', '002758.SZ',
-                  '002828.SZ', '600249.SH', '300653.SZ', '002158.SZ', '601615.SH', '000923.SZ', '300006.SZ',
-                  '000780.SZ', '000748.SZ', '300239.SZ', '603661.SH', '600673.SH', '603699.SH', '601058.SH',
-                  '600703.SH', '600122.SH', '600693.SH', '300243.SZ', '300338.SZ', '603983.SH', '600677.SH',
-                  '300738.SZ', '603076.SH', '300291.SZ', '002045.SZ', '000488.SZ', '603843.SH', '600416.SH',
-                  '000691.SZ', '600206.SH', '600908.SH', '600576.SH', '600694.SH', '000751.SZ', '002418.SZ',
-                  '600200.SH', '002840.SZ', '002464.SZ', '300063.SZ', '002929.SZ', '300657.SZ', '000753.SZ',
-                  '002638.SZ', '600055.SH', '002278.SZ', '300194.SZ', '000667.SZ', '002946.SZ', '000852.SZ',
-                  '603268.SH', '601019.SH', '600958.SH', '603477.SH', '600769.SH', '002911.SZ', '600531.SH',
-                  '600888.SH', '002046.SZ', '600682.SH', '600255.SH', '000521.SZ', '300098.SZ', '002381.SZ',
-                  '603166.SH', '600053.SH', '300352.SZ', '002661.SZ', '600036.SH', '600011.SH', '002712.SZ',
-                  '600333.SH', '002886.SZ', '002424.SZ', '000693.SZ', '603118.SH', '002524.SZ', '600228.SH',
-                  '300604.SZ', '002707.SZ', '002479.SZ', '600261.SH', '300553.SZ', '600804.SH', '603717.SH',
-                  '688288.SH', '600719.SH', '600016.SH', '600131.SH', '002554.SZ', '300596.SZ', '600019.SH',
-                  '002678.SZ', '603920.SH', '300477.SZ', '002366.SZ', '603897.SH', '300181.SZ', '002882.SZ',
-                  '601101.SH', '603658.SH', '300032.SZ', '600439.SH', '002950.SZ', '002084.SZ', '000862.SZ',
-                  '300585.SZ', '002351.SZ', '600023.SH', '002334.SZ', '603567.SH', '603421.SH', '603187.SH',
-                  '300727.SZ', '002037.SZ', '601177.SH', '688011.SH', '600669.SH', '600976.SH', '300770.SZ',
-                  '000712.SZ', '300148.SZ', '600963.SH', '603105.SH', '600310.SH', '002005.SZ', '603700.SH',
-                  '600536.SH', '002575.SZ', '000985.SZ', '601005.SH', '300788.SZ', '002969.SZ', '000527.SZ',
-                  '600363.SH', '603826.SH', '300424.SZ', '300641.SZ', '600919.SH', '002864.SZ', '000998.SZ',
-                  '002551.SZ', '000758.SZ', '300737.SZ', '600993.SH', '000705.SZ', '300164.SZ', '002290.SZ',
-                  '601933.SH', '300054.SZ', '600477.SH', '300051.SZ', '000717.SZ', '600625.SH', '002062.SZ',
-                  '002482.SZ', '300708.SZ', '600232.SH', '300589.SZ', '000055.SZ', '600199.SH', '002826.SZ',
-                  '003816.SZ', '002680.SZ', '600354.SH', '002892.SZ', '603098.SH', '000520.SZ', '603277.SH',
-                  '601600.SH', '600600.SH', '000710.SZ', '600875.SH', '000779.SZ', '601608.SH', '002068.SZ',
-                  '600226.SH', '600572.SH', '300242.SZ', '601126.SH', '300420.SZ', '600784.SH', '600528.SH',
-                  '603991.SH', '601330.SH', '300197.SZ', '300031.SZ', '600100.SH', '603066.SH', '002963.SZ',
-                  '002325.SZ', '300806.SZ', '300225.SZ', '600357.SH', '600326.SH', '002219.SZ', '000011.SZ',
-                  '688025.SH', '002425.SZ', '600358.SH', '300378.SZ', '300374.SZ', '600635.SH', '603982.SH',
-                  '300587.SZ', '002836.SZ', '002657.SZ', '300457.SZ', '603067.SH', '001872.SZ', '600212.SH',
-                  '603669.SH', '300743.SZ', '600516.SH', '300085.SZ', '600841.SH', '300686.SZ', '600392.SH',
-                  '603233.SH', '000516.SZ', '000670.SZ', '002395.SZ', '000059.SZ', '000716.SZ', '002542.SZ',
-                  '300521.SZ', '300631.SZ', '600433.SH', '300755.SZ', '002632.SZ', '000966.SZ', '600350.SH',
-                  '300634.SZ', '002520.SZ', '600692.SH', '002643.SZ', '603379.SH', '000983.SZ', '300388.SZ',
-                  '002577.SZ', '603997.SH', '300367.SZ', '002013.SZ', '600567.SH', '002058.SZ', '600284.SH',
-                  '603633.SH', '300344.SZ', '002941.SZ', '000559.SZ', '603167.SH', '603093.SH', '600697.SH',
-                  '000729.SZ', '600981.SH', '002338.SZ', '300184.SZ', '300638.SZ', '002688.SZ', '601567.SH',
-                  '002921.SZ', '603256.SH', '601108.SH', '000676.SZ', '000626.SZ', '300805.SZ', '601788.SH',
-                  '603139.SH', '002016.SZ', '000511.SZ', '000058.SZ', '300067.SZ', '000672.SZ', '002248.SZ',
-                  '000069.SZ', '601668.SH', '600501.SH', '601857.SH', '600352.SH', '600056.SH', '002075.SZ',
-                  '600089.SH', '603501.SH', '600526.SH', '300725.SZ', '000040.SZ', '002962.SZ', '600539.SH',
-                  '600401.SH', '600596.SH', '002090.SZ', '300052.SZ', '300315.SZ', '002082.SZ', '300080.SZ',
-                  '600110.SH', '002415.SZ', '300600.SZ', '300480.SZ', '600298.SH', '002673.SZ', '600820.SH',
-                  '600292.SH', '600138.SH', '300370.SZ', '600028.SH', '300513.SZ', '300406.SZ', '601918.SH',
-                  '300200.SZ', '300310.SZ', '603169.SH', '300455.SZ', '688008.SH', '600188.SH', '300552.SZ',
-                  '000603.SZ', '688012.SH', '002385.SZ', '600137.SH', '300666.SZ', '600050.SH', '600767.SH',
-                  '688188.SH', '000987.SZ', '002930.SZ', '300145.SZ', '600826.SH', '300527.SZ', '002199.SZ',
-                  '603055.SH', '002592.SZ', '002827.SZ', '000019.SZ', '002624.SZ', '300142.SZ', '600069.SH',
-                  '002041.SZ', '600933.SH', '002629.SZ', '600775.SH', '300329.SZ', '600461.SH', '600207.SH',
-                  '300633.SZ', '002095.SZ', '600088.SH', '002317.SZ', '000539.SZ', '300247.SZ', '600830.SH',
-                  '300198.SZ', '002186.SZ', '300602.SZ', '000722.SZ', '000514.SZ', '601616.SH', '600898.SH',
-                  '600215.SH', '603989.SH', '600776.SH', '603008.SH', '002039.SZ', '600269.SH', '600511.SH',
-                  '600133.SH', '000043.SZ', '000681.SZ', '300795.SZ', '002209.SZ', '000042.SZ', '300539.SZ',
-                  '000697.SZ', '002564.SZ', '002879.SZ', '600020.SH', '000795.SZ', '002512.SZ', '002591.SZ',
-                  '600764.SH', '603919.SH', '600308.SH', '000563.SZ', '600466.SH', '300593.SZ', '300369.SZ',
-                  '002529.SZ', '600208.SH', '300469.SZ', '603709.SH', '002915.SZ', '300166.SZ', '002291.SZ',
-                  '300069.SZ', '603638.SH', '300517.SZ', '300542.SZ', '600508.SH', '600854.SH', '002428.SZ',
-                  '002026.SZ', '002533.SZ', '300534.SZ', '603043.SH', '000007.SZ', '603955.SH', '002816.SZ',
-                  '000023.SZ', '000637.SZ', '000786.SZ', '002483.SZ', '002841.SZ', '300679.SZ', '600132.SH',
-                  '600233.SH', '603038.SH', '300422.SZ', '300149.SZ', '603896.SH', '300097.SZ', '002600.SZ',
-                  '002808.SZ', '000698.SZ', '002517.SZ', '002530.SZ', '002227.SZ', '601678.SH', '300702.SZ',
-                  '002298.SZ', '300684.SZ', '002103.SZ', '600909.SH', '300731.SZ', '300474.SZ', '002107.SZ',
-                  '002148.SZ', '603007.SH', '000005.SZ', '300287.SZ', '002220.SZ', '600807.SH', '600320.SH',
-                  '600739.SH', '688357.SH', '002355.SZ', '002192.SZ', '603595.SH', '600336.SH', '002458.SZ',
-                  '002908.SZ', '600634.SH', '002089.SZ', '600360.SH', '002936.SZ', '688002.SH', '300171.SZ',
-                  '600872.SH', '300546.SZ', '002553.SZ', '600971.SH', '600241.SH', '600319.SH', '603678.SH',
-                  '002410.SZ', '300693.SZ', '603078.SH', '300773.SZ', '600227.SH', '600223.SH', '300038.SZ',
-                  '002347.SZ', '300300.SZ', '002274.SZ', '603178.SH', '300465.SZ', '300623.SZ', '300016.SZ',
-                  '603386.SH', '300222.SZ', '601398.SH', '603882.SH', '600729.SH', '000765.SZ', '000013.SZ',
-                  '600397.SH', '300680.SZ', '600449.SH', '000615.SZ', '002958.SZ', '603029.SH', '600831.SH',
-                  '002008.SZ', '300109.SZ', '300245.SZ', '300487.SZ', '300189.SZ', '000916.SZ', '002302.SZ',
-                  '600179.SH', '600166.SH', '300359.SZ', '002152.SZ', '002521.SZ', '600654.SH', '600075.SH',
-                  '600580.SH', '300745.SZ', '000977.SZ', '600845.SH', '300608.SZ', '601127.SH', '601369.SH',
-                  '600883.SH', '300685.SZ', '002119.SZ', '300376.SZ', '000050.SZ', '000020.SZ', '603722.SH',
-                  '000631.SZ', '000612.SZ', '002766.SZ', '002273.SZ', '300285.SZ', '300466.SZ', '002353.SZ',
-                  '600532.SH', '300648.SZ', '603828.SH', '688168.SH', '603777.SH', '603596.SH', '300382.SZ',
-                  '002342.SZ', '603520.SH', '002560.SZ', '603077.SH', '000570.SZ', '002694.SZ', '300381.SZ',
-                  '600828.SH', '601985.SH', '603927.SH', '603069.SH', '002648.SZ', '300415.SZ', '603610.SH',
-                  '600849.SH', '002364.SZ', '300673.SZ', '002842.SZ', '600237.SH', '000156.SZ', '000778.SZ',
-                  '000790.SZ', '600307.SH', '300791.SZ', '002593.SZ', '688022.SH', '600982.SH', '000850.SZ',
-                  '300661.SZ', '002223.SZ', '000931.SZ', '000832.SZ', '300541.SZ', '002371.SZ', '603683.SH',
-                  '600763.SH', '002772.SZ', '002780.SZ', '000158.SZ', '002438.SZ', '300713.SZ', '300160.SZ',
-                  '601628.SH', '603009.SH', '600399.SH', '600523.SH', '300453.SZ', '000002.SZ', '002820.SZ',
-                  '600282.SH', '000868.SZ', '603986.SH', '300786.SZ', '000502.SZ', '600860.SH', '603788.SH',
-                  '300202.SZ', '601975.SH', '002070.SZ', '002948.SZ', '002916.SZ', '000048.SZ', '600716.SH',
-                  '002721.SZ', '300736.SZ', '300009.SZ', '601216.SH', '600182.SH', '002354.SZ', '000571.SZ',
-                  '002548.SZ', '300348.SZ', '600513.SH', '600632.SH', '002690.SZ', '600281.SH', '002352.SZ',
-                  '002123.SZ', '603922.SH', '002132.SZ', '600253.SH', '300691.SZ', '603100.SH', '000616.SZ',
-                  '300496.SZ', '002115.SZ', '600285.SH', '300599.SZ', '002526.SZ', '002120.SZ', '601798.SH',
-                  '601288.SH', '603025.SH', '002687.SZ', '300324.SZ', '600602.SH', '603365.SH', '600090.SH',
-                  '601138.SH', '000657.SZ', '002858.SZ', '000806.SZ', '600684.SH', '002452.SZ', '603286.SH',
-                  '603377.SH', '300767.SZ', '002706.SZ', '002901.SZ', '002511.SZ', '000683.SZ', '603839.SH',
-                  '600173.SH', '002869.SZ', '603698.SH', '000732.SZ', '002344.SZ', '000979.SZ', '603060.SH',
-                  '002341.SZ', '600066.SH', '000416.SZ', '300023.SZ', '002022.SZ', '600422.SH', '000558.SZ',
-                  '300037.SZ', '600525.SH', '603316.SH', '300210.SZ', '300545.SZ', '600159.SH', '600790.SH',
-                  '300779.SZ', '002606.SZ', '000731.SZ', '600699.SH', '002796.SZ', '600966.SH', '000812.SZ',
-                  '603797.SH', '600620.SH', '002053.SZ', '000065.SZ', '000965.SZ', '002357.SZ', '002280.SZ',
-                  '600000.SH', '002063.SZ', '601390.SH', '002130.SZ', '600793.SH', '600700.SH', '300651.SZ',
-                  '002674.SZ', '300355.SZ', '002698.SZ', '002083.SZ', '300136.SZ', '300241.SZ', '002557.SZ',
-                  '600742.SH', '000100.SZ', '000680.SZ', '300040.SZ', '600462.SH', '002494.SZ', '002596.SZ',
-                  '300628.SZ', '002967.SZ', '002717.SZ', '300548.SZ', '000818.SZ', '603011.SH', '600824.SH',
-                  '603015.SH', '603357.SH', '000890.SZ', '002074.SZ', '300649.SZ', '600832.SH', '002742.SZ',
-                  '600685.SH', '002126.SZ', '002406.SZ', '603900.SH', '300178.SZ', '002163.SZ', '688029.SH',
-                  '600074.SH', '603488.SH', '000515.SZ', '000529.SZ', '002300.SZ', '603389.SH', '000018.SZ',
-                  '300476.SZ', '002518.SZ', '300389.SZ', '002801.SZ', '002225.SZ', '600468.SH', '002362.SZ',
-                  '600929.SH', '002002.SZ', '600039.SH', '601890.SH', '002949.SZ', '600711.SH', '000762.SZ',
-                  '000630.SZ', '300665.SZ', '688333.SH', '601606.SH', '300504.SZ', '603333.SH', '002165.SZ',
-                  '002833.SZ', '002270.SZ', '300747.SZ', '002491.SZ', '601168.SH', '002492.SZ', '300146.SZ',
-                  '603712.SH', '600858.SH', '002329.SZ', '002012.SZ', '603186.SH', '603801.SH', '300294.SZ',
-                  '002513.SZ', '300140.SZ', '000701.SZ', '300511.SZ', '002072.SZ', '600799.SH', '300356.SZ',
-                  '000798.SZ', '002750.SZ', '300716.SZ', '600989.SH', '600366.SH', '002210.SZ', '600175.SH',
-                  '603668.SH', '300316.SZ', '600717.SH', '603976.SH', '600611.SH', '000671.SZ', '603588.SH',
-                  '300756.SZ', '002671.SZ', '000919.SZ', '600838.SH', '000629.SZ', '000400.SZ', '600193.SH',
-                  '002696.SZ', '300463.SZ', '600432.SH', '002390.SZ', '603767.SH', '603677.SH', '300411.SZ',
-                  '300237.SZ', '688122.SH', '600667.SH', '002843.SZ', '601000.SH', '002109.SZ', '000587.SZ',
-                  '603823.SH', '600369.SH', '600444.SH', '000799.SZ', '300800.SZ', '000001.SZ', '002044.SZ',
-                  '002889.SZ', '600486.SH', '000777.SZ', '600151.SH', '000060.SZ', '600603.SH', '000797.SZ',
-                  '002316.SZ', '300640.SZ', '601607.SH', '600217.SH', '000031.SZ', '000423.SZ', '601319.SH',
-                  '601229.SH', '000530.SZ', '000006.SZ', '600146.SH', '300102.SZ', '600744.SH', '300358.SZ',
-                  '600893.SH', '000618.SZ', '000617.SZ', '000863.SZ', '002255.SZ', '600863.SH', '600266.SH',
-                  '300022.SZ', '600813.SH', '603161.SH', '000900.SZ', '600306.SH', '300293.SZ', '002639.SZ',
-                  '600205.SH', '600229.SH', '600108.SH', '600061.SH', '002496.SZ', '601878.SH', '600355.SH',
-                  '600821.SH', '002693.SZ', '600072.SH', '603639.SH', '300423.SZ', '688003.SH', '002788.SZ',
-                  '300046.SZ', '600187.SH', '300559.SZ', '300019.SZ', '000089.SZ', '000541.SZ', '002568.SZ',
-                  '002541.SZ', '300061.SZ', '600962.SH', '603183.SH', '000810.SZ', '603266.SH', '002733.SZ',
-                  '002100.SZ', '603378.SH', '603960.SH', '002562.SZ', '300251.SZ', '000030.SZ', '000523.SZ',
-                  '002825.SZ', '000993.SZ', '600658.SH', '002111.SZ', '000552.SZ', '600651.SH', '002440.SZ',
-                  '603856.SH', '300612.SZ', '601801.SH', '600613.SH', '600801.SH', '600130.SH', '300443.SZ',
-                  '002239.SZ', '300238.SZ', '000837.SZ', '603317.SH', '600798.SH', '300223.SZ', '000978.SZ',
-                  '600242.SH', '002372.SZ', '002096.SZ', '002318.SZ', '600563.SH', '600301.SH', '002200.SZ',
-                  '300681.SZ', '000513.SZ', '300675.SZ', '300363.SZ', '603355.SH', '300323.SZ', '002612.SZ',
-                  '600961.SH', '300093.SZ', '600202.SH', '603903.SH', '603877.SH', '002206.SZ', '000555.SZ',
-                  '002571.SZ', '688128.SH', '300500.SZ', '603486.SH', '603096.SH', '300346.SZ', '002815.SZ',
-                  '000833.SZ', '002349.SZ', '300177.SZ', '300264.SZ', '603867.SH', '000017.SZ', '002246.SZ',
-                  '600258.SH', '000989.SZ', '002799.SZ', '600010.SH', '000088.SZ', '600852.SH', '600288.SH',
-                  '002234.SZ', '300325.SZ', '600785.SH', '300282.SZ', '002738.SZ', '002323.SZ', '300540.SZ',
-                  '002670.SZ', '603988.SH', '300357.SZ', '300131.SZ', '002490.SZ', '300533.SZ', '603917.SH',
-                  '600657.SH', '600617.SH', '600287.SH', '603259.SH', '601222.SH', '603258.SH', '300775.SZ',
-                  '001696.SZ', '002839.SZ', '000063.SZ', '002868.SZ', '002746.SZ', '600612.SH', '600299.SH',
-                  '601882.SH', '002379.SZ', '300765.SZ', '002159.SZ', '000906.SZ', '002607.SZ', '603697.SH',
-                  '002598.SZ', '600573.SH', '600631.SH', '000661.SZ', '300206.SZ', '603776.SH', '002101.SZ',
-                  '300261.SZ', '000807.SZ', '600683.SH', '603916.SH', '603313.SH', '600817.SH', '600480.SH',
-                  '600818.SH', '002078.SZ', '600643.SH', '603662.SH', '600550.SH', '603329.SH', '000301.SZ',
-                  '002402.SZ', '002092.SZ', '600727.SH', '300319.SZ', '002036.SZ', '002691.SZ', '600180.SH',
-                  '002539.SZ', '002646.SZ', '300809.SZ', '300468.SZ', '600815.SH', '002268.SZ', '600143.SH',
-                  '300793.SZ', '600896.SH', '688005.SH', '603825.SH', '688066.SH', '603267.SH', '603229.SH',
-                  '600585.SH', '600823.SH', '002952.SZ', '603203.SH', '603017.SH', '000047.SZ', '300263.SZ',
-                  '002190.SZ', '600192.SH', '300580.SZ', '601069.SH', '688310.SH', '600856.SH', '000921.SZ',
-                  '000099.SZ', '300635.SZ', '002756.SZ', '000901.SZ', '002221.SZ', '002032.SZ', '600235.SH',
-                  '000830.SZ', '300105.SZ', '300562.SZ', '000546.SZ', '600737.SH', '603929.SH', '601958.SH',
-                  '601113.SH', '603036.SH', '600529.SH', '002066.SZ', '600672.SH', '002668.SZ', '000898.SZ',
-                  '002445.SZ', '600664.SH', '002822.SZ', '603456.SH', '300799.SZ', '300437.SZ', '002363.SZ',
-                  '000545.SZ', '300485.SZ', '600428.SH', '002719.SZ', '300530.SZ', '600313.SH', '601001.SH',
-                  '600794.SH', '688009.SH', '601518.SH', '601236.SH', '002940.SZ', '300065.SZ', '603800.SH',
-                  '600990.SH', '600305.SH', '600277.SH', '300248.SZ', '300435.SZ', '000599.SZ', '600809.SH',
-                  '000633.SZ', '002716.SZ', '002064.SZ', '000333.SZ', '603020.SH', '688018.SH', '002476.SZ',
-                  '600185.SH', '300244.SZ', '300220.SZ', '603711.SH', '600747.SH', '002378.SZ', '600581.SH',
-                  '600178.SH', '300270.SZ', '002328.SZ', '000752.SZ', '002269.SZ', '600291.SH', '600017.SH',
-                  '000669.SZ', '601111.SH', '002238.SZ', '002368.SZ', '603288.SH', '300520.SZ', '000565.SZ',
-                  '601158.SH', '601298.SH', '002003.SZ', '601010.SH', '300515.SZ', '601811.SH', '600197.SH',
-                  '002931.SZ', '000070.SZ', '002745.SZ', '002217.SZ', '600423.SH', '002502.SZ', '300386.SZ',
-                  '603577.SH', '002739.SZ', '300008.SZ', '300317.SZ', '600382.SH', '002748.SZ', '002887.SZ',
-                  '603115.SH', '300523.SZ', '600788.SH', '002034.SZ', '603583.SH', '300185.SZ', '002835.SZ',
-                  '000982.SZ', '600646.SH', '002938.SZ', '600622.SH', '603507.SH', '300375.SZ', '002330.SZ',
-                  '002669.SZ', '600812.SH', '002004.SZ', '603798.SH', '300035.SZ', '600608.SH', '603040.SH',
-                  '002787.SZ', '002309.SZ', '002254.SZ', '000606.SZ', '300537.SZ', '002050.SZ', '600470.SH',
-                  '002725.SZ', '000407.SZ', '603019.SH', '600639.SH', '300390.SZ', '300337.SZ', '600589.SH',
-                  '002905.SZ', '603598.SH', '603042.SH', '300213.SZ', '000702.SZ', '000038.SZ', '603327.SH',
-                  '601669.SH', '300127.SZ', '600109.SH', '002208.SZ', '688118.SH', '600996.SH', '600002.SH',
-                  '600339.SH', '600530.SH', '603321.SH', '300566.SZ', '600105.SH', '600587.SH', '600609.SH',
-                  '002164.SZ', '300572.SZ', '600377.SH', '600578.SH', '300373.SZ', '603758.SH', '002615.SZ',
-                  '600987.SH', '002791.SZ', '600038.SH', '002253.SZ', '603018.SH', '603667.SH', '300618.SZ',
-                  '002047.SZ', '002416.SZ', '002176.SZ', '000062.SZ', '600373.SH', '002531.SZ', '600533.SH',
-                  '002817.SZ', '000788.SZ', '600021.SH', '002736.SZ', '000838.SZ', '300330.SZ', '300643.SZ',
-                  '300706.SZ', '600837.SH', '000755.SZ', '600084.SH', '600597.SH', '603616.SH', '002656.SZ',
-                  '600701.SH', '600163.SH', '600073.SH', '603855.SH', '688016.SH', '002875.SZ', '000988.SZ',
-                  '002768.SZ', '300044.SZ', '002586.SZ', '002769.SZ', '603768.SH', '603566.SH', '603217.SH',
-                  '000405.SZ', '002795.SZ', '603968.SH', '600579.SH', '600398.SH', '600686.SH', '300081.SZ',
-                  '002447.SZ', '300021.SZ', '002001.SZ', '002387.SZ', '300748.SZ', '600248.SH', '002197.SZ',
-                  '300528.SZ', '000659.SZ', '002777.SZ', '300342.SZ', '300168.SZ', '600236.SH', '002880.SZ',
-                  '002644.SZ', '000008.SZ', '603399.SH', '600590.SH', '000034.SZ', '600745.SH', '002135.SZ',
-                  '300234.SZ', '300703.SZ', '300418.SZ', '603876.SH', '600842.SH', '002957.SZ', '002701.SZ',
-                  '002793.SZ', '002106.SZ', '300082.SZ', '000860.SZ', '000826.SZ', '300028.SZ', '002939.SZ',
-                  '600835.SH', '300709.SZ', '603799.SH', '000728.SZ', '300481.SZ', '300066.SZ', '300015.SZ',
-                  '603006.SH', '300205.SZ', '000532.SZ', '600665.SH', '600463.SH', '002734.SZ', '002819.SZ',
-                  '000009.SZ', '300368.SZ', '300532.SZ', '601137.SH', '300606.SZ', '601012.SH', '002860.SZ',
-                  '000507.SZ', '600652.SH', '603787.SH', '603160.SH', '002621.SZ', '002398.SZ', '000897.SZ',
-                  '600762.SH', '600067.SH', '600553.SH', '603970.SH', '601828.SH', '002809.SZ', '300311.SZ',
-                  '600827.SH', '300246.SZ', '002169.SZ', '603969.SH', '600156.SH', '600621.SH', '300297.SZ',
-                  '688388.SH', '600121.SH', '603766.SH', '603579.SH', '300525.SZ', '002961.SZ', '002149.SZ',
-                  '300326.SZ', '002261.SZ', '600865.SH', '300284.SZ', '601818.SH', '603000.SH', '000003.SZ',
-                  '600870.SH', '000415.SZ', '600390.SH', '002647.SZ', '600565.SH', '000769.SZ', '002617.SZ',
-                  '300425.SZ', '002508.SZ', '002730.SZ', '002455.SZ', '002394.SZ', '002304.SZ', '300070.SZ',
-                  '000686.SZ', '000601.SZ', '300555.SZ', '002773.SZ', '002322.SZ', '300121.SZ', '000668.SZ',
-                  '000153.SZ', '300212.SZ', '000892.SZ', '601939.SH', '002830.SZ', '300438.SZ', '601500.SH',
-                  '600035.SH', '002862.SZ', '600718.SH', '603701.SH', '600475.SH']
-    from AmazingQuant.utils.security_type import is_security_type
-    stock_code_a_share = [i for i in stock_code if is_security_type(i, 'EXTRA_STOCK_A')]
-    print(len(stock_code_a_share))
     with Timer(True):
-        kline_object = GetKlineData()
-        all_market_data = kline_object.get_all_market_data(security_list=stock_code_a_share[:2],
-                                                           field=['open', 'high', 'low', 'close', 'volume', 'amount'],
-                                                           end=datetime.now())
-        # for i in all_market_data:
-        #     all_market_data[i].to_hdf(i+'.h5', key=i)
-        # index_data = kline_object.get_index_data(index_list=['000001.SH'], field=['open', 'close'], end=datetime.now())
-        # market_data = kline_object.get_market_data(all_market_data, stock_code=a[:20], field=['open', 'close'],
-        #                                            start=datetime(2019, 7, 5), end=datetime(2019, 7, 5))
-    with Timer(True):
-        from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
-        from AmazingQuant.constant import Period
-        SaveGetIndicator().save_indicator('close', all_market_data['close'])
-
+        kline_object = UpdateKlineData()
+        kline_object.update_all_market_data()
+        kline_object.update_index_data()

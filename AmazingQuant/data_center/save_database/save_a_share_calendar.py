@@ -10,7 +10,7 @@
 import pandas as pd
 
 from AmazingQuant.data_center.database_field.filed_a_share_calendar import AShareCalendar
-from AmazingQuant.data_center.mongo_connection import MongoConnect
+from AmazingQuant.data_center.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.data_transfer import date_to_datetime
 from AmazingQuant.constant import DatabaseName
 
