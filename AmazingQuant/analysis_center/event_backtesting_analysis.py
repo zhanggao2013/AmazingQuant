@@ -202,7 +202,7 @@ class EventBacktestingAnalysis(Event):
             end_time = Environment.benchmark_index[-1]
 
             benchmark_close = data_class.get_market_data(Environment.index_daily_data, stock_code=[benchmark],
-                                                         field=['close'], start=start_time, end=end_time, period=period)
+                                                         field=['close'], start=start_time, end=end_time)
         elif period == Period.ONE_MIN.value:
             start_time = millisecond_to_date(millisecond=Environment.benchmark_index[0], format='%Y-%m-%d %H:%M:%S')
             end_time = millisecond_to_date(millisecond=Environment.benchmark_index[-1], format='%Y-%m-%d %H:%M:%S')

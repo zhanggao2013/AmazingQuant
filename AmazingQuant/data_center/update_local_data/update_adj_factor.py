@@ -7,6 +7,7 @@
 # @Project : AmazingQuant
 # ------------------------------
 import pandas as pd
+import numpy as np
 
 from AmazingQuant.data_center.mongo_connection_me import MongoConnect
 from AmazingQuant.data_center.database_field.field_a_share_ex_right_dividend import AShareExRightDividend
@@ -58,11 +59,11 @@ class SaveAShareAdjFactor(object):
             for security_code, adj_data in data_dict.items():
                 backward_factor[security_code] = self.cal_backward_factor(adj_data['adj_factor'])
                 adj_factor[security_code] = adj_data['adj_factor']
-            backward_factor = backward_factor.fillna(method='ffill')
-            backward_factor = backward_factor.fillna(1)
+            backward_factor.replace([np.inf, 0], np.nan, inplace=True)
+            backward_factor.fillna(method='ffill', inplace=True)
+            backward_factor.fillna(1, inplace=True)
             save_data_to_hdf5(path, AdjustmentFactor.BACKWARD_ADJ_FACTOR.value, backward_factor)
-
-            save_data_to_hdf5(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value, backward_factor/backward_factor.iloc[-1, :])
+            save_data_to_hdf5(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value, backward_factor.div(backward_factor.iloc[-1]))
 
     def cal_backward_factor(self, x):
         result = pd.Series(index=x.index)
