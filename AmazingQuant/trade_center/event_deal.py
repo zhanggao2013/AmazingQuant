@@ -210,6 +210,5 @@ class EventDeal(Event):
 
                         account.available += \
                             Environment.current_deal_data.deal_price * Environment.current_deal_data.deal_volume
-
         # print("update_account_list")
         pass
