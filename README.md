@@ -41,6 +41,8 @@ AmazingQuant是一款基于event-driven的量化回测交易开源框架，下�
 # @File    : example_strategy.py.py
 # @Project : AmazingQuant
 # ------------------------------
+import time
+
 from AmazingQuant.utils.performance_test import Timer
 # import strategy基类
 from AmazingQuant.strategy_center.strategy import *

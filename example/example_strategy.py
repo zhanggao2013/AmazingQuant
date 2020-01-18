@@ -6,6 +6,8 @@
 # @File    : example_strategy.py.py
 # @Project : AmazingQuant
 # ------------------------------
+import time
+
 from AmazingQuant.utils.performance_test import Timer
 # import strategy基类
 from AmazingQuant.strategy_center.strategy import *
