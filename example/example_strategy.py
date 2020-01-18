@@ -24,6 +24,8 @@ from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
 class MaStrategy(StrategyBase):
     def __init__(self):
         super().__init__()
+
+        self.strategy_name = 'ma_strategy'
         # 取指数成分股实例
         self.index_member_obj = GetIndexMember()
         # 取K线数据实例
@@ -35,6 +37,7 @@ class MaStrategy(StrategyBase):
         self.ma5 = self.indicator.get_indicator('ma5')
         self.ma10 = self.indicator.get_indicator('ma10')
         self.now = time.time()
+
 
     def initialize(self):
         # 设置运行模式，回测或者交易
@@ -118,5 +121,9 @@ if __name__ == '__main__':
     # 测试运行完整个策略所需时间，沪深300动态股票池，一年数据，均线策略,15s完成
     with Timer(True):
         # 运行策略，设置是否保存委托，成交，资金，持仓
+        import sys
+        import os
+        # print(sys.argv[0][sys.argv[0].rfind(os.sep) + 1:])
+        # print(sys.argv[0][sys.argv[0].rfind(os.sep) + 1:][:-3])
         ma_strategy = MaStrategy()
         ma_strategy.run(save_trade_record=True)

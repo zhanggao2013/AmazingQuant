@@ -43,7 +43,7 @@ class StrategyBase(metaclass=ABCMeta):
         return self._strategy_name
 
     @strategy_name.setter
-    def run_mode(self, value):
+    def strategy_name(self, value):
         self._strategy_name = value
 
     @property
