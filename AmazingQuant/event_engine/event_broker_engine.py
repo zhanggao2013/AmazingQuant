@@ -21,7 +21,7 @@ def run_broker_engine(strategy):
     """
     broker_engine = EventEngineBase()
     event_deal = EventDeal()
-    event_deal.event_data_dict["strategy"] = strategy
+    event_deal.event_data_dict["strategy_data"] = strategy
     broker_engine.put(event_deal)
 
     broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.initialize_deal_data)

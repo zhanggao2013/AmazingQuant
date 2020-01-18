@@ -21,7 +21,7 @@ def run_backtesting_analysis_engine(strategy):
     """
     backtesting_analysis_engine = EventEngineBase()
     event_backtesting = EventBacktestingAnalysis()
-    event_backtesting.event_data_dict["strategy"] = strategy
+    event_backtesting.event_data_dict["strategy_data"] = strategy
 
     backtesting_analysis_engine.put(event_backtesting)
 
