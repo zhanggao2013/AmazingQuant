@@ -33,7 +33,7 @@ class GetKlineData(object):
         adj_factor = 1
         if dividend_type == RightsAdjustment.FROWARD.value:
             adj_factor = self.adj_factor_obj.get_adj_factor(RightsAdjustment.FROWARD.value)
-        elif dividend_type == RightsAdjustment.FROWARD.value:
+        elif dividend_type == RightsAdjustment.BACKWARD.value:
             adj_factor = self.adj_factor_obj.get_adj_factor(RightsAdjustment.BACKWARD.value)
         for i in self.field:
             data_name = i + '.h5'
@@ -79,9 +79,9 @@ class GetKlineData(object):
 if __name__ == '__main__':
     with Timer(True):
         kline_object = GetKlineData()
-        all_market_data = kline_object.cache_all_stock_data(dividend_type=RightsAdjustment.FROWARD.value)
+        all_market_data = kline_object.cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value)
         # all_index_data = kline_object.cache_all_index_data()
         #
         # index_data = kline_object.get_index_data(all_index_data, index_code=['000001.SH'], field=['open', 'close'], end=datetime.now())
-        market_data = kline_object.get_market_data(all_market_data, stock_code=['000503.SZ'], field=['close'],
-                                                   start=datetime(2017, 10, 5), end=datetime(2019, 7, 5))
+        # market_data = kline_object.get_market_data(all_market_data, stock_code=['000503.SZ'], field=['close'],
+        #                                            start=datetime(2017, 10, 5), end=datetime(2019, 7, 5))
