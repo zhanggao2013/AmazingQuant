@@ -81,7 +81,7 @@ class EventBacktestingAnalysis(Event):
 
             elif data_type_value == RecordDataType.ACCOUNT_DATA.value:
                 Environment.backtesting_record_account = all_data
-            save_path_dir = sys.argv[0][sys.argv[0].rfind(os.sep) + 1:][:-3] + millisecond_time_tag
+            save_path_dir = event.event_data_dict["strategy_data"].strategy_name + millisecond_time_tag
             is_exists = os.path.exists(save_path_dir)
             if not is_exists:
                 os.mkdir(save_path_dir)
@@ -89,8 +89,8 @@ class EventBacktestingAnalysis(Event):
 
     @classmethod
     def show_backtesting_indicator(cls, event):
-        period = event.event_data_dict['strategy'].period
-        benchmark = event.event_data_dict['strategy'].benchmark
+        period = event.event_data_dict['strategy_data'].period
+        benchmark = event.event_data_dict['strategy_data'].benchmark
         indicator_dict = {}
         # （１）基准净值
         benchmark_net_asset_value = cls().get_benchmark_net_asset_value(period, benchmark)
@@ -154,7 +154,7 @@ class EventBacktestingAnalysis(Event):
         indicator_dict['max_drawdown'] = max_drawdown
 
         # 展示到html
-        period = event.event_data_dict['strategy'].period
+        period = event.event_data_dict['strategy_data'].period
         if period == Period.DAILY.value:
             time_tag_date = Environment.benchmark_index
         else:

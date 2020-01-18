@@ -20,6 +20,7 @@ from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 
 class StrategyBase(metaclass=ABCMeta):
     def __init__(self):
+        self._strategy_name = self.__class__.__name__
         self._run_mode = RunMode.BACKTESTING.value
         self._account = []
         self._capital = 1000000
@@ -36,6 +37,14 @@ class StrategyBase(metaclass=ABCMeta):
         # 取数据
         self._get_data = GetKlineData()
         self.bar_index = 0
+
+    @property
+    def strategy_name(self):
+        return self._strategy_name
+
+    @strategy_name.setter
+    def run_mode(self, value):
+        self._strategy_name = value
 
     @property
     def run_mode(self):
