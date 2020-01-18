@@ -41,13 +41,6 @@ AmazingQuant是一款基于event-driven的量化回测交易开源框架，下�
 # @File    : example_strategy.py.py
 # @Project : AmazingQuant
 # ------------------------------
-
-import time
-import numpy as np
-import pandas as pd
-import talib
-from datetime import datetime
-
 from AmazingQuant.utils.performance_test import Timer
 # import strategy基类
 from AmazingQuant.strategy_center.strategy import *
@@ -86,7 +79,7 @@ class MaStrategy(StrategyBase):
         # 设置回测基准
         self.benchmark = '000300.SH'
         # 设置复权方式
-        self.rights_adjustment = RightsAdjustment.NONE.value
+        self.rights_adjustment = RightsAdjustment.FROWARD.value
         # 设置回测起止时间
         self.start = datetime(2018, 1, 1)
         self.end = datetime(2019, 1, 1)

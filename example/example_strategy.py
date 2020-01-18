@@ -6,13 +6,6 @@
 # @File    : example_strategy.py.py
 # @Project : AmazingQuant
 # ------------------------------
-
-import time
-import numpy as np
-import pandas as pd
-import talib
-from datetime import datetime
-
 from AmazingQuant.utils.performance_test import Timer
 # import strategy基类
 from AmazingQuant.strategy_center.strategy import *
