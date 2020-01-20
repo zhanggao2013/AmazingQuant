@@ -13,7 +13,7 @@ import time
 
 
 class Logger(object):
-    def __init__(self, logger_dir, set_level='DEBUG', filemode='w'):
+    def __init__(self, logger_dir, set_level='DEBUG', filemode='a'):
         self.logger = logging.getLogger(logger_dir)
         # 设置输出的等级
         level_dict = {'NOSET': logging.NOTSET,
