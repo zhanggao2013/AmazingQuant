@@ -32,7 +32,7 @@ class Logger(object):
                             format='%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S',
                             filename=logger_dir + '/' + logger_dir + '.log',
-                            filemode='a')
+                            filemode='w')
         file_handler = logging.FileHandler(filename=logger_dir + '/' + logger_dir + '.log', encoding="utf-8")
 
         # 控制台句柄
