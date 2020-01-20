@@ -24,8 +24,8 @@ class EventRiskManagement(Event):
         if Environment.current_order_data.status == Status.NOT_REPORTED.value and \
                 stock_code in Environment.black_namelist:
             Environment.is_pass_risk = False
-            print("Order Stock_code in Black_namelist")
-        # print("black_namelist_check")
+            Environment.logger.info("Order Stock_code in Black_namelist")
+        # Environment.logger.info("black_namelist_check")
         pass
 
     @classmethod

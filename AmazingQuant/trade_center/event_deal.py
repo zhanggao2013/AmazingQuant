@@ -56,7 +56,7 @@ class EventDeal(Event):
                 if Environment.current_deal_data.offset == Offset.OPEN.value:
                     Environment.current_deal_data.deal_price += \
                         Environment.slippage_dict[StockType.STOCK.value]["value"]
-                    # print("slippage_calculate")
+                    # Environment.logger.info("slippage_calculate")
                 elif Environment.current_deal_data.offset == Offset.CLOSE.value:
                     Environment.current_deal_data.deal_price -= \
                         Environment.slippage_dict[StockType.STOCK.value]["value"]
@@ -100,12 +100,12 @@ class EventDeal(Event):
             total_commission = commission['open_commission']
             trade_balance *= 1 + total_commission
             Environment.current_deal_data.deal_price = trade_balance / Environment.current_deal_data.deal_volume
-            # print("commission_calculate")
+            # Environment.logger.info("commission_calculate")
         elif Environment.current_deal_data.offset == Offset.CLOSE.value:
             total_commission = commission['close_commission'] + commission['tax']
             trade_balance *= 1 - total_commission
             Environment.current_deal_data.deal_price = trade_balance / Environment.current_deal_data.deal_volume
-        # print(Environment.current_deal_data.deal_price, "wwwwwwwwwwwwwww")
+        # Environment.logger.info(Environment.current_deal_data.deal_price, "wwwwwwwwwwwwwww")
 
     @classmethod
     def update_position_list(cls, event):
@@ -139,7 +139,7 @@ class EventDeal(Event):
                 if Environment.current_position_data.instrument == position_data.instrument and \
                         Environment.current_position_data.exchange == position_data.exchange:
                     position_hold = True
-                    # print(Environment.current_deal_data.offset, "方向"*10)
+                    # Environment.logger.info(Environment.current_deal_data.offset, "方向"*10)
                     if Environment.current_deal_data.offset == Offset.OPEN.value:
                         total_position = position_data.position + Environment.current_deal_data.deal_volume
                         position_cost_balance = position_data.position * position_data.average_price
@@ -152,7 +152,7 @@ class EventDeal(Event):
                         position_data.position = total_position
                         # 更新冻结数量
                         position_data.frozen += Environment.current_deal_data.deal_volume
-                        # print("update_position_list")
+                        # Environment.logger.info("update_position_list")
 
                     elif Environment.current_deal_data.offset == Offset.CLOSE.value:
                         total_position = \
@@ -166,7 +166,7 @@ class EventDeal(Event):
                         else:
                             position_data.average_price = 0
                         position_data.position = total_position
-                        # print("sell position"*5, position_data.position)
+                        # Environment.logger.info("sell position"*5, position_data.position)
 
             # 持仓不为空，且不在持仓里面的，append到Environment.bar_position_data_list
             if position_num == len(Environment.bar_position_data_list) and position_hold is False:
@@ -210,5 +210,5 @@ class EventDeal(Event):
 
                         account.available += \
                             Environment.current_deal_data.deal_price * Environment.current_deal_data.deal_volume
-        # print("update_account_list")
+        # Environment.logger.info("update_account_list")
         pass

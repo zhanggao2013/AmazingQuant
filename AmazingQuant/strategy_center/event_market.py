@@ -31,7 +31,7 @@ class EventMarket(Event):
                 for position_data in Environment.bar_position_data_list:
                     if last_day != current_day:
                         position_data.frozen = 0
-                        # print("更新今仓冻结数量")
+                        # Environment.logger.info("更新今仓冻结数量")
         pass
 
     @classmethod
@@ -73,7 +73,7 @@ class EventMarket(Event):
                 current_close_price = cls.current_close_price_all["close"][stock_code]
                 position_data.position_profit = position_data.position * (
                         current_close_price - position_data.average_price)
-        # print("更新bar_close持仓盈亏")
+        # Environment.logger.info("更新bar_close持仓盈亏")
 
     @classmethod
     def update_account_close(cls, event):
@@ -93,5 +93,5 @@ class EventMarket(Event):
                         hold_balance += position_data.position * current_close_price
                     account.total_balance = account.available + hold_balance
                 pass
-        # print("更新bar_close总资产test0"*5,Environment.bar_account_data_list[0].total_balance)
-        # print("更新bar_close总资产test1" * 5, Environment.bar_account_data_list[1].total_balance)
+        # Environment.logger.info("更新bar_close总资产test0"*5,Environment.bar_account_data_list[0].total_balance)
+        # Environment.logger.info("更新bar_close总资产test1" * 5, Environment.bar_account_data_list[1].total_balance)

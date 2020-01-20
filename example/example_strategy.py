@@ -18,14 +18,16 @@ from AmazingQuant.trade_center.trade import Trade
 # 取各种数据
 from AmazingQuant.data_center.api_data.get_index_member import GetIndexMember
 from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
+from AmazingQuant.utils.logger import Logger
+from AmazingQuant.environment import Environment
 
 
 # 继承strategy基类
 class MaStrategy(StrategyBase):
-    def __init__(self):
+    def __init__(self, strategy_name='ma_strategy'):
         super().__init__()
 
-        self.strategy_name = 'ma_strategy'
+        self.strategy_name = strategy_name
         # 取指数成分股实例
         self.index_member_obj = GetIndexMember()
         # 取K线数据实例
@@ -37,6 +39,11 @@ class MaStrategy(StrategyBase):
         self.ma5 = self.indicator.get_indicator('ma5')
         self.ma10 = self.indicator.get_indicator('ma10')
         self.now = time.time()
+        Environment.logger = Logger(strategy_name)
+        Environment.logger.info("this is info")
+        Environment.logger.debug("this is debug")
+        Environment.logger.error("this is error")
+        Environment.logger.warning("this is warning")
 
 
     def initialize(self):
@@ -61,7 +68,7 @@ class MaStrategy(StrategyBase):
 
         # 设置在运行前是否缓存日线，分钟线等各个周期数据
         self.daily_data_cache = True
-        print(self.universe)
+        Environment.logger.info(self.universe)
 
         # 回测滑点设置，按固定值0.01,20-0.01 = 19.99;百分比0.01,20*(1-0.01) = 19.98;平仓时用'+'
         self.set_slippage(stock_type=StockType.STOCK.value, slippage_type=SlippageType.SLIPPAGE_FIX.value, value=0.01)
@@ -77,8 +84,8 @@ class MaStrategy(StrategyBase):
                             close_today_commission=0, min_commission=5)
 
     def handle_bar(self, event):
-        print('self.time_tag', self.time_tag, datetime.now(), (time.time()-self.now)*1000)
-        print(len(Environment.bar_position_data_list))
+        Environment.logger.info('self.time_tag', self.time_tag, datetime.now(), (time.time()-self.now)*1000)
+        Environment.logger.debug(len(Environment.bar_position_data_list))
         # 取当前bar的持仓情况
         with Timer(True):
             available_position_dict = {}
@@ -101,19 +108,19 @@ class MaStrategy(StrategyBase):
                             Trade(self).order_shares(stock_code=stock, shares=100, price_type='fix',
                                                      order_price=close_price,
                                                      account=self.account[0])
-                            print('buy', stock, -1, 'fix', close_price, self.account)
+                            Environment.logger.info('buy', stock, -1, 'fix', close_price, self.account)
                         # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
                         elif ma5 < ma20 and stock in available_position_dict.keys():
                             Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
                                                      order_price=close_price,
                                                      account=self.account[0])
-                            print('sell', stock, -1, 'fix', close_price, self.account)
+                            Environment.logger.info('sell', stock, -1, 'fix', close_price, self.account)
             for stock in available_position_dict.keys():
                 if stock not in index_member_list:
                     Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
                                              order_price=close_price,
                                              account=self.account[0])
-                    print('sell not in index_member_list', stock, -1, 'fix', close_price, self.account)
+                    Environment.logger.info('sell not in index_member_list', stock, -1, 'fix', close_price, self.account)
         self.now = time.time()
 
 
@@ -121,9 +128,5 @@ if __name__ == '__main__':
     # 测试运行完整个策略所需时间，沪深300动态股票池，一年数据，均线策略,15s完成
     with Timer(True):
         # 运行策略，设置是否保存委托，成交，资金，持仓
-        import sys
-        import os
-        # print(sys.argv[0][sys.argv[0].rfind(os.sep) + 1:])
-        # print(sys.argv[0][sys.argv[0].rfind(os.sep) + 1:][:-3])
         ma_strategy = MaStrategy()
         ma_strategy.run(save_trade_record=True)

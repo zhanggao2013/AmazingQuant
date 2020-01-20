@@ -14,6 +14,7 @@ from AmazingQuant.data_object import *
 
 
 class Environment(object):
+    logger = None
     # key 都是每一根bar的timetag
     order_data_dict = {}  # timetag : [order_data,order_data]　　mission_engine risk 之后append
     deal_data_dict = {}  # timetag : [deal_data,deal_data]    broker_engine  deal 之后append

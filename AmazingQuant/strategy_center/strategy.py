@@ -163,7 +163,7 @@ class StrategyBase(metaclass=ABCMeta):
                 Environment.current_account_data.account_id = generate_random_id.generate_random_id(account)
                 Environment.current_account_data.total_balance = self.capital[account]
                 Environment.current_account_data.available = self.capital[account]
-                print(Environment.current_account_data.account_id, Environment.current_account_data.available)
+                # Environment.logger(Environment.current_account_data.account_id, Environment.current_account_data.available)
                 Environment.bar_account_data_list.append(Environment.current_account_data)
         # if self.run_mode == RunMode.TRADE.value:
         #     self.end = self._get_data.get_end_time_tag(benchmark=self.benchmark, period=Period.DAILY.value)
@@ -196,7 +196,7 @@ class StrategyBase(metaclass=ABCMeta):
 
         while True:
             try:
-                # print(self.time_tag, Environment.benchmark_index)
+                # Environment.logger(self.time_tag, Environment.benchmark_index)
                 self.time_tag = Environment.benchmark_index[self.bar_index]
             except IndexError:
                 if self.run_mode == RunMode.BACKTESTING.value:
@@ -218,5 +218,5 @@ class StrategyBase(metaclass=ABCMeta):
 
     @abstractmethod
     def handle_bar(self, event):
-        print('abstractmethod handle_bar')
+        Environment.logger('abstractmethod handle_bar')
         pass

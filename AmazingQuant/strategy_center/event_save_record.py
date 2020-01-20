@@ -29,4 +29,4 @@ class EventSaveRecord(Event):
         Environment.deal_data_dict[time_tag] = Environment.bar_deal_data_list
         Environment.position_data_dict[time_tag] = copy.deepcopy(Environment.bar_position_data_list)
         Environment.account_data_dict[time_tag] = copy.deepcopy(Environment.bar_account_data_list)
-        # print("记录每根bar的资金 持仓 委托　成交")
+        # Environment.logger.info("记录每根bar的资金 持仓 委托　成交")

@@ -34,7 +34,6 @@ class EventBacktestingAnalysis(Event):
 
     @classmethod
     def save_backtesting_record_to_csv(cls, event):
-        millisecond_time_tag = str(int(time.time() * 1000))
         for data_type in RecordDataType.__members__.values():
             data_type_value = data_type.value
             data_obj = None
@@ -56,16 +55,16 @@ class EventBacktestingAnalysis(Event):
                 data_dict = Environment.account_data_dict
 
             data_property = [i for i in dir(data_obj) if i not in dir(copy.deepcopy(EmptyClass()))]
-            # print(data_property, dir(copy.deepcopy(EmptyClass)))
+            # Environment.logger.info(data_property, dir(copy.deepcopy(EmptyClass)))
             values = []
             for time_tag in Environment.benchmark_index:
                 time_tag_data_list = []
                 for current_data in data_dict[time_tag]:
                     time_tag_data_list.append([current_data.__dict__[property_data] for property_data in data_property])
-                # print(time_tag_data_list)
+                # Environment.logger.info(time_tag_data_list)
                 time_tag_data_df = pd.DataFrame(time_tag_data_list, columns=data_property)
                 # time_tag_data_df.set_index('account_id', inplace=True)
-                # print(time_tag_data_df)
+                # Environment.logger.info(time_tag_data_df)
                 values.append(time_tag_data_df)
             all_data = pd.concat(values, keys=Environment.benchmark_index)
 
@@ -93,63 +92,63 @@ class EventBacktestingAnalysis(Event):
         indicator_dict = {}
         # （１）基准净值
         benchmark_net_asset_value = cls().get_benchmark_net_asset_value(period, benchmark)
-        print('benchmark_net_asset_value', benchmark_net_asset_value)
+        Environment.logger.info('benchmark_net_asset_value', benchmark_net_asset_value)
 
         # （２）策略净值
         strategy_net_asset_value = cls().get_strategy_net_asset_value()
-        print('strategy_net_asset_value', strategy_net_asset_value)
+        Environment.logger.info('strategy_net_asset_value', strategy_net_asset_value)
 
         # （３）基准年化收益率
         benchmark_year_yield = cls().get_year_yield(benchmark_net_asset_value)
-        print('benchmark_year_yield', benchmark_year_yield)
+        Environment.logger.info('benchmark_year_yield', benchmark_year_yield)
 
         # （４）策略年化收益率
         strategy_year_yield = cls().get_year_yield(strategy_net_asset_value)
-        print('strategy_year_yield', strategy_year_yield)
+        Environment.logger.info('strategy_year_yield', strategy_year_yield)
 
         # （５）beta
         beta = cls().get_beta(benchmark_net_asset_value, strategy_net_asset_value)
-        print('beta', beta)
+        Environment.logger.info('beta', beta)
         indicator_dict['beta'] = beta
 
         # （６）alpha
         alpha = cls().get_alpha(benchmark_year_yield, strategy_year_yield, beta)
-        print('alpha', alpha)
+        Environment.logger.info('alpha', alpha)
         indicator_dict['alpha'] = alpha
 
         # （７）volatility
         volatility = cls().get_volatility(strategy_net_asset_value)
-        print('volatility', volatility)
+        Environment.logger.info('volatility', volatility)
         indicator_dict['volatility'] = volatility
 
         # （８）sharpe
         sharpe = cls().get_sharp(strategy_year_yield, volatility)
-        print('sharpe', sharpe)
+        Environment.logger.info('sharpe', sharpe)
         indicator_dict['sharpe'] = sharpe
 
         # （９）downside_risk
         downside_risk = cls().get_downside_risk(strategy_year_yield)
-        print('downside_risk', downside_risk)
+        Environment.logger.info('downside_risk', downside_risk)
         indicator_dict['downside_risk'] = downside_risk
 
         # （１０）sortino_ratio
         sortino_ratio = cls().get_sortino_ratio(strategy_year_yield, downside_risk)
-        print('sortino_ratio', sortino_ratio)
+        Environment.logger.info('sortino_ratio', sortino_ratio)
         indicator_dict['sortino_ratio'] = sortino_ratio
 
         # （１１）tracking_error
         tracking_error = cls().get_tracking_error(benchmark_net_asset_value, strategy_net_asset_value)
-        print('tracking_error', tracking_error)
+        Environment.logger.info('tracking_error', tracking_error)
         indicator_dict['tracking_error'] = tracking_error
 
         # （１２）information_ratio
         information_ratio = cls().get_information_ratio(benchmark_year_yield, strategy_year_yield, tracking_error)
-        print('information_ratio', information_ratio)
+        Environment.logger.info('information_ratio', information_ratio)
         indicator_dict['information_ratio'] = information_ratio
 
         # （１３）max_drawdown
         max_drawdown = cls().get_max_drawdown(strategy_net_asset_value)
-        print('max_drawdown', max_drawdown)
+        Environment.logger.info('max_drawdown', max_drawdown)
         indicator_dict['max_drawdown'] = max_drawdown
 
         # 展示到html
@@ -181,7 +180,7 @@ class EventBacktestingAnalysis(Event):
         #
         # for indicator_name, indicator in indicator_dict.items():
         #     cls().add_to_page(page, indicator, indicator_name, time_tag_date)
-        #     # print(indicator_name)
+        #     # Environment.logger.info(indicator_name)
         #
         # millisecond_time_tag = str(int(time.time()) * 1000)
         # page.render(path=sys.argv[0][sys.argv[0].rfind(os.sep) + 1:][
