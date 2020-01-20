@@ -40,11 +40,6 @@ class MaStrategy(StrategyBase):
         self.ma10 = self.indicator.get_indicator('ma10')
         self.now = time.time()
         Environment.logger = Logger(strategy_name)
-        Environment.logger.info("this is info")
-        Environment.logger.debug("this is debug")
-        Environment.logger.error("this is error")
-        Environment.logger.warning("this is warning")
-
 
     def initialize(self):
         # 设置运行模式，回测或者交易
