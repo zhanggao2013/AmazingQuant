@@ -81,9 +81,8 @@ class EventBacktestingAnalysis(Event):
 
             elif data_type_value == RecordDataType.ACCOUNT_DATA.value:
                 Environment.backtesting_record_account = all_data
-            save_path_dir = event.event_data_dict["strategy_data"].strategy_name + '_' + millisecond_time_tag
-            is_exists = os.path.exists(save_path_dir)
-            if not is_exists:
+            save_path_dir = event.event_data_dict["strategy_data"].strategy_name
+            if not os.path.exists(save_path_dir):
                 os.mkdir(save_path_dir)
             all_data.to_csv(save_path_dir + '/' + data_type_value + '.csv')
 
