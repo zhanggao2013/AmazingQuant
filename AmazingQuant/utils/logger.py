@@ -13,7 +13,7 @@ import time
 
 
 class Logger(object):
-    def __init__(self, logger_dir, set_level="DEBUG"):
+    def __init__(self, logger_dir, set_level='DEBUG', filemode='w'):
         self.logger = logging.getLogger(logger_dir)
         # 设置输出的等级
         level_dict = {'NOSET': logging.NOTSET,
@@ -32,8 +32,8 @@ class Logger(object):
                             format='%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(message)s',
                             datefmt='%Y-%m-%d %H:%M:%S',
                             filename=logger_dir + '/' + logger_dir + '.log',
-                            filemode='w')
-        file_handler = logging.FileHandler(filename=logger_dir + '/' + logger_dir + '.log', encoding="utf-8")
+                            filemode=filemode)
+        file_handler = logging.FileHandler(filename=logger_dir + '/' + logger_dir + '.log', encoding='utf-8')
 
         # 控制台句柄
         console = logging.StreamHandler()
@@ -56,8 +56,8 @@ class Logger(object):
 
 
 if __name__ == '__main__':
-    logger = Logger("test")
-    logger.info("this is info", 'qwe')
-    logger.debug("this is debug")
-    logger.error("this is error")
-    logger.warning("this is warning")
+    logger = Logger('test')
+    logger.info('this is info', 'qwe')
+    logger.debug('this is debug')
+    logger.error('this is error')
+    logger.warning('this is warning')
