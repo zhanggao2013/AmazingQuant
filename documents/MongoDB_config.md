@@ -1,5 +1,5 @@
 mongo 安装
- sudo apt-get install mongodb 就在默认路径/usr/bin
+sudo apt-get install mongodb 就在默认路径/usr/bin
  
 
 因为写文件是的open file数量限制
