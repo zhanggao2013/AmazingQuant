@@ -31,22 +31,21 @@ from AmazingQuant.multi_factor.multi_factor_constant import ExtremeMethod
 class FactorPreProcessing(object):
     def __init__(self, raw_data):
         self.raw_data = raw_data
-        self.pre_processing = pd.DataFrame.empty
 
     def extreme_processing(self, method=None):
         if method is None:
             method = dict(std={'sigma_multiple': 3})
         extreme_obj = Extreme(self.raw_data)
         if ExtremeMethod.STD.value in method:
-            self.pre_processing = extreme_obj.std_method(method['std']['sigma_multiple'])
+            self.raw_data = extreme_obj.std_method(method['std']['sigma_multiple'])
         elif ExtremeMethod.MAD.value in method:
-            self.pre_processing = extreme_obj.mad_method(method['mad']['median_multiple'])
+            self.raw_data = extreme_obj.mad_method(method['mad']['median_multiple'])
         elif ExtremeMethod.BOX_PLOT.value in method:
-            self.pre_processing = extreme_obj.std_method(method['std']['sigma_multiple'])
+            self.raw_data = extreme_obj.std_method(method['std']['sigma_multiple'])
         else:
             raise Exception('This method is invalid!')
 
-        return self.pre_processing
+        return self.raw_data
 
 
 class Extreme(object):
@@ -73,7 +72,8 @@ class Extreme(object):
         raw_data_min = raw_data_median - median_multiple * raw_data_mad
         return self.raw_data.apply(self.data_replace, args=(raw_data_max, raw_data_min))
 
-    # BOX_PLOT = 'box_plot'
+    def box_plot_method(self):
+        pass
 
 
 if __name__ == '__main__':
