@@ -39,6 +39,13 @@ class FactorPreProcessing(object):
         extreme_obj = Extreme(self.raw_data)
         if ExtremeMethod.STD.value in method:
             self.pre_processing = extreme_obj.std_method(method['std']['sigma_multiple'])
+        elif ExtremeMethod.MAD.value in method:
+            self.pre_processing = extreme_obj.mad_method(method['mad']['median_multiple'])
+        elif ExtremeMethod.BOX_PLOT.value in method:
+            self.pre_processing = extreme_obj.std_method(method['std']['sigma_multiple'])
+        else:
+            raise Exception('This method is invalid!')
+
         return self.pre_processing
 
 
@@ -46,21 +53,31 @@ class Extreme(object):
     def __init__(self, raw_data):
         self.raw_data = raw_data
 
+    def data_replace(self, data_stock, raw_data_max, raw_data_min):
+        data_stock[data_stock > raw_data_max] = raw_data_max
+        data_stock[data_stock < raw_data_min] = raw_data_min
+        return data_stock
+
     def std_method(self, sigma_multiple):
         raw_data_mean = self.raw_data.mean(axis=1)
         raw_data_std = self.raw_data.std(axis=1)
         raw_data_max = raw_data_mean + sigma_multiple * raw_data_std
         raw_data_min = raw_data_mean - sigma_multiple * raw_data_std
+        return self.raw_data.apply(self.data_replace, args=(raw_data_max, raw_data_min))
 
-        def std_replace(data_stock, raw_data_max, raw_data_min):
-            data_stock[data_stock > raw_data_max] = raw_data_max
-            data_stock[data_stock < raw_data_min] = raw_data_min
-            return data_stock
+    def mad_method(self, median_multiple):
+        raw_data_median = self.raw_data.median(axis=1)
+        raw_data_median_deviation = self.raw_data.sub(raw_data_median, axis=0)
+        raw_data_mad = raw_data_median_deviation.median(axis=1)
+        raw_data_max = raw_data_median + median_multiple * raw_data_mad
+        raw_data_min = raw_data_median - median_multiple * raw_data_mad
+        return self.raw_data.apply(self.data_replace, args=(raw_data_max, raw_data_min))
 
-        return self.raw_data.apply(std_replace, args=(raw_data_max, raw_data_min))
+    # BOX_PLOT = 'box_plot'
 
 
 if __name__ == '__main__':
     indicator_data = SaveGetIndicator().get_indicator('ma5')
     factor_pre_obj = FactorPreProcessing(indicator_data)
-    extreme_data = factor_pre_obj.extreme_processing(dict(std={'sigma_multiple': 1}))
+    # extreme_data = factor_pre_obj.extreme_processing(dict(std={'sigma_multiple': 1}))
+    extreme_data = factor_pre_obj.extreme_processing(dict(md={'median_multiple': 1}))
