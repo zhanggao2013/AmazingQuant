@@ -14,6 +14,12 @@ from enum import Enum, unique
 class ExtremeMethod(Enum):
     STD = 'std'
     MAD = 'mad'
+    QUANTILE = 'quantile'
     BOX_PLOT = 'box_plot'
 
 
+@unique
+class ScaleMethod(Enum):
+    MIN_MAX = 'min_max'
+    Z_SCORE = 'z_score'
+    RANK = 'rank'
