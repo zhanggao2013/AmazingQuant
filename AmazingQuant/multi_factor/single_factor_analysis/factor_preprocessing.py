@@ -8,6 +8,10 @@
 # ------------------------------
 """
 因子数据预处理
+1.数据筛选
+    (1)时间区间过滤
+    (2)股票池过滤
+
 1.去极值
    (1) std法
    (2) MAD法,Median Absolute Deviation 绝对值差中位数法
@@ -41,6 +45,13 @@ class FactorPreProcessing(object):
     def __init__(self, raw_data):
         self.raw_data = raw_data
 
+    def data_filter(self, start=datetime(2010, 1, 1), end=datetime.now(), stock_list=None):
+        if stock_list is None:
+            self.raw_data = self.raw_data.loc[start: end]
+        else:
+            self.raw_data = self.raw_data.reindex(columns=stock_list).loc[start: end]
+        return self.raw_data
+
     def extreme_processing(self, method=None):
         if method is None:
             method = dict(std={'sigma_multiple': 3})
@@ -72,14 +83,6 @@ class FactorPreProcessing(object):
         else:
             raise Exception('This scale method is invalid!')
         return self.raw_data
-
-
-class DataFilter(object):
-    def __init__(self, raw_data):
-        self.raw_data = raw_data
-
-    def time_filter(self, start=datetime(2010, 1, 1), end=datetime.now()):
-        return self.raw_data.loc[start: end]
 
 
 class Extreme(object):
@@ -157,10 +160,8 @@ class Scale(object):
 if __name__ == '__main__':
     indicator_data = SaveGetIndicator().get_indicator('ma5')
 
-    data_filter_obj = DataFilter(indicator_data)
-    data_time_filter = data_filter_obj.time_filter(start=datetime(2020, 1, 1))
-
     factor_pre_obj = FactorPreProcessing(indicator_data)
+    data_filter = factor_pre_obj.data_filter()
     extreme_data = factor_pre_obj.extreme_processing(dict(std={'sigma_multiple': 3}))
     # extreme_data = factor_pre_obj.extreme_processing(dict(mad={'median_multiple': 3}))
     #
