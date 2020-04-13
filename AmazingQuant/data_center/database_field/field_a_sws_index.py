@@ -19,22 +19,24 @@ class ASwsIndex(Document):
     """
     # 更新时间
     update_date = DateTimeField(default=datetime.utcnow())
+    # 申万指数代码
+    sw_index_code = StringField(required=True)
     # 时间戳
     time_tag = DateTimeField(required=True)
     # 昨收
-    pre_close = FloatField(required=True)
+    pre_close = IntField(required=True)
     # 开
-    open = FloatField(required=True)
+    open = IntField(required=True)
     # 高
-    high = FloatField(required=True)
+    high = IntField(required=True)
     # 低
-    low = FloatField(required=True)
+    low = IntField(required=True)
     # 收
-    close = FloatField(required=True)
+    close = IntField(required=True)
     # 成交量(百股)
-    volume = FloatField(required=True)
+    volume = IntField(required=True)
     # 成交金额(千元)
-    amount = FloatField(required=True)
+    amount = IntField(required=True)
 
     # 指数市盈率
     index_pe = FloatField(required=True)
@@ -49,38 +51,3 @@ class ASwsIndex(Document):
     index_total_market_capitalisation = FloatField(required=True)
 
     meta = {'indexes': ['time_tag'], 'shard_key': ('time_tag',)}
-    # # 指数Wind代码
-    # S_INFO_WINDCODE
-    # # 交易日期
-    # TRADE_DT
-    # # 昨收盘价
-    # S_DQ_PRECLOSE
-    # # 开盘价
-    # S_DQ_OPEN
-    #
-    # # 最高价
-    # S_DQ_HIGH
-    #
-    # # 最低价
-    # S_DQ_LOW
-    #
-    # # 收盘价
-    # S_DQ_CLOSE
-    #
-    # # 成交量(百股)
-    # S_DQ_VOLUME
-    #
-    # # 成交金额(千元)
-    # S_DQ_AMOUNT
-    #
-    # # 指数市盈率
-    # S_VAL_PE
-    #
-    # # 指数市净率
-    # S_VAL_PB
-    #
-    # # A股流通市值(万元)
-    # S_DQ_MV
-    #
-    # # 总市值(万元)
-    # S_VAL_MV
