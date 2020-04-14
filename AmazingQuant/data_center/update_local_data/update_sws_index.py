@@ -35,5 +35,5 @@ class UpdateASwsIndex(object):
 
 
 if __name__ == '__main__':
-    kline_object = UpdateASwsIndex()
-    kline_object.update_a_sws_index()
+    a_sws_index_object = UpdateASwsIndex()
+    a_sws_index_object.update_a_sws_index()
