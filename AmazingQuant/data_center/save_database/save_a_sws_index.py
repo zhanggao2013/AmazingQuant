@@ -36,7 +36,7 @@ class SaveASwsIndex(object):
                             row[filed] = int(row[filed] * 100)
                     elif filed in ['S_DQ_AMOUNT']:
                         if not np.isnan(value):
-                            row[filed] = int(row[filed] * 100)
+                            row[filed] = int(row[filed] * 1000)
 
                 doc = ASwsIndex(sw_index_code=row['S_INFO_WINDCODE'],
                                 time_tag=date_to_datetime(str(row['TRADE_DT'])),
@@ -64,9 +64,3 @@ if __name__ == '__main__':
     save_a_sws_obj = SaveASwsIndex(data_path)
     save_a_sws_obj.save_a_sw_index()
 
-
-    # database = 'stock_base_data'
-    #
-    # with MongoConnect(database):
-    #     a = ASwsIndex.objects.as_pymongo()
-    #     b = pd.DataFrame(a)

@@ -28,6 +28,7 @@ class UpdateASwsIndex(object):
                           'index_pe', 'index_pb',
                           'index_free_float_market_capitalisation', 'index_total_market_capitalisation']
             self.a_sws_index_df = pd.DataFrame(a_sws_index).reindex(columns=field_list)
+            self.a_sws_index_df[['pre_close', 'open', 'high', 'low', 'close']] = self.a_sws_index_df[['pre_close', 'open', 'high', 'low', 'close']].div(10000)
             folder_name = LocalDataFolderName.SWS_INDEX.value
             path = LocalDataPath.path + folder_name + '/'
             data_name = folder_name

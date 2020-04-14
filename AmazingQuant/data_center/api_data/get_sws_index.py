@@ -24,11 +24,10 @@ class GetSwsIndex(object):
         return self.all_sws_index
 
     def get_sws_index(self, sws_index_code):
-        return self.all_sws_index[self.all_sws_index.sw_index_code==sws_index_code]
+        return self.all_sws_index[self.all_sws_index.sw_index_code == sws_index_code]
 
 
 if __name__ == '__main__':
     sws_index_obj = GetSwsIndex()
     sws_index_obj.get_all_sws_index()
     sws_index_obj.get_sws_index('801030.SI')
-

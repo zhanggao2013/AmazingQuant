@@ -33,9 +33,9 @@ class ASwsIndex(Document):
     low = IntField(required=True)
     # 收
     close = IntField(required=True)
-    # 成交量(百股)
+    # 成交量
     volume = IntField(required=True)
-    # 成交金额(千元)
+    # 成交金额
     amount = IntField(required=True)
 
     # 指数市盈率
