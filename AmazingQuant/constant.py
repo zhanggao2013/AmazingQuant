@@ -59,6 +59,8 @@ class LocalDataFolderName(Enum):
     A_SHARE = 'a_share'
     INDEX = 'index'
 
+    SWS_INDEX = 'sws_index'
+
 
 @unique
 class EventType(Enum):
