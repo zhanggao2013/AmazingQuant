@@ -16,7 +16,7 @@ from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hd
 from AmazingQuant.data_center.mongo_connection_me import MongoConnect
 
 
-class UpdateGIndexMember(object):
+class UpdateIndexMember(object):
     def __init__(self):
         self.index_members_df = pd.DataFrame.empty
         self.index_members_all = []
@@ -34,7 +34,7 @@ class UpdateGIndexMember(object):
 
 
 if __name__ == '__main__':
-    index_member_obj = UpdateGIndexMember()
+    index_member_obj = UpdateIndexMember()
     index_member_obj.update_index_members()
 
 
