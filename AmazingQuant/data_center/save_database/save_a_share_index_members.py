@@ -64,6 +64,10 @@ class SaveAShareIndexMembers(object):
 
 
 if __name__ == '__main__':
-    data_path = '../../../../data/finance/AINDEXMEMBERS.csv'
-    save_cash_flow_obj = SaveAShareIndexMembers(data_path)
-    save_cash_flow_obj.save_a_share_index_members()
+    # a_share_index_data_path = '../../../../data/finance/AINDEXMEMBERS.csv'
+    # save_a_share_index_members_obj = SaveAShareIndexMembers(a_share_index_data_path)
+    # save_a_share_index_members_obj.save_a_share_index_members()
+
+    sws_data_path = '../../../../data/finance/SWINDEXMEMBERS.csv'
+    save_a_sws_index_members_obj = SaveAShareIndexMembers(sws_data_path)
+    save_a_sws_index_members_obj.save_a_share_index_members()

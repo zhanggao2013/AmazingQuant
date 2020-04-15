@@ -51,5 +51,7 @@ if __name__ == '__main__':
     index_members_df_SZ, index_members_all_SZ = index_member_obj.get_index_members('399106.SZ')
     # 上证Ａ股
     index_members_df_SH, index_members_all_SH = index_member_obj.get_index_members('000001.SH')
-    print()
+    # 申万行业指数--化工
+    index_members_df_SI, index_members_all_SI = index_member_obj.get_index_members('801030.SI')
+
     index_member_in_date = index_member_obj.get_index_member_in_date()
