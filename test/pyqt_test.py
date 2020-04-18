@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         # 相当于初始化这个加载web的控件
         self.browser = QWebEngineView()
         # 加载外部页面，调用
-        self.browser.load(QUrl("file:///F:/%E5%B7%A5%E4%BD%9C/%E6%8A%95%E5%90%8E%E5%88%86%E6%9E%90svn/account_analysis/%E4%B8%8A%E6%B6%A8%E4%B8%8B%E8%B7%8C%E5%8C%BA%E9%97%B4.html"))
+        self.browser.load(QUrl("https://www.baidu.com"))
 
         self.setCentralWidget(self.browser)
 
