@@ -9,7 +9,7 @@
 
 from mongoengine import document
 
-from apps.server.database_field.field_a_share_kline import Kline
+from apps.server.database_server.database_field.field_a_share_kline import Kline
 
 
 def transfer_field(path):
