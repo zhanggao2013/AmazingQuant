@@ -14,9 +14,9 @@ import pandas as pd
 from mongoengine.context_managers import switch_collection
 
 from AmazingQuant.config.local_data_path import LocalDataPath
-from AmazingQuant.constant import DatabaseName, Period, LocalDataFolderName
+from AmazingQuant.constant import DatabaseName, LocalDataFolderName
 from AmazingQuant.data_center.mongo_connection_me import MongoConnect
-from AmazingQuant.data_center.database_field.field_a_share_kline import Kline
+from apps.server.database_field.field_a_share_kline import Kline
 from AmazingQuant.data_center.api_data.get_calender import GetCalendar
 from AmazingQuant.data_center.api_data.get_collection_list import GetCollectionList
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
@@ -139,5 +139,5 @@ class UpdateKlineData(object):
 if __name__ == '__main__':
     with Timer(True):
         kline_object = UpdateKlineData()
-        kline_object.update_all_market_data()
+        # kline_object.update_all_market_data()
         kline_object.update_index_data()

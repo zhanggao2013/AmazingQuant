@@ -55,3 +55,4 @@ if __name__ == '__main__':
     index_members_df_SI, index_members_all_SI = index_member_obj.get_index_members('801030.SI')
 
     index_member_in_date = index_member_obj.get_index_member_in_date()
+

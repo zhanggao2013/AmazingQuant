@@ -6,12 +6,11 @@
 # @File    : save_a_sws_index.py
 # @Project : AmazingQuant
 # ------------------------------
-from datetime import datetime
 
 import pandas as pd
 import numpy as np
 
-from AmazingQuant.data_center.database_field.field_a_sws_index import ASwsIndex
+from apps.server.database_field.field_a_sws_index import ASwsIndex
 from AmazingQuant.data_center.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.data_transfer import date_to_datetime
 
