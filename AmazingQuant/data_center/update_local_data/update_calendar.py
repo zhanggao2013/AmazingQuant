@@ -10,7 +10,7 @@
 import pandas as pd
 
 from AmazingQuant.config.local_data_path import LocalDataPath
-from apps.server.database_field.filed_a_share_calendar import AShareCalendar
+from apps.server.database_server.database_field.filed_a_share_calendar import AShareCalendar
 from AmazingQuant.constant import DatabaseName, LocalDataFolderName
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
 from AmazingQuant.utils.mongo_connection_me import MongoConnect

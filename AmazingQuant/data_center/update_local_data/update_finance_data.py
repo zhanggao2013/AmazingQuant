@@ -8,7 +8,7 @@
 # ------------------------------
 
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
-from apps.server.database_field.field_a_share_finance_data import AShareIncome
+from apps.server.database_server.database_field.field_a_share_finance_data import AShareIncome
 from AmazingQuant.utils.performance_test import Timer
 
 
