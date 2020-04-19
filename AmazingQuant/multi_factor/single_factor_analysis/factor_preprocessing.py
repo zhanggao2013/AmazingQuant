@@ -37,6 +37,7 @@ from datetime import datetime
 
 import pandas as pd
 import numpy as np
+import statsmodels.api as sm
 
 from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
 from AmazingQuant.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod
@@ -156,6 +157,17 @@ class Scale(object):
     def rank_method(self):
         raw_data_rank = self.raw_data.rank(axis=1)
         return raw_data_rank.div(self.raw_data.shape[1] - self.raw_data.isna().sum(axis=1), axis=0)
+
+
+class Neutralize(object):
+    def __init__(self, raw_data):
+        self.raw_data = raw_data
+
+    def industry_method(self):
+        pass
+
+    def market_value_method(self):
+        pass
 
 
 if __name__ == '__main__':
