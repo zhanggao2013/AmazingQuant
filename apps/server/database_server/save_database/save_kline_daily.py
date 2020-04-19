@@ -16,7 +16,7 @@ from mongoengine.context_managers import switch_collection
 
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.performance_test import Timer
-from apps.server.database_field.field_a_share_kline import Kline
+from apps.server.database_server.database_field import Kline
 from AmazingQuant.utils.security_type import is_security_type
 from AmazingQuant.constant import DatabaseName
 
@@ -129,10 +129,10 @@ class SaveKlineDaily(object):
 if __name__ == '__main__':
     with Timer(True):
         with Manager() as manager:
-            data_df = pd.read_csv('../../../../data/KLine_daily/ASHAREEODPRICES.csv', low_memory=False)
+            data_df = pd.read_csv('../../../../../data/KLine_daily/ASHAREEODPRICES.csv', low_memory=False)
             grouped = data_df.groupby("S_INFO_WINDCODE")
             data_dict = manager.dict({str(i[0]): i[1].reset_index(drop=True) for i in grouped})
 
-            save_kline_object = SaveKlineDaily('../../../../data/KLine_daily/KLine/', data_dict)
+            save_kline_object = SaveKlineDaily('../../../../../data/KLine_daily/KLine/', data_dict)
 
             save_kline_object.insert_security_code_list()

@@ -10,7 +10,7 @@
 import pandas as pd
 import numpy as np
 
-from apps.server.database_field.field_a_sws_index import ASwsIndex
+from apps.server.database_server.database_field import ASwsIndex
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.data_transfer import date_to_datetime
 
@@ -59,7 +59,7 @@ class SaveASwsIndex(object):
 
 
 if __name__ == '__main__':
-    data_path = '../../../../data/finance/ASWSINDEXEOD.csv'
+    data_path = '../../../../../data/finance/ASWSINDEXEOD.csv'
     save_a_sws_obj = SaveASwsIndex(data_path)
     save_a_sws_obj.save_a_sw_index()
 

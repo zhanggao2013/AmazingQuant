@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 # ------------------------------
-# @Time    : 2019/11/18
+# @Time    : 2019/11/23
 # @Author  : gao
-# @File    : save_a_share_cash_flow.py
+# @File    : save_a_share_ex_right_dividend.py
 # @Project : AmazingQuant 
 # ------------------------------
 from datetime import datetime
@@ -12,32 +12,32 @@ import pandas as pd
 import numpy as np
 from mongoengine.fields import DateTimeField, StringField
 
-from apps.server.database_field.field_a_share_finance_data import AShareCashFlow
+from apps.server.database_server.database_field import AShareExRightDividend
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.transfer_field import get_collection_property_list
 
 
-class SaveCashFlow(object):
+class SaveAShareExRightDividend(object):
     def __init__(self, data_path):
         self.data_df = pd.read_csv(data_path, low_memory=False)
-        self.collection_property_list = get_collection_property_list(AShareCashFlow)
+        self.collection_property_list = get_collection_property_list(AShareExRightDividend)
 
-    def save_a_share_cash_flow(self):
+    def save_a_share_ex_right_dividend(self):
         database = 'stock_base_data'
         with MongoConnect(database):
             doc_list = []
             for index, row in self.data_df.iterrows():
                 row_dict = dict(row)
+
                 row_dict['security_code'] = row_dict['S_INFO_WINDCODE']
-                row_dict.pop('WIND_CODE')
                 row_dict.pop('OBJECT_ID')
                 row_dict.pop('S_INFO_WINDCODE')
 
-                doc = AShareCashFlow()
+                doc = AShareExRightDividend()
 
                 for key, value in row_dict.items():
                     if key.lower() in self.collection_property_list:
-                        property_name = AShareCashFlow.__dict__[key.lower()]
+                        property_name = AShareExRightDividend.__dict__[key.lower()]
                         if isinstance(property_name, StringField):
                             setattr(doc, key.lower(), str(value))
                         elif isinstance(property_name, DateTimeField):
@@ -49,13 +49,13 @@ class SaveCashFlow(object):
                             setattr(doc, key.lower(), value)
                 doc_list.append(doc)
                 if len(doc_list) > 999:
-                    AShareCashFlow.objects.insert(doc_list)
+                    AShareExRightDividend.objects.insert(doc_list)
                     doc_list = []
             else:
-                AShareCashFlow.objects.insert(doc_list)
+                AShareExRightDividend.objects.insert(doc_list)
 
 
 if __name__ == '__main__':
-    data_path = '../../../../data/finance/AShareCashFlow.csv'
-    save_cash_flow_obj = SaveCashFlow(data_path)
-    save_cash_flow_obj.save_a_share_cash_flow()
+    data_path = '../../../../../data/finance/AShareEXRightDividendRecord.csv'
+    save_cash_flow_obj = SaveAShareExRightDividend(data_path)
+    save_cash_flow_obj.save_a_share_ex_right_dividend()

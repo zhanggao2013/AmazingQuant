@@ -9,7 +9,7 @@
 
 import pandas as pd
 
-from apps.server.database_field.filed_a_share_calendar import AShareCalendar
+from apps.server.database_server.database_field import AShareCalendar
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.data_transfer import date_to_datetime
 from AmazingQuant.constant import DatabaseName
@@ -37,6 +37,6 @@ class SaveCalendar(object):
 
 
 if __name__ == '__main__':
-    data_path = '../../../../data/finance/ASHARECALENDAR.csv'
+    data_path = '../../../../../data/finance/ASHARECALENDAR.csv'
     save_calendar_obj = SaveCalendar(data_path)
     save_calendar_obj.save_a_share_calendar()

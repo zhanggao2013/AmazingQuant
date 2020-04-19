@@ -3,39 +3,49 @@
 # ------------------------------
 # @Time    : 2019/11/22
 # @Author  : gao
-# @File    : save_a_share_profit_notice.py
+# @File    : save_a_share_index_members.py
 # @Project : AmazingQuant
 # ------------------------------
+
 from datetime import datetime
 
 import pandas as pd
 import numpy as np
 from mongoengine.fields import DateTimeField, StringField
 
-from apps.server.database_field.field_a_share_finance_data import AShareProfitNotice
+from apps.server.database_server.database_field.field_a_share_index_members import AShareIndexMembers
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.transfer_field import get_collection_property_list
 
 
-class SaveProfitNotice(object):
+class SaveAShareIndexMembers(object):
     def __init__(self, data_path):
         self.data_df = pd.read_csv(data_path, low_memory=False)
-        self.collection_property_list = get_collection_property_list(AShareProfitNotice)
+        self.collection_property_list = get_collection_property_list(AShareIndexMembers)
 
-    def save_a_share_profit_notice(self):
+    def save_a_share_index_members(self):
         database = 'stock_base_data'
         with MongoConnect(database):
             doc_list = []
             for index, row in self.data_df.iterrows():
                 row_dict = dict(row)
-                row_dict['security_code'] = row_dict['S_INFO_WINDCODE']
+
+                row_dict['index_code'] = row_dict['S_INFO_WINDCODE']
+                row_dict['security_code'] = row_dict['S_CON_WINDCODE']
+                row_dict['in_date'] = row_dict['S_CON_INDATE']
+                row_dict['out_date'] = row_dict['S_CON_OUTDATE']
+
                 row_dict.pop('OBJECT_ID')
                 row_dict.pop('S_INFO_WINDCODE')
+                row_dict.pop('S_CON_WINDCODE')
+                row_dict.pop('S_CON_INDATE')
+                row_dict.pop('S_CON_OUTDATE')
+                row_dict.pop('CUR_SIGN')
+                doc = AShareIndexMembers()
 
-                doc = AShareProfitNotice()
                 for key, value in row_dict.items():
                     if key.lower() in self.collection_property_list:
-                        property_name = AShareProfitNotice.__dict__[key.lower()]
+                        property_name = AShareIndexMembers.__dict__[key.lower()]
                         if isinstance(property_name, StringField):
                             setattr(doc, key.lower(), str(value))
                         elif isinstance(property_name, DateTimeField):
@@ -47,13 +57,17 @@ class SaveProfitNotice(object):
                             setattr(doc, key.lower(), value)
                 doc_list.append(doc)
                 if len(doc_list) > 999:
-                    AShareProfitNotice.objects.insert(doc_list)
+                    AShareIndexMembers.objects.insert(doc_list)
                     doc_list = []
             else:
-                AShareProfitNotice.objects.insert(doc_list)
+                AShareIndexMembers.objects.insert(doc_list)
 
 
 if __name__ == '__main__':
-    data_path = '../../../../data/finance/ASHAREPROFITNOTICE.csv'
-    save_cash_flow_obj = SaveProfitNotice(data_path)
-    save_cash_flow_obj.save_a_share_profit_notice()
+    # a_share_index_data_path = '../../../../data/finance/AINDEXMEMBERS.csv'
+    # save_a_share_index_members_obj = SaveAShareIndexMembers(a_share_index_data_path)
+    # save_a_share_index_members_obj.save_a_share_index_members()
+
+    sws_data_path = '../../../../../data/finance/SWINDEXMEMBERS.csv'
+    save_a_sws_index_members_obj = SaveAShareIndexMembers(sws_data_path)
+    save_a_sws_index_members_obj.save_a_share_index_members()

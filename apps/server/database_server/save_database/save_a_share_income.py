@@ -1,29 +1,28 @@
 # -*- coding: utf-8 -*-
 
 # ------------------------------
-# @Time    : 2019/11/21
+# @Time    : 2019/11/20
 # @Author  : gao
-# @File    : save_a_share_balance_sheet.py
-# @Project : AmazingQuant
+# @File    : save_a_share_income.py
+# @Project : AmazingQuant 
 # ------------------------------
-
 from datetime import datetime
 
 import pandas as pd
 import numpy as np
 from mongoengine.fields import DateTimeField, StringField
 
-from apps.server.database_field.field_a_share_finance_data import AShareBalanceSheet
+from apps.server.database_server.database_field import AShareIncome
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.transfer_field import get_collection_property_list
 
 
-class SaveBalanceSheet(object):
+class SaveIncome(object):
     def __init__(self, data_path):
         self.data_df = pd.read_csv(data_path, low_memory=False)
-        self.collection_property_list = get_collection_property_list(AShareBalanceSheet)
+        self.collection_property_list = get_collection_property_list(AShareIncome)
 
-    def save_a_share_balance_sheet(self):
+    def save_a_share_cash_flow(self):
         database = 'stock_base_data'
         with MongoConnect(database):
             doc_list = []
@@ -34,11 +33,11 @@ class SaveBalanceSheet(object):
                 row_dict.pop('OBJECT_ID')
                 row_dict.pop('S_INFO_WINDCODE')
 
-                doc = AShareBalanceSheet()
+                doc = AShareIncome()
 
                 for key, value in row_dict.items():
                     if key.lower() in self.collection_property_list:
-                        property_name = AShareBalanceSheet.__dict__[key.lower()]
+                        property_name = AShareIncome.__dict__[key.lower()]
                         if isinstance(property_name, StringField):
                             setattr(doc, key.lower(), str(value))
                         elif isinstance(property_name, DateTimeField):
@@ -48,16 +47,15 @@ class SaveBalanceSheet(object):
                                 setattr(doc, key.lower(), datetime.strptime(str(int(value)), "%Y%m%d"))
                         else:
                             setattr(doc, key.lower(), value)
-
                 doc_list.append(doc)
                 if len(doc_list) > 999:
-                    AShareBalanceSheet.objects.insert(doc_list)
+                    AShareIncome.objects.insert(doc_list)
                     doc_list = []
             else:
-                AShareBalanceSheet.objects.insert(doc_list)
+                AShareIncome.objects.insert(doc_list)
 
 
 if __name__ == '__main__':
-    data_path = '../../../../data/finance/AShareBalanceSheet.csv'
-    save_balance_sheet_obj = SaveBalanceSheet(data_path)
-    save_balance_sheet_obj.save_a_share_balance_sheet()
+    data_path = '../../../../../data/finance/ASHAREINCOME.csv'
+    save_cash_flow_obj = SaveIncome(data_path)
+    save_cash_flow_obj.save_a_share_cash_flow()
