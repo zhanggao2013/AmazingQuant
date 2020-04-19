@@ -7,7 +7,7 @@
 # @Project : AmazingQuant
 # ------------------------------
 
-from AmazingQuant.data_center.mongo_connection_pm import MongoConnectPm
+from AmazingQuant.utils.mongo_connection_pm import MongoConnectPm
 from AmazingQuant.constant import DatabaseName
 
 

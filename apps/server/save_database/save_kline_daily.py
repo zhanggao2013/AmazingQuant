@@ -14,7 +14,7 @@ import pandas as pd
 import numpy as np
 from mongoengine.context_managers import switch_collection
 
-from AmazingQuant.data_center.mongo_connection_me import MongoConnect
+from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.performance_test import Timer
 from apps.server.database_field.field_a_share_kline import Kline
 from AmazingQuant.utils.security_type import is_security_type

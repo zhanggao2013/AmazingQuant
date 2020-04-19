@@ -9,7 +9,7 @@
 import pandas as pd
 import numpy as np
 
-from AmazingQuant.data_center.mongo_connection_me import MongoConnect
+from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from apps.server.database_field.field_a_share_ex_right_dividend import AShareExRightDividend
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5

@@ -15,7 +15,7 @@ from mongoengine.context_managers import switch_collection
 
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.constant import DatabaseName, LocalDataFolderName
-from AmazingQuant.data_center.mongo_connection_me import MongoConnect
+from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from apps.server.database_field.field_a_share_kline import Kline
 from AmazingQuant.data_center.api_data.get_calender import GetCalendar
 from AmazingQuant.data_center.api_data.get_collection_list import GetCollectionList

@@ -7,7 +7,7 @@
 # @Project : AmazingQuant
 # ------------------------------
 
-from AmazingQuant.data_center.mongo_connection_me import MongoConnect
+from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from apps.server.database_field.field_a_share_finance_data import AShareIncome
 from AmazingQuant.utils.performance_test import Timer
 

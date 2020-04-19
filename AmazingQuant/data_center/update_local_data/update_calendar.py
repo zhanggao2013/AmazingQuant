@@ -13,7 +13,7 @@ from AmazingQuant.config.local_data_path import LocalDataPath
 from apps.server.database_field.filed_a_share_calendar import AShareCalendar
 from AmazingQuant.constant import DatabaseName, LocalDataFolderName
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
-from AmazingQuant.data_center.mongo_connection_me import MongoConnect
+from AmazingQuant.utils.mongo_connection_me import MongoConnect
 
 
 class UpdateCalendar(object):

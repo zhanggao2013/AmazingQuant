@@ -14,7 +14,7 @@ import numpy as np
 from mongoengine.fields import DateTimeField, StringField
 
 from apps.server.database_field.field_a_share_index_members import AShareIndexMembers
-from AmazingQuant.data_center.mongo_connection_me import MongoConnect
+from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.transfer_field import get_collection_property_list
 
 

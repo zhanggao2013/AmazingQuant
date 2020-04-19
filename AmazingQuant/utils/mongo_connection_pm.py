@@ -11,7 +11,7 @@ import sys
 import traceback
 import pymongo
 
-from AmazingQuant.data_center.singleton import singleton
+from AmazingQuant.utils.singleton import singleton
 from AmazingQuant.config.database_info import MongodbConfig
 
 
