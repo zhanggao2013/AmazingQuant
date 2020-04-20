@@ -61,6 +61,9 @@ class LocalDataFolderName(Enum):
 
     SWS_INDEX = 'sws_index'
 
+    INDUSTRY_CLASS = 'industry_class'
+    SW_INDUSTRY_ONE = 'sw_industry_one'
+
 
 @unique
 class EventType(Enum):

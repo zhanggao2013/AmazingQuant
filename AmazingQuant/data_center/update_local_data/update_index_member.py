@@ -37,7 +37,7 @@ class UpdateIndexMember(object):
             data_name = folder_name
             save_data_to_hdf5(path, data_name, self.index_members_df)
 
-    def update_index_class(self, index_dict):
+    def update_index_class(self, industry_class, index_dict):
         with MongoConnect(self.database):
             index_members_data = AShareIndexMembers.objects(index_code__in=index_dict.keys()).as_pymongo()
             field_list = ['index_code', 'security_code', 'in_date', 'out_date']
@@ -58,10 +58,13 @@ class UpdateIndexMember(object):
 
             self.index_class = self.index_class.apply(industry_history, args=(self.index_members_df,), axis=0)
             self.index_class = self.index_class.fillna(method='pad').fillna(method='backfill')
-            return self.index_class
+            folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
+            path = LocalDataPath.path + folder_name + '/'
+            data_name = industry_class
+            save_data_to_hdf5(path, data_name, self.index_class)
 
 
 if __name__ == '__main__':
     index_member_obj = UpdateIndexMember()
     # index_member_obj.update_index_members()
-    index_member_obj.update_index_class(sw_industry_one)
+    index_member_obj.update_index_class(LocalDataFolderName.SW_INDUSTRY_ONE.value, sw_industry_one)
