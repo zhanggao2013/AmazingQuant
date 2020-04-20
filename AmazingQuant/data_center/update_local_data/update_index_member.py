@@ -17,7 +17,7 @@ from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hd
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from AmazingQuant.data_center.api_data.get_collection_list import GetCollectionList
 from AmazingQuant.data_center.api_data.get_calender import GetCalendar
-from AmazingQuant.config.industry_class import sw_industry_one
+from AmazingQuant.config.industry_class_name import sw_industry_one
 
 
 class UpdateIndexMember(object):
@@ -37,9 +37,9 @@ class UpdateIndexMember(object):
             data_name = folder_name
             save_data_to_hdf5(path, data_name, self.index_members_df)
 
-    def update_index_class(self, industry_class, index_dict):
+    def update_index_class(self, industry_class_name, industry_class_dict):
         with MongoConnect(self.database):
-            index_members_data = AShareIndexMembers.objects(index_code__in=index_dict.keys()).as_pymongo()
+            index_members_data = AShareIndexMembers.objects(index_code__in=industry_class_dict.keys()).as_pymongo()
             field_list = ['index_code', 'security_code', 'in_date', 'out_date']
             self.index_members_df = pd.DataFrame(list(index_members_data)).reindex(columns=field_list)
             self.index_members_df = self.index_members_df.fillna(datetime.now()).reset_index(drop=True)
@@ -58,9 +58,9 @@ class UpdateIndexMember(object):
 
             self.index_class = self.index_class.apply(industry_history, args=(self.index_members_df,), axis=0)
             self.index_class = self.index_class.fillna(method='pad').fillna(method='backfill')
-            folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
+            folder_name = LocalDataFolderName.industry_class_name.value
             path = LocalDataPath.path + folder_name + '/'
-            data_name = industry_class
+            data_name = industry_class_name
             save_data_to_hdf5(path, data_name, self.index_class)
 
 

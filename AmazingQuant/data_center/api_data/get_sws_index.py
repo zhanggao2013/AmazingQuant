@@ -30,4 +30,4 @@ class GetSwsIndex(object):
 if __name__ == '__main__':
     sws_index_obj = GetSwsIndex()
     sws_index_obj.get_all_sws_index()
-    sws_index_obj.get_sws_index('801030.SI')
+    a = sws_index_obj.get_sws_index('801780.SI')
