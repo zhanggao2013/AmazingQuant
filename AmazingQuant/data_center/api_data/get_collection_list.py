@@ -9,7 +9,7 @@
 
 from AmazingQuant.utils.mongo_connection_pm import MongoConnectPm
 from AmazingQuant.constant import DatabaseName
-from AmazingQuant.utils.stock_type import is_stock_type
+from AmazingQuant.utils.security_type import is_security_type
 
 
 class GetCollectionList(object):
@@ -19,7 +19,7 @@ class GetCollectionList(object):
     def get_a_share_list(self):
         database_name = DatabaseName.A_SHARE_KLINE_DAILY.value
         a_share_list = self.connect.get_list_collection_names(database_name)
-        a_share_list = [i for i in a_share_list if is_stock_type(i, 'EXTRA_STOCK_A')]
+        a_share_list = [i for i in a_share_list if is_security_type(i, 'EXTRA_STOCK_A')]
         self.connect.disconnect()
         return a_share_list
 
