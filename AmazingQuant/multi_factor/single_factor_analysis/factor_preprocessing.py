@@ -41,6 +41,7 @@ import statsmodels.api as sm
 
 from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
 from AmazingQuant.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod
+from AmazingQuant.data_center.api_data.get_index_member import GetIndexMember
 
 
 class FactorPreProcessing(object):
@@ -164,6 +165,8 @@ class Neutralize(object):
         self.raw_data = raw_data
 
     def industry_method(self):
+        index_member_obj = GetIndexMember()
+        industry_member_df = index_member_obj.get_industry_member()
         pass
 
     def market_value_method(self):
@@ -180,5 +183,5 @@ if __name__ == '__main__':
     #
     # extreme_data = factor_pre_obj.extreme_processing(dict(quantile={'quantile_min': 0.025, 'quantile_max': 0.975}))
     # extreme_data = factor_pre_obj.extreme_processing(dict(box_plot={'median_multiple': 3}))
-    scale_data = factor_pre_obj.scale_processing('min_max')
+    scale_data = factor_pre_obj.scale_processing(ScaleMethod.MIN_MAX.value)
 
