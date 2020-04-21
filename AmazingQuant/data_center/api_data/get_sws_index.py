@@ -24,7 +24,7 @@ class GetSwsIndex(object):
         return self.all_sws_index
 
     def get_sws_index(self, sws_index_code):
-        return self.all_sws_index[self.all_sws_index.sw_index_code == sws_index_code]
+        return self.all_sws_index[self.all_sws_index.sw_index_code == sws_index_code].reset_index(drop=True)
 
 
 if __name__ == '__main__':
