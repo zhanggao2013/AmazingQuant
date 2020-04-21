@@ -10,7 +10,7 @@
 import pandas as pd
 import numpy as np
 
-from apps.server.database_server.database_field import ASwsIndex
+from apps.server.database_server.database_field.field_a_sws_index import ASwsIndex
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.data_transfer import date_to_datetime
 
