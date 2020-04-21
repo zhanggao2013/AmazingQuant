@@ -18,6 +18,7 @@ class GetIndexMember(object):
     def __init__(self):
         self.all_index_members_df = pd.DataFrame.empty
         self.index_members_df = pd.DataFrame.empty
+        self.industry_members_df = pd.DataFrame.empty
         self.index_members_all = []
 
     def get_all_index_members(self):
@@ -43,6 +44,13 @@ class GetIndexMember(object):
             (self.index_members_df.in_date <= members_date) & (self.index_members_df.out_date >= members_date)]
         return list(index_members_in_date_df["security_code"])
 
+    def get_industry_member(self):
+        folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
+        path = LocalDataPath.path + folder_name + '/'
+        data_name = LocalDataFolderName.SW_INDUSTRY_ONE.value + '.h5'
+        self.industry_members_df = pd.read_hdf(path + data_name)
+        return self.industry_members_df
+
 
 if __name__ == '__main__':
     index_member_obj = GetIndexMember()
@@ -55,4 +63,6 @@ if __name__ == '__main__':
     index_members_df_SI, index_members_all_SI = index_member_obj.get_index_members('801030.SI')
 
     index_member_in_date = index_member_obj.get_index_member_in_date()
+
+    industry_member_df = index_member_obj.get_industry_member()
 
