@@ -23,3 +23,10 @@ class ScaleMethod(Enum):
     MIN_MAX = 'min_max'
     Z_SCORE = 'z_score'
     RANK = 'rank'
+
+
+@unique
+class NeutralizeMethod(Enum):
+    INDUSTRY = 'industry'
+    MARKET_VALUE = 'market_value'
+

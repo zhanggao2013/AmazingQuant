@@ -40,7 +40,7 @@ import numpy as np
 import statsmodels.api as sm
 
 from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
-from AmazingQuant.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod
+from AmazingQuant.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod, NeutralizeMethod
 from AmazingQuant.data_center.api_data.get_index_member import GetIndexMember
 
 
@@ -85,6 +85,18 @@ class FactorPreProcessing(object):
             self.raw_data = scale_obj.rank_method()
         else:
             raise Exception('This scale method is invalid!')
+        return self.raw_data
+
+    def neutralize_processing(self, method=None):
+        if method is None:
+            method = NeutralizeMethod.INDUSTRY.value
+        neutralize_obj = Neutralize(self.raw_data)
+        if NeutralizeMethod.INDUSTRY.value in method:
+            self.raw_data = neutralize_obj.industry_method()
+        elif NeutralizeMethod.MARKET_VALUE.value in method:
+            self.raw_data = neutralize_obj.market_value_method()
+        else:
+            raise Exception('This neutralize method is invalid!')
         return self.raw_data
 
 
@@ -166,10 +178,12 @@ class Neutralize(object):
     def industry_method(self):
         index_member_obj = GetIndexMember()
         industry_member_df = index_member_obj.get_industry_member()
-        pass
+        return industry_member_df
 
     def market_value_method(self):
-        pass
+        index_member_obj = GetIndexMember()
+        industry_member_df = index_member_obj.get_industry_member()
+        return industry_member_df
 
 
 if __name__ == '__main__':
@@ -178,9 +192,9 @@ if __name__ == '__main__':
     factor_pre_obj = FactorPreProcessing(indicator_data)
     data_filter = factor_pre_obj.data_filter()
     # extreme_data = factor_pre_obj.extreme_processing(dict(std={'sigma_multiple': 3}))
-    extreme_data = factor_pre_obj.extreme_processing(dict(mad={'median_multiple': 1.483}))
+    # extreme_data = factor_pre_obj.extreme_processing(dict(mad={'median_multiple': 1.483}))
     #
     # extreme_data = factor_pre_obj.extreme_processing(dict(quantile={'quantile_min': 0.025, 'quantile_max': 0.975}))
     # extreme_data = factor_pre_obj.extreme_processing(dict(box_plot={'median_multiple': 3}))
-    scale_data = factor_pre_obj.scale_processing(ScaleMethod.MIN_MAX.value)
+    # scale_data = factor_pre_obj.scale_processing(ScaleMethod.MIN_MAX.value)
 
