@@ -101,7 +101,7 @@ class Extreme(object):
 
     def mad_method(self, median_multiple):
         raw_data_median = self.raw_data.median(axis=1)
-        raw_data_median_deviation = self.raw_data.sub(raw_data_median, axis=0)
+        raw_data_median_deviation = self.raw_data.sub(raw_data_median, axis=0).abs()
         raw_data_mad = raw_data_median_deviation.median(axis=1)
         raw_data_max = raw_data_median + median_multiple * raw_data_mad
         raw_data_min = raw_data_median - median_multiple * raw_data_mad
@@ -119,7 +119,6 @@ class Extreme(object):
         iqr = quantile_max - quantile_min
 
         def mc_time_tag(x, raw_data_median):
-            print(x.name)
             less_median = np.tile(x[0], (len(x[1]), 1))
             greater_median = np.tile(x[1], (len(x[0]), 1)).T
             x_add = less_median + greater_median - 2 * raw_data_median[x.name]
@@ -179,7 +178,7 @@ if __name__ == '__main__':
     factor_pre_obj = FactorPreProcessing(indicator_data)
     data_filter = factor_pre_obj.data_filter()
     # extreme_data = factor_pre_obj.extreme_processing(dict(std={'sigma_multiple': 3}))
-    extreme_data = factor_pre_obj.extreme_processing(dict(mad={'median_multiple': 3}))
+    extreme_data = factor_pre_obj.extreme_processing(dict(mad={'median_multiple': 1.483}))
     #
     # extreme_data = factor_pre_obj.extreme_processing(dict(quantile={'quantile_min': 0.025, 'quantile_max': 0.975}))
     # extreme_data = factor_pre_obj.extreme_processing(dict(box_plot={'median_multiple': 3}))
