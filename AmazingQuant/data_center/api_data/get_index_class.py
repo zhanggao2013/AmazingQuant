@@ -6,14 +6,20 @@
 # @File    : get_index_class.py
 # @Project : AmazingQuant
 # ------------------------------
+from datetime import datetime
+
 import pandas as pd
+import numpy as np
+
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
+from AmazingQuant.config.industry_class import sw_industry_one
 
 
 class GetIndexClass(object):
     def __init__(self):
         self.index_class_df = None
+        self.zero_index_class = None
 
     def get_index_class(self):
         folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
@@ -22,7 +28,22 @@ class GetIndexClass(object):
         self.index_class_df = pd.read_hdf(path + data_name)
         return self.index_class_df
 
+    def get_zero_index_class(self):
+        self.zero_index_class = pd.DataFrame(index=self.index_class_df.columns, columns=sw_industry_one.keys()).fillna(0)
+
+    def get_index_class_in_date(self, members_date):
+        index_class_in_date = self.zero_index_class
+        members_date_index_class = self.index_class_df.loc[members_date]
+        members_date_index_class_dict = members_date_index_class.to_dict()
+        for key, value in members_date_index_class_dict.items():
+            print(key, value)
+            if isinstance(value, str):
+                index_class_in_date.loc[key, value] = 1
+        return index_class_in_date
+
 
 if __name__ == '__main__':
     index_class_obj = GetIndexClass()
     index_class = index_class_obj.get_index_class()
+    index_class_obj.get_zero_index_class()
+    a = index_class_obj.get_index_class_in_date(datetime(2020, 12, 31))
