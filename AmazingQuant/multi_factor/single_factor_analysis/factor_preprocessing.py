@@ -41,7 +41,7 @@ import statsmodels.api as sm
 
 from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
 from AmazingQuant.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod, NeutralizeMethod
-from AmazingQuant.data_center.api_data.get_index_member import GetIndexMember
+from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass
 
 
 class FactorPreProcessing(object):
@@ -86,6 +86,9 @@ class FactorPreProcessing(object):
         else:
             raise Exception('This scale method is invalid!')
         return self.raw_data
+
+    # def fill_nan_processing(self, method=None):
+
 
     def neutralize_processing(self, method=None):
         if method is None:
@@ -171,14 +174,37 @@ class Scale(object):
         return raw_data_rank.div(self.raw_data.shape[1] - self.raw_data.isna().sum(axis=1), axis=0)
 
 
-class Neutralize(object):
+class FillNan(object):
     def __init__(self, raw_data):
         self.raw_data = raw_data
 
+    def mean_method(self):
+        raw_data_mean = self.raw_data.mean(axis=1)
+        return self.raw_data.apply(lambda x:x.fillna(raw_data_mean[x.name]))
+        pass
+
+    def mid_method(self):
+        pass
+
+
+class Neutralize(object):
+    def __init__(self, raw_data):
+        self.raw_data = raw_data
+        self.index_class_obj = GetIndexClass()
+        self.index_class = self.index_class_obj.get_index_class()
+        self.index_class_obj.get_zero_index_class()
+
     def industry_method(self):
-        index_member_obj = GetIndexMember()
-        industry_member_df = index_member_obj.get_industry_member()
-        return industry_member_df
+        # index_class_in_date = self.index_class_obj.get_index_class_in_date(datetime(2020, 12, 31))
+        for datetime_time_tag, data in self.raw_data.iterrows():
+            index_class_in_date = self.index_class_obj.get_index_class_in_date(datetime_time_tag)
+            print(datetime_time_tag, data)
+            x = sm.add_constant(index_class_in_date)
+            model = sm.OLS(data, x)
+            results = model.fit()
+            resid = results.resid
+            print(resid)
+        # return index_class_in_date
 
     def market_value_method(self):
         index_member_obj = GetIndexMember()
