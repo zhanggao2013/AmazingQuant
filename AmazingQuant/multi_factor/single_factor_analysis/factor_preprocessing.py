@@ -191,10 +191,12 @@ if __name__ == '__main__':
 
     factor_pre_obj = FactorPreProcessing(indicator_data)
     data_filter = factor_pre_obj.data_filter()
-    # extreme_data = factor_pre_obj.extreme_processing(dict(std={'sigma_multiple': 3}))
+    extreme_data = factor_pre_obj.extreme_processing(dict(std={'sigma_multiple': 3}))
     # extreme_data = factor_pre_obj.extreme_processing(dict(mad={'median_multiple': 1.483}))
     #
     # extreme_data = factor_pre_obj.extreme_processing(dict(quantile={'quantile_min': 0.025, 'quantile_max': 0.975}))
     # extreme_data = factor_pre_obj.extreme_processing(dict(box_plot={'median_multiple': 3}))
-    # scale_data = factor_pre_obj.scale_processing(ScaleMethod.MIN_MAX.value)
+    scale_data = factor_pre_obj.scale_processing(ScaleMethod.MIN_MAX.value)
+
+    neutralize_data = factor_pre_obj.neutralize_processing()
 
