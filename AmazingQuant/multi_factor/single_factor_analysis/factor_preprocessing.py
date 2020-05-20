@@ -40,7 +40,7 @@ import numpy as np
 import statsmodels.api as sm
 
 from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
-from AmazingQuant.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod, NeutralizeMethod
+from AmazingQuant.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod, FillNanMethod, NeutralizeMethod
 from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass
 
 
@@ -87,7 +87,15 @@ class FactorPreProcessing(object):
             raise Exception('This scale method is invalid!')
         return self.raw_data
 
-    # def fill_nan_processing(self, method=None):
+    def fill_nan_processing(self, method=None):
+        if method is None:
+            method = FillNanMethod.MEAN.value
+        fill_nan_obj = FillNan(self.raw_data)
+        if FillNanMethod.MEAN.value in method:
+            self.raw_data = fill_nan_obj.mean_method()
+        elif FillNanMethod.MID.value in method:
+            self.raw_data = fill_nan_obj.median_method()
+        return self.raw_data
 
 
     def neutralize_processing(self, method=None):
@@ -180,11 +188,11 @@ class FillNan(object):
 
     def mean_method(self):
         raw_data_mean = self.raw_data.mean(axis=1)
-        return self.raw_data.apply(lambda x:x.fillna(raw_data_mean[x.name]))
-        pass
+        return self.raw_data.T.fillna(raw_data_mean).T
 
-    def mid_method(self):
-        pass
+    def median_method(self):
+        raw_data_median = self.raw_data.median(axis=1)
+        return self.raw_data.T.fillna(raw_data_median).T
 
 
 class Neutralize(object):
@@ -197,13 +205,16 @@ class Neutralize(object):
     def industry_method(self):
         # index_class_in_date = self.index_class_obj.get_index_class_in_date(datetime(2020, 12, 31))
         for datetime_time_tag, data in self.raw_data.iterrows():
+            print(datetime_time_tag, type(data))
             index_class_in_date = self.index_class_obj.get_index_class_in_date(datetime_time_tag)
-            print(datetime_time_tag, data)
+            stock_code_list = list(set(data.index).intersection(set(index_class_in_date.index)))
             x = sm.add_constant(index_class_in_date)
-            model = sm.OLS(data, x)
+            print(len(stock_code_list))
+            # print(x)
+            model = sm.OLS(data[stock_code_list], x.reindex(stock_code_list))
             results = model.fit()
             resid = results.resid
-            print(resid)
+            # print(resid)
         # return index_class_in_date
 
     def market_value_method(self):
@@ -223,6 +234,6 @@ if __name__ == '__main__':
     # extreme_data = factor_pre_obj.extreme_processing(dict(quantile={'quantile_min': 0.025, 'quantile_max': 0.975}))
     # extreme_data = factor_pre_obj.extreme_processing(dict(box_plot={'median_multiple': 3}))
     scale_data = factor_pre_obj.scale_processing(ScaleMethod.MIN_MAX.value)
+    fill_nan_data = factor_pre_obj.fill_nan_processing(FillNanMethod.MEAN.value)
 
     neutralize_data = factor_pre_obj.neutralize_processing()
-

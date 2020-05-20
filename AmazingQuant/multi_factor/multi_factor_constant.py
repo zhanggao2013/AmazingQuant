@@ -26,6 +26,12 @@ class ScaleMethod(Enum):
 
 
 @unique
+class FillNanMethod(Enum):
+    MEAN = 'mean'
+    MEDIAN = 'median'
+
+
+@unique
 class NeutralizeMethod(Enum):
     INDUSTRY = 'industry'
     MARKET_VALUE = 'market_value'

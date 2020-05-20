@@ -33,7 +33,7 @@ class GetIndexClass(object):
 
     def get_index_class_in_date(self, members_date):
         index_class_in_date = self.zero_index_class.copy()
-        members_date_index_class = self.index_class_df.loc[members_date].dropna()
+        members_date_index_class = self.index_class_df.loc[members_date]
         members_date_index_class_grouped = members_date_index_class.groupby(members_date_index_class)
 
         def cal_class(x, members_date_index_class_groups):
@@ -48,7 +48,6 @@ if __name__ == '__main__':
     index_class_obj = GetIndexClass()
     index_class = index_class_obj.get_index_class()
     index_class_obj.get_zero_index_class()
-    import time
-    a = time.time()
+
     index_class_in_date = index_class_obj.get_index_class_in_date(datetime(2020, 12, 31))
-    print(time.time()-a)
+
