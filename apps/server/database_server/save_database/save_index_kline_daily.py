@@ -17,7 +17,7 @@ from mongoengine.context_managers import switch_collection
 
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.performance_test import Timer
-from apps.server.database_server.database_field import Kline
+from apps.server.database_server.database_field.field_a_share_kline import Kline
 from AmazingQuant.constant import DatabaseName
 
 

@@ -97,7 +97,6 @@ class FactorPreProcessing(object):
             self.raw_data = fill_nan_obj.median_method()
         return self.raw_data
 
-
     def neutralize_processing(self, method=None):
         if method is None:
             method = NeutralizeMethod.INDUSTRY.value
@@ -198,24 +197,24 @@ class FillNan(object):
 class Neutralize(object):
     def __init__(self, raw_data):
         self.raw_data = raw_data
-        self.index_class_obj = GetIndexClass()
-        self.index_class = self.index_class_obj.get_index_class()
-        self.index_class_obj.get_zero_index_class()
 
     def industry_method(self):
-        # index_class_in_date = self.index_class_obj.get_index_class_in_date(datetime(2020, 12, 31))
-        for datetime_time_tag, data in self.raw_data.iterrows():
-            print(datetime_time_tag, type(data))
-            index_class_in_date = self.index_class_obj.get_index_class_in_date(datetime_time_tag)
+        index_class_obj = GetIndexClass()
+        index_class_obj.get_index_class()
+        index_class_obj.get_zero_index_class()
+
+        def cal_resid(data, index_class_obj):
+            index_class_in_date = index_class_obj.get_index_class_in_date(data.name)
             stock_code_list = list(set(data.index).intersection(set(index_class_in_date.index)))
             x = sm.add_constant(index_class_in_date)
-            print(len(stock_code_list))
-            # print(x)
+            # print(len(stock_code_list))
             model = sm.OLS(data[stock_code_list], x.reindex(stock_code_list))
-            results = model.fit()
-            resid = results.resid
-            # print(resid)
-        # return index_class_in_date
+            fit_result = model.fit()
+            return fit_result.resid
+
+        self.raw_data = self.raw_data.apply(cal_resid, args=(index_class_obj,), axis=1)
+        return self.raw_data
+
 
     def market_value_method(self):
         index_member_obj = GetIndexMember()
@@ -237,3 +236,4 @@ if __name__ == '__main__':
     fill_nan_data = factor_pre_obj.fill_nan_processing(FillNanMethod.MEAN.value)
 
     neutralize_data = factor_pre_obj.neutralize_processing()
+

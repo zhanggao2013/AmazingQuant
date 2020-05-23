@@ -12,7 +12,7 @@ import pandas as pd
 import numpy as np
 from mongoengine.fields import DateTimeField, StringField
 
-from apps.server.database_server.database_field import AShareCashFlow
+from apps.server.database_server.database_field.field_a_share_finance_data import AShareCashFlow
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.transfer_field import get_collection_property_list
 
