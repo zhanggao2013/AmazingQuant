@@ -29,6 +29,10 @@ class GetIndexClass(object):
         return self.index_class_df
 
     def get_zero_index_class(self):
+        """
+        初始化一个0的dataframe
+        :return:
+        """
         self.zero_index_class = pd.DataFrame(index=self.index_class_df.columns, columns=sw_industry_one.keys()).fillna(0)
 
     def get_index_class_in_date(self, members_date):
