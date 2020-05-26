@@ -51,7 +51,9 @@ class DatabaseName(Enum):
 @unique
 class LocalDataFolderName(Enum):
     CALENDAR = 'calendar'
+
     INDEX_MEMBER = 'index_member'
+
     ADJ_FACTOR = 'adj_factor'
 
     MARKET_DATA = 'market_data'
@@ -62,7 +64,10 @@ class LocalDataFolderName(Enum):
     SWS_INDEX = 'sws_index'
 
     INDUSTRY_CLASS = 'industry_class'
-    SW_INDUSTRY_ONE = 'sw_industry_one'
+
+    INDICATOR_EVERYDAY = 'indicator_everyday'
+
+
 
 
 @unique

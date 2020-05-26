@@ -37,28 +37,32 @@ class UpAShareCapitalization(object):
             kline_object = GetKlineData()
             market_close_data = kline_object.cache_all_stock_data()['close']
             index = list(set(market_close_data.index).union(set(self.a_share_capitalization['change_date'])))
-
+            index.sort()
             share_capitalization_grouped = self.a_share_capitalization.groupby('security_code')
 
-            share_capitalization = pd.DataFrame(index=index)
+            total_share = pd.DataFrame({})
+            float_a_share = pd.DataFrame({})
             for i in share_capitalization_grouped:
-                data = i[1].reindex(['change_date', 'total_share'], axis=1).sort_values('change_date').set_index(
-                    'change_date')
+                data = i[1].sort_values('change_date').set_index('change_date')
                 try:
-                    share_capitalization[i[0]] = data
+                    total_share[i[0]] = data['total_share'].reindex(index)
+                    float_a_share[i[0]] = data['float_a_share'].reindex(index)
                 except ValueError:
                     # 有四只票 change date 重复,需要手工清洗修正
-                    # print(data)
-                    share_capitalization[i[0]] = data[data.index.duplicated()]
-            share_capitalization = share_capitalization.fillna(method='ffill').reindex(market_close_data.index)
-            return share_capitalization.multiply(10000) * market_close_data
+                    # print(data[data.index.duplicated()])
+                    total_share[i[0]] = data[data.index.duplicated()]['total_share'].reindex(index)
+                    float_a_share[i[0]] = data[data.index.duplicated()]['float_a_share'].reindex(index)
+            total_share = total_share.fillna(method='ffill').reindex(market_close_data.index)
+            float_a_share = float_a_share.fillna(method='ffill').reindex(market_close_data.index)
+            total_share_value = total_share.multiply(10000) * market_close_data
+            float_a_share_value = float_a_share.multiply(10000) * market_close_data
 
-            # folder_name = LocalDataFolderName.INDEX_MEMBER.value
-            # path = LocalDataPath.path + folder_name + '/'
-            # data_name = folder_name
-            # save_data_to_hdf5(path, data_name, self.index_members_df)
+            folder_name = LocalDataFolderName.INDICATOR_EVERYDAY.value
+            path = LocalDataPath.path + folder_name + '/'
+            save_data_to_hdf5(path, 'total_share_value', total_share_value)
+            save_data_to_hdf5(path, 'float_a_share_value', float_a_share_value)
 
 
 if __name__ == '__main__':
     share_capitalization_obj = UpAShareCapitalization()
-    total_share = share_capitalization_obj.update_a_share_capitalization()
+    share_capitalization_obj.update_a_share_capitalization()

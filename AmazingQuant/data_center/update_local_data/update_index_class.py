@@ -55,4 +55,4 @@ class UpdateIndexMember(object):
 
 if __name__ == '__main__':
     index_member_obj = UpdateIndexMember()
-    index_member_obj.update_index_class(LocalDataFolderName.SW_INDUSTRY_ONE.value, sw_industry_one)
+    index_member_obj.update_index_class('sw_industry_one', sw_industry_one)
