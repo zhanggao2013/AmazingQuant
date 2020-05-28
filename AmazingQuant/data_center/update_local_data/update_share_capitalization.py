@@ -59,6 +59,8 @@ class UpAShareCapitalization(object):
 
             folder_name = LocalDataFolderName.INDICATOR_EVERYDAY.value
             path = LocalDataPath.path + folder_name + '/'
+            save_data_to_hdf5(path, 'total_share', total_share)
+            save_data_to_hdf5(path, 'float_a_share', float_a_share)
             save_data_to_hdf5(path, 'total_share_value', total_share_value)
             save_data_to_hdf5(path, 'float_a_share_value', float_a_share_value)
 
