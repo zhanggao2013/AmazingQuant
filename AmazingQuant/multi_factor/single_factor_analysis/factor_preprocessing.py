@@ -203,24 +203,39 @@ class Neutralize(object):
         index_class_obj.get_index_class()
         index_class_obj.get_zero_index_class()
 
-        def cal_resid(data, index_class_obj):
+        share_data = pd.DataFrame({})
+        if NeutralizeMethod.MARKET_VALUE.value in method:
+            share_data_obj = GetShare()
+            share_data = share_data_obj.get_share('float_a_share_value')
+
+        def cal_resid(data, index_class_obj, share_data, method):
+            print(data.name)
             index_class_in_date = pd.DataFrame({})
-            share_data = pd.DataFrame({})
+            share_data_in_date = pd.DataFrame({})
             if NeutralizeMethod.INDUSTRY.value in method:
                 index_class_in_date = index_class_obj.get_index_class_in_date(data.name)
-            elif NeutralizeMethod.MARKET_VALUE.value in method:
-                share_data_obj = GetShare()
-                share_data = share_data_obj.get_share('float_a_share_value')
+            if NeutralizeMethod.MARKET_VALUE.value in method:
+                share_data_in_date = share_data.loc[data.name].dropna()
+                share_data_in_date = pd.DataFrame({'float_a_share_value': share_data_in_date})
+                print(share_data_in_date)
 
-            neutralize_data = pd.concat([index_class_in_date, share_data], axis=1)
+            neutralize_data = index_class_in_date.join(share_data_in_date, how='outer')
             stock_code_list = list(set(data.index).intersection(set(neutralize_data.index)))
-            neutralize_data = sm.add_constant(neutralize_data)
-            # print(len(stock_code_list))
-            model = sm.OLS(data[stock_code_list], neutralize_data.reindex(stock_code_list))
+            print(len(stock_code_list))
+            # print(neutralize_data)
+            neutralize_data = sm.add_constant(neutralize_data.reindex(stock_code_list))
+            print('000001.SZ' in stock_code_list, '000001.SZ' in neutralize_data.index, )
+            print(neutralize_data.shape)
+            print(data[stock_code_list])
+            model = sm.OLS(data[stock_code_list], neutralize_data)
+            print(type(data[stock_code_list]), type(neutralize_data))
+            print(data[stock_code_list].shape, neutralize_data.shape)
             fit_result = model.fit()
+            # print(fit_result.summary())
+            print(fit_result.resid)
             return fit_result.resid
 
-        self.raw_data = self.raw_data.apply(cal_resid, args=(index_class_obj,), axis=1)
+        self.raw_data = self.raw_data.apply(cal_resid, args=(index_class_obj, share_data, method,), axis=1)
         return self.raw_data
 
 
@@ -234,8 +249,11 @@ if __name__ == '__main__':
     #
     # extreme_data = factor_pre_obj.extreme_processing(dict(quantile={'quantile_min': 0.025, 'quantile_max': 0.975}))
     # extreme_data = factor_pre_obj.extreme_processing(dict(box_plot={'median_multiple': 3}))
+
+    neutralize_data = factor_pre_obj.neutralize_processing(dict(neutralize_method=[NeutralizeMethod.INDUSTRY.value, NeutralizeMethod.MARKET_VALUE.value]))
+
     scale_data = factor_pre_obj.scale_processing(ScaleMethod.MIN_MAX.value)
     fill_nan_data = factor_pre_obj.fill_nan_processing(FillNanMethod.MEAN.value)
 
-    neutralize_data = factor_pre_obj.neutralize_processing(dict(neutralize_method=NeutralizeMethod.INDUSTRY.value) )
+
 

@@ -36,4 +36,4 @@ class GetShare(object):
 
 if __name__ == '__main__':
     share_data_obj = GetShare()
-    share_data = share_data_obj.get_share()
+    share_data = share_data_obj.get_share('float_a_share_value')
