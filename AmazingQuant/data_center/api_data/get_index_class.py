@@ -24,7 +24,7 @@ class GetIndexClass(object):
     def get_index_class(self):
         folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
         path = LocalDataPath.path + folder_name + '/'
-        data_name = LocalDataFolderName.SW_INDUSTRY_ONE.value + '.h5'
+        data_name = 'sw_industry_one' + '.h5'
         self.index_class_df = pd.read_hdf(path + data_name)
         return self.index_class_df
 

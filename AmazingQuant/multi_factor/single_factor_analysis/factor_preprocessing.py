@@ -42,6 +42,7 @@ import statsmodels.api as sm
 from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
 from AmazingQuant.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod, FillNanMethod, NeutralizeMethod
 from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass
+from AmazingQuant.data_center.api_data.get_share import GetShare
 
 
 class FactorPreProcessing(object):
@@ -99,14 +100,13 @@ class FactorPreProcessing(object):
 
     def neutralize_processing(self, method=None):
         if method is None:
-            method = NeutralizeMethod.INDUSTRY.value
+            method = dict(neutralize_method=NeutralizeMethod.INDUSTRY.value)
         neutralize_obj = Neutralize(self.raw_data)
-        if NeutralizeMethod.INDUSTRY.value in method:
-            self.raw_data = neutralize_obj.industry_method()
-        elif NeutralizeMethod.MARKET_VALUE.value in method:
-            self.raw_data = neutralize_obj.market_value_method()
+        if NeutralizeMethod.INDUSTRY.value in method['neutralize_method']\
+                or NeutralizeMethod.MARKET_VALUE.value in method['neutralize_method']:
+            self.raw_data = neutralize_obj.neutralize_method(method['neutralize_method'])
         else:
-            raise Exception('This neutralize method is invalid!')
+            raise Exception('This extreme method is invalid!')
         return self.raw_data
 
 
@@ -198,28 +198,30 @@ class Neutralize(object):
     def __init__(self, raw_data):
         self.raw_data = raw_data
 
-    def industry_method(self):
+    def neutralize_method(self, method):
         index_class_obj = GetIndexClass()
         index_class_obj.get_index_class()
         index_class_obj.get_zero_index_class()
 
         def cal_resid(data, index_class_obj):
-            index_class_in_date = index_class_obj.get_index_class_in_date(data.name)
-            stock_code_list = list(set(data.index).intersection(set(index_class_in_date.index)))
-            x = sm.add_constant(index_class_in_date)
+            index_class_in_date = pd.DataFrame({})
+            share_data = pd.DataFrame({})
+            if NeutralizeMethod.INDUSTRY.value in method:
+                index_class_in_date = index_class_obj.get_index_class_in_date(data.name)
+            elif NeutralizeMethod.MARKET_VALUE.value in method:
+                share_data_obj = GetShare()
+                share_data = share_data_obj.get_share('float_a_share_value')
+
+            neutralize_data = pd.concat([index_class_in_date, share_data], axis=1)
+            stock_code_list = list(set(data.index).intersection(set(neutralize_data.index)))
+            neutralize_data = sm.add_constant(neutralize_data)
             # print(len(stock_code_list))
-            model = sm.OLS(data[stock_code_list], x.reindex(stock_code_list))
+            model = sm.OLS(data[stock_code_list], neutralize_data.reindex(stock_code_list))
             fit_result = model.fit()
             return fit_result.resid
 
         self.raw_data = self.raw_data.apply(cal_resid, args=(index_class_obj,), axis=1)
         return self.raw_data
-
-
-    def market_value_method(self):
-        index_member_obj = GetIndexMember()
-        industry_member_df = index_member_obj.get_industry_member()
-        return industry_member_df
 
 
 if __name__ == '__main__':
@@ -235,5 +237,5 @@ if __name__ == '__main__':
     scale_data = factor_pre_obj.scale_processing(ScaleMethod.MIN_MAX.value)
     fill_nan_data = factor_pre_obj.fill_nan_processing(FillNanMethod.MEAN.value)
 
-    neutralize_data = factor_pre_obj.neutralize_processing()
+    neutralize_data = factor_pre_obj.neutralize_processing(dict(neutralize_method=NeutralizeMethod.INDUSTRY.value) )
 
