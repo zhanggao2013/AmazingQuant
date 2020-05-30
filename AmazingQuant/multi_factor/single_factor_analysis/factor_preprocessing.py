@@ -209,30 +209,27 @@ class Neutralize(object):
             share_data = share_data_obj.get_share('float_a_share_value')
 
         def cal_resid(data, index_class_obj, share_data, method):
-            print(data.name)
+            print('data.name', data.name)
+            # 删除一些 , 因子数据为NAN的个股
+            data = data.dropna()
             index_class_in_date = pd.DataFrame({})
             share_data_in_date = pd.DataFrame({})
+
             if NeutralizeMethod.INDUSTRY.value in method:
                 index_class_in_date = index_class_obj.get_index_class_in_date(data.name)
             if NeutralizeMethod.MARKET_VALUE.value in method:
                 share_data_in_date = share_data.loc[data.name].dropna()
                 share_data_in_date = pd.DataFrame({'float_a_share_value': share_data_in_date})
-                print(share_data_in_date)
 
-            neutralize_data = index_class_in_date.join(share_data_in_date, how='outer')
+            # 行业中性与流通市值中性化取交集
+            neutralize_data = index_class_in_date.join(share_data_in_date, how='outer').dropna()
+            # 因子数据的股票list与中性化数据的股票list,取交集
             stock_code_list = list(set(data.index).intersection(set(neutralize_data.index)))
-            print(len(stock_code_list))
-            # print(neutralize_data)
-            neutralize_data = sm.add_constant(neutralize_data.reindex(stock_code_list))
-            print('000001.SZ' in stock_code_list, '000001.SZ' in neutralize_data.index, )
-            print(neutralize_data.shape)
-            print(data[stock_code_list])
-            model = sm.OLS(data[stock_code_list], neutralize_data)
-            print(type(data[stock_code_list]), type(neutralize_data))
-            print(data[stock_code_list].shape, neutralize_data.shape)
+            neutralize_data = sm.add_constant(neutralize_data.reindex(stock_code_list).sort_index())
+            factor = data[stock_code_list].sort_index()
+
+            model = sm.OLS(factor, neutralize_data)
             fit_result = model.fit()
-            # print(fit_result.summary())
-            print(fit_result.resid)
             return fit_result.resid
 
         self.raw_data = self.raw_data.apply(cal_resid, args=(index_class_obj, share_data, method,), axis=1)
