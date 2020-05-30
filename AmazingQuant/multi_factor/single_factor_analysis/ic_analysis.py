@@ -19,3 +19,17 @@ IC是指因子在第T期的因子值与T+1期的股票收益的相关系数
     （6） p-value（有效性）,全部都计算时间序列
     （7） IC信号衰减计算
 """
+from AmazingQuant.constant import LocalDataFolderName
+from AmazingQuant.config.local_data_path import LocalDataPath
+from AmazingQuant.data_center.api_data.get_data import get_local_data
+
+
+class IcAnalysis(object):
+    def __init__(self, factor):
+        self.factor = factor
+
+
+if __name__ == '__main__':
+    path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
+    factor_ma5 = get_local_data(path, 'factor_ma5.h5')
+    ic_analysis_obj = IcAnalysis(factor_ma5)
