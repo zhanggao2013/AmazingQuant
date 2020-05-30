@@ -67,6 +67,8 @@ class LocalDataFolderName(Enum):
 
     INDICATOR_EVERYDAY = 'indicator_everyday'
 
+    FACTOR = 'factor'
+
 
 
 

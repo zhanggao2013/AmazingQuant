@@ -44,6 +44,9 @@ from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
 from AmazingQuant.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod, FillNanMethod, NeutralizeMethod
 from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass
 from AmazingQuant.data_center.api_data.get_share import GetShare
+from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
+from AmazingQuant.constant import LocalDataFolderName
+from AmazingQuant.config.local_data_path import LocalDataPath
 
 
 class FactorPreProcessing(object):
@@ -264,6 +267,10 @@ if __name__ == '__main__':
 
     # 补充空值的方法，已实现两种
     fill_nan_data = factor_pre_obj.fill_nan_processing(FillNanMethod.MEAN.value)
+
+    # 保存预处理之后的因子数据，单因子检测使用
+    path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
+    save_data_to_hdf5(path, 'factor_ma5', fill_nan_data)
 
 
 
