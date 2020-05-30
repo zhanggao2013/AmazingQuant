@@ -10,6 +10,7 @@
 import pandas as pd
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
+from AmazingQuant.data_center.api_data.get_data import get_local_data
 
 
 class GetSwsIndex(object):
@@ -20,7 +21,7 @@ class GetSwsIndex(object):
         folder_name = LocalDataFolderName.SWS_INDEX.value
         path = LocalDataPath.path + folder_name + '/'
         data_name = folder_name + '.h5'
-        self.all_sws_index = pd.read_hdf(path + data_name).sort_values(by='time_tag')
+        self.all_sws_index = get_local_data(path, data_name).sort_values(by='time_tag')
         return self.all_sws_index
 
     def get_sws_index(self, sws_index_code):

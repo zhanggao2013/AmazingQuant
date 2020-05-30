@@ -13,6 +13,7 @@ import pandas as pd
 
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
+from AmazingQuant.data_center.api_data.get_data import get_local_data
 
 
 class GetShare(object):
@@ -30,7 +31,7 @@ class GetShare(object):
         folder_name = LocalDataFolderName.INDICATOR_EVERYDAY.value
         path = LocalDataPath.path + folder_name + '/'
         data_name = field + '.h5'
-        self.share_data = pd.read_hdf(path + data_name)
+        self.share_data = get_local_data(path, data_name)
         return self.share_data
 
 

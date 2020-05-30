@@ -15,6 +15,7 @@ from AmazingQuant.constant import Period, RightsAdjustment, LocalDataFolderName
 from AmazingQuant.utils.performance_test import Timer
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.data_center.api_data.get_adj_factor import GetAdjFactor
+from AmazingQuant.data_center.api_data.get_data import get_local_data
 
 
 class GetKlineData(object):
@@ -37,7 +38,7 @@ class GetKlineData(object):
             adj_factor = self.adj_factor_obj.get_adj_factor(RightsAdjustment.BACKWARD.value)
         for i in self.field:
             data_name = i + '.h5'
-            data = pd.read_hdf(path + data_name)
+            data = get_local_data(path, data_name)
             if isinstance(adj_factor, int):
                 all_market_date[i] = data
             else:
@@ -69,7 +70,7 @@ class GetKlineData(object):
         index_date = {}
         for i in self.field:
             data_name = i + '.h5'
-            index_date[i] = pd.read_hdf(path + data_name)
+            index_date[i] = get_local_data(path, data_name)
         return index_date
     
     def get_index_data(self, index_data, index_code=None, field=None, start=None, end=None, period=Period.DAILY.value, count=-1):

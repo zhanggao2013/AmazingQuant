@@ -14,6 +14,7 @@ import numpy as np
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.config.industry_class import sw_industry_one
+from AmazingQuant.data_center.api_data.get_data import get_local_data
 
 
 class GetIndexClass(object):
@@ -25,7 +26,7 @@ class GetIndexClass(object):
         folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
         path = LocalDataPath.path + folder_name + '/'
         data_name = 'sw_industry_one' + '.h5'
-        self.index_class_df = pd.read_hdf(path + data_name)
+        self.index_class_df = get_local_data(path, data_name)
         return self.index_class_df
 
     def get_zero_index_class(self):

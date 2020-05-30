@@ -12,6 +12,7 @@ import pandas as pd
 from AmazingQuant.constant import LocalDataFolderName, RightsAdjustment, AdjustmentFactor
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.utils.performance_test import Timer
+from AmazingQuant.data_center.api_data.get_data import get_local_data
 
 
 class GetAdjFactor(object):
@@ -23,9 +24,9 @@ class GetAdjFactor(object):
         path = LocalDataPath.path + folder_name + '/'
         data = pd.DataFrame({})
         if adjustment_mode == RightsAdjustment.BACKWARD.value:
-            data = pd.read_hdf(path + AdjustmentFactor.BACKWARD_ADJ_FACTOR.value + '.h5')
+            data = get_local_data(path, AdjustmentFactor.BACKWARD_ADJ_FACTOR.value + '.h5')
         elif adjustment_mode == RightsAdjustment.FROWARD.value:
-            data = pd.read_hdf(path + AdjustmentFactor.FROWARD_ADJ_FACTOR.value + '.h5')
+            data = get_local_data(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value + '.h5')
         return data
 
 

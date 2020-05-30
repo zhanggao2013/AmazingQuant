@@ -12,6 +12,7 @@ import pandas as pd
 
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
+from AmazingQuant.data_center.api_data.get_data import get_local_data
 
 
 class GetIndexMember(object):
@@ -25,7 +26,7 @@ class GetIndexMember(object):
         folder_name = LocalDataFolderName.INDEX_MEMBER.value
         path = LocalDataPath.path + folder_name + '/'
         data_name = folder_name + '.h5'
-        self.all_index_members_df = pd.read_hdf(path + data_name)
+        self.all_index_members_df = get_local_data(path, data_name)
         return self.all_index_members_df
 
     def get_index_members(self, index_code):
