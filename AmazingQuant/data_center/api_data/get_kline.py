@@ -25,7 +25,9 @@ class GetKlineData(object):
         self.calendar_SZ = []
         self.adj_factor_obj = GetAdjFactor()
 
-    def cache_all_stock_data(self, period=Period.DAILY.value, dividend_type=RightsAdjustment.NONE.value):
+    def cache_all_stock_data(self, period=Period.DAILY.value, dividend_type=RightsAdjustment.NONE.value, field=None):
+        if field is not None:
+            self.field = field
         folder_name = LocalDataFolderName.MARKET_DATA.value
         sub_folder_name = LocalDataFolderName.KLINE_DAILY.value
         sub_sub_folder_name = LocalDataFolderName.A_SHARE.value
