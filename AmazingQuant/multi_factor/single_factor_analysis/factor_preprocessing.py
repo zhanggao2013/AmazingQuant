@@ -225,11 +225,16 @@ class Neutralize(object):
             neutralize_data = index_class_in_date.join(share_data_in_date, how='outer').dropna()
             # 因子数据的股票list与中性化数据的股票list,取交集
             stock_code_list = list(set(data.index).intersection(set(neutralize_data.index)))
-            neutralize_data = sm.add_constant(neutralize_data.reindex(stock_code_list).sort_index())
+            # 因子数据取 有效股票列表数据，并排序
             factor = data[stock_code_list].sort_index()
+            # 中性化数据取 有效股票列表数据，并排序
+            neutralize_data = neutralize_data.reindex(stock_code_list).sort_index()
 
+            # 回归
+            neutralize_data = sm.add_constant(neutralize_data)
             model = sm.OLS(factor, neutralize_data)
             fit_result = model.fit()
+            # 残差作为中性化后的数据
             return fit_result.resid
 
         self.raw_data = self.raw_data.apply(cal_resid, args=(index_class_obj, share_data, method,), axis=1)

@@ -9,4 +9,4 @@
 
 
 class LocalDataPath(object):
-    path = 'F:/myproject/AmazingQuant/' + 'local_data/'
+    path = '/home/zhanggao/AmazingQuant/' + 'local_data/'
