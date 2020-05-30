@@ -19,6 +19,10 @@ IC是指因子在第T期的因子值与T+1期的股票收益的相关系数
     （6） p-value（有效性）,全部都计算时间序列
     （7） IC信号衰减计算
 """
+
+import pandas as pd
+import numpy as np
+
 from AmazingQuant.constant import LocalDataFolderName, RightsAdjustment
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.data_center.api_data.get_data import get_local_data
@@ -28,7 +32,23 @@ from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 class IcAnalysis(object):
     def __init__(self, factor):
         self.factor = factor
-        self.market_data = GetKlineData().cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value, field=['close'])
+        market_data = \
+            GetKlineData().cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value, field=['close'])['close']
+        self.stock_return = market_data.pct_change().reindex(factor.index).reindex(factor.columns, axis=1)
+        self.ic_series = pd.Series({self.factor.index[0]: np.nan})
+
+    def cal_ic_series(self, method='pearson'):
+        """
+        method = {‘pearson’, ‘kendall’, ‘spearman’}
+        :param method:
+        :return:
+        """
+        index_num = 0
+        for index, data in self.stock_return.iterrows():
+            if index_num > 0:
+                self.ic_series[index] = data.corr(self.factor.iloc[index_num-1], method=method)
+            index_num += 1
+        return self.ic_series
 
 
 if __name__ == '__main__':
@@ -36,3 +56,4 @@ if __name__ == '__main__':
     factor_ma5 = get_local_data(path, 'factor_ma5.h5')
 
     ic_analysis_obj = IcAnalysis(factor_ma5)
+    ic_series = ic_analysis_obj.cal_ic_series(method='spearman')
