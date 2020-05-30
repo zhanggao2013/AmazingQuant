@@ -246,16 +246,23 @@ if __name__ == '__main__':
     indicator_data = SaveGetIndicator().get_indicator('ma5')
 
     factor_pre_obj = FactorPreProcessing(indicator_data)
+    # 可根据时间和股票list过滤数据
     data_filter = factor_pre_obj.data_filter()
+    # 去极值方法，四种
     extreme_data = factor_pre_obj.extreme_processing(dict(std={'sigma_multiple': 3}))
     # extreme_data = factor_pre_obj.extreme_processing(dict(mad={'median_multiple': 1.483}))
-    #
     # extreme_data = factor_pre_obj.extreme_processing(dict(quantile={'quantile_min': 0.025, 'quantile_max': 0.975}))
     # extreme_data = factor_pre_obj.extreme_processing(dict(box_plot={'median_multiple': 3}))
 
+    # 中性化方法，可选择行业和流通市值中性
     neutralize_data = factor_pre_obj.neutralize_processing(dict(neutralize_method=[NeutralizeMethod.INDUSTRY.value, NeutralizeMethod.MARKET_VALUE.value]))
 
-    scale_data = factor_pre_obj.scale_processing(ScaleMethod.MIN_MAX.value)
+    # 归一化方法，三种
+    # scale_data = factor_pre_obj.scale_processing(ScaleMethod.MIN_MAX.value)
+    scale_data = factor_pre_obj.scale_processing(ScaleMethod.Z_SCORE.value)
+    # scale_data = factor_pre_obj.scale_processing(ScaleMethod.RANK.value)
+
+    # 补充空值的方法，已实现两种
     fill_nan_data = factor_pre_obj.fill_nan_processing(FillNanMethod.MEAN.value)
 
 
