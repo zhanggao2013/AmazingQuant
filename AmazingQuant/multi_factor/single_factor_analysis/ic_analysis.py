@@ -9,7 +9,7 @@
 """
 IC分析
 IC是指因子在第T期的因子值与T+1期的股票收益的相关系数
-1.计算rank_IC
+1.method = {‘pearsonr’, ‘spearmanr’}，两种方法计算ic， IC 和 rankIC
 2.评价指标
     （1） IC均值
     （2） IC标准差
