@@ -31,7 +31,7 @@ AmazingQuant是一款量化交易综合平台，目前包含策略研究，策�
 （3）收益分解	<br/>
     市场中性策略,基本分解公式为：总收益=交易收益+选股收益+基差收益+择时收益+交易成本	<br/>
     对于纯股票策略,基本分解公式为：总收益=基准收益+交易收益+选股收益+择时收益+交易成本	<br/>
-    下图是总体框架架构。	<br/>
+下图是总体框架架构。	<br/>
 ![](https://github.com/zhanggao2013/AmazingQuant/raw/master/documents/framework_architecture.jpg)  
 * data_center
     * to_mongoDB 存放行情、财务等各种数据到MongoDB的存储模块
