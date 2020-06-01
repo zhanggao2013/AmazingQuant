@@ -43,27 +43,17 @@ class IcAnalysis(object):
             .reindex(factor.columns, axis=1)
 
         self.ic_decay = 20
+        column_list = [factor_name + '_' + str(i + 1) for i in range(self.ic_decay)]
         self.stock_return_dict = {i + 1: market_data.pct_change(periods=i + 1) for i in range(self.ic_decay)}
 
         # IC信号衰减计算，index 是时间序列， columns是decay周期，[1, self.ic_decay], 闭区间
-        self.ic_df = pd.DataFrame(columns=[factor_name + '_' + str(i + 1) for i in range(self.ic_decay)])
+        self.ic_df = pd.DataFrame(columns=column_list)
 
-        self.p_value_df = pd.DataFrame(columns=[factor_name + '_' + str(i + 1) for i in range(self.ic_decay)])
+        self.p_value_df = pd.DataFrame(columns=column_list)
 
-        # IC均值
-        self.ic_mean = None
-        # IC标准差
-        self.ic_std = None
-        # IC_IR比率
-        self.ic_ir = None
-        # IC > 0 占比
-        self.ic_ratio = None
-        # | IC | > 0.02 占比(绝对值)
-        self.ic_abs_ratio = None
-        # 偏度
-        self.ic_skewness = None
-        # 峰度
-        self.ic_kurtosis = None
+        # IC均值、 IC标准差、 IC_IR比率、 IC > 0 占比、 | IC | > 0.02 占比(绝对值)、 偏度、 峰度
+        index_list = ['ic_mean', 'ic_std', 'ic_ir', 'ic_ratio', 'ic_abs_ratio', 'ic_skewness', 'ic_kurtosis']
+        self.ic_result = pd.DataFrame(index=index_list, columns=column_list)
 
     def cal_ic_series(self, method='spearmanr'):
         """
@@ -94,18 +84,18 @@ class IcAnalysis(object):
         return self.ic_df, self.p_value_df
 
     def cal_ic_indicator(self):
-        self.ic_mean = self.ic_df.mean()
-        self.ic_std = self.ic_df.std()
-        self.ic_ir = self.ic_mean / self.ic_std
+        self.ic_result.loc['ic_mean'] = self.ic_df.mean()
+        self.ic_result.loc['ic_std'] = self.ic_df.std()
+        self.ic_result.loc['ic_ir'] = self.ic_result.loc['ic_mean'] / self.ic_result.loc['ic_std']
 
         ic_count = self.ic_df.count()
-        self.ic_ratio = self.ic_df[self.ic_df > 0].count().div(ic_count)
+        self.ic_result.loc['ic_ratio'] = self.ic_df[self.ic_df > 0].count().div(ic_count)
 
         ic_abs = ic_analysis_obj.ic_df.abs()
-        self.ic_abs_ratio = ic_abs[ic_abs > 0.02].count().div(ic_count)
+        self.ic_result.loc['ic_abs_ratio'] = ic_abs[ic_abs > 0.02].count().div(ic_count)
 
-        self.ic_skewness = self.ic_df.skew()
-        self.ic_kurtosis = self.ic_df.kurt()
+        self.ic_result.loc['ic_skewness'] = self.ic_df.skew()
+        self.ic_result.loc['ic_kurtosis'] = self.ic_df.kurt()
 
 
 if __name__ == '__main__':
