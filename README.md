@@ -4,7 +4,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/zhanggao2013/AmazingQuant.svg?style=social&label=Fork&)](https://github.com/zhanggao2013/AmazingQuant/fork)
 
 # 1.简介
-AmazingQuant是一款量化交易综合平台，目前包含策略研究，策略指标计算服务，策略绩效分析服务三大功能模块。	<br/>
+AmazingQuant是一款量化交易综合平台，目前包含策略研究服务，策略指标计算服务，策略绩效分析服务三大功能模块。	<br/>
 1.1 策略研究服务	<br/>
 （1）选股模型<br/>
 （2）风险控制模型<br/>
