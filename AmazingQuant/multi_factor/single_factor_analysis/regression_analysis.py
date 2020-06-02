@@ -22,3 +22,22 @@
 (8)beta,跟踪误差,信息比率,
 (9)因子自稳定性系数（FactorStabilityCoeff），该值检验因子收益率的稳定性
 """
+#
+# m = 1 + 28 + 1，单因子，28行业，流通市值
+# m个因子, n只股票
+# f  ---- m*1
+# x’-----m*n
+# W-----n*n
+# x----- n*m
+# R-----n*1
+
+import statsmodels.api as sm
+import numpy as np
+
+Y = np.array(range(70, 149))
+X = range(1, 80)
+X = sm.add_constant(X)
+wls_model = sm.WLS(Y, X, weights=[i/0.3231 for i in list(range(2,81))])
+results = wls_model.fit()
+
+# results.params
