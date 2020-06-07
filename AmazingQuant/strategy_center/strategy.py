@@ -19,8 +19,8 @@ from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 
 
 class StrategyBase(metaclass=ABCMeta):
-    def __init__(self):
-        self._strategy_name = self.__class__.__name__
+    def __init__(self, strategy_name='ma_strategy'):
+        self._strategy_name = strategy_name
         self._run_mode = RunMode.BACKTESTING.value
         self._account = []
         self._capital = 1000000
@@ -214,9 +214,77 @@ class StrategyBase(metaclass=ABCMeta):
 
     @abstractmethod
     def initialize(self):
+        """
+        设置运行模式，回测、实盘
+        设置on_bar运行周期，分钟线、日线
+        设置缓存历史数据范围、实时行情订阅
+        设置回测的各种设置。手续费、滑点、回测区间等
+        :return:
+        """
         pass
 
-    @abstractmethod
     def on_bar(self, event):
+        """
+        支持分钟线、日线的处理
+        :param event:
+        :return:
+        """
         Environment.logger('abstractmethod handle_bar')
         pass
+
+    def on_quote(self, event):
+        """
+        level1行情数据的推送会自动触发该方法的调用,每只股票数据推送都调用
+        :param event:
+        :return:
+        """
+        pass
+
+    def on_transaction(self, event):
+        """
+        逐笔成交行情数据的推送会自动触发该方法的调用,每只股票数据推送都调用
+        :param event:
+        :return:
+        """
+        pass
+
+    def on_entrust(self, event):
+        """
+        逐笔委托行情数据的推送会自动触发该方法的调用,每只股票数据推送都调用
+        :param event:
+        :return:
+        """
+        pass
+
+    def on_order(self, event):
+        """
+        策略订单成交信息的更新会自动触发该方法的调用。
+        :param event:
+        :return:
+        """
+        pass
+
+    def on_cancel_order(self, event):
+        """
+        策略订单撤单信息的更新会自动触发该方法的调用。
+        :param event:
+        :return:
+        """
+        pass
+
+    def on_trade(self, event):
+        """
+        策略订单委托信息的更新会自动触发该方法的调用。
+        :param event:
+        :return:
+        """
+        pass
+
+    def on_account(self, event):
+        """
+        策略账户信息的更新会自动触发该方法的调用。支持多账户，股票，期货
+        :param event:
+        :return:
+        """
+        pass
+

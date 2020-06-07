@@ -25,9 +25,13 @@ from AmazingQuant.environment import Environment
 # 继承strategy基类
 class MaStrategy(StrategyBase):
     def __init__(self, strategy_name='ma_strategy'):
+        """
+        用户定义类变量
+        取本地数据
+        :param strategy_name:
+        """
         super().__init__()
 
-        self.strategy_name = strategy_name
         # 取指数成分股实例
         self.index_member_obj = GetIndexMember()
         # 取K线数据实例
