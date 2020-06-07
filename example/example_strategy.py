@@ -78,7 +78,7 @@ class MaStrategy(StrategyBase):
                             close_commission=0.0005,
                             close_today_commission=0, min_commission=5)
 
-    def handle_bar(self, event):
+    def on_bar(self, event):
         Environment.logger.info('self.time_tag', self.time_tag, datetime.now(), (time.time()-self.now)*1000)
         Environment.logger.debug(len(Environment.bar_position_data_list))
         # 取当前bar的持仓情况

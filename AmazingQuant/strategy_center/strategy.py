@@ -217,6 +217,6 @@ class StrategyBase(metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def handle_bar(self, event):
+    def on_bar(self, event):
         Environment.logger('abstractmethod handle_bar')
         pass
