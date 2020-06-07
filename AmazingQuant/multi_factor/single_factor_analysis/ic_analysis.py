@@ -46,7 +46,7 @@ class IcAnalysis(object):
             .reindex(factor.index) \
             .reindex(factor.columns, axis=1)
 
-        self.ic_decay = 2
+        self.ic_decay = 20
         column_list = [factor_name + '_' + str(i + 1) for i in range(self.ic_decay)]
         self.stock_return_dict = {i + 1: market_data.pct_change(periods=i + 1) for i in range(self.ic_decay)}
 
@@ -61,7 +61,7 @@ class IcAnalysis(object):
                       'ic_positive_ratio', 'ic_negative_ratio', 'ic_change_ratio', 'ic_unchange_ratio', ]
         self.ic_result = pd.DataFrame(index=index_list, columns=column_list)
 
-    def cal_ic_series(self, method='spearmanr'):
+    def cal_ic_df(self, method='spearmanr'):
         """
         method = {‘pearsonr’, ‘spearmanr’}
         :param method:
@@ -79,9 +79,9 @@ class IcAnalysis(object):
                     factor_data = self.factor.iloc[index - ic_decay - 1].dropna()
                     stock_list = list(set(stock_return.index).intersection(set(factor_data.index)))
                     if method == 'spearmanr':
-                        corr, p_value = stats.spearmanr(stock_return[stock_list], factor_data[stock_list])
+                        corr, p_value = stats.spearmanr(stock_return[stock_list].sort_index(), factor_data[stock_list].sort_index())
                     elif method == 'pearsonr':
-                        corr, p_value = stats.pearsonr(stock_return[stock_list], factor_data[stock_list])
+                        corr, p_value = stats.pearsonr(stock_return[stock_list].sort_index(), factor_data[stock_list].sort_index())
                 ic_dict[self.factor_name + '_' + str(ic_decay + 1)] = corr
                 p_value_dict[self.factor_name + '_' + str(ic_decay + 1)] = p_value
 
@@ -118,5 +118,5 @@ if __name__ == '__main__':
     factor_ma5 = get_local_data(path, 'factor_ma5.h5')
 
     ic_analysis_obj = IcAnalysis(factor_ma5, 'factor_ma5')
-    ic_analysis_obj.cal_ic_series(method='spearmanr')
+    ic_analysis_obj.cal_ic_df(method='spearmanr')
     ic_analysis_obj.cal_ic_indicator()
