@@ -38,13 +38,10 @@ from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 
 
 class IcAnalysis(object):
-    def __init__(self, factor, factor_name):
+    def __init__(self, factor, factor_name, market_close_data):
         self.factor = factor
         self.factor_name = factor_name
-        market_data = GetKlineData() \
-            .cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value, field=['close'])['close'] \
-            .reindex(factor.index) \
-            .reindex(factor.columns, axis=1)
+        market_data = market_close_data.reindex(factor.index).reindex(factor.columns, axis=1)
 
         self.ic_decay = 20
         column_list = [factor_name + '_' + str(i + 1) for i in range(self.ic_decay)]
@@ -116,7 +113,8 @@ class IcAnalysis(object):
 if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
     factor_ma5 = get_local_data(path, 'factor_ma5.h5')
-
-    ic_analysis_obj = IcAnalysis(factor_ma5, 'factor_ma5')
+    market_close_data = GetKlineData().cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value,
+                                                            field=['close'])['close']
+    ic_analysis_obj = IcAnalysis(factor_ma5, 'factor_ma5', market_close_data)
     ic_analysis_obj.cal_ic_df(method='spearmanr')
     ic_analysis_obj.cal_ic_indicator()

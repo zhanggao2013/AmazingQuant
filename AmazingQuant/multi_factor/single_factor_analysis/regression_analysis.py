@@ -44,14 +44,11 @@ from AmazingQuant.data_center.api_data.get_share import GetShare
 
 
 class RegressionAnalysis(object):
-    def __init__(self, factor, factor_name):
+    def __init__(self, factor, factor_name, market_close_data):
         self.factor = factor
         self.factor_name = factor_name
 
-        market_data = GetKlineData() \
-            .cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value, field=['close'])['close'] \
-            .reindex(factor.index) \
-            .reindex(factor.columns, axis=1)
+        market_data = market_close_data.reindex(factor.index).reindex(factor.columns, axis=1)
         self.stock_return = market_data.pct_change()
 
         # 因子收益率，单利，复利
@@ -130,8 +127,9 @@ class RegressionAnalysis(object):
 if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
     factor_ma5 = get_local_data(path, 'factor_ma5.h5')
-
-    regression_analysis_obj = RegressionAnalysis(factor_ma5, 'factor_ma5')
+    market_close_data = GetKlineData().cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value,
+                                                            field=['close'])['close']
+    regression_analysis_obj = RegressionAnalysis(factor_ma5, 'factor_ma5', market_close_data)
     regression_analysis_obj.cal_factor_return('float_value_inverse')
     regression_analysis_obj.cal_t_value_statistics()
 
