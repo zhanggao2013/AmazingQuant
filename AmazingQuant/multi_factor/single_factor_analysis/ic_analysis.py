@@ -11,6 +11,7 @@ IC分析
 IC是指因子在第T期的因子值与T+1期的股票收益的相关系数
 1.method = {‘pearsonr’, ‘spearmanr’}，两种方法计算ic， IC 和 rankIC
 2.评价指标
+    IC信号衰减计算,全部都计算时间序列
     （1） IC均值
     （2） IC标准差
     （3） IC_IR比率
@@ -20,16 +21,10 @@ IC是指因子在第T期的因子值与T+1期的股票收益的相关系数
     （7） 偏度ic_skewness
     （8） 峰度ic_kurtosis
 
-    （9） IC信号衰减计算,全部都计算时间序列
-
-
-    正相关显著比例：显著的正相关系数占样本的比例
-
-    负相关显著比例：显著的负相关系数占样本的比例
-
-    状态切换比例：前后两期中相关系数符号相反占样本的比例。
-
-    同向比例：前后两期中相关系数符号相同占样本的比例。
+    （9） 正相关显著比例：显著的正相关系数占样本的比例
+    （10）负相关显著比例：显著的负相关系数占样本的比例
+    （11）状态切换比例：前后两期中相关系数符号相反占样本的比例。
+    （12）同向比例：前后两期中相关系数符号相同占样本的比例。
 """
 
 import pandas as pd
@@ -51,7 +46,7 @@ class IcAnalysis(object):
             .reindex(factor.index) \
             .reindex(factor.columns, axis=1)
 
-        self.ic_decay = 20
+        self.ic_decay = 2
         column_list = [factor_name + '_' + str(i + 1) for i in range(self.ic_decay)]
         self.stock_return_dict = {i + 1: market_data.pct_change(periods=i + 1) for i in range(self.ic_decay)}
 
@@ -60,8 +55,10 @@ class IcAnalysis(object):
 
         self.p_value_df = pd.DataFrame(columns=column_list)
 
-        # IC均值、 IC标准差、 IC_IR比率、 IC > 0 占比、 | IC | > 0.02 占比(绝对值)、 偏度、 峰度
-        index_list = ['ic_mean', 'ic_std', 'ic_ir', 'ic_ratio', 'ic_abs_ratio', 'ic_skewness', 'ic_kurtosis']
+        # IC均值、 IC标准差、 IC_IR比率、 IC > 0 占比、 | IC | > 0.02 占比(绝对值)、 偏度、 峰度、
+        # 正相关显著比例、负相关显著比例、状态切换比例、同向比例
+        index_list = ['ic_mean', 'ic_std', 'ic_ir', 'ic_ratio', 'ic_abs_ratio', 'ic_skewness', 'ic_kurtosis',
+                      'ic_positive_ratio', 'ic_negative_ratio', 'ic_change_ratio', 'ic_unchange_ratio', ]
         self.ic_result = pd.DataFrame(index=index_list, columns=column_list)
 
     def cal_ic_series(self, method='spearmanr'):
@@ -98,13 +95,22 @@ class IcAnalysis(object):
         self.ic_result.loc['ic_ir'] = self.ic_result.loc['ic_mean'] / self.ic_result.loc['ic_std']
 
         ic_count = self.ic_df.count()
-        self.ic_result.loc['ic_ratio'] = self.ic_df[self.ic_df > 0].count().div(ic_count)
+        ic_greater_zero = self.ic_df > 0
+        self.ic_result.loc['ic_ratio'] = self.ic_df[ic_greater_zero].count().div(ic_count)
 
         ic_abs = ic_analysis_obj.ic_df.abs()
         self.ic_result.loc['ic_abs_ratio'] = ic_abs[ic_abs > 0.02].count().div(ic_count)
 
         self.ic_result.loc['ic_skewness'] = self.ic_df.skew()
         self.ic_result.loc['ic_kurtosis'] = self.ic_df.kurt()
+
+        p_value_significant = self.p_value_df[self.p_value_df < 0.05].count()
+        self.ic_result.loc['ic_positive_ratio'] = p_value_significant.div(ic_count)*100
+        self.ic_result.loc['ic_negative_ratio'] = (ic_count - p_value_significant).div(ic_count)*100
+
+        ic_change_num = ic_greater_zero.diff().sum()
+        self.ic_result.loc['ic_change_ratio'] = ic_change_num.div(ic_count)*100
+        self.ic_result.loc['ic_unchange_ratio'] = (ic_count - ic_change_num).div(ic_count)*100
 
 
 if __name__ == '__main__':
