@@ -16,13 +16,6 @@ import statsmodels.api as sm
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 
 
-class NetValueAnalysis(object):
-    def __init__(self, net_value_df, benchmark_df, start_time, end_time):
-        self.net_value_df = net_value_df.loc[start_time: end_time]
-        self.benchmark_df = benchmark_df.loc[start_time: end_time]
-        pass
-
-
 class CalBullBear(object):
     """
     class :CalBullBear
@@ -34,37 +27,9 @@ class CalBullBear(object):
         self.bull_bear = np.array([0])
 
     def refx(self, data, n):
-        """
-        取data后n个周期的数据
-
-        Parameters
-        ----------
-        data:np.array
-            close
-        n:int
-            前n个周期
-
-        Returns
-        -------
-        np.array
-
-        """
         return np.append(data[n:], np.array([data[-1]] * n))
 
     def hhv(self, data, n):
-        """
-        取data前n个周期的最大值
-        Parameters
-        ----------
-        data:np.array
-            close
-        n:int
-            前n个周期
-
-        Returns
-        -------
-        np.array
-        """
         data_length = len(data)
         hhv_data = np.array([])
         if data_length > 0:
@@ -75,19 +40,6 @@ class CalBullBear(object):
         return hhv_data
 
     def llv(self, data, n):
-        """
-        取data前n个周期的最小值
-        Parameters
-        ----------
-        data:np.array
-            close
-        n:int
-            前n个周期
-
-        Returns
-        -------
-        np.array
-        """
         data_length = len(data)
         llv_data = np.array([])
         if data_length > 0:
@@ -136,6 +88,32 @@ class CalBullBear(object):
             index += 1
         # bull-0  bear-1
         return
+
+
+class NetValueAnalysis(object):
+    def __init__(self, net_value_df, benchmark_df, start_time, end_time):
+        """
+        net_value_df和benchmark_df的index必须在【start_time, end_time】
+        :param net_value_df:
+        :param benchmark_df:
+        :param start_time:
+        :param end_time:
+        """
+        self.net_value_df = net_value_df.loc[start_time: end_time]
+        self.benchmark_df = benchmark_df.loc[start_time: end_time]
+
+    def cal_net_value(self):
+        self.net_value_df.insert(loc=0, column='net_value',
+                                 value=self.net_value_df['total_balance'] / self.net_value_df['total_balance'].iloc[0])
+        self.benchmark_df.insert(loc=0, column='net_value',
+                                 value=self.benchmark_df['close'] / self.benchmark_df['close'].iloc[0])
+
+    def cal_profit_ratio(self):
+        self.net_value_df.insert(loc=0, column='profit_ratio', value=self.net_value_df['net_value'].pct_change() * 100)
+        self.benchmark_df.insert(loc=0, column='profit_ratio', value=self.benchmark_df['net_value'].pct_change() * 100)
+
+
+
 
 
 class NetValueIndicator(object):
@@ -363,11 +341,15 @@ if __name__ == '__main__':
     # 指数行情，沪深300代替
     all_index_data = kline_object.cache_all_index_data()
     benchmark_df = kline_object.get_market_data(all_index_data, stock_code=['000300.SH'],
-                                                field=['close'], start=start_time, end=end_time)
-    # 策略精致，上证指数代替
-    net_value_df = kline_object.get_market_data(all_index_data, stock_code=['000001.SH'],
-                                                field=['close'], start=start_time, end=end_time)
+                                                field=['close'], start=start_time, end=end_time).to_frame(name='close')
+    # 策略净值数据,index 为 datetime,取单个账户分析，后续可做多个账户
+    net_value_df = pd.read_csv('account_data.csv', index_col=0)
+    net_value_df.index = pd.DatetimeIndex(net_value_df.index)
+    net_value_single_account_df = pd.DataFrame({})
+    for i in net_value_df.groupby('account_id'):
+        net_value_single_account_df = i[1]
+        break
 
-    net_value_analysis_obj = NetValueAnalysis(net_value_df, benchmark_df, start_time, end_time)
-
-
+    net_value_analysis_obj = NetValueAnalysis(net_value_single_account_df, benchmark_df, start_time, end_time)
+    net_value_analysis_obj.cal_net_value()
+    net_value_analysis_obj.cal_profit_ratio()
