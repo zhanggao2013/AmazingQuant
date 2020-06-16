@@ -258,6 +258,18 @@ class NetValueAnalysis(object):
         month_ratio = {key: 100 * (value[-1] / value[0] - 1) for key, value in month_ratio.items()}
         return month_ratio
 
+    @staticmethod
+    def cal_month_ratio_average(month_ratio):
+        return sum(month_ratio.values()) / len(month_ratio.values())
+
+    @staticmethod
+    def cal_day_volatility(profit_ratio):
+        return np.std(profit_ratio)
+
+    @staticmethod
+    def cal_month_volatility(month_ratio):
+        return np.std(list(month_ratio.values()))
+
 
 if __name__ == '__main__':
     start_time = datetime(2018, 1, 2)
@@ -289,6 +301,9 @@ if __name__ == '__main__':
     benchmark_year_volatility = net_value_analysis_obj.cal_year_volatility(
         net_value_analysis_obj.benchmark_df['profit_ratio'])
 
+    net_day_volatility = net_value_analysis_obj.cal_day_volatility(net_value_analysis_obj.net_value_df['profit_ratio'])
+    benchmark_day_volatility = net_value_analysis_obj.cal_day_volatility(net_value_analysis_obj.benchmark_df['profit_ratio'])
+
     beta = net_value_analysis_obj.cal_beta(net_value_analysis_obj.net_value_df['profit_ratio'],
                                            net_value_analysis_obj.benchmark_df['profit_ratio'])
 
@@ -316,3 +331,12 @@ if __name__ == '__main__':
 
     net_month_ratio = net_value_analysis_obj.cal_month_ratio(net_value_analysis_obj.net_value_df['net_value'])
     benchmark_month_ratio = net_value_analysis_obj.cal_month_ratio(net_value_analysis_obj.benchmark_df['net_value'])
+
+    net_month_ratio_average = net_value_analysis_obj.cal_month_ratio_average(net_month_ratio)
+    benchmark_month_ratio_average = net_value_analysis_obj.cal_month_ratio_average(benchmark_month_ratio)
+
+    net_month_volatility = net_value_analysis_obj.cal_month_volatility(net_month_ratio)
+    benchmark_month_volatility = net_value_analysis_obj.cal_month_volatility(benchmark_month_ratio)
+
+
+
