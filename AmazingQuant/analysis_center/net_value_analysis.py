@@ -128,12 +128,6 @@ class NetValueAnalysis(object):
         # 历史最大回撤
         self.max_drawdown = None
 
-        # 历史最大回撤结束时间
-        self.max_drawdown_end_date = None
-
-        # 历史最大回撤开始时间
-        self.max_drawdown_start_date = None
-
         # 上涨区间胜率
         self.bull_win_index_ratio = None
 
@@ -253,13 +247,16 @@ class NetValueAnalysis(object):
         return profit_ratio.mean()
 
     @staticmethod
-    def cal_month_ratio(net_value):
-        for i in range(len(self.trade_date) - 1):
-            if self.trade_date[i][:-2] in self.month_ratio.keys():
-                self.month_ratio[self.trade_date[i][:-2]].append(self.net_value[i])
+    def cal_month_ratio(net_value_series):
+        month_ratio = {}
+        for i in net_value_series.index:
+            if str(i.year*100 + i.month) in month_ratio.keys():
+                month_ratio[str(i.year*100 + i.month)].append(net_value_series[i])
             else:
-                self.month_ratio[self.trade_date[i][:-2]] = [self.net_value[i]]
-        self.month_ratio = {key: 100 * (value[-1] / value[0] - 1) for key, value in self.month_ratio.items()}
+                month_ratio[str(i.year*100 + i.month)] = [net_value_series[i]]
+
+        month_ratio = {key: 100 * (value[-1] / value[0] - 1) for key, value in month_ratio.items()}
+        return month_ratio
 
 
 if __name__ == '__main__':
@@ -316,3 +313,6 @@ if __name__ == '__main__':
         net_value_analysis_obj.net_value_df['profit_ratio'])
     benchmark_day_ratio_average = net_value_analysis_obj.cal_day_ratio_average(
         net_value_analysis_obj.benchmark_df['profit_ratio'])
+
+    net_month_ratio = net_value_analysis_obj.cal_month_ratio(net_value_analysis_obj.net_value_df['net_value'])
+    benchmark_month_ratio = net_value_analysis_obj.cal_month_ratio(net_value_analysis_obj.benchmark_df['net_value'])
