@@ -139,29 +139,6 @@ class NetValueAnalysis(object):
                                        "-1%~0%": 0,
                                        "0%~1%": 0, "1%~2%": 0, "2%~3%": 0, "3%~5%": 0, "5%~10%": 0, "10%以上": 0}
 
-        # 日均收益率
-        self.day_ratio_average = None
-
-        # 月收益率
-        self.month_ratio = {}
-
-        # 月均收益率
-        self.month_ratio_average = None
-
-        # 日收益波动率
-        self.day_volatility = None
-
-        # 月收益率波动率
-        self.month_volatility = None
-        # HM模型
-        self.HM_model = {'selection': None, 'timing': None, 'p_value': None, }
-
-        # TM模型
-        self.TM_model = {'selection': None, 'timing': None, 'p_value': None, }
-
-        # HM模型
-        self.CL_model = {'selection': None, 'timing': None, 'p_value': None, }
-
     def cal_net_value(self):
         self.net_value_df.insert(loc=0, column='net_value',
                                  value=self.net_value_df['total_balance'] / self.net_value_df['total_balance'].iloc[0])
