@@ -194,64 +194,32 @@ class NetValueAnalysis(object):
     def cal_sharpe(net_year_yield, net_year_volatility):
         return (net_year_yield - 3.0) / net_year_volatility
 
+    @staticmethod
+    def cal_tracking_error(net_value_ratio, benchmark_close_ratio):
+        net_index_diff = benchmark_close_ratio - net_value_ratio
+        return math.sqrt(252) * np.std(net_index_diff)
 
-    def get_tracking_error(self):
-        net_index_diff = self.index_close_ratio - self.net_value_ratio
-        for timetag_index in range(len(self.net_value_ratio)):
-            if timetag_index > 0:
-                tracking_error = math.sqrt(252) * np.std(net_index_diff[:timetag_index + 1])
-            else:
-                tracking_error = 0
-            self.tracking_error_array = np.append(self.tracking_error_array, tracking_error)
-        return self.tracking_error_array
+    @staticmethod
+    def cal_information_ratio(net_year_yield, benchmark_year_yield, tracking_error):
+        return (net_year_yield - benchmark_year_yield) / tracking_error
 
-    def get_information_ratio(self):
-        for timetag_index in range(len(self.net_year_yield)):
-            if self.tracking_error_array[timetag_index] > 0:
-                information_ratio = (self.net_year_yield[timetag_index] - self.index_year_yield[timetag_index])/ \
-                                    self.tracking_error_array[timetag_index]
-            else:
-                information_ratio = 999
-            self.information_ratio_array = np.append(self.information_ratio_array, information_ratio)
-        return self.information_ratio_array
+    @staticmethod
+    def cal_downside_risk(net_value_ratio):
+        downside_net_value_ratio = [net_value_ratio[i] if net_value_ratio[i] < 3.0 / 252 else 0 for i in
+                                   range(len(net_value_ratio))]
+        return math.sqrt(252) * np.std(downside_net_value_ratio)
 
-    def get_downside_risk(self):
-        downside_net_value_ratio = [self.net_value_ratio[i] if self.net_value_ratio[i] < 3.5 / 252 else 0 for i in
-                                   range(len(self.net_value_ratio))]
-        for timetag_index in range(len(downside_net_value_ratio)):
-            if timetag_index > 0:
-                downside_risk = math.sqrt(252) * np.std(downside_net_value_ratio[:timetag_index + 1])
-            else:
-                downside_risk = 0
-            self.downside_risk_array = np.append(self.downside_risk_array, downside_risk)
-        return self.downside_risk_array
+    @staticmethod
+    def cal_sortino_ratio(net_year_yield, downside_risk):
+        return (net_year_yield - 3.0) / downside_risk
 
-    def get_sortino_ratio(self):
-        for timetag_index in range(len(self.net_year_yield)):
-            if self.downside_risk_array[timetag_index] > 0:
-                sortino_ratio = (self.net_year_yield[timetag_index] - 3.5) / self.downside_risk_array[timetag_index]
-            else:
-                sortino_ratio = 999
-            self.sortino_ratio_array = np.append(self.sortino_ratio_array, sortino_ratio)
-        return self.sortino_ratio_array
+    @staticmethod
+    def cal_calmar_ratio(net_year_yield, max_drawdown):
+        return net_year_yield / abs(max_drawdown)
 
-    def get_calmar_ratio(self):
-        for timetag_index in range(len(self.max_drawdown_array)):
-            if self.max_drawdown_array[timetag_index] != 0:
-                calmar_ratio = self.net_year_yield[timetag_index] / abs(self.max_drawdown_array[timetag_index])
-            else:
-                calmar_ratio = 999
-            self.calmar_ratio_array = np.append(self.calmar_ratio_array, calmar_ratio)
-        return self.calmar_ratio_array
-
-    def get_treynor_ratio(self):
-        for timetag_index in range(len(self.beta_array)):
-            if self.beta_array[timetag_index] != 0:
-                treynor_ratio = (self.net_year_yield[timetag_index] - 3.0)/self.beta_array[timetag_index]
-            else:
-                treynor_ratio = 999
-            self.treynor_ratio_array = np.append(self.treynor_ratio_array, treynor_ratio)
-        return self.treynor_ratio_array
+    @staticmethod
+    def cal_treynor_ratio(net_year_yield, beta):
+        return (net_year_yield - 3.0)/beta
 
     @staticmethod
     def cal_max_drawdown(drawdown_series):
@@ -345,8 +313,21 @@ if __name__ == '__main__':
 
     alpha = net_value_analysis_obj.cal_alpha(net_year_yield, benchmark_year_yield, beta)
     sharpe = net_value_analysis_obj.cal_sharpe(net_year_yield, net_year_volatility)
+    tracking_error = net_value_analysis_obj.cal_tracking_error(net_value_analysis_obj.net_value_df['profit_ratio'],
+                                                               net_value_analysis_obj.benchmark_df['profit_ratio'])
+    information_ratio = net_value_analysis_obj.cal_information_ratio(net_year_yield,
+                                                                     benchmark_year_yield,
+                                                                     tracking_error)
+    downside_risk = net_value_analysis_obj.cal_downside_risk(net_value_analysis_obj.net_value_df['profit_ratio'])
+    sortino_ratio = net_value_analysis_obj.cal_sortino_ratio(net_year_yield, downside_risk)
+
+
+    treynor_ratio = net_value_analysis_obj.cal_treynor_ratio(net_year_yield, beta)
 
     net_max_drawdown = net_value_analysis_obj.cal_max_drawdown(net_value_analysis_obj.net_value_df['drawdown'])
+
+    calmar_ratio = net_value_analysis_obj.cal_calmar_ratio(net_year_yield, net_max_drawdown)
+
     benchmark_max_drawdown = net_value_analysis_obj.cal_max_drawdown(net_value_analysis_obj.benchmark_df['drawdown'])
 
     bull_win_index_ratio, bear_win_index_ratio = net_value_analysis_obj.cal_win_index_ratio()
