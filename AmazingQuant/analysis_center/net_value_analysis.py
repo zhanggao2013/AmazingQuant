@@ -94,9 +94,11 @@ class NetValueAnalysis(object):
         """
         net_value_df和benchmark_df的index必须在【start_time, end_time】
         :param net_value_df:  columns=['total_balance', 'available', 'net_value', 'profit_ratio', 'drawdown']
-        :param benchmark_df: columns=['close', 'net_value', 'profit_ratio', 'drawdown']
-        :param start_time:
-        :param end_time:
+                            'total_balance', 'available' columns必须有，index为datetime的日线级别时间序列
+        :param benchmark_df: columns=['close', 'net_value', 'profit_ratio', 'drawdown']，closecolumns必须有，
+                            index为datetime的日线级别时间序列
+        :param start_time: datetime
+        :param end_time: datetime
         """
         # 净值'net_value', 日收益率'profit_ratio', 总资产'total_balance', 可用资金'available', 最大回撤'drawdown'
         self.net_value_df = net_value_df.loc[start_time: end_time]
