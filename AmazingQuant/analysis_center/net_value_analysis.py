@@ -194,6 +194,65 @@ class NetValueAnalysis(object):
     def cal_sharpe(net_year_yield, net_year_volatility):
         return (net_year_yield - 3.0) / net_year_volatility
 
+
+    def get_tracking_error(self):
+        net_index_diff = self.index_close_ratio - self.net_value_ratio
+        for timetag_index in range(len(self.net_value_ratio)):
+            if timetag_index > 0:
+                tracking_error = math.sqrt(252) * np.std(net_index_diff[:timetag_index + 1])
+            else:
+                tracking_error = 0
+            self.tracking_error_array = np.append(self.tracking_error_array, tracking_error)
+        return self.tracking_error_array
+
+    def get_information_ratio(self):
+        for timetag_index in range(len(self.net_year_yield)):
+            if self.tracking_error_array[timetag_index] > 0:
+                information_ratio = (self.net_year_yield[timetag_index] - self.index_year_yield[timetag_index])/ \
+                                    self.tracking_error_array[timetag_index]
+            else:
+                information_ratio = 999
+            self.information_ratio_array = np.append(self.information_ratio_array, information_ratio)
+        return self.information_ratio_array
+
+    def get_downside_risk(self):
+        downside_net_value_ratio = [self.net_value_ratio[i] if self.net_value_ratio[i] < 3.5 / 252 else 0 for i in
+                                   range(len(self.net_value_ratio))]
+        for timetag_index in range(len(downside_net_value_ratio)):
+            if timetag_index > 0:
+                downside_risk = math.sqrt(252) * np.std(downside_net_value_ratio[:timetag_index + 1])
+            else:
+                downside_risk = 0
+            self.downside_risk_array = np.append(self.downside_risk_array, downside_risk)
+        return self.downside_risk_array
+
+    def get_sortino_ratio(self):
+        for timetag_index in range(len(self.net_year_yield)):
+            if self.downside_risk_array[timetag_index] > 0:
+                sortino_ratio = (self.net_year_yield[timetag_index] - 3.5) / self.downside_risk_array[timetag_index]
+            else:
+                sortino_ratio = 999
+            self.sortino_ratio_array = np.append(self.sortino_ratio_array, sortino_ratio)
+        return self.sortino_ratio_array
+
+    def get_calmar_ratio(self):
+        for timetag_index in range(len(self.max_drawdown_array)):
+            if self.max_drawdown_array[timetag_index] != 0:
+                calmar_ratio = self.net_year_yield[timetag_index] / abs(self.max_drawdown_array[timetag_index])
+            else:
+                calmar_ratio = 999
+            self.calmar_ratio_array = np.append(self.calmar_ratio_array, calmar_ratio)
+        return self.calmar_ratio_array
+
+    def get_treynor_ratio(self):
+        for timetag_index in range(len(self.beta_array)):
+            if self.beta_array[timetag_index] != 0:
+                treynor_ratio = (self.net_year_yield[timetag_index] - 3.0)/self.beta_array[timetag_index]
+            else:
+                treynor_ratio = 999
+            self.treynor_ratio_array = np.append(self.treynor_ratio_array, treynor_ratio)
+        return self.treynor_ratio_array
+
     @staticmethod
     def cal_max_drawdown(drawdown_series):
         return drawdown_series.min()
