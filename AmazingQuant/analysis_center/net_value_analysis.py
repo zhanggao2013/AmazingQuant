@@ -105,42 +105,6 @@ class NetValueAnalysis(object):
         # 基准收盘价'close', 基准净值'net_value', 基准收益率'profit_ratio', 最大回撤'drawdown'
         self.benchmark_df = benchmark_df.loc[start_time: end_time]
 
-        # 截面数据指标
-        # 年化收益率
-        self.net_year_yield = None
-
-        # 基准年化收益率
-        self.benchmark_year_yield = None
-
-        # 年化波动率
-        self.year_volatility = None
-
-        # 基准年化波动率
-        self.benchmark_year_volatility = None
-
-        # beta
-        self.beta = None
-
-        # alpha
-        self.alpha = None
-
-        # sharpe
-        self.sharp = None
-
-        # 历史最大回撤
-        self.max_drawdown = None
-
-        # 上涨区间胜率
-        self.bull_win_index_ratio = None
-
-        # 下跌区间胜率
-        self.bear_win_index_ratio = None
-
-        # 日收益率分布
-        self.day_ratio_distribution = {"-10%以下": 0, "-10%~-5%": 0, "-5%~-3%": 0, "-3%~-2%": 0, "-2%~-1%": 0,
-                                       "-1%~0%": 0,
-                                       "0%~1%": 0, "1%~2%": 0, "2%~3%": 0, "3%~5%": 0, "5%~10%": 0, "10%以上": 0}
-
     def cal_net_value(self):
         self.net_value_df.insert(loc=0, column='net_value',
                                  value=self.net_value_df['total_balance'] / self.net_value_df['total_balance'].iloc[0])
