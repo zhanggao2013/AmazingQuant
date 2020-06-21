@@ -172,7 +172,7 @@ class NetValueAnalysis(object):
     @staticmethod
     def cal_downside_risk(net_value_ratio):
         downside_net_value_ratio = [net_value_ratio[i] if net_value_ratio[i] < 3.0 / 252 else 0 for i in
-                                   range(len(net_value_ratio))]
+                                    range(len(net_value_ratio))]
         return math.sqrt(252) * np.std(downside_net_value_ratio)
 
     @staticmethod
@@ -185,7 +185,7 @@ class NetValueAnalysis(object):
 
     @staticmethod
     def cal_treynor_ratio(net_year_yield, beta):
-        return (net_year_yield - 3.0)/beta
+        return (net_year_yield - 3.0) / beta
 
     @staticmethod
     def cal_max_drawdown(drawdown_series):
@@ -220,10 +220,10 @@ class NetValueAnalysis(object):
     def cal_month_ratio(net_value_series):
         month_ratio = {}
         for i in net_value_series.index:
-            if str(i.year*100 + i.month) in month_ratio.keys():
-                month_ratio[str(i.year*100 + i.month)].append(net_value_series[i])
+            if str(i.year * 100 + i.month) in month_ratio.keys():
+                month_ratio[str(i.year * 100 + i.month)].append(net_value_series[i])
             else:
-                month_ratio[str(i.year*100 + i.month)] = [net_value_series[i]]
+                month_ratio[str(i.year * 100 + i.month)] = [net_value_series[i]]
 
         month_ratio = {key: 100 * (value[-1] / value[0] - 1) for key, value in month_ratio.items()}
         return month_ratio
@@ -239,6 +239,14 @@ class NetValueAnalysis(object):
     @staticmethod
     def cal_month_volatility(month_ratio):
         return np.std(list(month_ratio.values()))
+
+    @staticmethod
+    def cal_skew_kurt(profit_ratio):
+        """
+        :param profit_ratio:
+        :return: Skewness, Kurtosis,偏度 峰度
+        """
+        return profit_ratio.skew(), profit_ratio.kurt()
 
 
 if __name__ == '__main__':
@@ -280,7 +288,8 @@ if __name__ == '__main__':
 
     # 日波动率
     net_day_volatility = net_value_analysis_obj.cal_day_volatility(net_value_analysis_obj.net_value_df['profit_ratio'])
-    benchmark_day_volatility = net_value_analysis_obj.cal_day_volatility(net_value_analysis_obj.benchmark_df['profit_ratio'])
+    benchmark_day_volatility = net_value_analysis_obj.cal_day_volatility(
+        net_value_analysis_obj.benchmark_df['profit_ratio'])
 
     # beta
     beta = net_value_analysis_obj.cal_beta(net_value_analysis_obj.net_value_df['profit_ratio'],
@@ -338,5 +347,8 @@ if __name__ == '__main__':
     net_month_volatility = net_value_analysis_obj.cal_month_volatility(net_month_ratio)
     benchmark_month_volatility = net_value_analysis_obj.cal_month_volatility(benchmark_month_ratio)
 
-
-
+    # 偏度，峰度
+    net_skewness, net_kurtosis = net_value_analysis_obj.cal_skew_kurt(
+        net_value_analysis_obj.net_value_df['profit_ratio'])
+    benchmark_skewness, benchmark_kurtosis = net_value_analysis_obj.cal_skew_kurt(
+        net_value_analysis_obj.benchmark_df['profit_ratio'])
