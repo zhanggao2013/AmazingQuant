@@ -259,65 +259,82 @@ if __name__ == '__main__':
         break
 
     net_value_analysis_obj = NetValueAnalysis(net_value_single_account_df, benchmark_df, start_time, end_time)
+    # 时间序列：净值、日收益率、最大回撤
     net_value_analysis_obj.cal_net_value()
     net_value_analysis_obj.cal_profit_ratio()
     net_value_analysis_obj.cal_drawdown()
 
+    # 年化收益率
     net_year_yield = net_value_analysis_obj.cal_year_yield(net_value_analysis_obj.net_value_df['net_value'])
     benchmark_year_yield = net_value_analysis_obj.cal_year_yield(net_value_analysis_obj.benchmark_df['net_value'])
 
+    # 年化波动率
     net_year_volatility = net_value_analysis_obj.cal_year_volatility(
         net_value_analysis_obj.net_value_df['profit_ratio'])
     benchmark_year_volatility = net_value_analysis_obj.cal_year_volatility(
         net_value_analysis_obj.benchmark_df['profit_ratio'])
 
+    # 历史最大回撤
+    net_max_drawdown = net_value_analysis_obj.cal_max_drawdown(net_value_analysis_obj.net_value_df['drawdown'])
+    benchmark_max_drawdown = net_value_analysis_obj.cal_max_drawdown(net_value_analysis_obj.benchmark_df['drawdown'])
+
+    # 日波动率
     net_day_volatility = net_value_analysis_obj.cal_day_volatility(net_value_analysis_obj.net_value_df['profit_ratio'])
     benchmark_day_volatility = net_value_analysis_obj.cal_day_volatility(net_value_analysis_obj.benchmark_df['profit_ratio'])
 
+    # beta
     beta = net_value_analysis_obj.cal_beta(net_value_analysis_obj.net_value_df['profit_ratio'],
                                            net_value_analysis_obj.benchmark_df['profit_ratio'])
-
+    # alpha
     alpha = net_value_analysis_obj.cal_alpha(net_year_yield, benchmark_year_yield, beta)
+    # sharpe
     sharpe = net_value_analysis_obj.cal_sharpe(net_year_yield, net_year_volatility)
+    # 跟踪误差
     tracking_error = net_value_analysis_obj.cal_tracking_error(net_value_analysis_obj.net_value_df['profit_ratio'],
                                                                net_value_analysis_obj.benchmark_df['profit_ratio'])
+    # 信息比率
     information_ratio = net_value_analysis_obj.cal_information_ratio(net_year_yield,
                                                                      benchmark_year_yield,
                                                                      tracking_error)
+    # 下行风险
     downside_risk = net_value_analysis_obj.cal_downside_risk(net_value_analysis_obj.net_value_df['profit_ratio'])
+    # 索提诺比率
     sortino_ratio = net_value_analysis_obj.cal_sortino_ratio(net_year_yield, downside_risk)
 
-
+    # 特雷诺比率
     treynor_ratio = net_value_analysis_obj.cal_treynor_ratio(net_year_yield, beta)
 
-    net_max_drawdown = net_value_analysis_obj.cal_max_drawdown(net_value_analysis_obj.net_value_df['drawdown'])
-
+    # calmar_ratio
     calmar_ratio = net_value_analysis_obj.cal_calmar_ratio(net_year_yield, net_max_drawdown)
-
-    benchmark_max_drawdown = net_value_analysis_obj.cal_max_drawdown(net_value_analysis_obj.benchmark_df['drawdown'])
 
     bull_win_index_ratio, bear_win_index_ratio = net_value_analysis_obj.cal_win_index_ratio()
 
+    # 日胜率
     net_day_win_ratio = net_value_analysis_obj.cal_day_win_ratio(net_value_analysis_obj.net_value_df['profit_ratio'])
     benchmark_day_win_ratio = net_value_analysis_obj.cal_day_win_ratio(
         net_value_analysis_obj.benchmark_df['profit_ratio'])
 
+    # 日收益率分布
     net_day_ratio_distribution = net_value_analysis_obj.cal_day_ratio_distribution(
         net_value_analysis_obj.net_value_df['profit_ratio'])
     benchmark_day_ratio_distribution = net_value_analysis_obj.cal_day_ratio_distribution(
         net_value_analysis_obj.benchmark_df['profit_ratio'])
 
+    # 日均收益率
     net_day_ratio_average = net_value_analysis_obj.cal_day_ratio_average(
         net_value_analysis_obj.net_value_df['profit_ratio'])
     benchmark_day_ratio_average = net_value_analysis_obj.cal_day_ratio_average(
         net_value_analysis_obj.benchmark_df['profit_ratio'])
 
+    # 月度收益率
     net_month_ratio = net_value_analysis_obj.cal_month_ratio(net_value_analysis_obj.net_value_df['net_value'])
     benchmark_month_ratio = net_value_analysis_obj.cal_month_ratio(net_value_analysis_obj.benchmark_df['net_value'])
 
+    # 月均收益率
     net_month_ratio_average = net_value_analysis_obj.cal_month_ratio_average(net_month_ratio)
     benchmark_month_ratio_average = net_value_analysis_obj.cal_month_ratio_average(benchmark_month_ratio)
 
+    # 月收益波动率
     net_month_volatility = net_value_analysis_obj.cal_month_volatility(net_month_ratio)
     benchmark_month_volatility = net_value_analysis_obj.cal_month_volatility(benchmark_month_ratio)
 
