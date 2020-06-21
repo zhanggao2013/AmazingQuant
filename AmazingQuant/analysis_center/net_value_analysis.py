@@ -218,14 +218,18 @@ class NetValueAnalysis(object):
 
     @staticmethod
     def cal_month_ratio(net_value_series):
-        month_ratio = {}
+        month_ratio_list = {}
         for i in net_value_series.index:
-            if str(i.year * 100 + i.month) in month_ratio.keys():
-                month_ratio[str(i.year * 100 + i.month)].append(net_value_series[i])
+            if str(i.year * 100 + i.month) in month_ratio_list.keys():
+                month_ratio_list[str(i.year * 100 + i.month)].append(net_value_series[i])
             else:
-                month_ratio[str(i.year * 100 + i.month)] = [net_value_series[i]]
-
-        month_ratio = {key: 100 * (value[-1] / value[0] - 1) for key, value in month_ratio.items()}
+                month_ratio_list[str(i.year * 100 + i.month)] = [net_value_series[i]]
+        month_ratio = {key: 0 for key, value in month_ratio_list.items()}
+        for key, value in month_ratio_list.items():
+            if value[0] > 0:
+                month_ratio[key] = 100 * (value[-1] / value[0] - 1)
+            else:
+                print(key, value[0], 'net_value less than 0')
         return month_ratio
 
     @staticmethod

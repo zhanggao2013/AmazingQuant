@@ -30,6 +30,7 @@
 # W-----n*n
 # x----- n*m
 # R-----n*1
+import datetime
 
 import statsmodels.api as sm
 import numpy as np
@@ -41,12 +42,14 @@ from AmazingQuant.data_center.api_data.get_data import get_local_data
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass
 from AmazingQuant.data_center.api_data.get_share import GetShare
+from AmazingQuant.analysis_center.net_value_analysis import NetValueAnalysis
 
 
 class RegressionAnalysis(object):
-    def __init__(self, factor, factor_name, market_close_data):
+    def __init__(self, factor, factor_name, market_close_data, benchmark_df):
         self.factor = factor
         self.factor_name = factor_name
+        self.benchmark_df = benchmark_df
 
         market_data = market_close_data.reindex(factor.index).reindex(factor.columns, axis=1)
         self.stock_return = market_data.pct_change()
@@ -59,6 +62,8 @@ class RegressionAnalysis(object):
         self.factor_t_value = None
         # 单因子检测的T值的统计值，'t_value_mean': 绝对值均值, 't_value_greater_two':绝对值序列大于2的占比
         self.factor_t_value_statistics = None
+        # 净值分析结果
+        self.net_analysis_result = {'cumsum': None, 'cumprod': None}
 
     def cal_factor_return(self, method='float_value_inverse'):
         """
@@ -123,13 +128,36 @@ class RegressionAnalysis(object):
         self.factor_t_value_statistics = pd.Series({'t_value_mean': t_value_mean,
                                                     't_value_greater_two': t_value_greater_two})
 
+    def cal_net_analysis(self):
+        start_time, end_time = self.factor_return.dropna().index.min(), self.factor_return.dropna().index.max()
+        for i in ['cumsum', 'cumprod']:
+            net_value = regression_analysis_obj.factor_return[i].to_frame('total_balance')
+            net_value[net_value < 0] = 0
+            net_value_analysis_obj = NetValueAnalysis(net_value, benchmark_df, start_time, end_time)
+            self.net_analysis_result[i] = net_value_analysis_obj.cal_net_analysis_result()
+        return self.net_analysis_result
+
 
 if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
     factor_ma5 = get_local_data(path, 'factor_ma5.h5')
-    market_close_data = GetKlineData().cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value,
-                                                            field=['close'])['close']
-    regression_analysis_obj = RegressionAnalysis(factor_ma5, 'factor_ma5', market_close_data)
+    # 指数数据不全，需要删一部分因子数据
+    factor_ma5 = factor_ma5[factor_ma5.index < datetime.datetime(2020, 1, 1)]
+
+    kline_object = GetKlineData()
+    market_data = kline_object.cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value, field=['close'])
+    market_close_data = kline_object.get_market_data(market_data, field=['close'])
+
+
+    # 指数行情，沪深300代替
+    all_index_data = kline_object.cache_all_index_data()
+    benchmark_df = kline_object.get_market_data(all_index_data, stock_code=['000300.SH'],
+                                                field=['close']).to_frame(name='close')
+    # 沪深300 的日线，有脏数据，后续单独处理
+    if datetime.datetime(2016, 1, 1) in benchmark_df.index:
+        benchmark_df = benchmark_df.drop(datetime.datetime(2016, 1, 1))
+    regression_analysis_obj = RegressionAnalysis(factor_ma5, 'factor_ma5', market_close_data, benchmark_df)
     regression_analysis_obj.cal_factor_return('float_value_inverse')
     regression_analysis_obj.cal_t_value_statistics()
+    net_analysis_result = regression_analysis_obj.cal_net_analysis()
 
