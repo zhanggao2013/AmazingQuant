@@ -52,7 +52,11 @@ class GetKlineData(object):
 
     def get_market_data(self, market_data, stock_code=None, field=None, start=None, end=None, count=-1):
         result = None
-        if len(stock_code) == 1 and len(field) == 1 and start < end and count == -1:
+        if stock_code is None and len(field) == 1:
+            result = market_data[field[0]]
+        elif len(stock_code) == 1 and len(field) == 1 and (end is None and start is None) and count == -1:
+            result = market_data[field[0]][stock_code[0]]
+        elif len(stock_code) == 1 and len(field) == 1 and start < end and count == -1:
             result = market_data[field[0]][stock_code[0]][start: end]
         elif len(stock_code) == 1 and len(field) == 1 and start == end and count == -1:
             result = market_data[field[0]][stock_code[0]][start]
