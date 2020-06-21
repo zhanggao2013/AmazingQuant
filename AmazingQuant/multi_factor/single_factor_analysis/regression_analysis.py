@@ -147,8 +147,8 @@ class RegressionAnalysis(object):
     def cal_acf(self, nlags=10):
         for i in ['cumsum', 'cumprod']:
             net_value = self.factor_return[i]
-            self.acf_result['cumsum']['acf'] = stattools.acf(net_value.dropna().values, fft=False, nlags=nlags)
-            self.acf_result['cumsum']['pacf'] = stattools.pacf(net_value.dropna().values, nlags=nlags)
+            self.acf_result[i]['acf'] = stattools.acf(net_value.dropna().values, fft=False, nlags=nlags)
+            self.acf_result[i]['pacf'] = stattools.pacf(net_value.dropna().values, nlags=nlags)
         return self.acf_result
 
 
