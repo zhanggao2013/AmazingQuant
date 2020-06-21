@@ -33,6 +33,7 @@
 import datetime
 
 import statsmodels.api as sm
+from statsmodels.tsa import stattools
 import numpy as np
 import pandas as pd
 
@@ -64,6 +65,8 @@ class RegressionAnalysis(object):
         self.factor_t_value_statistics = None
         # 净值分析结果
         self.net_analysis_result = {'cumsum': None, 'cumprod': None}
+        # 因子收益率的自相关系数acf和偏自相关系数pacf,默认1-10阶,结果list len=11，取1-10个数
+        self.acf_result = {'cumsum': {}, 'cumprod': {}}
 
     def cal_factor_return(self, method='float_value_inverse'):
         """
@@ -81,6 +84,7 @@ class RegressionAnalysis(object):
         index_list = self.factor.index
         factor_return_daily = {}
         factor_t_value_dict = {}
+
         for index in range(self.factor.shape[0]):
             stock_return = self.stock_return.iloc[index].dropna()
             factor_data = self.factor.iloc[index].dropna()
@@ -100,12 +104,15 @@ class RegressionAnalysis(object):
                 factor_t_value_dict[index_list[index]] = None
                 continue
             wls_model = None
+            weights = None
             if method == 'float_value_inverse':
                 weights = (1. / share_data_in_date['float_a_share_value'])
                 weights[np.isinf(weights)] = 0
                 wls_model = sm.WLS(stock_return, x, weights=weights)
             elif method == 'float_value_square_root':
-                wls_model = sm.WLS(stock_return, x, weights=share_data_in_date['float_a_share_value'].values ** 0.5)
+                weights = share_data_in_date['float_a_share_value'].values ** 0.5
+                wls_model = sm.WLS(stock_return, x, weights=weights)
+            weights.name = index_list[index]
 
             if wls_model is None:
                 factor_return_daily[index_list[index]] = None
@@ -131,11 +138,18 @@ class RegressionAnalysis(object):
     def cal_net_analysis(self):
         start_time, end_time = self.factor_return.dropna().index.min(), self.factor_return.dropna().index.max()
         for i in ['cumsum', 'cumprod']:
-            net_value = regression_analysis_obj.factor_return[i].to_frame('total_balance')
+            net_value = self.factor_return[i].to_frame('total_balance')
             net_value[net_value < 0] = 0
             net_value_analysis_obj = NetValueAnalysis(net_value, benchmark_df, start_time, end_time)
             self.net_analysis_result[i] = net_value_analysis_obj.cal_net_analysis_result()
         return self.net_analysis_result
+
+    def cal_acf(self, nlags=10):
+        for i in ['cumsum', 'cumprod']:
+            net_value = self.factor_return[i]
+            self.acf_result['cumsum']['acf'] = stattools.acf(net_value.dropna().values, fft=False, nlags=nlags)
+            self.acf_result['cumsum']['pacf'] = stattools.pacf(net_value.dropna().values, nlags=nlags)
+        return self.acf_result
 
 
 if __name__ == '__main__':
@@ -159,5 +173,6 @@ if __name__ == '__main__':
     regression_analysis_obj = RegressionAnalysis(factor_ma5, 'factor_ma5', market_close_data, benchmark_df)
     regression_analysis_obj.cal_factor_return('float_value_inverse')
     regression_analysis_obj.cal_t_value_statistics()
-    net_analysis_result = regression_analysis_obj.cal_net_analysis()
+    regression_analysis_obj.cal_net_analysis()
+    regression_analysis_obj.cal_acf()
 
