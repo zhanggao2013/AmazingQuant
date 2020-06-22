@@ -213,7 +213,6 @@ class Neutralize(object):
             share_data = share_data_obj.get_share('float_a_share_value')
 
         def cal_resid(data, index_class_obj, share_data, method):
-            print('data.name', data.name)
             # 删除一些 , 因子数据为NAN的个股
             data = data.dropna()
             index_class_in_date = pd.DataFrame({})
