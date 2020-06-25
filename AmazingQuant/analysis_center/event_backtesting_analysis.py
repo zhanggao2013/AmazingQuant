@@ -102,9 +102,11 @@ class EventBacktestingAnalysis(Event):
                                                       for i in account_data_property_list}, name=time_tag))
         benchmark_df = data_class.get_market_data(Environment.index_daily_data, stock_code=[benchmark],
                                                   field=['close'], ).to_frame(name='close')
-
         net_value_analysis_obj = NetValueAnalysis(account_df, benchmark_df, start_time, end_time)
 
         net_analysis_result = net_value_analysis_obj.cal_net_analysis_result()
         for i in net_analysis_result:
             Environment.logger.info(i, net_analysis_result[i])
+
+        # 持仓数据转pandas
+        a = Environment.position_data_dict[list(Environment.position_data_dict.keys())[0]][0]
