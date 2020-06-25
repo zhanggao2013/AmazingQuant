@@ -1,4 +1,4 @@
-sn# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # ------------------------------
 # @Time    : 2020/3/31
@@ -22,3 +22,32 @@ sn# -*- coding: utf-8 -*-
 （4）group_stock_list：每组选出股票的代码,
 （5）plot_industry_ratio():每组行业占比热力图
 """
+import datetime
+
+import numpy as np
+import pandas as pd
+
+from AmazingQuant.constant import LocalDataFolderName
+from AmazingQuant.config.local_data_path import LocalDataPath
+from AmazingQuant.data_center.api_data.get_data import get_local_data
+
+
+class StratificationAnalysis(object):
+    def __init__(self, factor, factor_name):
+        self.factor = factor
+        self.factor_name = factor_name
+
+    def add_group(self, group_num, ascending=True):
+        factor_ma5_rank = self.factor.rank(axis=1, ascending=ascending)
+        group_key = ['group_' + str(i) for i in range(group_num)]
+        return factor_ma5_rank.apply(lambda x: pd.cut(x, group_num, labels=group_key), axis=1)
+
+
+if __name__ == '__main__':
+    path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
+    factor_ma5 = get_local_data(path, 'factor_ma5.h5')
+    # 指数数据不全，需要删一部分因子数据
+    factor_ma5 = factor_ma5[factor_ma5.index < datetime.datetime(2020, 1, 1)]
+    stratification_analysis_obj = StratificationAnalysis(factor_ma5, 'factor_ma5')
+    factor_ma5_rank = stratification_analysis_obj.add_group(5)
+
