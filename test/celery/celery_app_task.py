@@ -7,14 +7,19 @@
 # @Project : AmazingQuant
 # ------------------------------
 from celery import Celery
-
-# broker = 'redis://127.0.0.1:6379/7'
+import time
+# broker = 'redis://127.0.0.1:6378/7'
 broker = 'amqp://guest:guest@127.0.0.1:5672/'
-backend = 'redis://127.0.0.1:6379/1'
+backend = 'redis://127.0.0.1:6378/1'
 
 cel = Celery('tasks', broker=broker, backend=backend)
 
 
-@cel.task
+a = 1
+a += 1
+
+
+@cel.task(name='celery_app_task.task')
 def add(x, y):
-    return x + y
+    time.sleep(4)
+    return x + y + a

@@ -7,5 +7,5 @@
 # @Project : AmazingQuant
 # ------------------------------
 from test.celery.celery_app_task import add
-result = add.delay(562, 200)
+result = add.delay(1, 1)
 print(result.id)
