@@ -49,9 +49,9 @@ class MaStrategy(StrategyBase):
         # 设置运行模式，回测或者交易
         self.run_mode = RunMode.BACKTESTING.value
         # 设置回测资金账号
-        self.account = ['test0', 'test1']
+        self.account = ['test0']
         # 设置回测资金账号资金量
-        self.capital = {'test0': 2000000, 'test1': 1000}
+        self.capital = {'test0': 2000000}
         # 设置回测基准
         self.benchmark = '000300.SH'
         # 设置复权方式
@@ -82,7 +82,7 @@ class MaStrategy(StrategyBase):
                             close_commission=0.0005,
                             close_today_commission=0, min_commission=5)
 
-    def on_bar(self, event):
+    def handle_bar(self, event):
         Environment.logger.info('self.time_tag', self.time_tag, datetime.now(), (time.time()-self.now)*1000)
         Environment.logger.debug(len(Environment.bar_position_data_list))
         # 取当前bar的持仓情况
