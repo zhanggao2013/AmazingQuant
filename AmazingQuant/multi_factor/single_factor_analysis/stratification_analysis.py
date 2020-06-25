@@ -24,7 +24,6 @@
 """
 import datetime
 
-import numpy as np
 import pandas as pd
 
 from AmazingQuant.constant import LocalDataFolderName
@@ -33,14 +32,23 @@ from AmazingQuant.data_center.api_data.get_data import get_local_data
 
 
 class StratificationAnalysis(object):
-    def __init__(self, factor, factor_name):
+    def __init__(self, factor, factor_name, group_num=5):
         self.factor = factor
         self.factor_name = factor_name
+        self.group_num = group_num
+        self.factor_group = None
+        self.group_key = ['group_' + str(i) for i in range(group_num)]
 
-    def add_group(self, group_num, ascending=True):
-        factor_ma5_rank = self.factor.rank(axis=1, ascending=ascending)
-        group_key = ['group_' + str(i) for i in range(group_num)]
-        return factor_ma5_rank.apply(lambda x: pd.cut(x, group_num, labels=group_key), axis=1)
+    def add_group(self, ascending=True):
+        factor_rank = self.factor.rank(axis=1, ascending=ascending)
+        self.factor_group = factor_rank.apply(lambda x: pd.cut(x, self.group_num, labels=self.group_key), axis=1)
+
+    def cal_group_hold(self, group_name):
+        """
+        a = group_hold.iloc[0]
+        a.dropna().index.values
+        """
+        return self.factor_group[self.factor_group == group_name]
 
 
 if __name__ == '__main__':
@@ -49,5 +57,8 @@ if __name__ == '__main__':
     # 指数数据不全，需要删一部分因子数据
     factor_ma5 = factor_ma5[factor_ma5.index < datetime.datetime(2020, 1, 1)]
     stratification_analysis_obj = StratificationAnalysis(factor_ma5, 'factor_ma5')
-    factor_ma5_rank = stratification_analysis_obj.add_group(5)
-
+    stratification_analysis_obj.add_group()
+    import time
+    a = time.time()
+    group_hold = stratification_analysis_obj.cal_group_hold(stratification_analysis_obj.group_key[0])
+    print(time.time() - a)
