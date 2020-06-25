@@ -6,6 +6,7 @@
 # @File    : data_object.py.py
 # @Project : AmazingQuant
 # ------------------------------
+import json
 
 from AmazingQuant.constant import Empty
 
@@ -75,3 +76,14 @@ class AccountData(object):
         self.pre_balance = Empty.EMPTY_FLOAT.value  # 昨日账户总资产，期货用
         self.total_balance = Empty.EMPTY_FLOAT.value  # 账户总资产
         self.available = Empty.EMPTY_FLOAT.value  # 可用资金
+
+    def __str__(self):
+        obj_property = {'account_id': self.account_id,
+                        'pre_balance': self.pre_balance,
+                        'total_balance': self.pre_balance,
+                        'available': self.pre_balance}
+        return json.dumps(obj_property)
+
+
+if __name__ == '__main__':
+    print(json.loads(AccountData().__str__()))
