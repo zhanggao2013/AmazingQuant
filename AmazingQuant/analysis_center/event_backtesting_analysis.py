@@ -109,4 +109,4 @@ class EventBacktestingAnalysis(Event):
             Environment.logger.info(i, net_analysis_result[i])
 
         # 持仓数据转pandas
-        a = Environment.position_data_dict[list(Environment.position_data_dict.keys())[0]][0]
+        # a = Environment.position_data_dict[list(Environment.position_data_dict.keys())[0]][0]

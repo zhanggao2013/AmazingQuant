@@ -158,7 +158,10 @@ class NetValueAnalysis(object):
 
     @staticmethod
     def cal_sharpe(net_year_yield, net_year_volatility):
-        return (net_year_yield - 3.0) / net_year_volatility
+        sharpe = None
+        if net_year_volatility != 0:
+            sharpe = (net_year_yield - 3.0) / net_year_volatility
+        return sharpe
 
     @staticmethod
     def cal_tracking_error(net_value_ratio, benchmark_close_ratio):
@@ -167,7 +170,10 @@ class NetValueAnalysis(object):
 
     @staticmethod
     def cal_information_ratio(net_year_yield, benchmark_year_yield, tracking_error):
-        return (net_year_yield - benchmark_year_yield) / tracking_error
+        information_ratio = None
+        if tracking_error != 0:
+            information_ratio = (net_year_yield - benchmark_year_yield) / tracking_error
+        return information_ratio
 
     @staticmethod
     def cal_downside_risk(net_value_ratio):
@@ -177,15 +183,24 @@ class NetValueAnalysis(object):
 
     @staticmethod
     def cal_sortino_ratio(net_year_yield, downside_risk):
-        return (net_year_yield - 3.0) / downside_risk
+        sortino_ratio = None
+        if downside_risk != 0:
+            sortino_ratio = (net_year_yield - 3.0) / downside_risk
+        return sortino_ratio
 
     @staticmethod
     def cal_calmar_ratio(net_year_yield, max_drawdown):
-        return net_year_yield / abs(max_drawdown)
+        calmar_ratio = None
+        if abs(max_drawdown) != 0:
+            calmar_ratio = (net_year_yield - 3.0) / abs(max_drawdown)
+        return calmar_ratio
 
     @staticmethod
     def cal_treynor_ratio(net_year_yield, beta):
-        return (net_year_yield - 3.0) / beta
+        treynor_ratio = None
+        if beta != 0:
+            treynor_ratio = (net_year_yield - 3.0) / beta
+        return treynor_ratio
 
     @staticmethod
     def cal_max_drawdown(drawdown_series):
@@ -287,7 +302,7 @@ class NetValueAnalysis(object):
 
         # beta
         beta = self.cal_beta(self.net_value_df['profit_ratio'],
-                                               self.benchmark_df['profit_ratio'])
+                             self.benchmark_df['profit_ratio'])
         net_analysis_result['beta'] = beta
         # alpha
         alpha = self.cal_alpha(net_year_yield, benchmark_year_yield, beta)
@@ -297,12 +312,12 @@ class NetValueAnalysis(object):
         net_analysis_result['sharpe'] = sharpe
         # 跟踪误差
         tracking_error = self.cal_tracking_error(self.net_value_df['profit_ratio'],
-                                                                   self.benchmark_df['profit_ratio'])
+                                                 self.benchmark_df['profit_ratio'])
         net_analysis_result['tracking_error'] = tracking_error
         # 信息比率
         information_ratio = self.cal_information_ratio(net_year_yield,
-                                                                         benchmark_year_yield,
-                                                                         tracking_error)
+                                                       benchmark_year_yield,
+                                                       tracking_error)
         net_analysis_result['information_ratio'] = information_ratio
         # 下行风险
         downside_risk = self.cal_downside_risk(self.net_value_df['profit_ratio'])
@@ -382,7 +397,7 @@ if __name__ == '__main__':
     #
     # 指数行情，沪深300代替
     all_index_data = kline_object.cache_all_index_data()
-    benchmark_df = kline_object.get_market_data(all_index_data, stock_code=['000300.SH'], field=['close'],)\
+    benchmark_df = kline_object.get_market_data(all_index_data, stock_code=['000300.SH'], field=['close'], ) \
         .to_frame(name='close')
     # 策略净值数据,index 为 datetime,取单个账户分析，后续可做多个账户
     net_value_df = pd.read_csv('account_data.csv', index_col=0)
@@ -395,4 +410,3 @@ if __name__ == '__main__':
     net_value_analysis_obj = NetValueAnalysis(net_value_single_account_df, benchmark_df, start_time, end_time)
 
     net_analysis_result = net_value_analysis_obj.cal_net_analysis_result()
-
