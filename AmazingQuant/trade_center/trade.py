@@ -23,8 +23,8 @@ class Trade(object):
         """下单函数"""
         # 代码编号相关
         Environment.current_order_data.order_id = generate_random_id(ID.ORDER_ID.value)
-        Environment.current_order_data.instrument = stock_code[:-3]
-        Environment.current_order_data.exchange = stock_code[-2:]
+        Environment.current_order_data.instrument = stock_code.split('.')[0]
+        Environment.current_order_data.exchange = stock_code.split('.')[1]
 
         # 　报单相关
         Environment.current_order_data.price_type = price_type

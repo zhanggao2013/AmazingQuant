@@ -34,6 +34,26 @@ class OrderData(object):
         self.frond_id = Empty.EMPTY_STRING.value  # 前置机编号，真实交易用
         self.session_id = Empty.EMPTY_STRING.value  # 连接编号
 
+    def __str__(self):
+        obj_property = {'order_id': self.order_id,
+                        'instrument': self.instrument,
+                        'exchange': self.exchange,
+
+                        'price_type': self.price_type,
+                        'order_price': self.order_price,
+                        'direction': self.direction,
+                        'offset': self.offset,
+                        'total_volume': self.total_volume,
+                        'deal_volume': self.deal_volume,
+                        'status': self.status,
+
+                        'order_time': self.order_time,
+                        'cancel_time': self.cancel_time,
+
+                        'frond_id': self.frond_id,
+                        'session_id': self.session_id}
+        return json.dumps(obj_property)
+
 
 class DealData(object):
     def __init__(self):
@@ -50,6 +70,20 @@ class DealData(object):
         self.deal_volume = Empty.EMPTY_INT.value  # 成交数量
         self.deal_time = Empty.EMPTY_STRING.value  # 成交时间
 
+    def __str__(self):
+        obj_property = {'trade_id': self.trade_id,
+                        'instrument': self.instrument,
+                        'exchange': self.exchange,
+                        'order_id': self.order_id,
+
+                        'deal_price': self.deal_price,
+                        'direction': self.direction,
+                        'offset': self.offset,
+                        'deal_volume': self.deal_volume,
+                        'deal_time': self.deal_time}
+        return json.dumps(obj_property)
+
+
 
 class PositionData(object):
     def __init__(self):
@@ -65,6 +99,19 @@ class PositionData(object):
         self.frozen = Empty.EMPTY_INT.value  # 冻结数量
         self.yesterday_position = Empty.EMPTY_INT.value  # 昨持仓数量，期货用
         self.position_profit = Empty.EMPTY_FLOAT.value  # 持仓盈亏
+
+    def __str__(self):
+        obj_property = {'instrument': self.instrument,
+                        'exchange': self.exchange,
+                        'account_id': self.account_id,
+
+                        'average_price': self.average_price,
+                        'direction': self.direction,
+                        'position': self.position,
+                        'frozen': self.frozen,
+                        'yesterday_position': self.yesterday_position,
+                        'position_profit': self.position_profit}
+        return json.dumps(obj_property)
 
 
 class AccountData(object):

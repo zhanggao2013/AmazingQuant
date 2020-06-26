@@ -22,7 +22,7 @@ from AmazingQuant.constant import RecordDataType, Period
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.utils.data_transfer import millisecond_to_date
 from AmazingQuant.analysis_center.net_value_analysis import NetValueAnalysis
-from AmazingQuant.data_object import AccountData
+from AmazingQuant.data_object import AccountData, OrderData, DealData, PositionData
 
 
 # from pyecharts import Line, Page, Grid
@@ -42,24 +42,23 @@ class EventBacktestingAnalysis(Event):
             data_type_value = data_type.value
             data_obj = None
             data_dict = None
+            data_property = []
             if data_type_value == RecordDataType.ORDER_DATA.value:
-                data_obj = Environment.current_order_data
                 data_dict = Environment.order_data_dict
+                data_property = list(json.loads(OrderData().__str__()).keys())
 
             elif data_type_value == RecordDataType.DEAL_DATA.value:
-                data_obj = Environment.current_deal_data
                 data_dict = Environment.deal_data_dict
+                data_property = list(json.loads(DealData().__str__()).keys())
 
             elif data_type_value == RecordDataType.POSITION_DATA.value:
-                data_obj = Environment.current_position_data
                 data_dict = Environment.position_data_dict
+                data_property = list(json.loads(PositionData().__str__()).keys())
 
             elif data_type_value == RecordDataType.ACCOUNT_DATA.value:
-                data_obj = Environment.current_account_data
                 data_dict = Environment.account_data_dict
+                data_property = list(json.loads(AccountData().__str__()).keys())
 
-            data_property = [i for i in dir(data_obj) if i not in dir(copy.deepcopy(EmptyClass()))]
-            # Environment.logger.info(data_property, dir(copy.deepcopy(EmptyClass)))
             values = []
             for time_tag in Environment.benchmark_index:
                 time_tag_data_list = []
