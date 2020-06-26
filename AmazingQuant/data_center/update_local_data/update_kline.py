@@ -83,8 +83,6 @@ class UpdateKlineData(object):
                     security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
                     security_code_data_df.set_index(["time_tag"], inplace=True)
                     thread_data_dict[stock] = security_code_data_df.reindex(self.calendar_SZ).fillna(method='ffill')
-                    if stock=='003816.SZ':
-                        print(stock, thread_data_dict[stock])
             process_manager_dict[security_list_i] = thread_data_dict
 
     def update_all_market_data(self, end=datetime.now()):
@@ -100,8 +98,6 @@ class UpdateKlineData(object):
                 path = LocalDataPath.path + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
                 data_name = field
                 data = pd.DataFrame(all_market_data[field])
-                print(data['003816.SZ'])
-                data.to_csv(path+data_name+'.csv')
                 save_data_to_hdf5(path, data_name, data)
 
 

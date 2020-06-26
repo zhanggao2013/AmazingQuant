@@ -76,8 +76,10 @@ class StratificationStrategy(StrategyBase):
         self.group_hold = group_hold
         self.group_hold_index = self.group_hold.index
         self.single_stock_value = None
+
         # 初始仓位，因交易费用，满仓后无法慢如
-        self.hold_ratio = 1
+        self.hold_ratio = 0.95
+        self.group_hold_num = self.group_hold.iloc[0].dropna().shape[0]
         Environment.logger = Logger(strategy_name)
 
     def initialize(self):
@@ -93,7 +95,7 @@ class StratificationStrategy(StrategyBase):
         self.rights_adjustment = RightsAdjustment.FROWARD.value
         # 设置回测起止时间
         self.start = self.group_hold.index[0]
-        self.start = datetime(2019, 12, 5)
+        # self.start = datetime(2019, 12, 5)
         self.end = self.group_hold.index[-1]
         # 设置运行周期
         self.period = 'daily'
@@ -115,7 +117,7 @@ class StratificationStrategy(StrategyBase):
                             close_commission=0.0003,
                             close_today_commission=0, min_commission=5)
 
-        self.single_stock_value = self.capital[self.account[0]]*self.hold_ratio/self.group_hold.shape[1]
+        self.single_stock_value = self.capital[self.account[0]] * self.hold_ratio / self.group_hold_num
 
     def handle_bar(self, event):
         Environment.logger.info('self.time_tag', self.time_tag, datetime.now())
@@ -142,7 +144,10 @@ class StratificationStrategy(StrategyBase):
                                                           field=['close'],
                                                           start=self.time_tag, end=self.time_tag)
 
-        Environment.logger.info(len(current_group_hold_list), len(position_stock_list), len(buy_stock_list), len(sell_stock_list))
+        Environment.logger.info(len(current_group_hold_list), len(position_stock_list), len(buy_stock_list),
+                                len(sell_stock_list))
+
+        print(Environment.current_account_data.available)
         # 循环遍历股票池
         for stock in sell_stock_list:
             # 取当前股票的收盘价
@@ -154,15 +159,25 @@ class StratificationStrategy(StrategyBase):
             Environment.logger.info(self.time_tag, 'sell', stock, available_position_dict[stock],
                                     'fix', close_price, self.account)
 
-        for stock in buy_stock_list:
-            # 取当前股票的收盘价
-            close_price = close_price_all['close'][stock]
-            if np.isnan(close_price):
-                continue
-            buy_share = int(self.single_stock_value/close_price/100)*100
-            Trade(self).order_shares(stock_code=stock, shares=buy_share, price_type='fix', order_price=close_price,
-                                     account=self.account[0])
-            Environment.logger.info(self.time_tag, 'buy', stock, buy_share, 'fix', close_price, self.account)
+        print(Environment.current_account_data.available)
+        # print(position_stock_list)
+        if position_stock_list:
+            self.single_stock_value = (Environment.current_account_data.available -
+                                       Environment.current_account_data.total_balance * (1 - self.hold_ratio)) / \
+                                      len(buy_stock_list)
+            self.single_stock_value = max(self.single_stock_value, 0)
+            print(self.single_stock_value)
+
+        if self.single_stock_value > 0:
+            for stock in buy_stock_list:
+                # 取当前股票的收盘价
+                close_price = close_price_all['close'][stock]
+                if np.isnan(close_price):
+                    continue
+                buy_share = int(self.single_stock_value / close_price / 100) * 100
+                Trade(self).order_shares(stock_code=stock, shares=buy_share, price_type='fix', order_price=close_price,
+                                         account=self.account[0])
+                Environment.logger.info(self.time_tag, 'buy', stock, buy_share, 'fix', close_price, self.account)
 
 
 if __name__ == '__main__':
@@ -175,6 +190,7 @@ if __name__ == '__main__':
     group_hold = stratification_analysis_obj.cal_group_hold(stratification_analysis_obj.group_key[0])
     stratification_strategy = StratificationStrategy(group_hold)
     import time
+
     a = time.time()
     stratification_strategy.run(save_trade_record=True)
     print(time.time() - a)
