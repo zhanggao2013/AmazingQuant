@@ -76,6 +76,8 @@ class StratificationStrategy(StrategyBase):
         self.group_hold = group_hold
         self.group_hold_index = self.group_hold.index
         self.single_stock_value = None
+        # 初始仓位，因交易费用，满仓后无法慢如
+        self.hold_ratio = 1
         Environment.logger = Logger(strategy_name)
 
     def initialize(self):
@@ -113,7 +115,7 @@ class StratificationStrategy(StrategyBase):
                             close_commission=0.0003,
                             close_today_commission=0, min_commission=5)
 
-        self.single_stock_value = self.capital[self.account[0]]/self.group_hold.shape[1]
+        self.single_stock_value = self.capital[self.account[0]]*self.hold_ratio/self.group_hold.shape[1]
 
     def handle_bar(self, event):
         Environment.logger.info('self.time_tag', self.time_tag, datetime.now())

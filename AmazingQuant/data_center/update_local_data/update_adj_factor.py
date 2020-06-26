@@ -34,6 +34,7 @@ class SaveAShareAdjFactor(object):
         """
         kline_object = GetKlineData()
         all_market_data = kline_object.cache_all_stock_data()
+
         with MongoConnect(self.database):
             self.data = pd.DataFrame(AShareExRightDividend.objects.as_pymongo())
             self.data['close'] = self.data.apply(
@@ -62,6 +63,7 @@ class SaveAShareAdjFactor(object):
             backward_factor.replace([np.inf, 0], np.nan, inplace=True)
             backward_factor.fillna(method='ffill', inplace=True)
             backward_factor.fillna(1, inplace=True)
+            backward_factor = backward_factor.reindex(columns=all_market_data['close'].columns, fill_value=1)
             save_data_to_hdf5(path, AdjustmentFactor.BACKWARD_ADJ_FACTOR.value, backward_factor)
             save_data_to_hdf5(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value, backward_factor.div(backward_factor.iloc[-1]))
 
