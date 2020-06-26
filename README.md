@@ -4,7 +4,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/zhanggao2013/AmazingQuant.svg?style=social&label=Fork&)](https://github.com/zhanggao2013/AmazingQuant/fork)
 
 # 1.简介
-AmazingQuant是一款量化交易综合平台，包含策略组合研究服务，行情数据服务，指标计算服务，绩效分析服务四大功能模块。	<br/>
+AmazingQuant是一款量化交易综合平台，包含策略组合研究服务，量化数据服务，指标计算服务，绩效分析服务四大功能模块。	<br/>
 1.1 策略组合研究服务	<br/>
 　　四大类策略模型组合的研究体系<br/>
 （1）选股模型<br/>
@@ -16,9 +16,9 @@ AmazingQuant是一款量化交易综合平台，包含策略组合研究服务�
 （4）T+0模型<br/>
 　　满足回测与实盘的策略无缝对接	<br/>
 
-1.2 行情数据服务	<br/>
+1.2 量化数据服务	<br/>
 1.2.1 历史数据存储	<br/>
-存储到服务器的mongoDB，并保存到本地的HDF5，满足策略需求。	<br/>
+存储到服务器的mongoDB作为数据服务器，并保存到本地的HDF5，满足策略需求。	<br/>
 （1）tick、1min、5min、日线等周期的股票、指数、期货行情数据	<br/>
 （2）财务数据	<br/>
 （3）龙虎榜数据	<br/>
