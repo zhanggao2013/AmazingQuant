@@ -118,7 +118,7 @@ class StratificationStrategy(StrategyBase):
         available_position_dict = {}
         for position in Environment.bar_position_data_list:
             available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
-        if self.time_tag not in self.group_hold_index:
+        if self.time_tag not in self.group_hold_index or self.time_tag==datetime(2016, 1, 1):
             return
         # 因子选股的持仓股票
         current_group_hold_list = self.group_hold.loc[self.time_tag].dropna().index.values
