@@ -142,6 +142,8 @@ class StratificationStrategy(StrategyBase):
         for stock in sell_stock_list:
             # 取当前股票的收盘价
             close_price = close_price_all['close'][stock]
+            if np.isnan(close_price):
+                continue
             Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix', order_price=close_price,
                                      account=self.account[0])
             # Environment.logger.info(self.time_tag, 'buy', stock, -1, 'fix', close_price, self.account)
@@ -149,6 +151,8 @@ class StratificationStrategy(StrategyBase):
         for stock in buy_stock_list:
             # 取当前股票的收盘价
             close_price = close_price_all['close'][stock]
+            if np.isnan(close_price):
+                continue
             Trade(self).order_shares(stock_code=stock, shares=100, price_type='fix', order_price=close_price,
                                      account=self.account[0])
             # Environment.logger.info(self.time_tag, 'sell', stock, -1, 'fix', close_price, self.account)
