@@ -116,6 +116,9 @@ class UpdateKlineData(object):
                     security_code_data = KlineDaily_index_code.objects(time_tag__lte=self.end).as_pymongo()
                     security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
                     security_code_data_df.set_index(["time_tag"], inplace=True)
+                    # 数据库中数据多了一天，特殊处理删除了
+                    if pd.Timestamp(datetime(2016, 1, 1)) in security_code_data_df.index:
+                        security_code_data_df = security_code_data_df.drop(labels=datetime(2016, 1, 1), axis=0)
                     index_data_dict[index_code] = security_code_data_df
         field_data_dict = {}
         for i in self.field:
