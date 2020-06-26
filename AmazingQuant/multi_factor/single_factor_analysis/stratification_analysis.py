@@ -90,6 +90,7 @@ class StratificationStrategy(StrategyBase):
         self.rights_adjustment = RightsAdjustment.FROWARD.value
         # 设置回测起止时间
         self.start = self.group_hold.index[0]
+        self.start = datetime(2016, 1, 2)
         self.end = self.group_hold.index[-1]
         # 设置运行周期
         self.period = 'daily'
@@ -114,12 +115,14 @@ class StratificationStrategy(StrategyBase):
     def handle_bar(self, event):
         Environment.logger.info('self.time_tag', self.time_tag, datetime.now())
         # Environment.logger.debug(len(Environment.bar_position_data_list))
+        if self.time_tag not in self.group_hold_index or self.time_tag == pd.Timestamp(datetime(2016, 1, 1)):
+            return
+
         # 取当前bar的持仓情况
         available_position_dict = {}
         for position in Environment.bar_position_data_list:
             available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
-        if self.time_tag not in self.group_hold_index or self.time_tag==datetime(2016, 1, 1):
-            return
+
         # 因子选股的持仓股票
         current_group_hold_list = self.group_hold.loc[self.time_tag].dropna().index.values
         # 当前资金账户的持仓股票
