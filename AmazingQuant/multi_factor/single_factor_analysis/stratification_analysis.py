@@ -22,9 +22,10 @@
 （4）group_stock_list：每组选出股票的代码,
 （5）plot_industry_ratio():每组行业占比热力图
 """
-import datetime
+import time
 
 import pandas as pd
+import numpy as np
 
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
@@ -68,11 +69,12 @@ class StratificationStrategy(StrategyBase):
         取本地数据
         :param strategy_name:
         """
-        super().__init__()
+        super().__init__(strategy_name=strategy_name)
 
         # 取K线数据实例
         self.data_class = GetKlineData()
         self.group_hold = group_hold
+        self.group_hold_index = self.group_hold.index
         Environment.logger = Logger(strategy_name)
 
     def initialize(self):
@@ -111,41 +113,42 @@ class StratificationStrategy(StrategyBase):
 
     def handle_bar(self, event):
         Environment.logger.info('self.time_tag', self.time_tag, datetime.now())
-        Environment.logger.debug(len(Environment.bar_position_data_list))
+        # Environment.logger.debug(len(Environment.bar_position_data_list))
         # 取当前bar的持仓情况
         available_position_dict = {}
         for position in Environment.bar_position_data_list:
             available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
+        if self.time_tag not in self.group_hold_index:
+            return
+        # 因子选股的持仓股票
+        current_group_hold_list = self.group_hold.loc[self.time_tag].dropna().index.values
+        # 当前资金账户的持仓股票
+        position_stock_list = list(available_position_dict.keys())
+        # 需要买入调仓的股票
+        buy_stock_list = np.setdiff1d(current_group_hold_list, position_stock_list)
+        # 需要卖出调仓的股票
+        sell_stock_list = np.setdiff1d(position_stock_list, current_group_hold_list)
+        # 需要调仓的股票，取这些票的收盘价
+        buy_sell_stock_list = np.union1d(buy_stock_list, sell_stock_list)
+        close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=buy_sell_stock_list,
+                                                          field=['close'],
+                                                          start=self.time_tag, end=self.time_tag)
 
-        # close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=index_member_list, field=['close'],
-        #                                                   start=self.time_tag, end=self.time_tag)
-        Environment.logger.info(available_position_dict)
+        Environment.logger.info(len(current_group_hold_list), len(buy_stock_list), len(sell_stock_list))
         # 循环遍历股票池
-        # for stock in index_member_list:
-        #     # 取当前股票的收盘价
-        #     close_price = close_price_all['close'][stock]
-        #     if close_price:
-        #         ma5 = self.ma5[stock][self.time_tag]
-        #         ma20 = self.ma10[stock][self.time_tag]
-        #         if ma5 and ma20:
-        #             # 如果5日均线突破20日均线，并且没有持仓，则买入这只股票100股，以收盘价为指定价交易
-        #             if ma5 > ma20 and stock not in available_position_dict.keys() and stock in index_member_list:
-        #                 Trade(self).order_shares(stock_code=stock, shares=100, price_type='fix',
-        #                                          order_price=close_price,
-        #                                          account=self.account[0])
-        #                 Environment.logger.info('buy', stock, -1, 'fix', close_price, self.account)
-        #             # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
-        #             elif ma5 < ma20 and stock in available_position_dict.keys():
-        #                 Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
-        #                                          order_price=close_price,
-        #                                          account=self.account[0])
-        #                 Environment.logger.info('sell', stock, -1, 'fix', close_price, self.account)
-        # for stock in available_position_dict.keys():
-        #     if stock not in index_member_list:
-        #         Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
-        #                                  order_price=close_price,
-        #                                  account=self.account[0])
-        #         Environment.logger.info('sell not in index_member_list', stock, -1, 'fix', close_price, self.account)
+        for stock in sell_stock_list:
+            # 取当前股票的收盘价
+            close_price = close_price_all['close'][stock]
+            Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix', order_price=close_price,
+                                     account=self.account[0])
+            # Environment.logger.info(self.time_tag, 'buy', stock, -1, 'fix', close_price, self.account)
+
+        for stock in buy_stock_list:
+            # 取当前股票的收盘价
+            close_price = close_price_all['close'][stock]
+            Trade(self).order_shares(stock_code=stock, shares=100, price_type='fix', order_price=close_price,
+                                     account=self.account[0])
+            # Environment.logger.info(self.time_tag, 'sell', stock, -1, 'fix', close_price, self.account)
 
 
 if __name__ == '__main__':
@@ -158,4 +161,3 @@ if __name__ == '__main__':
     group_hold = stratification_analysis_obj.cal_group_hold(stratification_analysis_obj.group_key[0])
     stratification_strategy = StratificationStrategy(group_hold)
     stratification_strategy.run(save_trade_record=True)
-
