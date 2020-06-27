@@ -95,7 +95,7 @@ class StratificationStrategy(StrategyBase):
         self.rights_adjustment = RightsAdjustment.FROWARD.value
         # 设置回测起止时间
         self.start = self.group_hold.index[0]
-        self.start = datetime(2019, 12, 5)
+        # self.start = datetime(2019, 12, 5)
         self.end = self.group_hold.index[-1]
         # 设置运行周期
         self.period = 'daily'
@@ -128,7 +128,6 @@ class StratificationStrategy(StrategyBase):
         # 取当前bar的持仓情况
         available_position_dict = {}
         for position in Environment.bar_position_data_list:
-            print('position.account_id', position.account_id)
             if position.account_id == self.account[0]:
                 available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
 
