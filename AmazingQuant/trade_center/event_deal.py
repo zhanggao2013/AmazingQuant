@@ -129,7 +129,7 @@ class EventDeal(Event):
         # self.position_profit = Empty.EMPTY_FLOAT.value  # 持仓盈亏
         Environment.current_position_data.instrument = Environment.current_deal_data.instrument
         Environment.current_position_data.exchange = Environment.current_deal_data.exchange
-        Environment.current_position_data.account_id = Environment.current_order_data.session_id
+        Environment.current_position_data.account_id = Environment.current_order_data.account_id
         Environment.current_position_data.frozen += Environment.current_deal_data.deal_volume
 
         if Environment.bar_position_data_list:
@@ -202,7 +202,7 @@ class EventDeal(Event):
         """
         if Environment.bar_account_data_list:
             for account in Environment.bar_account_data_list:
-                if account.account_id == Environment.current_order_data.session_id:
+                if account.account_id == Environment.current_order_data.account_id:
                     if Environment.current_deal_data.offset == Offset.OPEN.value:
                         # 更新可用资金
                         account.available -= \
