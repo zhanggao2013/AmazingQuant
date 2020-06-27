@@ -54,10 +54,6 @@ class StratificationAnalysis(object):
         self.factor_group = factor_rank.apply(lambda x: pd.cut(x, self.group_num, labels=self.group_key), axis=1)
 
     def cal_group_hold(self, group_name):
-        """
-        a = group_hold.iloc[0]
-        a.dropna().index.values
-        """
         return self.factor_group[self.factor_group == group_name]
 
 
@@ -86,9 +82,9 @@ class StratificationStrategy(StrategyBase):
         # 设置运行模式，回测或者交易
         self.run_mode = RunMode.BACKTESTING.value
         # 设置回测资金账号
-        self.account = ['test0', 'test1']
+        self.account = ['test0']
         # 设置回测资金账号资金量
-        self.capital = {'test0': 100000000, 'test1': 2000}
+        self.capital = {'test0': 100000000}
         # 设置回测基准
         self.benchmark = '000300.SH'
         # 设置复权方式
