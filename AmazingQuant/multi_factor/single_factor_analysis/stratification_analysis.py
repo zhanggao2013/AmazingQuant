@@ -86,9 +86,9 @@ class StratificationStrategy(StrategyBase):
         # 设置运行模式，回测或者交易
         self.run_mode = RunMode.BACKTESTING.value
         # 设置回测资金账号
-        self.account = ['test0']
+        self.account = ['test0', 'test1']
         # 设置回测资金账号资金量
-        self.capital = {'test0': 100000000}
+        self.capital = {'test0': 100000000, 'test1': 2000}
         # 设置回测基准
         self.benchmark = '000300.SH'
         # 设置复权方式
@@ -128,7 +128,9 @@ class StratificationStrategy(StrategyBase):
         # 取当前bar的持仓情况
         available_position_dict = {}
         for position in Environment.bar_position_data_list:
-            available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
+            print('position.account_id', position.account_id)
+            if position.account_id == self.account[0]:
+                available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
 
         # 因子选股的持仓股票
         current_group_hold_list = self.group_hold.loc[self.time_tag].dropna().index.values
@@ -147,7 +149,7 @@ class StratificationStrategy(StrategyBase):
         Environment.logger.info(len(current_group_hold_list), len(position_stock_list), len(buy_stock_list),
                                 len(sell_stock_list))
 
-        print(Environment.current_account_data.available)
+        print(Environment.bar_account_data_list[0].available)
         # 循环遍历股票池
         for stock in sell_stock_list:
             # 取当前股票的收盘价
@@ -157,13 +159,13 @@ class StratificationStrategy(StrategyBase):
             Trade(self).order_shares(stock_code=stock, shares=-available_position_dict[stock], price_type='fix',
                                      order_price=close_price, account_id=self.account[0])
             Environment.logger.info(self.time_tag, 'sell', stock, available_position_dict[stock],
-                                    'fix', close_price, self.account)
+                                    'fix', close_price, self.account[0])
 
-        print(Environment.current_account_data.available)
+        print(Environment.bar_account_data_list[0].available, Environment.bar_account_data_list[0].account_id)
         # print(position_stock_list)
         if position_stock_list:
-            self.single_stock_value = (Environment.current_account_data.available -
-                                       Environment.current_account_data.total_balance * (1 - self.hold_ratio)) / \
+            self.single_stock_value = (Environment.bar_account_data_list[0].available -
+                                       Environment.bar_account_data_list[0].total_balance * (1 - self.hold_ratio)) / \
                                       len(buy_stock_list)
             self.single_stock_value = max(self.single_stock_value, 0)
             print(self.single_stock_value)
@@ -177,7 +179,7 @@ class StratificationStrategy(StrategyBase):
                 buy_share = int(self.single_stock_value / close_price / 100) * 100
                 Trade(self).order_shares(stock_code=stock, shares=buy_share, price_type='fix', order_price=close_price,
                                          account_id=self.account[0])
-                Environment.logger.info(self.time_tag, 'buy', stock, buy_share, 'fix', close_price, self.account)
+                Environment.logger.info(self.time_tag, 'buy', stock, buy_share, 'fix', close_price, self.account[0])
 
 
 if __name__ == '__main__':

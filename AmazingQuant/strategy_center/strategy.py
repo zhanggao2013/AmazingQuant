@@ -160,7 +160,7 @@ class StrategyBase(metaclass=ABCMeta):
         if self.account:
             for account in self.account:
                 Environment.current_account_data = AccountData()
-                Environment.current_account_data.account_id = generate_random_id.generate_random_id(account)
+                Environment.current_account_data.account_id = account
                 Environment.current_account_data.total_balance = self.capital[account]
                 Environment.current_account_data.available = self.capital[account]
                 # Environment.logger(Environment.current_account_data.account_id, Environment.current_account_data.available)
