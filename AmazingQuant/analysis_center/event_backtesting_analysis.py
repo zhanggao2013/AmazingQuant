@@ -91,16 +91,16 @@ class EventBacktestingAnalysis(Event):
     @classmethod
     def show_backtesting_indicator(cls, event):
         benchmark = event.event_data_dict['strategy_data'].benchmark
+        account = event.event_data_dict['strategy_data'].account
         data_class = GetKlineData()
         start_time = Environment.benchmark_index[0]
         end_time = Environment.benchmark_index[-1]
-        account_data_property_list = list(json.loads(AccountData().__str__()).keys())
-        account_df = pd.DataFrame(columns=account_data_property_list)
-        for time_tag in Environment.account_data_dict:
-            account_df = account_df.append(pd.Series({i: Environment.account_data_dict[time_tag][0].__dict__[i]
-                                                      for i in account_data_property_list}, name=time_tag))
+
+        account_df = Environment.backtesting_record_account
         benchmark_df = data_class.get_market_data(Environment.index_daily_data, stock_code=[benchmark],
                                                   field=['close'], ).to_frame(name='close')
+        account_df = account_df[account_df.index.get_level_values(1) == account[0]]
+        account_df.reset_index(level='account_id', drop=True, inplace=True)
         net_value_analysis_obj = NetValueAnalysis(account_df, benchmark_df, start_time, end_time)
 
         net_analysis_result = net_value_analysis_obj.cal_net_analysis_result()
