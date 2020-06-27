@@ -19,9 +19,10 @@ class Trade(object):
         self._strategy = strategy
 
     def order_shares(self, stock_code="", shares=1, price_type=PriceType.LIMIT.value, order_price=None,
-                   account=""):
+                   account_id=""):
         """下单函数"""
         # 代码编号相关
+        Environment.current_order_data.account_id = account_id
         Environment.current_order_data.order_id = generate_random_id(ID.ORDER_ID.value)
         stock_code_split = stock_code.split('.')
         Environment.current_order_data.instrument = stock_code_split[0]
@@ -42,7 +43,7 @@ class Trade(object):
         # CTP相关
         Environment.current_order_data.order_time = self._strategy.time_tag
         for account_data in Environment.bar_account_data_list:
-            if account_data.account_id[:-9] == account:
+            if account_data.account_id[:-9] == account_id:
                 Environment.current_order_data.session_id = account_data.account_id
 
         run_mission_engine(strategy=self._strategy)

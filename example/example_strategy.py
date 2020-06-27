@@ -106,19 +106,19 @@ class MaStrategy(StrategyBase):
                         if ma5 > ma20 and stock not in available_position_dict.keys() and stock in index_member_list:
                             Trade(self).order_shares(stock_code=stock, shares=100, price_type='fix',
                                                      order_price=close_price,
-                                                     account=self.account[0])
+                                                     account_id=self.account[0])
                             Environment.logger.info('buy', stock, -1, 'fix', close_price, self.account)
                         # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
                         elif ma5 < ma20 and stock in available_position_dict.keys():
                             Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
                                                      order_price=close_price,
-                                                     account=self.account[0])
+                                                     account_id=self.account[0])
                             Environment.logger.info('sell', stock, -1, 'fix', close_price, self.account)
             for stock in available_position_dict.keys():
                 if stock not in index_member_list:
                     Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
                                              order_price=close_price,
-                                             account=self.account[0])
+                                             account_id=self.account[0])
                     Environment.logger.info('sell not in index_member_list', stock, -1, 'fix', close_price, self.account)
         self.now = time.time()
 

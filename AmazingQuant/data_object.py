@@ -14,6 +14,7 @@ from AmazingQuant.constant import Empty
 class OrderData(object):
     def __init__(self):
         # 　代码编号相关
+        self.account_id = Empty.EMPTY_STRING.value  # 资金账号
         self.order_id = Empty.EMPTY_STRING.value  # 订单编号
         self.instrument = Empty.EMPTY_STRING.value  # 合约代码
         self.exchange = Empty.EMPTY_STRING.value  # 交易所代码
@@ -35,7 +36,8 @@ class OrderData(object):
         self.session_id = Empty.EMPTY_STRING.value  # 连接编号
 
     def __str__(self):
-        obj_property = {'order_id': self.order_id,
+        obj_property = {'account_id': self.account_id,
+                        'order_id': self.order_id,
                         'instrument': self.instrument,
                         'exchange': self.exchange,
 
@@ -58,6 +60,7 @@ class OrderData(object):
 class DealData(object):
     def __init__(self):
         # 　代码编号相关
+        self.account_id = Empty.EMPTY_STRING.value  # 资金账号
         self.trade_id = Empty.EMPTY_STRING.value  # 成交编号
         self.instrument = Empty.EMPTY_STRING.value  # 合约代码
         self.exchange = Empty.EMPTY_STRING.value  # 交易所代码
@@ -71,7 +74,8 @@ class DealData(object):
         self.deal_time = Empty.EMPTY_STRING.value  # 成交时间
 
     def __str__(self):
-        obj_property = {'trade_id': self.trade_id,
+        obj_property = {'account_id': self.account_id,
+                        'trade_id': self.trade_id,
                         'instrument': self.instrument,
                         'exchange': self.exchange,
                         'order_id': self.order_id,
@@ -82,7 +86,6 @@ class DealData(object):
                         'deal_volume': self.deal_volume,
                         'deal_time': self.deal_time}
         return json.dumps(obj_property)
-
 
 
 class PositionData(object):

@@ -32,6 +32,7 @@ class EventDeal(Event):
         # self.deal_volume = Empty.EMPTY_INT.value  # 成交数量
         # self.deal_time = Empty.EMPTY_STRING.value  # 成交时间
         if Environment.current_order_data.status == Status.NOT_TRADED.value:
+            Environment.current_deal_data.account_id = Environment.current_order_data.account_id
             Environment.current_deal_data.trade_id = generate_random_id(topic=ID.DEAL_ID.value)
             Environment.current_deal_data.instrument = Environment.current_order_data.instrument
             Environment.current_deal_data.exchange = Environment.current_order_data.exchange

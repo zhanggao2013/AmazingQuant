@@ -95,7 +95,7 @@ class StratificationStrategy(StrategyBase):
         self.rights_adjustment = RightsAdjustment.FROWARD.value
         # 设置回测起止时间
         self.start = self.group_hold.index[0]
-        # self.start = datetime(2019, 12, 5)
+        self.start = datetime(2019, 12, 5)
         self.end = self.group_hold.index[-1]
         # 设置运行周期
         self.period = 'daily'
@@ -155,7 +155,7 @@ class StratificationStrategy(StrategyBase):
             if np.isnan(close_price):
                 continue
             Trade(self).order_shares(stock_code=stock, shares=-available_position_dict[stock], price_type='fix',
-                                     order_price=close_price, account=self.account[0])
+                                     order_price=close_price, account_id=self.account[0])
             Environment.logger.info(self.time_tag, 'sell', stock, available_position_dict[stock],
                                     'fix', close_price, self.account)
 
@@ -176,7 +176,7 @@ class StratificationStrategy(StrategyBase):
                     continue
                 buy_share = int(self.single_stock_value / close_price / 100) * 100
                 Trade(self).order_shares(stock_code=stock, shares=buy_share, price_type='fix', order_price=close_price,
-                                         account=self.account[0])
+                                         account_id=self.account[0])
                 Environment.logger.info(self.time_tag, 'buy', stock, buy_share, 'fix', close_price, self.account)
 
 
