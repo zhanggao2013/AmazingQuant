@@ -18,8 +18,6 @@
 （2）position_industry：行业市值-时序
 （3）position_industry_pct:行业市值占比-时序
 （4）position_industry_pct_mean：行业市值历史均值
-
-
 """
 
 import pandas as pd
