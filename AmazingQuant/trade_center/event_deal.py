@@ -155,6 +155,9 @@ class EventDeal(Event):
                         position_data.frozen += Environment.current_deal_data.deal_volume
                         # Environment.logger.info("update_position_list")
 
+                        position_data.close = Environment.current_deal_data.deal_price
+                        position_data.hold_value = Environment.current_deal_data.deal_price * position_data.position
+
                     elif Environment.current_deal_data.offset == Offset.CLOSE.value:
                         total_position = \
                             position_data.position - Environment.current_deal_data.deal_volume
@@ -168,6 +171,8 @@ class EventDeal(Event):
                             position_data.average_price = 0
                         position_data.position = total_position
                         # Environment.logger.info("sell position"*5, position_data.position)
+                        position_data.close = Environment.current_deal_data.deal_price
+                        position_data.hold_value = Environment.current_deal_data.deal_price * position_data.position
 
             # 持仓不为空，且不在持仓里面的，append到Environment.bar_position_data_list
             if position_num == len(Environment.bar_position_data_list) and position_hold is False:

@@ -103,6 +103,9 @@ class PositionData(object):
         self.yesterday_position = Empty.EMPTY_INT.value  # 昨持仓数量，期货用
         self.position_profit = Empty.EMPTY_FLOAT.value  # 持仓盈亏
 
+        self.close = Empty.EMPTY_FLOAT.value  # 当前bar的收盘价
+        self.hold_value = Empty.EMPTY_FLOAT.value  # 持仓市值
+
     def __str__(self):
         obj_property = {'instrument': self.instrument,
                         'exchange': self.exchange,
@@ -113,7 +116,11 @@ class PositionData(object):
                         'position': self.position,
                         'frozen': self.frozen,
                         'yesterday_position': self.yesterday_position,
-                        'position_profit': self.position_profit}
+                        'position_profit': self.position_profit,
+
+                        'close': self.close,
+                        'hold_value': self.hold_value,
+                        }
         return json.dumps(obj_property)
 
 

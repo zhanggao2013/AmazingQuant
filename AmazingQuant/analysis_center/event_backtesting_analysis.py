@@ -20,7 +20,7 @@ from AmazingQuant.event_engine.event_engine_base import Event, EventType
 from AmazingQuant.environment import Environment
 from AmazingQuant.constant import RecordDataType, Period
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
-from AmazingQuant.utils.data_transfer import millisecond_to_date
+from AmazingQuant.analysis_center.position_analysis import PositionAnalysis
 from AmazingQuant.analysis_center.net_value_analysis import NetValueAnalysis
 from AmazingQuant.data_object import AccountData, OrderData, DealData, PositionData
 
@@ -108,4 +108,10 @@ class EventBacktestingAnalysis(Event):
             Environment.logger.info(i, net_analysis_result[i])
 
         # 持仓数据转pandas
-        # a = Environment.position_data_dict[list(Environment.position_data_dict.keys())[0]][0]
+        position_data_df = Environment.backtesting_record_position
+
+        position_data_df = position_data_df[position_data_df.index.get_level_values(1) == account[0]]
+        position_analysis_obj = PositionAnalysis(position_data_df)
+        position_analysis_result = position_analysis_obj.cal_position_analysis_result()
+        for i in position_analysis_result:
+            Environment.logger.info(i, position_analysis_result[i])
