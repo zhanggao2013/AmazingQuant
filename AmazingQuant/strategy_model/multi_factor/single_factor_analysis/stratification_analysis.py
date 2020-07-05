@@ -9,7 +9,7 @@
 """
 分层法
 （1）根据因子排序分组，
-（2）每组持仓股票作为策略，进入回测模块分析
+（2）每组持仓股票作为策略，进入回测模块分析，设置仓位（默认95%，因交易费用，满仓后无法买入）
 """
 import time
 
@@ -48,7 +48,7 @@ class StratificationAnalysis(object):
 
 # 继承strategy基类
 class StratificationStrategy(StrategyBase):
-    def __init__(self, group_hold, strategy_name='stratification_strategy'):
+    def __init__(self, group_hold, hold_ratio=0.95, strategy_name='stratification_strategy'):
         """
         用户定义类变量
         取本地数据
@@ -63,7 +63,7 @@ class StratificationStrategy(StrategyBase):
         self.single_stock_value = None
 
         # 初始仓位，因交易费用，满仓后无法慢如
-        self.hold_ratio = 0.95
+        self.hold_ratio = hold_ratio
         self.group_hold_num = self.group_hold.iloc[0].dropna().shape[0]
         Environment.logger = Logger(strategy_name)
 
