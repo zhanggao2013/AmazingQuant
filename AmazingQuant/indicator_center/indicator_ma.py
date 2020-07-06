@@ -45,7 +45,6 @@ class MaIndicator(object):
 
 if __name__ == '__main__':
     with Timer(True):
-
         ma_indicator = MaIndicator()
         ma_indicator.get_stock_list()
         print(len(ma_indicator.stock_list))
