@@ -30,7 +30,7 @@ class MaStrategy(StrategyBase):
         取本地数据
         :param strategy_name:
         """
-        super().__init__()
+        super().__init__(strategy_name=strategy_name)
 
         # 取指数成分股实例
         self.index_member_obj = GetIndexMember()
@@ -49,9 +49,9 @@ class MaStrategy(StrategyBase):
         # 设置运行模式，回测或者交易
         self.run_mode = RunMode.BACKTESTING.value
         # 设置回测资金账号
-        self.account = ['test0', 'test1']
+        self.account = ['test0']
         # 设置回测资金账号资金量
-        self.capital = {'test0': 2000000, 'test1': 1000}
+        self.capital = {'test0': 2000000}
         # 设置回测基准
         self.benchmark = '000300.SH'
         # 设置复权方式
@@ -75,14 +75,14 @@ class MaStrategy(StrategyBase):
         # 回测股票手续费和印花税，卖出印花税，千分之一；开仓手续费，万分之三；平仓手续费，万分之三，最低手续费，５元
         # 沪市，卖出有万分之二的过户费，加入到卖出手续费
         self.set_commission(stock_type=StockType.STOCK_SH.value, tax=0.001, open_commission=0.0003,
-                            close_commission=0.0003,
+                            close_commission=0.00032,
                             close_today_commission=0, min_commission=5)
         # 深市不加过户费
         self.set_commission(stock_type=StockType.STOCK_SZ.value, tax=0.001, open_commission=0.0003,
-                            close_commission=0.0005,
+                            close_commission=0.0003,
                             close_today_commission=0, min_commission=5)
 
-    def on_bar(self, event):
+    def handle_bar(self, event):
         Environment.logger.info('self.time_tag', self.time_tag, datetime.now(), (time.time()-self.now)*1000)
         Environment.logger.debug(len(Environment.bar_position_data_list))
         # 取当前bar的持仓情况
@@ -106,19 +106,19 @@ class MaStrategy(StrategyBase):
                         if ma5 > ma20 and stock not in available_position_dict.keys() and stock in index_member_list:
                             Trade(self).order_shares(stock_code=stock, shares=100, price_type='fix',
                                                      order_price=close_price,
-                                                     account=self.account[0])
+                                                     account_id=self.account[0])
                             Environment.logger.info('buy', stock, -1, 'fix', close_price, self.account)
                         # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
                         elif ma5 < ma20 and stock in available_position_dict.keys():
                             Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
                                                      order_price=close_price,
-                                                     account=self.account[0])
+                                                     account_id=self.account[0])
                             Environment.logger.info('sell', stock, -1, 'fix', close_price, self.account)
             for stock in available_position_dict.keys():
                 if stock not in index_member_list:
                     Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
                                              order_price=close_price,
-                                             account=self.account[0])
+                                             account_id=self.account[0])
                     Environment.logger.info('sell not in index_member_list', stock, -1, 'fix', close_price, self.account)
         self.now = time.time()
 

@@ -9,7 +9,7 @@
 
 from datetime import datetime
 
-import pandas as pd
+import numpy as np
 
 from AmazingQuant.constant import Period, RightsAdjustment, LocalDataFolderName
 from AmazingQuant.utils.performance_test import Timer
@@ -87,6 +87,9 @@ if __name__ == '__main__':
     with Timer(True):
         kline_object = GetKlineData()
         all_market_data = kline_object.cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value)
+        a = all_market_data['close']
+        b = a['003816.SZ']
+        print(b)
         # all_index_data = kline_object.cache_all_index_data()
         #
         # index_data = kline_object.get_index_data(all_index_data, index_code=['000001.SH'], field=['open', 'close'], end=datetime.now())

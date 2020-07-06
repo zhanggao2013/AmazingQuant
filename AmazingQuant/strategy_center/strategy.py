@@ -19,11 +19,11 @@ from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 
 
 class StrategyBase(metaclass=ABCMeta):
-    def __init__(self, strategy_name='ma_strategy'):
+    def __init__(self, strategy_name='strategy_base'):
         self._strategy_name = strategy_name
         self._run_mode = RunMode.BACKTESTING.value
-        self._account = []
-        self._capital = 1000000
+        self._account = ['test_account']
+        self._capital = {'test_account': 1000000}
         self._start = datetime(2017, 1, 1)
         self._end = datetime(2018, 1, 1)
         self._benchmark = '000300.SH'
@@ -160,7 +160,7 @@ class StrategyBase(metaclass=ABCMeta):
         if self.account:
             for account in self.account:
                 Environment.current_account_data = AccountData()
-                Environment.current_account_data.account_id = generate_random_id.generate_random_id(account)
+                Environment.current_account_data.account_id = account
                 Environment.current_account_data.total_balance = self.capital[account]
                 Environment.current_account_data.available = self.capital[account]
                 # Environment.logger(Environment.current_account_data.account_id, Environment.current_account_data.available)
@@ -216,20 +216,29 @@ class StrategyBase(metaclass=ABCMeta):
     def initialize(self):
         """
         设置运行模式，回测、实盘
-        设置on_bar运行周期，分钟线、日线
+        设置handle_bar运行周期，分钟线、日线
         设置缓存历史数据范围、实时行情订阅
         设置回测的各种设置。手续费、滑点、回测区间等
         :return:
         """
         pass
 
-    def on_bar(self, event):
+    def handle_bar(self, event):
         """
-        支持分钟线、日线的处理
+        回测日线的处理
         :param event:
         :return:
         """
         Environment.logger('abstractmethod handle_bar')
+        pass
+
+    def on_bar(self, event):
+        """
+        实时行情分钟线的回调处理,每只股票数据推送都调用
+        :param event:
+        :return:
+        """
+        Environment.logger('abstractmethod on_bar')
         pass
 
     def on_quote(self, event):

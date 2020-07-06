@@ -9,14 +9,14 @@ ulimit -n 25000
 
 
 先启动 config ，再启动shard，最后启动mongos
-/usr/bin/mongod --port 27222 --dbpath=/home/zhanggao/mongodb/shard/config --logpath=/home/zhanggao/mongodb/shard/log/config.log --logappend --fork --configsvr --replSet rs0
+sudo /usr/bin/mongod --port 27222 --dbpath=/home/zhanggao/mongodb/shard/config --logpath=/home/zhanggao/mongodb/shard/log/config.log --logappend --fork --configsvr --replSet rs0
 
-/usr/bin/mongod --shardsvr --port 27020 --dbpath=/home/zhanggao/mongodb/shard/s0 --logpath=/home/zhanggao/mongodb/shard/log/s0.log --logappend --fork
-/usr/bin/mongod --shardsvr --port 27021 --dbpath=/home/zhanggao/mongodb/shard/s1 --logpath=/home/zhanggao/mongodb/shard/log/s1.log --logappend --fork
-/usr/bin/mongod --shardsvr --port 27022 --dbpath=/home/zhanggao/mongodb/shard/s2 --logpath=/home/zhanggao/mongodb/shard/log/s2.log --logappend --fork
-/usr/bin/mongod --shardsvr --port 27023 --dbpath=/home/zhanggao/mongodb/shard/s3 --logpath=/home/zhanggao/mongodb/shard/log/s3.log --logappend --fork
+sudo /usr/bin/mongod --shardsvr --port 27020 --dbpath=/home/zhanggao/mongodb/shard/s0 --logpath=/home/zhanggao/mongodb/shard/log/s0.log --logappend --fork
+sudo /usr/bin/mongod --shardsvr --port 27021 --dbpath=/home/zhanggao/mongodb/shard/s1 --logpath=/home/zhanggao/mongodb/shard/log/s1.log --logappend --fork
+sudo /usr/bin/mongod --shardsvr --port 27022 --dbpath=/home/zhanggao/mongodb/shard/s2 --logpath=/home/zhanggao/mongodb/shard/log/s2.log --logappend --fork
+sudo /usr/bin/mongod --shardsvr --port 27023 --dbpath=/home/zhanggao/mongodb/shard/s3 --logpath=/home/zhanggao/mongodb/shard/log/s3.log --logappend --fork
 
-/usr/bin/mongos --port 40001 --configdb=rs0/127.0.0.1:27222 --fork --logpath=/home/zhanggao/mongodb/shard/log/route.log
+sudo /usr/bin/mongos --port 40001 --configdb=rs0/127.0.0.1:27222 --fork --logpath=/home/zhanggao/mongodb/shard/log/route.log
 
 
 如果因为 linux 异常关闭，（1）删除所有 .lock文件，（2）--repair  启动，（3）不带 repair 再启动一次

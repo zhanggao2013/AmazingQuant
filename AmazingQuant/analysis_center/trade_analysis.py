@@ -3,6 +3,6 @@
 # ------------------------------
 # @Time    : 2019/12/16
 # @Author  : gao
-# @File    : deal_analysis.py
+# @File    : trade_analysis.py
 # @Project : AmazingQuant
 # ------------------------------

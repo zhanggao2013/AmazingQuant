@@ -73,6 +73,8 @@ class EventMarket(Event):
                 current_close_price = cls.current_close_price_all["close"][stock_code]
                 position_data.position_profit = position_data.position * (
                         current_close_price - position_data.average_price)
+                position_data.close = current_close_price
+                position_data.hold_value = current_close_price * position_data.position
         # Environment.logger.info("更新bar_close持仓盈亏")
 
     @classmethod

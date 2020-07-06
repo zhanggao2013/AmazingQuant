@@ -32,6 +32,7 @@ class EventDeal(Event):
         # self.deal_volume = Empty.EMPTY_INT.value  # 成交数量
         # self.deal_time = Empty.EMPTY_STRING.value  # 成交时间
         if Environment.current_order_data.status == Status.NOT_TRADED.value:
+            Environment.current_deal_data.account_id = Environment.current_order_data.account_id
             Environment.current_deal_data.trade_id = generate_random_id(topic=ID.DEAL_ID.value)
             Environment.current_deal_data.instrument = Environment.current_order_data.instrument
             Environment.current_deal_data.exchange = Environment.current_order_data.exchange
@@ -128,7 +129,7 @@ class EventDeal(Event):
         # self.position_profit = Empty.EMPTY_FLOAT.value  # 持仓盈亏
         Environment.current_position_data.instrument = Environment.current_deal_data.instrument
         Environment.current_position_data.exchange = Environment.current_deal_data.exchange
-        Environment.current_position_data.account_id = Environment.current_order_data.session_id
+        Environment.current_position_data.account_id = Environment.current_order_data.account_id
         Environment.current_position_data.frozen += Environment.current_deal_data.deal_volume
 
         if Environment.bar_position_data_list:
@@ -154,6 +155,9 @@ class EventDeal(Event):
                         position_data.frozen += Environment.current_deal_data.deal_volume
                         # Environment.logger.info("update_position_list")
 
+                        position_data.close = Environment.current_deal_data.deal_price
+                        position_data.hold_value = Environment.current_deal_data.deal_price * position_data.position
+
                     elif Environment.current_deal_data.offset == Offset.CLOSE.value:
                         total_position = \
                             position_data.position - Environment.current_deal_data.deal_volume
@@ -167,6 +171,8 @@ class EventDeal(Event):
                             position_data.average_price = 0
                         position_data.position = total_position
                         # Environment.logger.info("sell position"*5, position_data.position)
+                        position_data.close = Environment.current_deal_data.deal_price
+                        position_data.hold_value = Environment.current_deal_data.deal_price * position_data.position
 
             # 持仓不为空，且不在持仓里面的，append到Environment.bar_position_data_list
             if position_num == len(Environment.bar_position_data_list) and position_hold is False:
@@ -201,7 +207,7 @@ class EventDeal(Event):
         """
         if Environment.bar_account_data_list:
             for account in Environment.bar_account_data_list:
-                if account.account_id == Environment.current_order_data.session_id:
+                if account.account_id == Environment.current_order_data.account_id:
                     if Environment.current_deal_data.offset == Offset.OPEN.value:
                         # 更新可用资金
                         account.available -= \

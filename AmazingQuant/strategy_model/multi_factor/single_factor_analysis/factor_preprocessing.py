@@ -41,7 +41,8 @@ import numpy as np
 import statsmodels.api as sm
 
 from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
-from AmazingQuant.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod, FillNanMethod, NeutralizeMethod
+from AmazingQuant.strategy_model.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod, FillNanMethod,\
+    NeutralizeMethod
 from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass
 from AmazingQuant.data_center.api_data.get_share import GetShare
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
@@ -245,7 +246,7 @@ class Neutralize(object):
 
 
 if __name__ == '__main__':
-    indicator_data = SaveGetIndicator().get_indicator('ma5')
+    indicator_data = SaveGetIndicator().get_indicator('ma10')
 
     factor_pre_obj = FactorPreProcessing(indicator_data)
     # 可根据时间和股票list过滤数据
@@ -269,7 +270,7 @@ if __name__ == '__main__':
 
     # 保存预处理之后的因子数据，单因子检测使用
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
-    save_data_to_hdf5(path, 'factor_ma5', fill_nan_data)
+    save_data_to_hdf5(path, 'factor_ma10', fill_nan_data)
 
 
 

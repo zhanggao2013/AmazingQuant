@@ -41,7 +41,7 @@ class UpdateKlineData(object):
         self.calendar_SZ = calendar_obj.get_calendar('SZ')
         self.end = end
         database = DatabaseName.A_SHARE_KLINE_DAILY.value
-        process_num = 2 * cpu_count()
+        process_num = cpu_count()+2
         process_stock_num = int(len(security_list) / process_num) + 1
         security_list_split = []
         for i in range(int(len(security_list) / process_stock_num)):
@@ -97,7 +97,9 @@ class UpdateKlineData(object):
             if field not in ['time_tag', 'interest']:
                 path = LocalDataPath.path + folder_name + '/' + sub_folder_name + '/' + sub_sub_folder_name + '/'
                 data_name = field
-                save_data_to_hdf5(path, data_name, pd.DataFrame(all_market_data[field]))
+                data = pd.DataFrame(all_market_data[field])
+                save_data_to_hdf5(path, data_name, data)
+
 
     def update_index_data(self, end=datetime.now()):
         """
@@ -116,6 +118,9 @@ class UpdateKlineData(object):
                     security_code_data = KlineDaily_index_code.objects(time_tag__lte=self.end).as_pymongo()
                     security_code_data_df = pd.DataFrame(list(security_code_data)).reindex(columns=self.field)
                     security_code_data_df.set_index(["time_tag"], inplace=True)
+                    # 数据库中数据多了一天，特殊处理删除了
+                    if pd.Timestamp(datetime(2016, 1, 1)) in security_code_data_df.index:
+                        security_code_data_df = security_code_data_df.drop(labels=datetime(2016, 1, 1), axis=0)
                     index_data_dict[index_code] = security_code_data_df
         field_data_dict = {}
         for i in self.field:
@@ -139,5 +144,5 @@ class UpdateKlineData(object):
 if __name__ == '__main__':
     with Timer(True):
         kline_object = UpdateKlineData()
-        # kline_object.update_all_market_data()
-        kline_object.update_index_data()
+        kline_object.update_all_market_data()
+        # kline_object.update_index_data()

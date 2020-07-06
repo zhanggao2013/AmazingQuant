@@ -5,9 +5,7 @@
 # @Author  : gao
 # @File    : environment.py.py
 # @Project : AmazingQuant
-
-__author__ = "gao"
-
+# ------------------------------
 import pandas as pd
 
 from AmazingQuant.data_object import *
