@@ -6,7 +6,7 @@
 # @File    : result.py
 # @Project : AmazingQuant
 # ------------------------------
-
+import time
 from celery.result import AsyncResult
 from test.celery.celery_app_task import cel
 
@@ -15,10 +15,12 @@ result = add.delay(1, 1)
 print(result.id)
 a = 3
 async1 = AsyncResult(id=result.id, app=cel)
+
 while True:
     if async1.successful():
         result = async1.get()
         print(result)
+        print('执行完成', time.time())
         # async1.forget() # 将结果删除
         break
     elif async1.failed():
