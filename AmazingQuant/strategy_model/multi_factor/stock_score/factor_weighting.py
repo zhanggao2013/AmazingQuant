@@ -15,6 +15,7 @@
 (5)最大化IC_IR加权法
 (6)最大化IC加权法
 """
+from datetime import datetime
 
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
