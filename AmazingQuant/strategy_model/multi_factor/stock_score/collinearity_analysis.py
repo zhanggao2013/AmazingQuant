@@ -50,8 +50,11 @@ class CollinearityAnalysis(object):
         for factor_name in self.factor_name_index:
             model = sm.OLS(time_tag_data.loc[factor_name].T,
                            sm.add_constant(time_tag_data[time_tag_data.index != factor_name].T))
-            fit_result = model.fit()
-            vif_dict[factor_name] = 1 / (1 - fit_result.rsquared)
+            r_squared = model.fit().rsquared
+            if r_squared < 1:
+                vif_dict[factor_name] = 1 / (1 - r_squared)
+            else:
+                vif_dict[factor_name] = np.nan
         self.vif = self.vif.append(pd.Series(vif_dict, name=time_tag))
 
     def cal_condition_num(self, time_tag, time_tag_data):
