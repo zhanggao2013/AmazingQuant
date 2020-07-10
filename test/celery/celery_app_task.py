@@ -6,7 +6,6 @@
 # @File    : celery_app_task.py
 # @Project : AmazingQuant
 # ------------------------------
-from celery import Celery
 import time
 from test.celery import app
 
