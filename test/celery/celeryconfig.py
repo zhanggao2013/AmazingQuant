@@ -7,7 +7,7 @@ RESULT_BROKER_TRANSPORT_OPTIONS = {"master_name": "mymaster"}
 
 CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6378/1'  # 把任务结果存在了Redis
 
-IMPORTS = ("proj_celery.tasks",)
+IMPORTS = ("celery.tasks",)
 
 CELERY_QUEUES = (
     Queue("default", Exchange("default"), routing_key="default"),

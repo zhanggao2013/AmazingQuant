@@ -8,7 +8,7 @@
 # ------------------------------
 
 from celery import Celery
-# celery worker -A proj_celery -l info -n 1  -P eventlet
+# celery worker -A celery -l info -n 1  -P eventlet
 # celery flower --broker=redis://10.237.120.238:6379/13
 
 app = Celery('celery', include=['celery.tasks'])
