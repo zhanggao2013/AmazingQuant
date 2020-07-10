@@ -8,21 +8,10 @@
 # ------------------------------
 from celery import Celery
 import time
-# broker = 'redis://127.0.0.1:6378/7'
-# broker = 'amqp://guest:guest@127.0.0.1:5672/'
-# backend = 'redis://127.0.0.1:6378/1'
-
-broker = 'redis://10.237.120.238:6379/13'
-backend = 'redis://10.237.120.238:6379/14'
-
-cel = Celery('tasks', broker=broker, backend=backend)
+from test.celery import app
 
 
-a = 1
-a += 1
-
-
-@cel.task(name='celery_app_task.task')
+@app.task(name='celery_app_task.task')
 def add(x, y):
     time.sleep(4)
     return x + y

@@ -1,15 +1,20 @@
 # -*- coding: utf-8 -*-
 
 # ------------------------------
-# @Time    : 2020/5/5
-# @Author  : gao
+# @Time    : 2020/7/10
+# @Author  : zhangdg
 # @File    : run.py
 # @Project : AmazingQuant
 # ------------------------------
-# celery worker -A celery_app_task -l info -n 1 -c 10 -P eventlet
-# eventlet 线程、gevent 协程 都可以，prefork 进程、
 
-from test.celery.celery_app_task import cel
+from celery import Celery
+# celery worker -A proj_celery -l info -n 1  -P eventlet
+# celery flower --broker=redis://10.237.120.238:6379/13
+
+app = Celery('celery', include=['celery.tasks'])
+app.config_from_object('celery.celeryconfig')
+
+
 if __name__ == '__main__':
-    cel.worker_main()
-    # cel.worker_main(argv=['--loglevel=info')
+    app.start()
+    # app.worker_main()
