@@ -36,7 +36,7 @@ class CollinearityAnalysis(object):
         # 方差膨胀因子vif, Dataframe, index: time_tag , columns: factor name
         self.vif = pd.DataFrame(columns=self.factor_data.index.levels[0].unique())
         # 条件数, Series, index: time_tag
-        self.condition_num = pd.Series(index=self.time_tag_index)
+        self.condition_num = pd.Series(index=self.time_tag_index, dtype='float')
 
     def cal_relation(self, time_tag, time_tag_data):
         if time_tag == self.time_tag_index[0]:
