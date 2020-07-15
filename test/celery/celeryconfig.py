@@ -29,7 +29,7 @@ IMPORTS = ("celery.tasks",)
 # task name，做成list， 循环生成CELERY_QUEUES和CELERY_ROUTES
 task_name_list = ['task_A', 'task_B', 'task_C', 'task_D']
 CELERY_QUEUES = (Queue('for_' + i, Exchange('for_' + i), routing_key='for_' + i) for i in task_name_list)
-CELERY_ROUTES = ({'celery.tasks.save_' + i: {'queue': 'for_' + i, 'routing_key': 'for_' + i}, }
+CELERY_ROUTES = ({'celery.tasks.' + i: {'queue': 'for_' + i, 'routing_key': 'for_' + i}, }
                  for i in task_name_list)
 
 CELERY_TASK_SERIALIZER = 'msgpack'  # 任务序列化和反序列化使用msgpack方案
