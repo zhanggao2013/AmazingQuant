@@ -7,6 +7,24 @@ RESULT_BROKER_TRANSPORT_OPTIONS = {"master_name": "mymaster"}
 
 CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6378/1'  # 把任务结果存在了Redis
 
+# redis集群哨兵模式---------------
+# CELERY_RESULT_BACKEND = 'sentinel://10.237.102.210:26379/14;' \
+#                         'sentinel://10.237.102.211:26379/14;' \
+#                         'sentinel://10.237.102.212:26379/14'
+# BROKER_URL = 'sentinel://10.237.102.210:26379/13;' \
+#              'sentinel://10.237.102.211:26379/13;' \
+#              'sentinel://10.237.102.212:26379/13'
+#
+# BROKER_TRANSPORT_OPTIONS = {
+#     'master_name': 'mymaster',
+#     'service_name': 'mymaster',
+#     'socket_timeout': 6000,
+#     'visibility_timeout': 3600,
+# }
+# CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = BROKER_TRANSPORT_OPTIONS
+#  redis集群哨兵模式---------------
+
+
 IMPORTS = ("celery.tasks",)
 
 CELERY_QUEUES = (
