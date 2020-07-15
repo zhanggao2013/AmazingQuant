@@ -6,7 +6,7 @@
 # @File    : add_task.py
 # @Project : AmazingQuant
 # ------------------------------
-from test.celery.celery_app_task import add
+from .celery_app_task import add
 from celery import group
 
 data = [1, 2, 3]
