@@ -26,10 +26,47 @@ CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6378/1'  # 把任务结果存在了Re
 
 
 IMPORTS = ("celery.tasks",)
-# task name，做成list， 循环生成CELERY_QUEUES和CELERY_ROUTES
 task_name_list = ['task_A', 'task_B', 'task_C', 'task_D']
-CELERY_QUEUES = (Queue('for_' + i, Exchange('for_' + i), routing_key='for_' + i) for i in task_name_list)
-CELERY_ROUTES = ({'celery.tasks.' + i: {'queue': 'for_' + i, 'routing_key': 'for_' + i}, } for i in task_name_list)
+
+CELERY_QUEUES = (
+    Queue("for_task_A", Exchange("for_task_A"), routing_key="for_task_A"),
+    Queue("for_task_B", Exchange("for_task_B"), routing_key="for_task_B"),
+    Queue("for_task_C", Exchange("for_task_C"), routing_key="for_task_C"),
+    Queue("for_task_D", Exchange("for_task_D"), routing_key="for_task_D")
+)
+
+CELERY_ROUTES = (
+    {
+        "proj_celery.tasks.taskA":
+            {
+                'queue': "for_task_A",
+                "routing_key": "for_task_A"
+            },
+    },
+
+    {
+        "proj_celery.tasks.taskB":
+            {
+                'queue': "for_task_B",
+                "routing_key": "for_task_B"
+            },
+    },
+
+    {
+        "proj_celery.tasks.taskC":
+            {
+                'queue': "for_task_C",
+                "routing_key": "for_task_C"
+            },
+    },
+    {
+        "proj_celery.tasks.taskD":
+            {
+                'queue': "for_task_D",
+                "routing_key": "for_task_D"
+            },
+    },
+)
 
 CELERY_TASK_SERIALIZER = 'msgpack'  # 任务序列化和反序列化使用msgpack方案
 # CELERY_TASK_SERIALIZER = 'json'  # 任务序列化和反序列化使用msgpack方案
