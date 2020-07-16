@@ -8,9 +8,9 @@
 # ------------------------------
 import time
 from celery.result import AsyncResult
-from test.celery import app
+from my_test.celery_test import app
 
-from test.celery.celery_app_task import add
+from my_test.celery_test.celery_app_task import add
 result = add.delay(1, 1)
 print(result.id)
 a = 3

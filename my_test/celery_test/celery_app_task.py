@@ -7,10 +7,11 @@
 # @Project : AmazingQuant
 # ------------------------------
 import time
-from test.celery import app
+from celery_test import app
+# from celery_test import app
 
 
-@app.task(name='celery_app_task.task')
+@app.task(name='celery_test.celery_app_task.task')
 def add(x, y):
     time.sleep(4)
     return x + y
