@@ -73,7 +73,7 @@ CELERY_TASK_SERIALIZER = 'msgpack'  # 任务序列化和反序列化使用msgpac
 
 CELERY_RESULT_SERIALIZER = 'json'  # 读取任务结果一般性能要求不高，所以使用了可读性更好的JSON
 
-CELERY_TASK_RESULT_EXPIRES = 3  # 任务过期时间
+CELERY_TASK_RESULT_EXPIRES = 60*24  # 任务过期时间（秒）
 
 CELERY_ACCEPT_CONTENT = ['json', 'msgpack']  # 指定接受的内容类型
 
