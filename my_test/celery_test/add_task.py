@@ -11,7 +11,7 @@ import time
 from celery_test.celery_app_task import add
 from celery import group
 
-data = [1, 2, 3]
+data = [1, 2, 3]*50
 r1 = group([add.s(i, i + 2) for i in data]).apply_async()
 
 for async1 in r1:

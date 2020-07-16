@@ -7,10 +7,11 @@
 # @Project : AmazingQuant
 # ------------------------------
 import time
-import sys
-# print(sys.path)
+
+import numpy as np
 from celery_test import app
-# from celery_test import app
+
+a = np.ones(1000000000)
 
 
 @app.task(name='celery_test.celery_app_task.taskA')
