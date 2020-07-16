@@ -79,3 +79,4 @@ CELERY_ACCEPT_CONTENT = ['json', 'msgpack']  # 指定接受的内容类型
 
 CELERY_REJECT_ON_WORKER_LOST = True  # 当worker进程意外退出时，task会被放回到队列中
 CELERY_ACKS_LATE = True  # 只有当worker完成了这个task时，任务才被标记为ack状态
+
