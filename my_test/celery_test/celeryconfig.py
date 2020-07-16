@@ -1,31 +1,31 @@
 from kombu import Exchange, Queue
 
-BROKER_URL = 'amqp://guest:guest@127.0.0.1:5672/'  # 使用amqp作为消息代理
+# BROKER_URL = 'amqp://guest:guest@127.0.0.1:5672/'  # 使用amqp作为消息代理
 # BROKER_URL = 'redis://127.0.0.1:6378/7'  # 使用redis作为消息代理
 
 RESULT_BROKER_TRANSPORT_OPTIONS = {"master_name": "mymaster"}
 
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6378/1'  # 把任务结果存在了Redis
+# CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6378/1'  # 把任务结果存在了Redis
 
 # redis集群哨兵模式---------------
-# CELERY_RESULT_BACKEND = 'sentinel://10.237.102.210:26379/14;' \
-#                         'sentinel://10.237.102.211:26379/14;' \
-#                         'sentinel://10.237.102.212:26379/14'
-# BROKER_URL = 'sentinel://10.237.102.210:26379/13;' \
-#              'sentinel://10.237.102.211:26379/13;' \
-#              'sentinel://10.237.102.212:26379/13'
-#
-# BROKER_TRANSPORT_OPTIONS = {
-#     'master_name': 'mymaster',
-#     'service_name': 'mymaster',
-#     'socket_timeout': 6000,
-#     'visibility_timeout': 3600,
-# }
-# CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = BROKER_TRANSPORT_OPTIONS
+CELERY_RESULT_BACKEND = 'sentinel://10.237.102.210:26379/14;' \
+                        'sentinel://10.237.102.211:26379/14;' \
+                        'sentinel://10.237.102.212:26379/14'
+BROKER_URL = 'sentinel://10.237.102.210:26379/13;' \
+             'sentinel://10.237.102.211:26379/13;' \
+             'sentinel://10.237.102.212:26379/13'
+
+BROKER_TRANSPORT_OPTIONS = {
+    'master_name': 'mymaster',
+    'service_name': 'mymaster',
+    'socket_timeout': 6000,
+    'visibility_timeout': 3600,
+}
+CELERY_RESULT_BACKEND_TRANSPORT_OPTIONS = BROKER_TRANSPORT_OPTIONS
 #  redis集群哨兵模式---------------
 
 
-IMPORTS = ("celery.tasks",)
+IMPORTS = ("celery_test.celery_app_task",)
 task_name_list = ['task_A', 'task_B', 'task_C', 'task_D']
 
 CELERY_QUEUES = (
@@ -37,7 +37,7 @@ CELERY_QUEUES = (
 
 CELERY_ROUTES = (
     {
-        "proj_celery.tasks.taskA":
+        "celery_test.celery_app_task.taskA":
             {
                 'queue': "for_task_A",
                 "routing_key": "for_task_A"
@@ -45,7 +45,7 @@ CELERY_ROUTES = (
     },
 
     {
-        "proj_celery.tasks.taskB":
+        "celery_test.celery_app_task.taskB":
             {
                 'queue': "for_task_B",
                 "routing_key": "for_task_B"
@@ -53,14 +53,14 @@ CELERY_ROUTES = (
     },
 
     {
-        "proj_celery.tasks.taskC":
+        "celery_test.celery_app_task.taskC":
             {
                 'queue': "for_task_C",
                 "routing_key": "for_task_C"
             },
     },
     {
-        "proj_celery.tasks.taskD":
+        "celery_test.celery_app_task.taskD":
             {
                 'queue': "for_task_D",
                 "routing_key": "for_task_D"
