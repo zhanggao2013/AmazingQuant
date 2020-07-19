@@ -35,6 +35,9 @@ from AmazingQuant.constant import LocalDataFolderName, RightsAdjustment
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.data_center.api_data.get_data import get_local_data
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
+from apps.server.database_server.database_field.field_multi_factor import FactorIcAnalysisResult
+from AmazingQuant.constant import DatabaseName
+from AmazingQuant.utils.mongo_connection_me import MongoConnect
 
 
 class IcAnalysis(object):
@@ -76,9 +79,11 @@ class IcAnalysis(object):
                     factor_data = self.factor.iloc[index - ic_decay - 1].dropna()
                     stock_list = list(set(stock_return.index).intersection(set(factor_data.index)))
                     if method == 'spearmanr':
-                        corr, p_value = stats.spearmanr(stock_return[stock_list].sort_index(), factor_data[stock_list].sort_index())
+                        corr, p_value = stats.spearmanr(stock_return[stock_list].sort_index(),
+                                                        factor_data[stock_list].sort_index())
                     elif method == 'pearsonr':
-                        corr, p_value = stats.pearsonr(stock_return[stock_list].sort_index(), factor_data[stock_list].sort_index())
+                        corr, p_value = stats.pearsonr(stock_return[stock_list].sort_index(),
+                                                       factor_data[stock_list].sort_index())
                 ic_dict[self.factor_name + '_' + str(ic_decay + 1)] = corr
                 p_value_dict[self.factor_name + '_' + str(ic_decay + 1)] = p_value
 
@@ -102,19 +107,42 @@ class IcAnalysis(object):
         self.ic_result.loc['ic_kurtosis'] = self.ic_df.kurt()
 
         p_value_significant = self.p_value_df[self.p_value_df < 0.05].count()
-        self.ic_result.loc['ic_positive_ratio'] = p_value_significant.div(ic_count)*100
-        self.ic_result.loc['ic_negative_ratio'] = (ic_count - p_value_significant).div(ic_count)*100
+        self.ic_result.loc['ic_positive_ratio'] = p_value_significant.div(ic_count) * 100
+        self.ic_result.loc['ic_negative_ratio'] = (ic_count - p_value_significant).div(ic_count) * 100
 
         ic_change_num = ic_greater_zero.diff().sum()
-        self.ic_result.loc['ic_change_ratio'] = ic_change_num.div(ic_count)*100
-        self.ic_result.loc['ic_unchange_ratio'] = (ic_count - ic_change_num).div(ic_count)*100
+        self.ic_result.loc['ic_change_ratio'] = ic_change_num.div(ic_count) * 100
+        self.ic_result.loc['ic_unchange_ratio'] = (ic_count - ic_change_num).div(ic_count) * 100
+
+    def save_ic_analysis_result(self, factor_name):
+        with MongoConnect(DatabaseName.MULTI_FACTOR_DATA.value):
+            ic_df = self.ic_df.copy()
+            p_value_df = self.p_value_df.copy()
+            ic_df.index = ic_df.index.format()
+            p_value_df.index = p_value_df.index.format()
+            doc = FactorIcAnalysisResult(
+                factor_name=factor_name,
+                # 因子数据开始时间
+                begin_date=self.factor.index[0],
+                # 因子数据结束时间
+                end_date=self.factor.index[-1],
+                # IC信号衰减计算，index 是时间序列， columns是decay周期，[1, self.ic_decay], 闭区间
+                ic=ic_df,
+                # p值信号衰减计算，index 是时间序列， columns是decay周期，[1, self.ic_decay], 闭区间
+                p_value=p_value_df,
+                ic_result=self.ic_result)
+            doc.save()
 
 
 if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
-    factor_ma5 = get_local_data(path, 'factor_ma5.h5')
+    factor_name = 'factor_ma10'
+    factor_ma5 = get_local_data(path, factor_name + '.h5')
+
     market_close_data = GetKlineData().cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value,
                                                             field=['close'])['close']
-    ic_analysis_obj = IcAnalysis(factor_ma5, 'factor_ma5', market_close_data)
+    ic_analysis_obj = IcAnalysis(factor_ma5, factor_name, market_close_data)
     ic_analysis_obj.cal_ic_df(method='spearmanr')
     ic_analysis_obj.cal_ic_indicator()
+    ic_analysis_obj.save_ic_analysis_result(factor_name)
+
