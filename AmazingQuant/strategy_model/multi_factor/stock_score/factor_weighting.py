@@ -17,6 +17,8 @@
 """
 from datetime import datetime
 
+import pandas as pd
+
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.data_center.api_data.get_data import get_local_data
@@ -24,7 +26,19 @@ from AmazingQuant.data_center.api_data.get_data import get_local_data
 
 class FactorWeighting(object):
     def __init__(self, factor_data=None):
-        pass
+        self.factor_data = factor_data
+        # 因子收益率，单利，复利
+        self.factor_return = pd.DataFrame(index=self.factor_data.values()[0].index, columns=['cumsum', 'cumprod'])
+        self.factor_return_daily = None
+
+    def weighting_equal(self):
+        result = None
+        for i in self.factor_data:
+            if result is None:
+                result = self.factor_data[i]
+            else:
+                result += self.factor_data[i]
+        return result
 
 
 if __name__ == '__main__':
@@ -36,3 +50,5 @@ if __name__ == '__main__':
     # 指数数据不全，需要删一部分因子数据
     factor_ma10 = factor_ma10[factor_ma10.index < datetime(2020, 1, 1)]
     factor_data = {'factor_ma5': factor_ma5, 'factor_ma10': factor_ma10}
+    factor_weighting_obj = FactorWeighting(factor_data)
+    factor_weighting_equal = factor_weighting_obj.weighting_equal()

@@ -30,7 +30,7 @@ class MongoConnect(object):
 
 
 if __name__ == '__main__':
-    database = "test"
+    database = "my_test"
     with MongoConnect(database):
         print("done")
     collection_name = "kline_daily"

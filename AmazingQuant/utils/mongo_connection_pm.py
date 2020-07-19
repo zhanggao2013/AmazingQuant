@@ -129,7 +129,7 @@ class MongoConnectPm(object):
 
 if __name__ == "__main__":
     db_name = "a_share_kline_daily"
-    collection_name = "test"
+    collection_name = "my_test"
     my_conn = MongoConnectPm()
     a = my_conn.get_list_collection_names(db_name)
     print(len(list(set(a))))

@@ -47,6 +47,8 @@ class DatabaseName(Enum):
     INDEX_KLINE_DAILY = 'index_kline_daily'
     MARKET_DATA_ONE_MIN = 'market_data_1min'
 
+    MULTI_FACTOR_DATA = 'multi_factor_Data'
+
 
 @unique
 class LocalDataFolderName(Enum):

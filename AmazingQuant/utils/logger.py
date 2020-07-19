@@ -56,7 +56,7 @@ class Logger(object):
 
 
 if __name__ == '__main__':
-    logger = Logger('test')
+    logger = Logger('my_test')
     logger.info('this is info', 'qwe')
     logger.debug('this is debug')
     logger.error('this is error')

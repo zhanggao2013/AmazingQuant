@@ -41,13 +41,17 @@ import numpy as np
 import statsmodels.api as sm
 
 from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
-from AmazingQuant.strategy_model.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod, FillNanMethod,\
+from AmazingQuant.strategy_model.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod, FillNanMethod, \
     NeutralizeMethod
 from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass
 from AmazingQuant.data_center.api_data.get_share import GetShare
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
+from apps.server.database_server.database_field.field_multi_factor import FactorPreProcessingData
+from AmazingQuant.constant import DatabaseName
+from AmazingQuant.utils.mongo_connection_me import MongoConnect
+from AmazingQuant.utils.code_transfer import code_market_to_market_code
 
 
 class FactorPreProcessing(object):
@@ -107,12 +111,36 @@ class FactorPreProcessing(object):
         if method is None:
             method = dict(neutralize_method=NeutralizeMethod.INDUSTRY.value)
         neutralize_obj = Neutralize(self.raw_data)
-        if NeutralizeMethod.INDUSTRY.value in method['neutralize_method']\
+        if NeutralizeMethod.INDUSTRY.value in method['neutralize_method'] \
                 or NeutralizeMethod.MARKET_VALUE.value in method['neutralize_method']:
             self.raw_data = neutralize_obj.neutralize_method(method['neutralize_method'])
         else:
             raise Exception('This extreme method is invalid!')
         return self.raw_data
+
+    def save_factor_data(self, factor_name, data_source=None):
+        if data_source is None:
+            data_source = ['hdf5', 'mongo']
+        if 'hdf5' in data_source:
+            # 保存预处理之后的数据到本地hdf5，单因子检测使用
+            path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
+            save_data_to_hdf5(path, factor_name, self.raw_data)
+
+        if 'mongo' in data_source:
+            # 保存预处理之后的数据到mongo
+            with MongoConnect(DatabaseName.MULTI_FACTOR_DATA.value):
+                doc_list = []
+                raw_data = self.raw_data.rename(columns={i: code_market_to_market_code(i) for i in extreme_data.columns})
+                for index, row in raw_data.iterrows():
+                    doc = FactorPreProcessingData(factor_name=factor_name,
+                                                  time_tag=index,
+                                                  factor_data=row)
+                    doc_list.append(doc)
+                    if len(doc_list) > 999:
+                        FactorPreProcessingData.objects.insert(doc_list)
+                        doc_list = []
+                else:
+                    FactorPreProcessingData.objects.insert(doc_list)
 
 
 class Extreme(object):
@@ -240,13 +268,14 @@ class Neutralize(object):
             fit_result = model.fit()
             # 残差作为中性化后的数据
             return fit_result.resid
-
         self.raw_data = self.raw_data.apply(cal_resid, args=(index_class_obj, share_data, method,), axis=1)
         return self.raw_data
 
 
 if __name__ == '__main__':
-    indicator_data = SaveGetIndicator().get_indicator('ma10')
+    indicator_name = 'ma10'
+    factor_name = 'factor_' + indicator_name
+    indicator_data = SaveGetIndicator().get_indicator(indicator_name)
 
     factor_pre_obj = FactorPreProcessing(indicator_data)
     # 可根据时间和股票list过滤数据
@@ -267,10 +296,5 @@ if __name__ == '__main__':
 
     # 补充空值的方法，已实现两种
     fill_nan_data = factor_pre_obj.fill_nan_processing(FillNanMethod.MEAN.value)
-
-    # 保存预处理之后的因子数据，单因子检测使用
-    path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
-    save_data_to_hdf5(path, 'factor_ma10', fill_nan_data)
-
-
+    factor_pre_obj.save_factor_data(factor_name)
 
