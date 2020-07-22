@@ -1,6 +1,6 @@
 from kombu import Exchange, Queue
 
-BROKER_URL = 'amqp://guest:guest@127.0.0.1:5672/'  # 使用amqp作为消息代理
+BROKER_URL = 'amqp://zhanggao2013:123456@127.0.0.1:5672/'  # 使用amqp作为消息代理
 # BROKER_URL = 'redis://127.0.0.1:6378/2'  # 使用redis作为消息代理
 
 RESULT_BROKER_TRANSPORT_OPTIONS = {"master_name": "mymaster"}
@@ -81,4 +81,4 @@ CELERY_REJECT_ON_WORKER_LOST = True  # 当worker进程意外退出时，task会�
 CELERY_ACKS_LATE = True  # 只有当worker完成了这个task时，任务才被标记为ack状态
 
 # 并发数
-CELERYD_CONCURRENCY = 8
+CELERYD_CONCURRENCY = 2
