@@ -19,36 +19,53 @@ from datetime import datetime
 
 import pandas as pd
 
-from AmazingQuant.constant import LocalDataFolderName
-from AmazingQuant.config.local_data_path import LocalDataPath
-from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.constant import DatabaseName
+from AmazingQuant.utils.mongo_connection_me import MongoConnect
+from apps.server.database_server.database_field.field_multi_factor import FactorRegressionAnalysisResult
 
 
 class FactorWeighting(object):
-    def __init__(self, factor_data=None):
-        self.factor_data = factor_data
-        # 因子收益率，单利，复利
-        self.factor_return = pd.DataFrame(index=self.factor_data.values()[0].index, columns=['cumsum', 'cumprod'])
-        self.factor_return_daily = None
+    def __init__(self, factor_return=None):
+        # 因子收益率，单利，复利, 日收益率
+        self.factor_return = factor_return
 
     def weighting_equal(self):
         result = None
-        for i in self.factor_data:
+        for i in self.factor_return:
             if result is None:
-                result = self.factor_data[i]
+                result = self.factor_return[i]
             else:
-                result += self.factor_data[i]
-        return result
+                result += self.factor_return[i]
+        return result / len(self.factor_return)
+
+    def weighting_history_ir(self, window=20):
+        result = None
+        factor_ic_dict = {}
+        for factor in self.factor_return:
+            factor_ic_dict[factor] = self.factor_return[factor].rolling(window=window).mean() / \
+                                     self.factor_return[factor].rolling(window=window).std()
+            if result is None:
+                result = factor_ic_dict[factor]
+            else:
+                result += factor_ic_dict[factor]
+        return result / len(self.factor_return)
 
 
 if __name__ == '__main__':
-    path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
-    factor_ma5 = get_local_data(path, 'factor_ma5.h5')
-    # 指数数据不全，需要删一部分因子数据
-    factor_ma5 = factor_ma5[factor_ma5.index < datetime(2020, 1, 1)]
-    factor_ma10 = get_local_data(path, 'factor_ma10.h5')
-    # 指数数据不全，需要删一部分因子数据
-    factor_ma10 = factor_ma10[factor_ma10.index < datetime(2020, 1, 1)]
-    factor_data = {'factor_ma5': factor_ma5, 'factor_ma10': factor_ma10}
-    factor_weighting_obj = FactorWeighting(factor_data)
+    factor_list = ['factor_ma5', 'factor_ma10']
+
+    with MongoConnect(DatabaseName.MULTI_FACTOR_DATA.value):
+        factor_return = {}
+        for factor_name in factor_list:
+            factor_regression_analysis_result = FactorRegressionAnalysisResult.objects(factor_name=factor_name) \
+                .only('factor_name') \
+                .only('begin_date') \
+                .only('end_date') \
+                .only('factor_return') \
+                .as_pymongo()
+            factor_return[factor_name] = pd.DataFrame(factor_regression_analysis_result[0]['factor_return'])
+            factor_return[factor_name].index = pd.DatetimeIndex(factor_return[factor_name].index)
+
+    factor_weighting_obj = FactorWeighting(factor_return)
     factor_weighting_equal = factor_weighting_obj.weighting_equal()
+    factor_history_ic = factor_weighting_obj.weighting_history_ir()

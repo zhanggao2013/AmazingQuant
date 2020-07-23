@@ -52,7 +52,7 @@ class FactorIcAnalysisResult(Document):
     # 'ic_positive_ratio', 'ic_negative_ratio', 'ic_change_ratio', 'ic_unchange_ratio', ]
     ic_result = DictField()
 
-    meta = {'indexes': ['factor_name'], 'shard_key': ('factor_name',)}
+    meta = {'indexes': ['factor_name', ('factor_name', 'begin_date', 'end_date')], 'shard_key': ('factor_name',)}
 
 
 class FactorRegressionAnalysisResult(Document):
@@ -76,4 +76,4 @@ class FactorRegressionAnalysisResult(Document):
     # 净值分析结果
     net_analysis_result = DictField()
 
-    meta = {'indexes': ['factor_name'], 'shard_key': ('factor_name',)}
+    meta = {'indexes': ['factor_name', ('factor_name', 'begin_date', 'end_date')], 'shard_key': ('factor_name',)}
