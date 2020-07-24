@@ -59,16 +59,13 @@ class FactorWeighting(object):
                 factor_data_total = factor_ic_dict[factor]
             else:
                 factor_data_total = factor_data_total + factor_ic_dict[factor]
-            print(factor, self.factor_return[factor][factor_return_type], factor_ic_dict[factor])
+
         for factor in self.factor_data:
-            # print(factor_ic_dict[factor], factor_data_total)
-            # print(factor, (factor_ic_dict[factor].div(factor_data_total)))
             factor_single_data_weighted = self.factor_data[factor].mul(factor_ic_dict[factor] / factor_data_total, axis=0)
-            # print(factor_single_data_weighted)
             if self.factor_data_weighted is None:
                 self.factor_data_weighted = factor_single_data_weighted
             else:
-                self.factor_data_weighted += factor_single_data_weighted
+                self.factor_data_weighted = self.factor_data_weighted + factor_single_data_weighted
         return self.factor_data_weighted
 
 
