@@ -32,68 +32,45 @@ class FactorWeighting(object):
     def __init__(self, factor_data, factor_return=None):
         # 因子数据
         self.factor_data = factor_data
-        # 因子收益率，单利，复利, 日收益率
-        self.factor_return = factor_return
+        # 因子加权后的结果
         self.factor_data_weighted = None
 
-    def weighting_equal(self):
-        for i in self.factor_data:
-            if self.factor_data_weighted is None:
-                self.factor_data_weighted = self.factor_data[i]
-            else:
-                self.factor_data_weighted += self.factor_data[i]
-        self.factor_data_weighted = self.factor_data_weighted / len(self.factor_data)
-        return self.factor_data_weighted
-
-    def weighting_history_ir(self, window=20):
+    def weighting_history_return(self, factor_return, weight_method='equal', window=20):
         """
-        :param factor_return_type: 'cumsum'     'cumprod'
-        :param window:
-        :return:
-        """
-        factor_ic_dict = {}
-        factor_data_total = None
-        for factor in self.factor_return:
-            factor_ic_dict[factor] = self.factor_return[factor]['daily'].rolling(window=window).mean() / \
-                                     self.factor_return[factor]['daily'].rolling(window=window).std()
-            if factor_data_total is None:
-                factor_data_total = factor_ic_dict[factor]
-            else:
-                factor_data_total = factor_data_total + factor_ic_dict[factor]
+        :param factor_return:
+        :param weight_method:'equal'，等权法，不需要window,
+                              'return_mean'， 历史收益率加权法，平均值，window是平均值周期,
+                              'return_half_life'，历史收益率加权法，半衰期法，window是半衰期,
+                               'return_ir'，  历史因子收益率信息比例(IR)加权法，window是平均值周期
 
-        for factor in self.factor_data:
-            factor_single_data_weighted = self.factor_data[factor].mul(factor_ic_dict[factor] / factor_data_total, axis=0)
-            if self.factor_data_weighted is None:
-                self.factor_data_weighted = factor_single_data_weighted
-            else:
-                self.factor_data_weighted = self.factor_data_weighted + factor_single_data_weighted
-        return self.factor_data_weighted
-
-    def weighting_history_return(self, predict_method='mean', window=20):
-        """
-        :param predict_method: 'mean', 'half_life'
         :param window:
         :return:
         """
 
-        factor_mean_dict = {}
-        factor_data_total = None
-        for factor in self.factor_return:
-            factor_mean_dict[factor] = None
-            if predict_method == 'mean':
-                factor_mean_dict[factor] = self.factor_return[factor]['daily'].rolling(window=window).mean()
-            elif predict_method == 'half_life':
-                factor_mean_dict[factor] = self.factor_return[factor]['daily'].ewm(halflife=window).mean()
+        factor_single_weight_dict = {}
+        factor_total_weight = None
+        for factor in factor_return:
+            factor_single_weight_dict[factor] = None
+            if weight_method == 'equal':
+                factor_single_weight_dict[factor] = 1
+            elif weight_method == 'return_mean':
+                factor_single_weight_dict[factor] = factor_return[factor]['daily'].rolling(window=window).mean()
+            elif weight_method == 'return_half_life':
+                factor_single_weight_dict[factor] = factor_return[factor]['daily'].ewm(halflife=window).mean()
+            elif weight_method == 'return_ir':
+                factor_single_weight_dict[factor] = factor_return[factor]['daily'].rolling(window=window).mean() / \
+                                                    factor_return[factor]['daily'].rolling(window=window).std()
             else:
-                raise Exception('predict_method is not exist')
+                raise Exception('weight_method is not exist')
 
-            if factor_data_total is None:
-                factor_data_total = factor_mean_dict[factor]
+            if factor_total_weight is None:
+                factor_total_weight = factor_single_weight_dict[factor]
             else:
-                factor_data_total = factor_data_total + factor_mean_dict[factor]
+                factor_total_weight = factor_total_weight + factor_single_weight_dict[factor]
 
         for factor in self.factor_data:
-            factor_single_data_weighted = self.factor_data[factor].mul(factor_mean_dict[factor] / factor_data_total, axis=0)
+            factor_single_data_weighted = self.factor_data[factor].mul(
+                factor_single_weight_dict[factor] / factor_total_weight, axis=0)
             if self.factor_data_weighted is None:
                 self.factor_data_weighted = factor_single_data_weighted
             else:
@@ -123,7 +100,5 @@ if __name__ == '__main__':
             factor_return[factor_name] = pd.DataFrame(factor_regression_analysis_result[0]['factor_return'])
             factor_return[factor_name].index = pd.DatetimeIndex(factor_return[factor_name].index)
 
-    factor_weighting_obj = FactorWeighting(factor_data, factor_return)
-    # factor_weighting_equal = factor_weighting_obj.weighting_equal()
-    # factor_history_ic = factor_weighting_obj.weighting_history_ir()
-    factor_history_return = factor_weighting_obj.weighting_history_return()
+    factor_weighting_obj = FactorWeighting(factor_data)
+    factor_history_return = factor_weighting_obj.weighting_history_return(factor_return, weight_method='equal')
