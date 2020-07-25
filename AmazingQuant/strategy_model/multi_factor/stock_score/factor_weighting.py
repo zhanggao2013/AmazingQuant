@@ -44,7 +44,7 @@ class FactorWeighting(object):
         self.factor_data_weighted = self.factor_data_weighted / len(self.factor_data)
         return self.factor_data_weighted
 
-    def weighting_history_ir(self, factor_return_type='cumsum', window=20):
+    def weighting_history_ir(self, window=20):
         """
         :param factor_return_type: 'cumsum'     'cumprod'
         :param window:
@@ -53,8 +53,8 @@ class FactorWeighting(object):
         factor_ic_dict = {}
         factor_data_total = None
         for factor in self.factor_return:
-            factor_ic_dict[factor] = self.factor_return[factor][factor_return_type].rolling(window=window).mean() / \
-                                     self.factor_return[factor][factor_return_type].rolling(window=window).std()
+            factor_ic_dict[factor] = self.factor_return[factor]['daily'].rolling(window=window).mean() / \
+                                     self.factor_return[factor]['daily'].rolling(window=window).std()
             if factor_data_total is None:
                 factor_data_total = factor_ic_dict[factor]
             else:
