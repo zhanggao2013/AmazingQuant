@@ -18,6 +18,7 @@
 from datetime import datetime
 
 import pandas as pd
+import numpy as np
 
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
@@ -68,6 +69,37 @@ class FactorWeighting(object):
                 self.factor_data_weighted = self.factor_data_weighted + factor_single_data_weighted
         return self.factor_data_weighted
 
+    def weighting_history_return(self, predict_method='mean', window=20):
+        """
+        :param predict_method: 'mean', 'half_life'
+        :param window:
+        :return:
+        """
+
+        factor_mean_dict = {}
+        factor_data_total = None
+        for factor in self.factor_return:
+            factor_mean_dict[factor] = None
+            if predict_method == 'mean':
+                factor_mean_dict[factor] = self.factor_return[factor]['daily'].rolling(window=window).mean()
+            elif predict_method == 'half_life':
+                factor_mean_dict[factor] = self.factor_return[factor]['daily'].ewm(halflife=window).mean()
+            else:
+                raise Exception('predict_method is not exist')
+
+            if factor_data_total is None:
+                factor_data_total = factor_mean_dict[factor]
+            else:
+                factor_data_total = factor_data_total + factor_mean_dict[factor]
+
+        for factor in self.factor_data:
+            factor_single_data_weighted = self.factor_data[factor].mul(factor_mean_dict[factor] / factor_data_total, axis=0)
+            if self.factor_data_weighted is None:
+                self.factor_data_weighted = factor_single_data_weighted
+            else:
+                self.factor_data_weighted = self.factor_data_weighted + factor_single_data_weighted
+        return self.factor_data_weighted
+
 
 if __name__ == '__main__':
     factor_list = ['factor_ma5', 'factor_ma10']
@@ -93,4 +125,5 @@ if __name__ == '__main__':
 
     factor_weighting_obj = FactorWeighting(factor_data, factor_return)
     # factor_weighting_equal = factor_weighting_obj.weighting_equal()
-    factor_history_ic = factor_weighting_obj.weighting_history_ir()
+    # factor_history_ic = factor_weighting_obj.weighting_history_ir()
+    factor_history_return = factor_weighting_obj.weighting_history_return()
