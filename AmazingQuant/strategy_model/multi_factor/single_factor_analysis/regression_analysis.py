@@ -193,7 +193,7 @@ class RegressionAnalysis(object):
 
 
 if __name__ == '__main__':
-    factor_name = 'factor_ma10'
+    factor_name = 'factor_ma5'
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
     factor_ma5 = get_local_data(path, factor_name + '.h5')
     # 指数数据不全，需要删一部分因子数据

@@ -273,7 +273,7 @@ class Neutralize(object):
 
 
 if __name__ == '__main__':
-    indicator_name = 'ma10'
+    indicator_name = 'ma5'
     factor_name = 'factor_' + indicator_name
     indicator_data = SaveGetIndicator().get_indicator(indicator_name)
 

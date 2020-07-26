@@ -47,7 +47,7 @@ class IcAnalysis(object):
         market_data = market_close_data.reindex(factor.index).reindex(factor.columns, axis=1)
 
         self.ic_decay = 20
-        column_list = [factor_name + '_' + str(i + 1) for i in range(self.ic_decay)]
+        column_list = ['delay_' + str(i + 1) for i in range(self.ic_decay)]
         self.stock_return_dict = {i + 1: market_data.pct_change(periods=i + 1) for i in range(self.ic_decay)}
 
         # IC信号衰减计算，index 是时间序列， columns是decay周期，[1, self.ic_decay], 闭区间
@@ -130,6 +130,10 @@ class IcAnalysis(object):
                 ic=ic_df,
                 # p值信号衰减计算，index 是时间序列， columns是decay周期，[1, self.ic_decay], 闭区间
                 p_value=p_value_df,
+                # IC均值、 IC标准差、 IC_IR比率、 IC > 0 占比、 | IC | > 0.02 占比(绝对值)、 偏度、 峰度、
+                # 正相关显著比例、负相关显著比例、状态切换比例、同向比例
+                # index_list=['ic_mean', 'ic_std', 'ic_ir', 'ic_ratio', 'ic_abs_ratio', 'ic_skewness', 'ic_kurtosis',
+                #             'ic_positive_ratio', 'ic_negative_ratio', 'ic_change_ratio', 'ic_unchange_ratio', ]
                 ic_result=self.ic_result)
             doc.save()
 
