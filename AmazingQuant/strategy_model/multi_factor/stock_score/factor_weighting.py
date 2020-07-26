@@ -18,6 +18,7 @@
 from datetime import datetime
 
 import pandas as pd
+import numpy as np
 
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
@@ -112,6 +113,15 @@ class FactorWeighting(object):
     def weighting_ic_half_life(factor, **weight_para):
         return weight_para['data'][factor]['delay_1'].ewm(halflife=weight_para['half_life'], adjust=False).mean()
 
+    def weighting_max_ic_ir(self, factor_ic, window=20):
+        # x_norm = np.linalg.norm(x, ord=None, axis=None)
+        factor_ic_all = pd.DataFrame(columns=list(factor_ic.keys()))
+        for factor_name in factor_ic.keys():
+            factor_ic_all[factor_name] = factor_ic[factor_name]['delay_1']
+        factor_ic_mean = factor_ic_all.rolling(window=window).mean()
+        factor_ic_cov = factor_ic_all.rolling(window=window).cov()
+        return factor_ic_cov
+
 
 if __name__ == '__main__':
     factor_list = ['factor_ma5', 'factor_ma10']
@@ -147,4 +157,5 @@ if __name__ == '__main__':
             factor_ic[factor_name].index = pd.DatetimeIndex(factor_ic[factor_name].index)
 
     factor_weighting_obj = FactorWeighting(factor_data)
-    factor_history_return = factor_weighting_obj.weighting(weight_method='return_half_life', data=factor_return, half_life=5)
+    # factor_weighted = factor_weighting_obj.weighting(weight_method='return_half_life', data=factor_return, half_life=5)
+    factor_weighted = factor_weighting_obj.weighting_max_ic_ir(factor_ic)
