@@ -47,7 +47,8 @@ class IcAnalysis(object):
         market_data = market_close_data.reindex(factor.index).reindex(factor.columns, axis=1)
 
         self.ic_decay = 20
-        column_list = ['delay_' + str(i + 1) for i in range(self.ic_decay)]
+        self.column_prefix = 'delay_'
+        column_list = [self.column_prefix + str(i + 1) for i in range(self.ic_decay)]
         self.stock_return_dict = {i + 1: market_data.pct_change(periods=i + 1) for i in range(self.ic_decay)}
 
         # IC信号衰减计算，index 是时间序列， columns是decay周期，[1, self.ic_decay], 闭区间
@@ -84,8 +85,8 @@ class IcAnalysis(object):
                     elif method == 'pearsonr':
                         corr, p_value = stats.pearsonr(stock_return[stock_list].sort_index(),
                                                        factor_data[stock_list].sort_index())
-                ic_dict[self.factor_name + '_' + str(ic_decay + 1)] = corr
-                p_value_dict[self.factor_name + '_' + str(ic_decay + 1)] = p_value
+                ic_dict[self.column_prefix + str(ic_decay + 1)] = corr
+                p_value_dict[self.column_prefix + str(ic_decay + 1)] = p_value
 
             self.ic_df = self.ic_df.append(pd.Series(ic_dict, name=self.factor.index[index]))
             self.p_value_df = self.p_value_df.append(pd.Series(p_value_dict, name=self.factor.index[index]))
@@ -140,7 +141,7 @@ class IcAnalysis(object):
 
 if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
-    factor_name = 'factor_ma10'
+    factor_name = 'factor_ma5'
     factor_ma5 = get_local_data(path, factor_name + '.h5')
 
     market_close_data = GetKlineData().cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value,

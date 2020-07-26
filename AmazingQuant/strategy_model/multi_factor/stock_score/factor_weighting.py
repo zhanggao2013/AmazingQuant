@@ -66,10 +66,10 @@ class FactorWeighting(object):
                                                                              window=weight_para['window'])
             elif weight_method == 'ic_mean':
                 factor_single_weight_dict[factor] = self.weighting_ic_mean(factor, data=weight_para['data'],
-                                                                               window=weight_para['window'])
+                                                                           window=weight_para['window'])
             elif weight_method == 'ic_half_life':
                 factor_single_weight_dict[factor] = self.weighting_ic_half_life(factor, data=weight_para['data'],
-                                                                                    half_life=weight_para['half_life'])
+                                                                                half_life=weight_para['half_life'])
             else:
                 raise Exception('weight_method is not exist')
 
@@ -97,7 +97,7 @@ class FactorWeighting(object):
 
     @staticmethod
     def weighting_return_half_life(factor, **weight_para):
-        return weight_para['data'][factor]['daily'].ewm(halflife=weight_para['half_life']).mean()
+        return weight_para['data'][factor]['daily'].ewm(halflife=weight_para['half_life'], adjust=False).mean()
 
     @staticmethod
     def weighting_return_ir(factor, **weight_para):
@@ -110,7 +110,7 @@ class FactorWeighting(object):
 
     @staticmethod
     def weighting_ic_half_life(factor, **weight_para):
-        return weight_para['data'][factor]['delay_1'].ewm(halflife=weight_para['half_life']).mean()
+        return weight_para['data'][factor]['delay_1'].ewm(halflife=weight_para['half_life'], adjust=False).mean()
 
 
 if __name__ == '__main__':
@@ -142,8 +142,9 @@ if __name__ == '__main__':
                 .only('end_date') \
                 .only('ic') \
                 .as_pymongo()
+            # print(factor_ic_result)
             factor_ic[factor_name] = pd.DataFrame(factor_ic_result[0]['ic'])
             factor_ic[factor_name].index = pd.DatetimeIndex(factor_ic[factor_name].index)
 
     factor_weighting_obj = FactorWeighting(factor_data)
-    factor_history_return = factor_weighting_obj.weighting(weight_method='ic_mean', data=factor_ic, window=20)
+    factor_history_return = factor_weighting_obj.weighting(weight_method='return_half_life', data=factor_return, half_life=5)
