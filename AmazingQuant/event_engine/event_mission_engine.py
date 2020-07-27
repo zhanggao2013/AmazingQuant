@@ -22,8 +22,8 @@ def run_mission_engine(strategy):
     :return:
     """
     mission_engine = EventEngineBase()
-    event_order = EventOrder()
 
+    event_order = EventOrder()
     mission_engine.put(event_order)
 
     mission_engine.register(EventType.EVENT_ORDER.value, EventOrder.integer_conversion)
@@ -31,8 +31,8 @@ def run_mission_engine(strategy):
     mission_engine.register(EventType.EVENT_ORDER.value, EventOrder.position_available_volume_check)
 
     event_risk_management = EventRiskManagement()
-    mission_engine.put(event_risk_management)
     event_risk_management.event_data_dict["strategy"] = strategy
+    mission_engine.put(event_risk_management)
 
     mission_engine.register(EventType.EVENT_RISK_MANAGEMENT.value, EventRiskManagement.black_namelist_check)
     mission_engine.register(EventType.EVENT_RISK_MANAGEMENT.value, EventRiskManagement.change_order_status)
