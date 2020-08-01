@@ -30,7 +30,7 @@ def run_backtesting_analysis_engine(strategy):
     backtesting_analysis_engine.register(EventType.EVENT_BACKTESTING_ANALYSIS.value,
                                          EventBacktestingAnalysis.show_backtesting_indicator)
 
-    backtesting_analysis_engine.start(timer=False)
+    backtesting_analysis_engine.start()
     backtesting_analysis_engine.stop()
 
 

@@ -31,6 +31,6 @@ def run_broker_engine(strategy):
     broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.update_account_list)
     broker_engine.register(EventType.EVENT_DEAL.value, Environment().refresh_current_data)
 
-    broker_engine.start(timer=False)
+    broker_engine.start()
     broker_engine.stop()
 

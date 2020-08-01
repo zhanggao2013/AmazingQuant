@@ -20,7 +20,6 @@ class EventEngineBase(object):
     _queue：私有变量，事件队列
     _active：私有变量，事件引擎开关
     _thread：私有变量，事件处理线程
-    _timer：私有变量，计时器
     _handlers：私有变量，事件处理函数字典
 
 
@@ -47,21 +46,14 @@ class EventEngineBase(object):
         # 线程锁
         self._lock = RLock()
 
-        # 计时器，用于触发计时器事件
-        self._timer = Thread(target=self._run_timer)
-        self._timer_active = False  # 计时器工作状态
-        self._timer_sleep = 1  # 计时器触发间隔（默认1秒）
-
         # 这里的_handlers是一个字典，用来保存对应的事件调用关系
         # 其中每个键对应的值是一个列表，列表中保存了对该事件进行监听的函数功能
         self._handlers = defaultdict(list)
 
-        # _general_handlers是一个列表，用来保存通用回调函数（所有事件均调用）
-        self._general_handlers = []
-
     def _run(self):
         """引擎运行"""
         while self._active:
+            sleep(0.00000000000000000000001)
             try:
                 event = self._queue.get(block=False, timeout=0)  # 获取事件设为非阻塞
                 self._lock.acquire()
@@ -77,23 +69,7 @@ class EventEngineBase(object):
             # 若存在，则按顺序将事件传递给处理函数执行
             [handler(event) for handler in self._handlers[event.event_type]]
 
-        # 调用通用处理函数进行处理
-        if self._general_handlers:
-            [handler(event) for handler in self._general_handlers]
-
-    def _run_timer(self):
-        """运行在计时器线程中的循环函数"""
-        while self._timer_active:
-            # 创建计时器事件
-            event = Event(event_type=EventType.EVENT_TIMER.value)
-
-            # 向队列中存入计时器事件
-            self.put(event)
-
-            # 等待
-            sleep(self._timer_sleep)
-
-    def start(self, timer=True):
+    def start(self):
         """
         引擎启动
         timer：是否要启动计时器
@@ -104,18 +80,15 @@ class EventEngineBase(object):
         # 启动事件处理线程
         self._thread.start()
 
-        # 启动计时器，计时器事件间隔默认设定为1秒
-        if timer:
-            self._timer_active = True
-            self._timer.start()
-
     def stop(self):
         """停止引擎"""
 
-        # 停止计时器
-        if self._timer_active:
-            self._timer_active = False
-            self._timer.join()
+        # 队列为空的时候，将引擎设为False
+        while True:
+            sleep(0.00000000000000000000000001)
+            if self._queue.empty():
+                self._active = False
+                break
 
         # 等待事件处理线程退出
         self._thread.join()
@@ -145,16 +118,6 @@ class EventEngineBase(object):
     def put(self, event):
         """向事件队列中存入事件"""
         self._queue.put(event)
-
-    def registerGeneralHandler(self, handler):
-        """注册通用事件处理函数监听"""
-        if handler not in self._general_handlers:
-            self._general_handlers.append(handler)
-
-    def unregisterGeneralHandler(self, handler):
-        """注销通用事件处理函数监听"""
-        if handler in self._general_handlers:
-            self._general_handlers.remove(handler)
 
 
 class Event(object):
