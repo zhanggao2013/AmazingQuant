@@ -16,6 +16,7 @@ from AmazingQuant.data_object import *
 from AmazingQuant.event_engine.event_analysis_engine import run_backtesting_analysis_engine
 from AmazingQuant.event_engine.event_bar_engine import *
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
+from AmazingQuant.trade_center.trade import Trade
 
 
 class StrategyBase(metaclass=ABCMeta):
@@ -37,6 +38,8 @@ class StrategyBase(metaclass=ABCMeta):
         # 取数据
         self._get_data = GetKlineData()
         self.bar_index = 0
+        # 初始化交易函数
+        self.trade = Trade(self)
 
     @property
     def strategy_name(self):

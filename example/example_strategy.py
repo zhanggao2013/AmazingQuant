@@ -12,9 +12,6 @@ from AmazingQuant.utils.performance_test import Timer
 # import strategy基类
 from AmazingQuant.strategy_center.strategy import *
 
-# import 交易模块
-from AmazingQuant.trade_center.trade import Trade
-
 # 取各种数据
 from AmazingQuant.data_center.api_data.get_index_member import GetIndexMember
 from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
@@ -83,16 +80,18 @@ class MaStrategy(StrategyBase):
                             close_today_commission=0, min_commission=5)
 
     def handle_bar(self, event):
-        Environment.logger.info('self.time_tag', self.time_tag, datetime.now(), (time.time()-self.now)*1000)
+        Environment.logger.info('self.time_tag', self.time_tag, datetime.now(), (time.time() - self.now) * 1000)
         Environment.logger.debug(len(Environment.bar_position_data_list))
         # 取当前bar的持仓情况
         with Timer(True):
             available_position_dict = {}
             for position in Environment.bar_position_data_list:
-                available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
+                available_position_dict[
+                    position.instrument + '.' + position.exchange] = position.position - position.frozen
             index_member_list = self.index_member_obj.get_index_member_in_date(self.time_tag)
 
-            close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=index_member_list, field=['close'],
+            close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=index_member_list,
+                                                              field=['close'],
                                                               start=self.time_tag, end=self.time_tag)
             # 循环遍历股票池
             for stock in index_member_list:
@@ -104,22 +103,23 @@ class MaStrategy(StrategyBase):
                     if ma5 and ma20:
                         # 如果5日均线突破20日均线，并且没有持仓，则买入这只股票100股，以收盘价为指定价交易
                         if ma5 > ma20 and stock not in available_position_dict.keys() and stock in index_member_list:
-                            Trade(self).order_shares(stock_code=stock, shares=100, price_type='fix',
-                                                     order_price=close_price,
-                                                     account_id=self.account[0])
+                            self.trade.order_shares(stock_code=stock, shares=100, price_type='fix',
+                                                    order_price=close_price,
+                                                    account_id=self.account[0])
                             Environment.logger.info('buy', stock, -1, 'fix', close_price, self.account)
                         # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
                         elif ma5 < ma20 and stock in available_position_dict.keys():
-                            Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
-                                                     order_price=close_price,
-                                                     account_id=self.account[0])
+                            self.trade.order_shares(stock_code=stock, shares=-100, price_type='fix',
+                                                    order_price=close_price,
+                                                    account_id=self.account[0])
                             Environment.logger.info('sell', stock, -1, 'fix', close_price, self.account)
             for stock in available_position_dict.keys():
                 if stock not in index_member_list:
                     Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
                                              order_price=close_price,
                                              account_id=self.account[0])
-                    Environment.logger.info('sell not in index_member_list', stock, -1, 'fix', close_price, self.account)
+                    Environment.logger.info('sell not in index_member_list', stock, -1, 'fix', close_price,
+                                            self.account)
         self.now = time.time()
 
 
