@@ -41,3 +41,13 @@ def run_mission_engine(strategy):
     mission_engine.start()
     mission_engine.stop()
 
+
+if __name__ == '__main__':
+    import time
+
+    for i in range(1000):
+        time1 = time.time()
+        run_mission_engine('qwe')
+        time2 = time.time()
+        print((time2-time1)*1000)
+

@@ -53,7 +53,6 @@ class EventEngineBase(object):
     def _run(self):
         """引擎运行"""
         while self._active:
-            sleep(0.00000000000000000000001)
             try:
                 event = self._queue.get(block=False, timeout=0)  # 获取事件设为非阻塞
                 self._lock.acquire()
@@ -82,14 +81,6 @@ class EventEngineBase(object):
 
     def stop(self):
         """停止引擎"""
-
-        # 队列为空的时候，将引擎设为False
-        while True:
-            sleep(0.00000000000000000000000001)
-            if self._queue.empty():
-                self._active = False
-                break
-
         # 等待事件处理线程退出
         self._thread.join()
 
@@ -137,14 +128,19 @@ class TestOne(object):
         def simpletest(event):
             print(u'处理每秒触发的计时器事件：{}'.format(str(datetime.now())))
 
-        ee = EventEngineBase()
-        ee.put(Event(EventType.EVENT_MARKET.value))
-        # ee.register(EventType.EVENT_TIMER.value, simpletest)
-        ee.register(EventType.EVENT_MARKET.value, simpletest)
-        # ee.registerGeneralHandler(simpletest)
-        ee.start()
-        ee.stop()
 
+        # ee.put(Event(EventType.EVENT_MARKET.value))
+        # ee.register(EventType.EVENT_TIMER.value, simpletest)
+        # ee.register(EventType.EVENT_MARKET.value, simpletest)
+        # ee.registerGeneralHandler(simpletest)
+        import time
+        for i in range(1000):
+            time1 = time.time()
+            ee = EventEngineBase()
+            ee.start()
+            ee.stop()
+            time2 = time.time()
+            print((time2-time1)*1000)
 
 if __name__ == "__main__":
     aa = TestOne()
