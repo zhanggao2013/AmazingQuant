@@ -205,7 +205,8 @@ class StrategyBase(metaclass=ABCMeta):
                 if self.run_mode == RunMode.BACKTESTING.value:
                     if save_trade_record:
                         run_backtesting_analysis_engine(self)
-                        break
+                    break
+
                 # elif self.run_mode == RunMode.TRADE.value:
                 #     读取最新tick, 更新最新的分钟或者日线
                 #     if 读取最新tick, 更新最新的分钟或者日线 == done:

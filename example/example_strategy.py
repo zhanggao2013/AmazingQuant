@@ -124,8 +124,12 @@ class MaStrategy(StrategyBase):
 
 
 if __name__ == '__main__':
-    # 测试运行完整个策略所需时间，沪深300动态股票池，一年数据，均线策略,15s完成
+    # 测试运行完整个策略所需时间，沪深300动态股票池，一年数据，均线策略,10s完成,10S绩效分析
+    import time
+    time1 = time.time()
     with Timer(True):
         # 运行策略，设置是否保存委托，成交，资金，持仓
         ma_strategy = MaStrategy()
         ma_strategy.run(save_trade_record=True)
+    time2 = time.time()
+    print(time2-time1)
