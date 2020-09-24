@@ -100,6 +100,14 @@ class NetValueAnalysis(object):
         :param start_time: datetime
         :param end_time: datetime
         """
+        if max(benchmark_df.index) < end_time:
+            raise Exception('max(benchmark_df.index) < end_time')
+        if min(benchmark_df.index) > start_time:
+            raise Exception('min(benchmark_df.index) > start_time:')
+        if max(net_value_df.index) < end_time:
+            raise Exception('max(net_value_df.index) < end_time')
+        if min(net_value_df.index) > start_time:
+            raise Exception('min(net_value_df.index) > start_time')
         # 净值'net_value', 日收益率'profit_ratio', 总资产'total_balance', 可用资金'available', 最大回撤'drawdown'
         self.net_value_df = net_value_df.loc[start_time: end_time]
         # 基准收盘价'close', 基准净值'net_value', 基准收益率'profit_ratio', 最大回撤'drawdown'
@@ -399,6 +407,7 @@ if __name__ == '__main__':
     all_index_data = kline_object.cache_all_index_data()
     benchmark_df = kline_object.get_market_data(all_index_data, stock_code=['000300.SH'], field=['close'], ) \
         .to_frame(name='close')
+
     # 策略净值数据,index 为 datetime,取单个账户分析，后续可做多个账户
     net_value_df = pd.read_csv('account_data.csv', index_col=0)
     net_value_df.index = pd.DatetimeIndex(net_value_df.index)
