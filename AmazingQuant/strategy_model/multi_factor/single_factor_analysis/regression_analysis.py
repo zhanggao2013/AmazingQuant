@@ -145,7 +145,7 @@ class RegressionAnalysis(object):
         for i in ['cumsum', 'cumprod']:
             net_value = self.factor_return[i].to_frame('total_balance')
             net_value[net_value < 0] = 0
-            net_value_analysis_obj = NetValueAnalysis(net_value, benchmark_df, start_time, end_time)
+            net_value_analysis_obj = NetValueAnalysis(net_value, self.benchmark_df, start_time, end_time)
             self.net_analysis_result[i] = net_value_analysis_obj.cal_net_analysis_result()
         return self.net_analysis_result
 
@@ -197,7 +197,7 @@ if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
     factor_ma5 = get_local_data(path, factor_name + '.h5')
     # 指数数据不全，需要删一部分因子数据
-    factor_ma5 = factor_ma5[factor_ma5.index < datetime.datetime(2020, 1, 1)]
+    factor_ma5 = factor_ma5[factor_ma5.index < datetime.datetime(2016, 1, 1)]
 
     kline_object = GetKlineData()
     market_data = kline_object.cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value, field=['close'])
@@ -210,7 +210,7 @@ if __name__ == '__main__':
     # 沪深300 的日线，有脏数据，后续单独处理
     if datetime.datetime(2016, 1, 1) in benchmark_df.index:
         benchmark_df = benchmark_df.drop(datetime.datetime(2016, 1, 1))
-    regression_analysis_obj = RegressionAnalysis(factor_ma5, 'factor_ma5', market_close_data, benchmark_df)
+    regression_analysis_obj = RegressionAnalysis(factor_ma5, 'factor_name', market_close_data, benchmark_df)
     regression_analysis_obj.cal_factor_return('float_value_inverse')
     regression_analysis_obj.cal_t_value_statistics()
     regression_analysis_obj.cal_net_analysis()
