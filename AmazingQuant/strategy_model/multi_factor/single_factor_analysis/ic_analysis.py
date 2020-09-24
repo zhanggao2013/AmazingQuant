@@ -111,7 +111,9 @@ class IcAnalysis(object):
         self.ic_result.loc['ic_positive_ratio'] = p_value_significant.div(ic_count) * 100
         self.ic_result.loc['ic_negative_ratio'] = (ic_count - p_value_significant).div(ic_count) * 100
 
-        ic_change_num = ic_greater_zero.diff().sum()
+        change_df = ic_greater_zero.iloc[:-1].values != ic_greater_zero.iloc[1:].values
+        ic_change_num = pd.DataFrame(change_df, columns=self.ic_df.columns).sum()
+
         self.ic_result.loc['ic_change_ratio'] = ic_change_num.div(ic_count) * 100
         self.ic_result.loc['ic_unchange_ratio'] = (ic_count - ic_change_num).div(ic_count) * 100
 
@@ -141,8 +143,10 @@ class IcAnalysis(object):
 
 if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
-    factor_name = 'factor_ma5'
+    factor_name = 'factor_ma10'
     factor_ma5 = get_local_data(path, factor_name + '.h5')
+    import datetime
+    factor_ma5 = factor_ma5[factor_ma5.index < datetime.datetime(2016, 1, 1)]
 
     market_close_data = GetKlineData().cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value,
                                                             field=['close'])['close']
