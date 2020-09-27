@@ -120,7 +120,25 @@ class FactorWeighting(object):
             factor_ic_all[factor_name] = factor_ic[factor_name]['delay_1']
         factor_ic_mean = factor_ic_all.rolling(window=window).mean()
         factor_ic_cov = factor_ic_all.rolling(window=window).cov()
-        return factor_ic_cov
+
+        # factor_ic_all.rolling(window=window).apply(lambda x: print(x))
+        # mat = np.mat(IC.cov())  # 按照公式计算最优权重
+        # mat = nlg.inv(mat)
+
+        def cal_weight(mean_value, factor_ic_cov):
+            print(np.mat(mean_value.values.reshape(1, -1).T))
+            print('---------------------------')
+            ic = factor_ic_cov.loc[(mean_value.name, )]
+            print(np.mat(ic.values))
+            print('***************************')
+            print(np.mat(ic.values).I)
+            print('+++++++++++++++++++++++++++')
+            print(np.array(np.mat(ic.values).I * np.mat(mean_value.values.reshape(1, -1).T)).T[0])
+            return np.array(np.mat(ic.values).I * np.mat(mean_value.values.reshape(1, -1).T)).T[0]
+
+        result = factor_ic_mean.apply(cal_weight, args=(factor_ic_cov,), axis=1, result_type="expand")
+        result.columns = factor_ic.keys()
+        return factor_ic_all, factor_ic_mean, factor_ic_cov
 
 
 if __name__ == '__main__':
@@ -158,4 +176,4 @@ if __name__ == '__main__':
 
     factor_weighting_obj = FactorWeighting(factor_data)
     # factor_weighted = factor_weighting_obj.weighting(weight_method='return_half_life', data=factor_return, half_life=5)
-    factor_weighted = factor_weighting_obj.weighting_max_ic_ir(factor_ic)
+    factor_weighted, factor_ic_mean, factor_ic_cov = factor_weighting_obj.weighting_max_ic_ir(factor_ic)
