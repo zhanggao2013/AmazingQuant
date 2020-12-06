@@ -231,22 +231,8 @@ if __name__ == '__main__':
 * 自动生成回测报告<br>
 [回测报告](https://github.com/zhanggao2013/AmazingQuant/blob/master/example/test_strategy_strategy%20backtesting%20indicator1530494371000.html)是html格式，可在浏览器中打开查看，效果如下图： 
 ![](https://github.com/zhanggao2013/AmazingQuant/raw/master/documents/backtesting_result.jpg)  
-# 5.已实现和即将实现的功能
-* 已实现
-   * 数据库搭建
-   * 读取数据
-   * 策略运行回测
-   * 回测交易记录的保存和分析
-   * 实盘CTP接口的封装
-* 即将实现
-   * 各种数据的对接<br>
-   例如股票的分钟数据、股票财务数据、股票板块成分股、期货分钟数据、日线数据等
-   * CTP等交易接口与broker_engine对接<br>
-   CTP、xSpeed等
-   * 对回测区间的每一根bar的交易和持仓情况可视化<br>
-   * 回测分析模块的丰富<br>
-   增加brison、FAMA等各种绩效归因模型的分析和可视化
+
       
-# 6.联系方式
+# 5.联系方式
 欢迎加qq群讨论: 788279189 [qq群链接](https://jq.qq.com/?_wv=1027&k=5gK6IDW) <br>
 我的qq：37475036
