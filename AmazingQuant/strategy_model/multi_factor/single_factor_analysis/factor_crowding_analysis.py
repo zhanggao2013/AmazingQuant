@@ -13,5 +13,4 @@
 （3）长期收益反转(Long-term Return Reversal),
 （4）因子波动率(Factor Volatility)。
 （5）复合拥挤度， 使用等权的方式对于拥挤度指标进行复合
-
 """
