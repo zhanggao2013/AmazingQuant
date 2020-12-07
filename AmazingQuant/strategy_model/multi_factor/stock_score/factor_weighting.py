@@ -52,36 +52,43 @@ class FactorWeighting(object):
         """
         factor_single_weight_dict = {}
         factor_total_weight = None
-        for factor in weight_para['data']:
-            factor_single_weight_dict[factor] = None
-            if weight_method == 'equal':
-                factor_single_weight_dict[factor] = 1
-            elif weight_method == 'return_mean':
-                factor_single_weight_dict[factor] = self.weighting_return_mean(factor, data=weight_para['data'],
+        if weight_method == 'max_ic_ir':
+            factor_single_weight_dict = dict(self.weighting_max_ic_ir(factor_ic=weight_para['data'],
+                                                                         window=weight_para['window']))
+            print(factor_single_weight_dict)
+        else:
+
+            for factor_name in weight_para['data']:
+                factor_single_weight_dict[factor_name] = None
+                if weight_method == 'equal':
+                    factor_single_weight_dict[factor_name] = 1
+                elif weight_method == 'return_mean':
+                    factor_single_weight_dict[factor_name] = self.weighting_return_mean(factor_name, data=weight_para['data'],
+                                                                                   window=weight_para['window'])
+                elif weight_method == 'return_half_life':
+                    factor_single_weight_dict[factor_name] = self.weighting_return_half_life(factor_name, data=weight_para['data'],
+                                                                                        half_life=weight_para['half_life'])
+                elif weight_method == 'return_ir':
+                    factor_single_weight_dict[factor_name] = self.weighting_return_ir(factor_name, data=weight_para['data'],
+                                                                                 window=weight_para['window'])
+                elif weight_method == 'ic_mean':
+                    factor_single_weight_dict[factor_name] = self.weighting_ic_mean(factor_name, data=weight_para['data'],
                                                                                window=weight_para['window'])
-            elif weight_method == 'return_half_life':
-                factor_single_weight_dict[factor] = self.weighting_return_half_life(factor, data=weight_para['data'],
+                elif weight_method == 'ic_half_life':
+                    factor_single_weight_dict[factor_name] = self.weighting_ic_half_life(factor_name, data=weight_para['data'],
                                                                                     half_life=weight_para['half_life'])
-            elif weight_method == 'return_ir':
-                factor_single_weight_dict[factor] = self.weighting_return_ir(factor, data=weight_para['data'],
-                                                                             window=weight_para['window'])
-            elif weight_method == 'ic_mean':
-                factor_single_weight_dict[factor] = self.weighting_ic_mean(factor, data=weight_para['data'],
-                                                                           window=weight_para['window'])
-            elif weight_method == 'ic_half_life':
-                factor_single_weight_dict[factor] = self.weighting_ic_half_life(factor, data=weight_para['data'],
-                                                                                half_life=weight_para['half_life'])
-            else:
-                raise Exception('weight_method is not exist')
+                else:
+                    raise Exception('weight_method is not exist')
 
+        for factor_name in factor_single_weight_dict:
             if factor_total_weight is None:
-                factor_total_weight = factor_single_weight_dict[factor]
+                factor_total_weight = factor_single_weight_dict[factor_name]
             else:
-                factor_total_weight = factor_total_weight + factor_single_weight_dict[factor]
+                factor_total_weight = factor_total_weight + factor_single_weight_dict[factor_name]
 
-        for factor in self.factor_data:
-            factor_single_data_weighted = self.factor_data[factor].mul(
-                factor_single_weight_dict[factor] / factor_total_weight, axis=0)
+        for factor_name in self.factor_data:
+            factor_single_data_weighted = self.factor_data[factor_name].mul(
+                factor_single_weight_dict[factor_name] / factor_total_weight, axis=0)
             if self.factor_data_weighted is None:
                 self.factor_data_weighted = factor_single_data_weighted
             else:
@@ -93,52 +100,42 @@ class FactorWeighting(object):
         return 1
 
     @staticmethod
-    def weighting_return_mean(factor, **weight_para):
-        return weight_para['data'][factor]['daily'].rolling(window=weight_para['window']).mean()
+    def weighting_return_mean(factor_name, **weight_para):
+        return weight_para['data'][factor_name]['daily'].rolling(window=weight_para['window']).mean()
 
     @staticmethod
-    def weighting_return_half_life(factor, **weight_para):
-        return weight_para['data'][factor]['daily'].ewm(halflife=weight_para['half_life'], adjust=False).mean()
+    def weighting_return_half_life(factor_name, **weight_para):
+        return weight_para['data'][factor_name]['daily'].ewm(halflife=weight_para['half_life'], adjust=False).mean()
 
     @staticmethod
-    def weighting_return_ir(factor, **weight_para):
-        return weight_para['data'][factor]['daily'].rolling(window=weight_para['window']).mean() / \
-               weight_para['data'][factor]['daily'].rolling(window=weight_para['window']).std()
+    def weighting_return_ir(factor_name, **weight_para):
+        return weight_para['data'][factor_name]['daily'].rolling(window=weight_para['window']).mean() / \
+               weight_para['data'][factor_name]['daily'].rolling(window=weight_para['window']).std()
 
     @staticmethod
-    def weighting_ic_mean(factor, **weight_para):
-        return weight_para['data'][factor]['delay_1'].rolling(window=weight_para['window']).mean()
+    def weighting_ic_mean(factor_name, **weight_para):
+        return weight_para['data'][factor_name]['delay_1'].rolling(window=weight_para['window']).mean()
 
     @staticmethod
-    def weighting_ic_half_life(factor, **weight_para):
-        return weight_para['data'][factor]['delay_1'].ewm(halflife=weight_para['half_life'], adjust=False).mean()
+    def weighting_ic_half_life(factor_name, **weight_para):
+        return weight_para['data'][factor_name]['delay_1'].ewm(halflife=weight_para['half_life'], adjust=False).mean()
 
-    def weighting_max_ic_ir(self, factor_ic, window=20):
-        # x_norm = np.linalg.norm(x, ord=None, axis=None)
+    @staticmethod
+    def weighting_max_ic_ir(factor_ic, **weight_para):
+        window = weight_para['window']
         factor_ic_all = pd.DataFrame(columns=list(factor_ic.keys()))
         for factor_name in factor_ic.keys():
             factor_ic_all[factor_name] = factor_ic[factor_name]['delay_1']
         factor_ic_mean = factor_ic_all.rolling(window=window).mean()
         factor_ic_cov = factor_ic_all.rolling(window=window).cov()
 
-        # factor_ic_all.rolling(window=window).apply(lambda x: print(x))
-        # mat = np.mat(IC.cov())  # 按照公式计算最优权重
-        # mat = nlg.inv(mat)
-
         def cal_weight(mean_value, factor_ic_cov):
-            print(np.mat(mean_value.values.reshape(1, -1).T))
-            print('---------------------------')
             ic = factor_ic_cov.loc[(mean_value.name, )]
-            print(np.mat(ic.values))
-            print('***************************')
-            print(np.mat(ic.values).I)
-            print('+++++++++++++++++++++++++++')
-            print(np.array(np.mat(ic.values).I * np.mat(mean_value.values.reshape(1, -1).T)).T[0])
             return np.array(np.mat(ic.values).I * np.mat(mean_value.values.reshape(1, -1).T)).T[0]
 
         result = factor_ic_mean.apply(cal_weight, args=(factor_ic_cov,), axis=1, result_type="expand")
         result.columns = factor_ic.keys()
-        return factor_ic_all, factor_ic_mean, factor_ic_cov
+        return result.div(result.sum(1), axis=0)
 
 
 if __name__ == '__main__':
@@ -175,5 +172,5 @@ if __name__ == '__main__':
             factor_ic[factor_name].index = pd.DatetimeIndex(factor_ic[factor_name].index)
 
     factor_weighting_obj = FactorWeighting(factor_data)
-    # factor_weighted = factor_weighting_obj.weighting(weight_method='return_half_life', data=factor_return, half_life=5)
-    factor_weighted, factor_ic_mean, factor_ic_cov = factor_weighting_obj.weighting_max_ic_ir(factor_ic)
+    factor_weighted = factor_weighting_obj.weighting(weight_method='return_half_life', data=factor_return, half_life=5)
+    # factor_weighted = factor_weighting_obj.weighting(weight_method='max_ic_ir', data=factor_ic, window=20)
