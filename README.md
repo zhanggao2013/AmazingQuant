@@ -4,7 +4,7 @@
 [![GitHub forks](https://img.shields.io/github/forks/zhanggao2013/AmazingQuant.svg?style=social&label=Fork&)](https://github.com/zhanggao2013/AmazingQuant/fork)
 
 # 1.简介
-AmazingQuant——智能投资Lab，为交易而生。包含策略组合研究服务、量化数据服务、指标计算服务、绩效分析服务四大功能模块。	<br/>
+AmazingQuant——为交易而生的智能投研Lab。包含策略组合研究服务、量化数据服务、指标计算服务、绩效分析服务四大功能模块。	<br/>
 1.1 策略组合研究服务	<br/>
 　　四大类策略模型组合的研究体系<br/>
 （1）选股模型<br/>
