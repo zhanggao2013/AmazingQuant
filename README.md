@@ -3,7 +3,6 @@
 [![GitHub stars](https://img.shields.io/github/stars/zhanggao2013/AmazingQuant.svg?style=social&label=Star&)](https://github.com/zhanggao2013/AmazingQuant/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/zhanggao2013/AmazingQuant.svg?style=social&label=Fork&)](https://github.com/zhanggao2013/AmazingQuant/fork)
 
-
 # 1.简介
 AmazingaQuant——为交易而生的智能投研Lab。包含策略组合研究服务、量化数据服务、指标计算服务、绩效分析服务四大功能模块。	<br/>
 1.1 策略组合研究服务	<br/>
