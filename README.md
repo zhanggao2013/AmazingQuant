@@ -4,16 +4,16 @@
 [![GitHub forks](https://img.shields.io/github/forks/zhanggao2013/AmazingQuant.svg?style=social&label=Fork&)](https://github.com/zhanggao2013/AmazingQuant/fork)
 
 # 1.简介
-AmazingaQuant——为交易而生的智能投研Lab。包含策略组合研究服务、量化数据服务、指标计算服务、绩效分析服务四大功能模块。	<br/>
-1.1 策略组合研究服务	<br/>
-　　四大类策略模型组合的研究体系<br/>
-（1）选股模型<br/>
+AmazingaQuant——为交易而生的智能投研Lab。包含策略模型研究服务、量化数据服务、指标计算服务、绩效分析服务四大功能模块。	<br/>
+1.1 策略研究服务	<br/>
+　　四大策略体系的研究体系<br/>
+（1）选股体系<br/>
 　　中低频组合选股模型、强势短线模型<br/>
-（2）风险预警模型<br/>
+（2）风险预警体系<br/>
 　　事件风险等建立黑白名单模型<br/>
-（3）择时模型<br/>
+（3）择时体系<br/>
 　　仓位控制择时、行业风格轮动<br/>
-（4）T+0模型<br/>
+（4）T+0体系<br/>
 　  全市场股票分类（活跃型与稳定型），做T0模型	<br/>
 
 1.2 量化数据服务	<br/>
