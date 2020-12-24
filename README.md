@@ -226,14 +226,7 @@ if __name__ == '__main__':
         ma_strategy.run(save_trade_record=True)
 
 ```
-# 4.回测结果分析
-* 自动生成回测结果<br>
-产生的[委托](https://github.com/zhanggao2013/AmazingQuant/blob/master/example/test_strategy_order_data1530494369000.csv)，[成交](https://github.com/zhanggao2013/AmazingQuant/blob/master/example/test_strategy_deal_data1530494369000.csv)，[资金](https://github.com/zhanggao2013/AmazingQuant/blob/master/example/test_strategy_account_data1530494369000.csv)，[持仓](https://github.com/zhanggao2013/AmazingQuant/blob/master/example/test_strategy_position_data1530494369000.csv)的cvs文件写入到策略所在文件夹
-* 自动生成回测报告<br>
-[回测报告](https://github.com/zhanggao2013/AmazingQuant/blob/master/example/test_strategy_strategy%20backtesting%20indicator1530494371000.html)是html格式，可在浏览器中打开查看，效果如下图： 
-![](https://github.com/zhanggao2013/AmazingQuant/raw/master/documents/backtesting_result.jpg)  
-
-      
-# 5.联系方式
+ 
+# 4.联系方式
 欢迎加qq群讨论: 788279189 [qq群链接](https://jq.qq.com/?_wv=1027&k=5gK6IDW) <br>
 我的qq：37475036
