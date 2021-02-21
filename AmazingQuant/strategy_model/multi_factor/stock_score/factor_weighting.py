@@ -36,8 +36,9 @@ class FactorWeighting(object):
         # 因子加权后的结果
         self.factor_data_weighted = None
 
-    def weighting(self, weight_method='equal', **weight_para):
+    def weighting(self, weight_method='equal', weight_normalization=True, **weight_para):
         """
+        :param weight_normalization: 权重标准化
         :param weight_para:
         :param weight_method:
             'equal'，等权法，weight_para: data=factor_return
@@ -55,7 +56,6 @@ class FactorWeighting(object):
         if weight_method == 'max_ic_ir':
             factor_single_weight_dict = dict(self.weighting_max_ic_ir(factor_ic=weight_para['data'],
                                                                          window=weight_para['window']))
-            print(factor_single_weight_dict)
         else:
 
             for factor_name in weight_para['data']:
@@ -93,7 +93,10 @@ class FactorWeighting(object):
                 self.factor_data_weighted = factor_single_data_weighted
             else:
                 self.factor_data_weighted = self.factor_data_weighted + factor_single_data_weighted
-        return self.factor_data_weighted
+        if weight_normalization:
+            self.factor_data_weighted = self.factor_data_weighted.sub(self.factor_data_weighted.min(axis=1), axis=0).\
+                div(self.factor_data_weighted.max(axis=1) - self.factor_data_weighted.min(axis=1), axis=0)
+        return self.factor_data_weighted.div(self.factor_data_weighted.sum(axis=1), axis=0)
 
     @staticmethod
     def weighting_equal():
@@ -172,5 +175,5 @@ if __name__ == '__main__':
             factor_ic[factor_name].index = pd.DatetimeIndex(factor_ic[factor_name].index)
 
     factor_weighting_obj = FactorWeighting(factor_data)
-    factor_weighted = factor_weighting_obj.weighting(weight_method='return_half_life', data=factor_return, half_life=5)
-    # factor_weighted = factor_weighting_obj.weighting(weight_method='max_ic_ir', data=factor_ic, window=20)
+    # factor_weighted = factor_weighting_obj.weighting(weight_method='return_half_life', data=factor_return, half_life=5)
+    factor_weighted = factor_weighting_obj.weighting(weight_method='max_ic_ir', data=factor_ic, window=20)
