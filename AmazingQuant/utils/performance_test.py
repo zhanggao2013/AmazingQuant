@@ -16,7 +16,7 @@ class Timer(object):
         self.verbose = verbose
 
     def __enter__(self):
-        self.start = clock()
+        self.start = perf_counter()
         return self
 
     def __exit__(self, *args):

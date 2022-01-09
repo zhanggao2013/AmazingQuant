@@ -12,6 +12,7 @@ dir /home/zhanggao/redis
 启动服务
 redis-server /home/zhanggao/redis/redis.conf
 
+
 启动客户端
 redis-cli -h 127.0.0.1 -p 6378
 

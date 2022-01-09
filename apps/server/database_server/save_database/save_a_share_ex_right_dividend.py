@@ -56,6 +56,6 @@ class SaveAShareExRightDividend(object):
 
 
 if __name__ == '__main__':
-    data_path = '../../../../../data/finance/AShareEXRightDividendRecord.csv'
+    data_path = '../../../../../data/finance/ASHAREEXRIGHTDIVIDENDRECORD.csv'
     save_cash_flow_obj = SaveAShareExRightDividend(data_path)
     save_cash_flow_obj.save_a_share_ex_right_dividend()
