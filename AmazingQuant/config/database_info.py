@@ -10,7 +10,7 @@
 
 class MongodbConfig(object):
     host = "127.0.0.1"
-    port = 40001
+    port = 27017
     db_name = None
     username = None
     password = None

@@ -56,6 +56,6 @@ class SaveCashFlow(object):
 
 
 if __name__ == '__main__':
-    data_path = '../../../../../data/finance/AShareCashFlow.csv'
+    data_path = '../../../../../data/finance/ASHARECASHFLOW.csv'
     save_cash_flow_obj = SaveCashFlow(data_path)
     save_cash_flow_obj.save_a_share_cash_flow()
