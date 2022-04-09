@@ -81,3 +81,5 @@ if __name__ == '__main__':
     with Timer(True):
         save_index_kline_object = SaveIndexKlineDaily('../../../../../data/KLine_daily/KLine_index_daily/')
         save_index_kline_object.insert_security_code_list()
+
+
