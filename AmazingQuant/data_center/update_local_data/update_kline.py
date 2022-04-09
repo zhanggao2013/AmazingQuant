@@ -144,5 +144,5 @@ class UpdateKlineData(object):
 if __name__ == '__main__':
     with Timer(True):
         kline_object = UpdateKlineData()
-        kline_object.update_all_market_data()
-        # kline_object.update_index_data()
+        # kline_object.update_all_market_data()
+        kline_object.update_index_data()

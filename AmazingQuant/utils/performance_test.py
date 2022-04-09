@@ -20,7 +20,7 @@ class Timer(object):
         return self
 
     def __exit__(self, *args):
-        self.end = clock()
+        self.end = perf_counter()
         self.secs = self.end - self.start
         self.millisecond = self.secs * 1000  # millisecond
         if self.verbose:
