@@ -229,6 +229,6 @@ if __name__ == '__main__':
  
 # 4.联系方式
 qq群: 788279189 [qq群链接](https://jq.qq.com/?_wv=1027&k=5gK6IDW) <br>
-qq：37475036
-微信公众号：[微信公众号]([https://github.com/zhanggao2013/AmazingQuant/blob/master/documents/MongoDB_config.md](https://github.com/zhanggao2013/AmazingQuant/blob/master/documents/wechat.jpg))
+qq：37475036 <br>
+微信公众号：![]([https://github.com/zhanggao2013/AmazingQuant/blob/master/documents/MongoDB_config.md](https://github.com/zhanggao2013/AmazingQuant/blob/master/documents/wechat.jpg))
 
