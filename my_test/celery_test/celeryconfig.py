@@ -1,11 +1,11 @@
 from kombu import Exchange, Queue
 
-BROKER_URL = 'amqp://zhanggao2013:123456@127.0.0.1:5672/'  # 使用amqp作为消息代理
+BROKER_URL = 'amqp://guest:123456@127.0.0.1:15672/'  # 使用amqp作为消息代理
 # BROKER_URL = 'redis://127.0.0.1:6378/2'  # 使用redis作为消息代理
 
 RESULT_BROKER_TRANSPORT_OPTIONS = {"master_name": "mymaster"}
 
-CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6378/1'  # 把任务结果存在了Redis
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/1'  # 把任务结果存在了Redis
 
 # redis集群哨兵模式---------------
 # CELERY_RESULT_BACKEND = 'sentinel://10.237.102.210:26379/4;' \
@@ -82,3 +82,4 @@ CELERY_ACKS_LATE = True  # 只有当worker完成了这个task时，任务才被�
 
 # 并发数
 CELERYD_CONCURRENCY = 2
+

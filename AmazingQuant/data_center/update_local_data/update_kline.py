@@ -103,7 +103,6 @@ class UpdateKlineData(object):
 
     def update_index_data(self, end=datetime.now()):
         """
-
         :param end:
         :return:
         """
@@ -122,6 +121,7 @@ class UpdateKlineData(object):
                     if pd.Timestamp(datetime(2016, 1, 1)) in security_code_data_df.index:
                         security_code_data_df = security_code_data_df.drop(labels=datetime(2016, 1, 1), axis=0)
                     index_data_dict[index_code] = security_code_data_df
+
         field_data_dict = {}
         for i in self.field:
             if i != 'time_tag':

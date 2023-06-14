@@ -11,7 +11,7 @@
 (1)施密特正交
 (2)规范正交
 (3)对称正交
-可仅仅实现对称正交
+
 """
 from datetime import datetime
 
