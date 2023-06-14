@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 # ------------------------------
-# @Time    : 2019/11/14
+# @Time    : 2023/6/15
 # @Author  : gao
-# @File    : __init__.py
+# @File    : update_adj_factor.py 
 # @Project : AmazingQuant 
 # ------------------------------
