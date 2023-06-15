@@ -12,6 +12,7 @@ import time
 import pandas as pd
 import tgw
 
+from AmazingQuant.config.tgw_info import TgwConfig
 
 class MyLogSpi(tgw.ILogSpi):
     def __init__(self) -> None:
@@ -68,10 +69,10 @@ if __name__ == '__main__':
 
     # 第二步，登录
     cfg = tgw.Cfg()
-    cfg.server_vip = "101.230.159.234"
-    cfg.server_port = 8600
-    cfg.username = "zdg"  # 账号
-    cfg.password = "zdg@2022"  # 密码
+    cfg.server_vip = TgwConfig.host
+    cfg.server_port = TgwConfig.port
+    cfg.username = TgwConfig.username
+    cfg.password = TgwConfig.password
 
     success = tgw.Login(cfg, tgw.ApiMode.kInternetMode, './')  # 互联网模式初始化，可指定证书文件地址
     if not success:

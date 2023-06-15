@@ -12,21 +12,8 @@ import time
 import pandas as pd
 import tgw
 
-
-class MyLogSpi(tgw.ILogSpi):
-    def __init__(self) -> None:
-        super().__init__()
-        pass
-
-    def OnLog(self, level, log, len):
-        if level > 1:
-            print("TGW log: level: {}     log:   {}".format(level, log.strip('\n').strip('\r')))
-            pass
-
-    def OnLogon(self, data):
-        print("TGW Logon information:  : ")
-        print("api_mode : ", data.api_mode)
-        print("logon json : ", data.logon_json)
+from AmazingQuant.config.tgw_info import TgwConfig
+from AmazingQuant.data_center.tgw_source.tgw_log import TgwLogSpi
 
 
 class UpdateKlineData(object):
@@ -109,15 +96,16 @@ class SaveGetData(object):
 
 if __name__ == '__main__':
     # 第一步：设置日志spi，保证有日志输出
-    log_spi = MyLogSpi()
+    log_spi = TgwLogSpi()
     tgw.SetLogSpi(log_spi)
 
     # 第二步，登录
     cfg = tgw.Cfg()
-    cfg.server_vip = "101.230.159.234"
-    cfg.server_port = 8600
-    cfg.username = "zdg"  # 账号
-    cfg.password = "zdg@2022"  # 密码
+    cfg.server_vip = TgwConfig.host
+    cfg.server_port = TgwConfig.port
+    cfg.username = TgwConfig.username
+    cfg.password = TgwConfig.password
+
 
     success = tgw.Login(cfg, tgw.ApiMode.kInternetMode, './')  # 互联网模式初始化，可指定证书文件地址
     if not success:
