@@ -9,7 +9,7 @@
 
 
 class TgwConfig(object):
-    host = "101.230.159.234"
-    port = 8600
-    username = "zdg"
-    password = "zdg@2022"
+    host = "***.***.***.***"
+    port = ****
+    username = "****"
+    password = "z*******"
