@@ -10,6 +10,9 @@
 import tgw
 
 
+from AmazingQuant.config.tgw_info import TgwConfig
+
+
 class TgwLogSpi(tgw.ILogSpi):
     def __init__(self) -> None:
         super().__init__()
@@ -24,3 +27,19 @@ class TgwLogSpi(tgw.ILogSpi):
         print("TGW Logon information:  : ")
         print("api_mode : ", data.api_mode)
         print("logon json : ", data.logon_json)
+
+
+def tgw_log():
+    log_spi = TgwLogSpi()
+    tgw.SetLogSpi(log_spi)
+
+    # 第二步，登录
+    cfg = tgw.Cfg()
+    cfg.server_vip = TgwConfig.host
+    cfg.server_port = TgwConfig.port
+    cfg.username = TgwConfig.username
+    cfg.password = TgwConfig.password
+    success = tgw.Login(cfg, tgw.ApiMode.kInternetMode, './')  # 互联网模式初始化，可指定证书文件地址
+    if not success:
+        print("login fail")
+        exit(0)
