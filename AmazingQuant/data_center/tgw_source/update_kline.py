@@ -16,6 +16,8 @@ from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
 from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
 from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.config.local_data_path import LocalDataPath
+from AmazingQuant.constant import LocalDataFolderName, AdjustmentFactor
 
 
 class UpdateKlineData(object):
@@ -44,7 +46,7 @@ class UpdateKlineData(object):
                 code_list = code_sz_list
                 market = 'SZ'
 
-            for code in code_list:
+            for code in code_list[:5]:
                 stock_kline.security_code = code
                 stock_data_df, _ = tgw.QueryKline(stock_kline)
                 stock_data_df = stock_data_df[self.field]
@@ -65,11 +67,8 @@ if __name__ == '__main__':
     kline_object = UpdateKlineData()
     stock_data_dict = kline_object.get_kline_data(code_sh_list, code_sz_list, calendar_index)
 
-    local_data_path = 'D://AmazingQuant//local_data//'
-    folder_name = 'market_data'
-    sub_folder_name = 'kline_daily'
-    sub_sub_folder_name = 'a_share'
-    path = local_data_path + folder_name + '//' + sub_folder_name + '//' + sub_sub_folder_name + '//'
+    path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//'+LocalDataFolderName.KLINE_DAILY.value + \
+        '//' + LocalDataFolderName.A_SHARE.value + '//'
 
     field_data_dict = {}
     for i in kline_object.field:
