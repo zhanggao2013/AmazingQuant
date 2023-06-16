@@ -38,17 +38,19 @@ class UpdateKlineData(object):
         for market_type in [tgw.MarketType.kSSE, tgw.MarketType.kSZSE]:
             stock_kline.market_type = tgw.MarketType.kSSE
             code_list = code_sh_list
+            market = 'SH'
             if market_type == tgw.MarketType.kSZSE:
                 stock_kline.market_type = tgw.MarketType.kSZSE
                 code_list = code_sz_list
+                market = 'SZ'
 
-            for code in code_list[:5]:
+            for code in code_list:
                 stock_kline.security_code = code
                 stock_data_df, _ = tgw.QueryKline(stock_kline)
                 stock_data_df = stock_data_df[self.field]
                 stock_data_df.set_index(["kline_time"], inplace=True)
                 stock_data_df = stock_data_df.reindex(calendar).fillna(method='ffill')
-                stock_data_dict[code] = stock_data_df
+                stock_data_dict[code+'.'+market] = stock_data_df
 
         return stock_data_dict
 

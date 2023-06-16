@@ -9,4 +9,4 @@
 
 
 class LocalDataPath(object):
-    path = 'F://AmazingQuant//' + 'local_data//'
+    path = 'D://AmazingQuant//' + 'local_data//'
