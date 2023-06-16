@@ -12,7 +12,7 @@ import time
 import pandas as pd
 import tgw
 
-from AmazingQuant.data_center.tgw_source.tgw_log import tgw_log
+from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
 from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
 from AmazingQuant.data_center.api_data.get_data import get_local_data
@@ -54,7 +54,7 @@ class UpdateKlineData(object):
 
 
 if __name__ == '__main__':
-    tgw_log()
+    tgw_login()
 
     tgw_api_object = TgwApiData(20991231)
     code_sh_list, code_sz_list = tgw_api_object.get_code_list()

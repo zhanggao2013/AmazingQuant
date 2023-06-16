@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2023/6/15
 # @Author  : gao
-# @File    : tgw_log.py 
+# @File    : tgw_login.py
 # @Project : AmazingQuant 
 # ------------------------------
 
@@ -29,7 +29,7 @@ class TgwLogSpi(tgw.ILogSpi):
         print("logon json : ", data.logon_json)
 
 
-def tgw_log():
+def tgw_login():
     log_spi = TgwLogSpi()
     tgw.SetLogSpi(log_spi)
 
