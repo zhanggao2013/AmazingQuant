@@ -126,15 +126,16 @@ if __name__ == '__main__':
     calendar_index = tgw_api_object.get_calendar()
 
     adj_factor_object = UpdateAdjFactor()
-    # backward_factor = adj_factor_object.get_backward_factor(code_sh_list, code_sz_list, calendar_index)
-    # folder_name = LocalDataFolderName.ADJ_FACTOR.value
-    # path = LocalDataPath.path + folder_name + '/'
-    # save_data_to_hdf5(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value, backward_factor)
+    backward_factor = adj_factor_object.get_backward_factor(code_sh_list, code_sz_list, calendar_index)
+    folder_name = LocalDataFolderName.ADJ_FACTOR.value
+    path = LocalDataPath.path + folder_name + '/'
+    save_data_to_hdf5(path, AdjustmentFactor.BACKWARD_ADJ_FACTOR.value, backward_factor)
 
-    path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
-           '//' + LocalDataFolderName.A_SHARE.value + '//'
-    close_df = get_local_data(path, 'close_price.h5')
-    backward_factor_ratio, ex_right_dividend_df, data_dict = adj_factor_object.get_backward_factor_ratio(close_df,
-                                                                                                         code_sh_list,
-                                                                                                         code_sz_list,
-                                                                                                         calendar_index)
+    forward_factor = adj_factor_object.cal_forward_factor(backward_factor)
+    save_data_to_hdf5(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value, forward_factor)
+
+    # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
+    #        '//' + LocalDataFolderName.A_SHARE.value + '//'
+    # close_df = get_local_data(path, 'close_price.h5')
+    # backward_factor_ratio = adj_factor_object.get_backward_factor_ratio(close_df, code_sh_list,  code_sz_list,
+    #                                                                     calendar_index)
