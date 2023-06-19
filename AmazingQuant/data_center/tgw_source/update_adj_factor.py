@@ -38,7 +38,7 @@ class UpdateAdjFactor(object):
                 adj_factor, _ = tgw.QueryExFactorTable(code)
                 adj_factor.set_index(["ex_date"], inplace=True)
                 adj_factor.sort_index(inplace=True)
-                backward_factor[code+'.'+market] = adj_factor['cum_factor']
+                backward_factor[code + '.' + market] = adj_factor['cum_factor']
         backward_factor.replace([np.inf, 0], np.nan, inplace=True)
         backward_factor.fillna(method='ffill', inplace=True)
         backward_factor.fillna(1, inplace=True)
@@ -65,7 +65,7 @@ class UpdateAdjFactor(object):
                 tgw.SetThirdInfoParam(task_id, "function_id", "A010030003")
                 tgw.SetThirdInfoParam(task_id, "start_date", "20130101")
                 tgw.SetThirdInfoParam(task_id, "end_date", "20991231")
-                tgw.SetThirdInfoParam(task_id, "market_code", code+'.'+market)
+                tgw.SetThirdInfoParam(task_id, "market_code", code + '.' + market)
                 df, _ = tgw.QueryThirdInfo(task_id)
                 if ex_right_dividend_df is None:
                     ex_right_dividend_df = df
@@ -75,14 +75,20 @@ class UpdateAdjFactor(object):
         ex_right_dividend_df['close'] = ex_right_dividend_df.apply(
             lambda x: self.get_adj_day_close(x['MARKET_CODE'], int(x['EX_RD_DATE']), close_df), axis=1)
         ex_right_dividend_df = ex_right_dividend_df.fillna(0)
-        ratio = ex_right_dividend_df['BONUS_SHARE_RATIO'] + ex_right_dividend_df['CONVER_INCR_RATIO'] + ex_right_dividend_df['REDUCED_RATIO']
+        ratio = ex_right_dividend_df['BONUS_SHARE_RATIO'] + ex_right_dividend_df['CONVER_INCR_RATIO'] + \
+                ex_right_dividend_df['REDUCED_RATIO']
 
         ex_right_dividend_df['adj_factor'] = ex_right_dividend_df['close'] * (
                 1 + ratio + ex_right_dividend_df['RIGHT_ISSUE_RATIO'] + ex_right_dividend_df['SEO_RATIO']) / (
-                ex_right_dividend_df['close'] - ex_right_dividend_df['DIV_PAYOUT_RATIO'] + ex_right_dividend_df['close']
-                * ratio + ex_right_dividend_df['RIGHT_ISSUE_PRICE'] * ex_right_dividend_df['RIGHT_ISSUE_RATIO'] +
-                                          ex_right_dividend_df['SEO_PRICE'] * ex_right_dividend_df['SEO_RATIO'])
-        ex_right_dividend_df = ex_right_dividend_df.reindex(columns=['MARKET_CODE', 'EX_RD_DATE', 'adj_factor','close'])
+                                                     ex_right_dividend_df['close'] - ex_right_dividend_df[
+                                                 'DIV_PAYOUT_RATIO'] + ex_right_dividend_df['close']
+                                                     * ratio + ex_right_dividend_df['RIGHT_ISSUE_PRICE'] *
+                                                     ex_right_dividend_df['RIGHT_ISSUE_RATIO'] +
+                                                     ex_right_dividend_df['SEO_PRICE'] * ex_right_dividend_df[
+                                                         'SEO_RATIO'])
+        ex_right_dividend_df = ex_right_dividend_df.reindex(
+            columns=['MARKET_CODE', 'EX_RD_DATE', 'adj_factor', 'close'])
+        ex_right_dividend_df["EX_RD_DATE"] = ex_right_dividend_df["EX_RD_DATE"].astype(int)
         ex_right_dividend_df.set_index(["EX_RD_DATE"], inplace=True)
         ex_right_dividend_df.sort_index(inplace=True)
 
@@ -92,8 +98,7 @@ class UpdateAdjFactor(object):
         data_dict = dict(list(ex_right_dividend_df.groupby(ex_right_dividend_df['MARKET_CODE'])))
         for security_code, adj_data in data_dict.items():
             backward_factor_ratio[security_code] = adj_data['adj_factor'].cumprod(axis=0)
-            print(backward_factor_ratio[security_code])
-            print(adj_data['adj_factor'])
+
         backward_factor_ratio.replace([np.inf, 0], np.nan, inplace=True)
         backward_factor_ratio.fillna(method='ffill', inplace=True)
         backward_factor_ratio.fillna(1, inplace=True)
@@ -101,11 +106,10 @@ class UpdateAdjFactor(object):
 
         return backward_factor_ratio, ex_right_dividend_df, data_dict
 
-
     def get_adj_day_close(self, security_code, date, close_df):
         security_code_market_data = 0
         try:
-            security_code_market_data = close_df.loc[date, security_code]/1000000
+            security_code_market_data = close_df.loc[date, security_code] / 1000000
         except KeyError:
             print(security_code, date, security_code_market_data)
         return security_code_market_data
@@ -127,10 +131,10 @@ if __name__ == '__main__':
     # path = LocalDataPath.path + folder_name + '/'
     # save_data_to_hdf5(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value, backward_factor)
 
-    path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//'+LocalDataFolderName.KLINE_DAILY.value + \
-        '//' + LocalDataFolderName.A_SHARE.value + '//'
+    path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
+           '//' + LocalDataFolderName.A_SHARE.value + '//'
     close_df = get_local_data(path, 'close_price.h5')
-    backward_factor_ratio, ex_right_dividend_df, data_dict = adj_factor_object.get_backward_factor_ratio(close_df, code_sh_list, code_sz_list,
-                                                                        calendar_index)
-
-
+    backward_factor_ratio, ex_right_dividend_df, data_dict = adj_factor_object.get_backward_factor_ratio(close_df,
+                                                                                                         code_sh_list,
+                                                                                                         code_sz_list,
+                                                                                                         calendar_index)

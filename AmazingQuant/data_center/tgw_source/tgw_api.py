@@ -35,7 +35,6 @@ class TgwApiData(object):
 
     def get_code_list(self):
         code_table_df, _ = tgw.QueryCodeTable(return_df_format=True)
-        print(code_table_df)
         code_table_shsz_df = code_table_df[code_table_df['market_type'].isin([101, 102])]
         self.code_sh_list = list(
             code_table_shsz_df[code_table_shsz_df['security_type'].isin(['ASH', 'KSH'])]['security_code'])
