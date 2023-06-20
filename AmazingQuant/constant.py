@@ -71,6 +71,8 @@ class LocalDataFolderName(Enum):
 
     FACTOR = 'factor'
 
+    FINANCE = 'finance'
+
 
 
 
