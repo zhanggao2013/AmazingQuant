@@ -15,6 +15,8 @@ class TgwApiData(object):
         self.calendar = []
         self.code_sh_list, self.code_sz_list = [], []
 
+        self.code_list_hist = []
+
     def get_calendar(self):
         index_kline = tgw.ReqKline()
         index_kline.cq_flag = 0
@@ -42,3 +44,11 @@ class TgwApiData(object):
             code_table_shsz_df[code_table_shsz_df['security_type'].isin(['1', '2', '3'])]['security_code'])
         return self.code_sh_list, self.code_sz_list
 
+    def get_code_list_hist(self):
+        task_id = tgw.GetTaskID()
+        tgw.SetThirdInfoParam(task_id, "function_id", "A010010006")
+        tgw.SetThirdInfoParam(task_id, "start_date", "19000101")
+        tgw.SetThirdInfoParam(task_id, "end_date", "20991231")
+        df, _ = tgw.QueryThirdInfo(task_id)
+        self.code_list_hist = list(df['MARKET_CODE'])
+        return self.code_list_hist
