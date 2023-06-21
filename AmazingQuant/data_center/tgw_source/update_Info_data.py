@@ -26,10 +26,11 @@ class UpdateInfoData(object):
         self.code_list_hist = code_list_hist
 
     def get_data(self, id):
+        code_list_error = []
         result_df = None
         a = 1
         for code in self.code_list_hist:
-            print(code, a)
+            print(code, a, id)
             a += 1
             task_id = tgw.GetTaskID()
             tgw.SetThirdInfoParam(task_id, "function_id", id)
@@ -38,12 +39,14 @@ class UpdateInfoData(object):
             tgw.SetThirdInfoParam(task_id, "end_date", "20991231")
             if code in ['T00018.SH']:
                 continue
-            df, _ = tgw.QueryThirdInfo(task_id)
+            df, error = tgw.QueryThirdInfo(task_id)
+            if error != 0:
+                code_list_error = code_list_error.append(code)
             if result_df is None:
                 result_df = df
             else:
                 result_df = result_df.append(df)
-        return result_df
+        return result_df, code_list_error
 
     def get_industry_class(self):
         """
@@ -58,8 +61,7 @@ class UpdateInfoData(object):
         """
         股本结构 A010010004
         """
-        stock_struction_df = self.get_data('A010010004')
-
+        stock_struction_df, code_list_error = self.get_data('A010010004')
         folder_name = LocalDataFolderName.FINANCE.value
         path = LocalDataPath.path + folder_name + '/'
         save_data_to_hdf5(path, 'stock_struction', stock_struction_df)
@@ -86,7 +88,6 @@ class UpdateInfoData(object):
         folder_name = LocalDataFolderName.FINANCE.value
         path = LocalDataPath.path + folder_name + '/'
         save_data_to_hdf5(path, 'longhubang', stock_struction_df)
-
 
 
 if __name__ == '__main__':
