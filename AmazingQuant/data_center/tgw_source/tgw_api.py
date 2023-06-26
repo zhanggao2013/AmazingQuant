@@ -49,6 +49,6 @@ class TgwApiData(object):
         tgw.SetThirdInfoParam(task_id, "function_id", "A010010006")
         tgw.SetThirdInfoParam(task_id, "start_date", "19000101")
         tgw.SetThirdInfoParam(task_id, "end_date", "20991231")
-        df, _ = tgw.QueryThirdInfo(task_id)
+        df, error = tgw.QueryThirdInfo(task_id)
         self.code_list_hist = list(df['MARKET_CODE'])
         return self.code_list_hist

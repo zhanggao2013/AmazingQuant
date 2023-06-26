@@ -26,12 +26,12 @@ class UpdateInfoData(object):
         self.code_list_hist = code_list_hist
 
     def get_data(self, id):
-        code_list_error = []
         result_df = None
-        a = 1
+        num = 1
+        error_code_list = []
         for code in self.code_list_hist:
-            print(code, a, id)
-            a += 1
+            print(id, code, num)
+            num += 1
             task_id = tgw.GetTaskID()
             tgw.SetThirdInfoParam(task_id, "function_id", id)
             tgw.SetThirdInfoParam(task_id, "market_code", code)
@@ -40,17 +40,17 @@ class UpdateInfoData(object):
             if code in ['T00018.SH']:
                 continue
             df, error = tgw.QueryThirdInfo(task_id)
-            if error != 0:
-                code_list_error = code_list_error.append(code)
             if result_df is None:
                 result_df = df
             else:
                 result_df = result_df.append(df)
-        return result_df, code_list_error
+            if error != 0:
+                error_code_list = error_code_list.append(code)
+        return result_df, error_code_list
 
     def get_industry_class(self):
         """
-        股本结构 A010010002
+        行业分类 A010010002
         """
         industry_class_df = self.get_data('A010010002')
         folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
@@ -61,7 +61,8 @@ class UpdateInfoData(object):
         """
         股本结构 A010010004
         """
-        stock_struction_df, code_list_error = self.get_data('A010010004')
+        stock_struction_df, error_code_list = self.get_data('A010010004')
+
         folder_name = LocalDataFolderName.FINANCE.value
         path = LocalDataPath.path + folder_name + '/'
         save_data_to_hdf5(path, 'stock_struction', stock_struction_df)
@@ -74,7 +75,7 @@ class UpdateInfoData(object):
         """
         data_dict = {"A010050001": "balance", "A010050002": "income", "A010050003": "cash_flow"}
         for key, value in data_dict.items():
-            stock_struction_df = self.get_data(key)
+            stock_struction_df, error_code_list = self.get_data(key)
             folder_name = LocalDataFolderName.FINANCE.value
             path = LocalDataPath.path + folder_name + '/'
             save_data_to_hdf5(path, value, stock_struction_df)
@@ -83,11 +84,12 @@ class UpdateInfoData(object):
         """
         交易异动营业部买卖信息 A010070002
         """
-        stock_struction_df = self.get_data('A010070002')
+        stock_struction_df, error_code_list = self.get_data('A010070002')
 
         folder_name = LocalDataFolderName.FINANCE.value
         path = LocalDataPath.path + folder_name + '/'
         save_data_to_hdf5(path, 'longhubang', stock_struction_df)
+
 
 
 if __name__ == '__main__':
