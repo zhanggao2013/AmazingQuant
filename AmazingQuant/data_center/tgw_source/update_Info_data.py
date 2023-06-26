@@ -36,7 +36,6 @@ class UpdateInfoData(object):
             tgw.SetThirdInfoParam(task_id, "function_id", id)
             tgw.SetThirdInfoParam(task_id, "market_code", code)
             if para_date:
-                print('para_date')
                 tgw.SetThirdInfoParam(task_id, "start_date", "19900101")
                 tgw.SetThirdInfoParam(task_id, "end_date", "20991231")
             if code in ['T00018.SH']:
