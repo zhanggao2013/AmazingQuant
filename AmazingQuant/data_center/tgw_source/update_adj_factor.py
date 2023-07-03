@@ -29,16 +29,22 @@ class UpdateAdjFactor(object):
         backward_factor = pd.DataFrame(index=calendar_index)
 
         market = 'SH'
+        num = 1
         for market_type in [tgw.MarketType.kSSE, tgw.MarketType.kSZSE]:
             code_list = code_sh_list
             if market_type == tgw.MarketType.kSZSE:
                 code_list = code_sz_list
                 market = 'SZ'
-            for code in code_list[:5]:
-                adj_factor, _ = tgw.QueryExFactorTable(code)
+            for code in code_list:
+                print(code, 'adj_factor', num)
+                num += 1
+                adj_factor, error = tgw.QueryExFactorTable(code)
+                if adj_factor is None:
+                    adj_factor = pd.DataFrame({}, columns=['cum_factor', 'ex_date'])
                 adj_factor.set_index(["ex_date"], inplace=True)
                 adj_factor.sort_index(inplace=True)
                 backward_factor[code + '.' + market] = adj_factor['cum_factor']
+
         backward_factor.replace([np.inf, 0], np.nan, inplace=True)
         backward_factor.fillna(method='ffill', inplace=True)
         backward_factor.fillna(1, inplace=True)
