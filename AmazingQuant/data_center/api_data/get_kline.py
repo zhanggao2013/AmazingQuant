@@ -20,7 +20,7 @@ from AmazingQuant.data_center.api_data.get_data import get_local_data
 
 class GetKlineData(object):
     def __init__(self):
-        self.field = ['open', 'high', 'low', 'close', 'volume', 'amount', 'match_items']
+        self.field = ['open', 'high', 'low', 'close', 'volume', 'amount']
         self.end = ''
         self.calendar_SZ = []
         self.adj_factor_obj = GetAdjFactor()
@@ -38,9 +38,11 @@ class GetKlineData(object):
             adj_factor = self.adj_factor_obj.get_adj_factor(RightsAdjustment.FROWARD.value)
         elif dividend_type == RightsAdjustment.BACKWARD.value:
             adj_factor = self.adj_factor_obj.get_adj_factor(RightsAdjustment.BACKWARD.value)
+        print('adj_factor', adj_factor.shape)
         for i in self.field:
             data_name = i + '.h5'
             data = get_local_data(path, data_name)
+            print(data)
             if isinstance(adj_factor, int):
                 all_market_date[i] = data
             else:

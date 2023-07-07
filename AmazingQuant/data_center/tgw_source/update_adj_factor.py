@@ -66,7 +66,7 @@ class UpdateAdjFactor(object):
             if market_type == tgw.MarketType.kSZSE:
                 code_list = code_sz_list
                 market = 'SZ'
-            for code in code_list[:5]:
+            for code in code_list:
                 task_id = tgw.GetTaskID()
                 tgw.SetThirdInfoParam(task_id, "function_id", "A010030003")
                 tgw.SetThirdInfoParam(task_id, "start_date", "20130101")
