@@ -88,3 +88,4 @@ if __name__ == '__main__':
     volume_trade_df = get_local_data(path, 'volume_trade.h5')
     value_trade_df = get_local_data(path, 'value_trade.h5')
 
+
