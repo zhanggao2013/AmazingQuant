@@ -27,7 +27,6 @@ class UpdateAdjFactor(object):
 
     def get_backward_factor(self, code_sh_list, code_sz_list, calendar_index):
         backward_factor = pd.DataFrame(index=calendar_index)
-
         market = 'SH'
         num = 1
         for market_type in [tgw.MarketType.kSSE, tgw.MarketType.kSZSE]:

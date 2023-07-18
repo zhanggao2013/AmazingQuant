@@ -66,13 +66,13 @@ if __name__ == '__main__':
 
     tgw_api_object = TgwApiData(20991231)
     # code_sh_list, code_sz_list = tgw_api_object.get_code_list()
-    calendar_index = tgw_api_object.get_calendar()
+    # calendar_index = tgw_api_object.get_calendar()
     #
     # kline_object = UpdateKlineData()
     # stock_data_dict = kline_object.get_kline_data(code_sh_list, code_sz_list, calendar_index)
-    #
-    # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
-    #        '//' + LocalDataFolderName.A_SHARE.value + '//'
+
+    path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
+           '//' + LocalDataFolderName.A_SHARE.value + '//'
 
     # field_data_dict = {}
     # for i in kline_object.field:
@@ -81,9 +81,10 @@ if __name__ == '__main__':
     #         field_data_dict[i] = field_data_pd
     #         field = ['kline_time', 'open_price', 'high_price', 'low_price', 'close_price', 'volume_trade', 'value_trade']
     #         save_data_to_hdf5(path, i, field_data_pd)
-    # open_df = get_local_data(path, 'open_price.h5')
-    # high_df = get_local_data(path, 'high_price.h5')
-    # low_df = get_local_data(path, 'low_price.h5')
-    # close_df = get_local_data(path, 'close_price.h5')
-    # volume_trade_df = get_local_data(path, 'volume_trade.h5')
-    # value_trade_df = get_local_data(path, 'value_trade.h5')
+    open_df = get_local_data(path, 'open_price.h5')
+    high_df = get_local_data(path, 'high_price.h5')
+    low_df = get_local_data(path, 'low_price.h5')
+    close_df = get_local_data(path, 'close_price.h5')
+    volume_trade_df = get_local_data(path, 'volume_trade.h5')
+    value_trade_df = get_local_data(path, 'value_trade.h5')
+
