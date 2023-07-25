@@ -29,9 +29,12 @@ class UpdateKlineData(object):
         stock_kline = tgw.ReqKline()
         stock_kline.cq_flag = 0
         stock_kline.auto_complete = 1
-        stock_kline.cyc_type = tgw.MDDatatype.kDayKline
-        stock_kline.begin_date = 19900101
-        stock_kline.end_date = 20991231
+        # stock_kline.cyc_type = tgw.MDDatatype.kDayKline
+        # stock_kline.begin_date = 19900101
+        # stock_kline.end_date = 20991231
+        stock_kline.cyc_type = tgw.MDDatatype.k10KLine
+        stock_kline.begin_date = 20230720
+        stock_kline.end_date = 20230720
         stock_kline.begin_time = 930
         stock_kline.end_time = 1700
         num = 1
@@ -51,13 +54,13 @@ class UpdateKlineData(object):
                 num += 1
                 stock_kline.security_code = code
                 stock_data_df, _ = tgw.QueryKline(stock_kline)
+                print(code, stock_data_df)
                 stock_data_df = stock_data_df[self.field]
                 stock_data_df.set_index(["kline_time"], inplace=True)
                 stock_data_df = stock_data_df.reindex(calendar).fillna(method='ffill')
                 stock_data_df[['open_price', 'high_price', 'low_price', 'close_price']] =\
                     stock_data_df[['open_price', 'high_price', 'low_price', 'close_price']] / 1000000
                 stock_data_dict[code + '.' + market] = stock_data_df
-
         return stock_data_dict
 
 
@@ -65,9 +68,9 @@ if __name__ == '__main__':
     tgw_login()
 
     tgw_api_object = TgwApiData(20991231)
-    # code_sh_list, code_sz_list = tgw_api_object.get_code_list()
-    # calendar_index = tgw_api_object.get_calendar()
-    #
+    code_sh_list, code_sz_list = tgw_api_object.get_code_list()
+    calendar_index = tgw_api_object.get_calendar()
+
     # kline_object = UpdateKlineData()
     # stock_data_dict = kline_object.get_kline_data(code_sh_list, code_sz_list, calendar_index)
 
@@ -81,11 +84,14 @@ if __name__ == '__main__':
     #         field_data_dict[i] = field_data_pd
     #         field = ['kline_time', 'open_price', 'high_price', 'low_price', 'close_price', 'volume_trade', 'value_trade']
     #         save_data_to_hdf5(path, i, field_data_pd)
-    open_df = get_local_data(path, 'open_price.h5')
-    high_df = get_local_data(path, 'high_price.h5')
-    low_df = get_local_data(path, 'low_price.h5')
-    close_df = get_local_data(path, 'close_price.h5')
-    volume_trade_df = get_local_data(path, 'volume_trade.h5')
-    value_trade_df = get_local_data(path, 'value_trade.h5')
+    open_df = get_local_data(path, 'open.h5')
+    high_df = get_local_data(path, 'high.h5')
+    low_df = get_local_data(path, 'low.h5')
+    close_df = get_local_data(path, 'close.h5')
+    volume_trade_df = get_local_data(path, 'volume.h5')
+    value_trade_df = get_local_data(path, 'amount.h5')
 
-
+    item2 = tgw.SubCodeTableItem()
+    item2.market = tgw.MarketType.kNone
+    item2.security_code = ""
+    df, error = tgw.QuerySecuritiesInfo(item2)

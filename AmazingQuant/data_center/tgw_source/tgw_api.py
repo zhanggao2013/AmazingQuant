@@ -36,12 +36,13 @@ class TgwApiData(object):
         return self.calendar
 
     def get_code_list(self):
-        code_table_df, _ = tgw.QueryCodeTable(return_df_format=True)
-        code_table_shsz_df = code_table_df[code_table_df['market_type'].isin([101, 102])]
-        self.code_sh_list = list(
-            code_table_shsz_df[code_table_shsz_df['security_type'].isin(['ASH', 'KSH'])]['security_code'])
-        self.code_sz_list = list(
-            code_table_shsz_df[code_table_shsz_df['security_type'].isin(['1', '2', '3'])]['security_code'])
+        item = tgw.SubCodeTableItem()
+        item.market = tgw.MarketType.kNone
+        item.security_code = ""
+        code_table_df, error = tgw.QuerySecuritiesInfo(item)
+        code_table_df = code_table_df[code_table_df['security_type'].isin(['02001', '02003', '02004', '02999'])]
+        self.code_sh_list = code_table_df[code_table_df['market_type']==101]
+        self.code_sz_list = code_table_df[code_table_df['market_type']==102]
         return self.code_sh_list, self.code_sz_list
 
     def get_code_list_hist(self):
