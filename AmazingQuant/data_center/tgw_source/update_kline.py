@@ -21,20 +21,31 @@ from AmazingQuant.constant import LocalDataFolderName, AdjustmentFactor
 
 
 class UpdateKlineData(object):
-    def __init__(self):
-        self.field = ['kline_time', 'open_price', 'high_price', 'low_price', 'close_price', 'volume_trade',
-                      'value_trade']
+    def __init__(self, path):
+        self.field = ['open_price', 'high_price', 'low_price', 'close_price', 'volume_trade', 'value_trade']
+        self.path = path
 
     def get_kline_data(self, code_sh_list, code_sz_list, calendar):
+        begin_date = 19900101
+        local_data = {}
+        try:
+            date_list = []
+            for i in self.field:
+                local_data[i] = get_local_data(self.path, i+'.h5')
+                date_list.append(max(local_data[i].index))
+            date_list_min = min(date_list)
+            begin_date = calendar_index[calendar_index.index(date_list_min) - 1]
+        except FileNotFoundError:
+            for i in self.field:
+                local_data[i] = pd.DataFrame({})
+            print('File does not exist')
+
         stock_kline = tgw.ReqKline()
         stock_kline.cq_flag = 0
         stock_kline.auto_complete = 1
-        # stock_kline.cyc_type = tgw.MDDatatype.kDayKline
-        # stock_kline.begin_date = 19900101
-        # stock_kline.end_date = 20991231
-        stock_kline.cyc_type = tgw.MDDatatype.k10KLine
-        stock_kline.begin_date = 20230720
-        stock_kline.end_date = 20230720
+        stock_kline.cyc_type = tgw.MDDatatype.kDayKline
+        stock_kline.begin_date = begin_date
+        stock_kline.end_date = 20991231
         stock_kline.begin_time = 930
         stock_kline.end_time = 1700
         num = 1
@@ -61,7 +72,12 @@ class UpdateKlineData(object):
                 stock_data_df[['open_price', 'high_price', 'low_price', 'close_price']] =\
                     stock_data_df[['open_price', 'high_price', 'low_price', 'close_price']] / 1000000
                 stock_data_dict[code + '.' + market] = stock_data_df
-        return stock_data_dict
+        field_data_dict = {}
+        for i in self.field:
+            field_data_pd = pd.DataFrame({key: value[i] for key, value in stock_data_dict.items()})
+            field_data_dict[i] = pd.concat([local_data[i], field_data_pd])
+            save_data_to_hdf5(self.path, i, field_data_dict[i])
+        return field_data_dict
 
 
 if __name__ == '__main__':
@@ -70,28 +86,17 @@ if __name__ == '__main__':
     tgw_api_object = TgwApiData(20991231)
     code_sh_list, code_sz_list = tgw_api_object.get_code_list()
     calendar_index = tgw_api_object.get_calendar()
-
-    # kline_object = UpdateKlineData()
-    # stock_data_dict = kline_object.get_kline_data(code_sh_list, code_sz_list, calendar_index)
-
     path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
            '//' + LocalDataFolderName.A_SHARE.value + '//'
 
-    # field_data_dict = {}
-    # for i in kline_object.field:
-    #     if i != 'kline_time':
-    #         field_data_pd = pd.DataFrame({key: value[i] for key, value in stock_data_dict.items()})
-    #         field_data_dict[i] = field_data_pd
-    #         field = ['kline_time', 'open_price', 'high_price', 'low_price', 'close_price', 'volume_trade', 'value_trade']
-    #         save_data_to_hdf5(path, i, field_data_pd)
-    open_df = get_local_data(path, 'open.h5')
-    high_df = get_local_data(path, 'high.h5')
-    low_df = get_local_data(path, 'low.h5')
-    close_df = get_local_data(path, 'close.h5')
-    volume_trade_df = get_local_data(path, 'volume.h5')
-    value_trade_df = get_local_data(path, 'amount.h5')
+    kline_object = UpdateKlineData(path)
+    field_data_dict = kline_object.get_kline_data(code_sh_list, code_sz_list, calendar_index)
 
-    item2 = tgw.SubCodeTableItem()
-    item2.market = tgw.MarketType.kNone
-    item2.security_code = ""
-    df, error = tgw.QuerySecuritiesInfo(item2)
+
+
+
+    for i in field_data_dict:
+        if i != 'kline_time':
+            save_data_to_hdf5(path, i, field_data_dict[i])
+
+
