@@ -26,25 +26,37 @@ class UpdateKlineData(object):
         self.path = path
 
     def get_kline_data(self, code_sh_list, code_sz_list, calendar):
-        begin_date = 19900101
+        code_market_list = []
+        for code in code_sh_list:
+            code_market_list.append(code + '.SH')
+        for code in code_sz_list:
+            code_market_list.append(code + '.SZ')
+
+        download_begin_date = 19900101
         local_data = {}
         try:
             date_list = []
             for i in self.field:
-                local_data[i] = get_local_data(self.path, i+'.h5')
+                local_data[i] = get_local_data(self.path, i+'.h5').reindex(columns=code_market_list)
                 date_list.append(max(local_data[i].index))
             date_list_min = min(date_list)
-            begin_date = calendar_index[calendar_index.index(date_list_min) - 1]
+            download_begin_date = calendar_index[calendar_index.index(date_list_min) - 1]
+            end_date = calendar_index[calendar_index.index(date_list_min) -2]
+            for i in self.field:
+                print(local_data[i].shape)
+                local_data[i] = local_data[i].loc[:end_date, :]
+                print(local_data[i].shape)
+            print(download_begin_date)
         except FileNotFoundError:
             for i in self.field:
                 local_data[i] = pd.DataFrame({})
             print('File does not exist')
-
+        print('download_begin_date', download_begin_date)
         stock_kline = tgw.ReqKline()
         stock_kline.cq_flag = 0
         stock_kline.auto_complete = 1
         stock_kline.cyc_type = tgw.MDDatatype.kDayKline
-        stock_kline.begin_date = begin_date
+        stock_kline.begin_date = download_begin_date
         stock_kline.end_date = 20991231
         stock_kline.begin_time = 930
         stock_kline.end_time = 1700
@@ -65,9 +77,9 @@ class UpdateKlineData(object):
                 num += 1
                 stock_kline.security_code = code
                 stock_data_df, _ = tgw.QueryKline(stock_kline)
-                print(code, stock_data_df)
-                stock_data_df = stock_data_df[self.field]
                 stock_data_df.set_index(["kline_time"], inplace=True)
+                stock_data_df = stock_data_df[self.field]
+                # print(code, stock_data_df)
                 stock_data_df = stock_data_df.reindex(calendar).fillna(method='ffill')
                 stock_data_df[['open_price', 'high_price', 'low_price', 'close_price']] =\
                     stock_data_df[['open_price', 'high_price', 'low_price', 'close_price']] / 1000000
@@ -75,8 +87,11 @@ class UpdateKlineData(object):
         field_data_dict = {}
         for i in self.field:
             field_data_pd = pd.DataFrame({key: value[i] for key, value in stock_data_dict.items()})
-            field_data_dict[i] = pd.concat([local_data[i], field_data_pd])
+            field_data_dict[i] = field_data_pd
+            if download_begin_date != 19900101:
+                field_data_dict[i] = pd.concat([local_data[i], field_data_pd])
             save_data_to_hdf5(self.path, i, field_data_dict[i])
+            print('save_data_to_hdf5', i)
         return field_data_dict
 
 
@@ -95,8 +110,8 @@ if __name__ == '__main__':
 
 
 
-    for i in field_data_dict:
-        if i != 'kline_time':
-            save_data_to_hdf5(path, i, field_data_dict[i])
+    # for i in field_data_dict:
+    #     if i != 'kline_time':
+    #         save_data_to_hdf5(path, i, field_data_dict[i])
 
 
