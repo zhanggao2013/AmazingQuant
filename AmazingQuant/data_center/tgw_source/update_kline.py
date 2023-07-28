@@ -43,10 +43,10 @@ class UpdateKlineData(object):
             download_begin_date = calendar_index[calendar_index.index(date_list_min) - 1]
             end_date = calendar_index[calendar_index.index(date_list_min) -2]
             for i in self.field:
-                print(local_data[i].shape)
+                # print(local_data[i].shape)
                 local_data[i] = local_data[i].loc[:end_date, :]
-                print(local_data[i].shape)
-            print(download_begin_date)
+                # print(local_data[i].shape)
+            # print(download_begin_date)
         except FileNotFoundError:
             for i in self.field:
                 local_data[i] = pd.DataFrame({})
@@ -56,6 +56,7 @@ class UpdateKlineData(object):
         stock_kline.cq_flag = 0
         stock_kline.auto_complete = 1
         stock_kline.cyc_type = tgw.MDDatatype.kDayKline
+        # stock_kline.cyc_type = tgw.MDDatatype.k1KLine
         stock_kline.begin_date = download_begin_date
         stock_kline.end_date = 20991231
         stock_kline.begin_time = 930
@@ -76,14 +77,16 @@ class UpdateKlineData(object):
                 print(num, code)
                 num += 1
                 stock_kline.security_code = code
-                stock_data_df, _ = tgw.QueryKline(stock_kline)
-                stock_data_df.set_index(["kline_time"], inplace=True)
-                stock_data_df = stock_data_df[self.field]
-                # print(code, stock_data_df)
-                stock_data_df = stock_data_df.reindex(calendar).fillna(method='ffill')
-                stock_data_df[['open_price', 'high_price', 'low_price', 'close_price']] =\
-                    stock_data_df[['open_price', 'high_price', 'low_price', 'close_price']] / 1000000
-                stock_data_dict[code + '.' + market] = stock_data_df
+                stock_data_df, error = tgw.QueryKline(stock_kline)
+                print(error)
+                if error == "":
+                    stock_data_df.set_index(["kline_time"], inplace=True)
+                    stock_data_df = stock_data_df[self.field]
+                    # print(code, stock_data_df)
+                    stock_data_df = stock_data_df.reindex(calendar).fillna(method='ffill')
+                    stock_data_df[['open_price', 'high_price', 'low_price', 'close_price']] =\
+                        stock_data_df[['open_price', 'high_price', 'low_price', 'close_price']] / 1000000
+                    stock_data_dict[code + '.' + market] = stock_data_df
         field_data_dict = {}
         for i in self.field:
             field_data_pd = pd.DataFrame({key: value[i] for key, value in stock_data_dict.items()})
@@ -106,12 +109,3 @@ if __name__ == '__main__':
 
     kline_object = UpdateKlineData(path)
     field_data_dict = kline_object.get_kline_data(code_sh_list, code_sz_list, calendar_index)
-
-
-
-
-    # for i in field_data_dict:
-    #     if i != 'kline_time':
-    #         save_data_to_hdf5(path, i, field_data_dict[i])
-
-
