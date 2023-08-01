@@ -27,8 +27,6 @@ class UpAShareCapitalization(object):
         保存 总股本, 总市值, 流通股本, 流通市值 四个hdf5
         :return:
         """
-        field_list = ['MARKET_CODE', 'EX_CHANGE_DATE', 'TOT_SHARE', 'FLOAT_SHARE', 'FLOAT_A_SHARE', 'FLOAT_B_SHARE',
-                      'FLOAT_HK_SHARE']
         folder_name = LocalDataFolderName.FINANCE.value
         path = LocalDataPath.path + folder_name + '/'
         self.a_share_capitalization = get_local_data(path, 'stock_struction.h5')
