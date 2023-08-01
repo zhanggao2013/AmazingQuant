@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2023/6/20
 # @Author  : gao
-# @File    : update_Info_data.py
+# @File    : download_Info_data.py
 # @Project : AmazingQuant 
 # ------------------------------
 import os

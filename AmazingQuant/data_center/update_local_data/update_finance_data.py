@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/11/21
 # @Author  : gao
-# @File    : update_Info_data.py
+# @File    : download_Info_data.py
 # @Project : AmazingQuant
 # ------------------------------
 
