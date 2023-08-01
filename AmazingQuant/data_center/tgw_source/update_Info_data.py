@@ -25,7 +25,7 @@ class UpdateInfoData(object):
     def __init__(self, code_list_hist):
         self.code_list_hist = code_list_hist
 
-    def get_data(self, id, para_date=False):
+    def get_info_data(self, id, para_date=False):
         result_df = None
         num = 1
         error_code_list = []
@@ -54,20 +54,22 @@ class UpdateInfoData(object):
         """
         行业分类 A010010002
         """
-        industry_class_df, error_code_list = self.get_data('A010010002')
+        industry_class_df, error_code_list = self.get_info_data('A010010002')
         folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
         path = LocalDataPath.path + folder_name + '/'
         save_data_to_hdf5(path, 'industry_class', industry_class_df)
+        return industry_class_df
 
     def get_stock_struction(self):
         """
         股本结构 A010010004
         """
-        stock_struction_df, error_code_list = self.get_data('A010010004', para_date=True)
+        stock_struction_df, error_code_list = self.get_info_data('A010010004', para_date=True)
 
         folder_name = LocalDataFolderName.FINANCE.value
         path = LocalDataPath.path + folder_name + '/'
         save_data_to_hdf5(path, 'stock_struction', stock_struction_df)
+        return stock_struction_df
 
     def get_finance_data(self):
         """
@@ -76,22 +78,24 @@ class UpdateInfoData(object):
         A股一般企业现金流表   A010050003
         """
         data_dict = {"A010050001": "balance", "A010050002": "income", "A010050003": "cash_flow"}
+        result = {}
         for key, value in data_dict.items():
-            stock_struction_df, error_code_list = self.get_data(key, para_date=True)
+            result[value], error_code_list = self.get_info_data(key, para_date=True)
             folder_name = LocalDataFolderName.FINANCE.value
             path = LocalDataPath.path + folder_name + '/'
-            save_data_to_hdf5(path, value, stock_struction_df)
+            save_data_to_hdf5(path, value, result[value])
+        return result
 
     def get_longhubang(self):
         """
         交易异动营业部买卖信息 A010070002
         """
-        stock_struction_df, error_code_list = self.get_data('A010070002', para_date=True)
+        longhubang_df, error_code_list = self.get_info_data('A010070002', para_date=True)
 
         folder_name = LocalDataFolderName.FINANCE.value
         path = LocalDataPath.path + folder_name + '/'
-        save_data_to_hdf5(path, 'longhubang', stock_struction_df)
-
+        save_data_to_hdf5(path, 'longhubang', longhubang_df)
+        return longhubang_df
 
 
 if __name__ == '__main__':
@@ -105,6 +109,6 @@ if __name__ == '__main__':
     # info_data_object.get_stock_struction()
     # info_data_object.get_finance_data()
     #
-    folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
-    path = LocalDataPath.path + folder_name + '/'
-    a = get_local_data(path, folder_name + '.h5')
+    # folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
+    # path = LocalDataPath.path + folder_name + '/'
+    # a = get_local_data(path, folder_name + '.h5')
