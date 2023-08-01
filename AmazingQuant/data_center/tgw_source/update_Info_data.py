@@ -105,10 +105,11 @@ if __name__ == '__main__':
     code_list_hist = tgw_api_object.get_code_list_hist()
     calendar_index = tgw_api_object.get_calendar()
     info_data_object = UpdateInfoData(code_list_hist)
-    info_data_object.get_industry_class()
+    industry_class_df = info_data_object.get_industry_class()
     # info_data_object.get_stock_struction()
-    # info_data_object.get_finance_data()
-    #
+    # result = info_data_object.get_finance_data()
+
     # folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
     # path = LocalDataPath.path + folder_name + '/'
     # a = get_local_data(path, folder_name + '.h5')
+
