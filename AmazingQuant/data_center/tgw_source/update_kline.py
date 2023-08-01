@@ -23,6 +23,8 @@ from AmazingQuant.constant import LocalDataFolderName, AdjustmentFactor
 class UpdateKlineData(object):
     def __init__(self, path):
         self.field = ['open_price', 'high_price', 'low_price', 'close_price', 'volume_trade', 'value_trade']
+        self.field_dict = {'open_price': 'open', 'high_price': 'high', 'low_price': 'low',
+                            'close_price': 'close', 'volume_trade': 'volume', 'value_trade': 'amount'}
         self.path = path
 
     def get_kline_data(self, code_sh_list, code_sz_list, calendar):
@@ -90,11 +92,11 @@ class UpdateKlineData(object):
         field_data_dict = {}
         for i in self.field:
             field_data_pd = pd.DataFrame({key: value[i] for key, value in stock_data_dict.items()})
-            field_data_dict[i] = field_data_pd
+            field_data_dict[self.field_dict[i]] = field_data_pd
             if download_begin_date != 19900101:
-                field_data_dict[i] = pd.concat([local_data[i], field_data_pd])
-            save_data_to_hdf5(self.path, i, field_data_dict[i])
-            print('save_data_to_hdf5', i)
+                field_data_dict[self.field_dict[i]] = pd.concat([local_data[i], field_data_pd])
+            save_data_to_hdf5(self.path, self.field_dict[i], field_data_dict[self.field_dict[i]])
+            print('save_data_to_hdf5', self.field_dict[i])
         return field_data_dict
 
 
