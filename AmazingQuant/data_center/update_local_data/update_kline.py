@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/11/19
 # @Author  : gao
-# @File    : update_kline.py
+# @File    : download_kline.py
 # @Project : AmazingQuant
 # ------------------------------
 
