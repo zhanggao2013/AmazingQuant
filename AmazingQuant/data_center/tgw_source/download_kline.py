@@ -20,7 +20,7 @@ from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.constant import LocalDataFolderName, AdjustmentFactor
 
 
-class UpdateKlineData(object):
+class DownloadKlineData(object):
     def __init__(self, path):
         self.field = ['open_price', 'high_price', 'low_price', 'close_price', 'volume_trade', 'value_trade']
         self.field_dict = {'open_price': 'open', 'high_price': 'high', 'low_price': 'low',
@@ -109,5 +109,5 @@ if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
            '//' + LocalDataFolderName.A_SHARE.value + '//'
 
-    kline_object = UpdateKlineData(path)
+    kline_object = DownloadKlineData(path)
     field_data_dict = kline_object.get_kline_data(code_sh_list, code_sz_list, calendar_index)

@@ -21,7 +21,7 @@ from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.constant import LocalDataFolderName, AdjustmentFactor
 
 
-class UpdateInfoData(object):
+class DownloadInfoData(object):
     def __init__(self, code_list_hist):
         self.code_list_hist = code_list_hist
 
@@ -104,7 +104,7 @@ if __name__ == '__main__':
     tgw_api_object = TgwApiData(20991231)
     code_list_hist = tgw_api_object.get_code_list_hist()
     calendar_index = tgw_api_object.get_calendar()
-    info_data_object = UpdateInfoData(code_list_hist)
+    info_data_object = DownloadInfoData(code_list_hist)
     industry_class_df = info_data_object.get_industry_class()
     # info_data_object.get_stock_struction()
     # result = info_data_object.get_finance_data()
