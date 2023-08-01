@@ -11,7 +11,7 @@ from datetime import datetime
 
 import pandas as pd
 
-from AmazingQuant.constant import DatabaseName, LocalDataFolderName
+from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
@@ -42,16 +42,13 @@ class UpAShareCapitalization(object):
         total_share = pd.DataFrame({})
         float_a_share = pd.DataFrame({})
         for i in share_capitalization_grouped:
-            data = i[1].sort_values('EX_CHANGE_DATE').set_index('EX_CHANGE_DATE')
-            # print(data['TOT_SHARE'])
-            try:
-                total_share[i[0]] = data['TOT_SHARE'].reindex(index)
-                float_a_share[i[0]] = data['FLOAT_A_SHARE'].reindex(index)
-            except ValueError:
-                # 有四只票 change date 重复, 需要手工清洗修正
-                # print(data[data.index.duplicated()])
-                total_share[i[0]] = data[data.index.duplicated()]['TOT_SHARE'].reindex(index)
-                float_a_share[i[0]] = data[data.index.duplicated()]['FLOAT_A_SHARE'].reindex(index)
+            data = i[1].sort_values('EX_CHANGE_DATE')
+            data.drop_duplicates(subset=['EX_CHANGE_DATE'], keep='first', inplace = True, ignore_index = False)
+            data = data.set_index('EX_CHANGE_DATE')
+            total_share[i[0]] = data['TOT_SHARE'].reindex(index)
+            float_a_share[i[0]] = data['FLOAT_A_SHARE'].reindex(index)
+            print(i[0])
+
         total_share = total_share.fillna(method='ffill').reindex(market_close_data.index)
         float_a_share = float_a_share.fillna(method='ffill').reindex(market_close_data.index)
         total_share_value = total_share.multiply(10000) * market_close_data
