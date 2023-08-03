@@ -25,9 +25,7 @@ class MaIndicator(object):
 
     def get_stock_list(self):
         tgw_api_object = TgwApiData(20991231)
-        stock_list_SH, stock_list_SZ = tgw_api_object.get_code_list()
-        stock_list_SH = [i+'.SH' for i in stock_list_SH]
-        stock_list_SZ = [i+'.SZ' for i in stock_list_SZ]
+        stock_list_SH, stock_list_SZ = tgw_api_object.get_code_list(add_market=True)
         self.stock_list = stock_list_SH + stock_list_SZ
         return self.stock_list
 
@@ -39,9 +37,9 @@ class MaIndicator(object):
 
     def save_ma(self, num):
         save_get_indicator = SaveGetIndicator()
-        ma5 = self.kline['close'].rolling(num).mean()
-        save_get_indicator.save_indicator('ma'+str(num), ma5)
-        return ma5
+        ma = self.kline['close'].rolling(num).mean()
+        save_get_indicator.save_indicator('ma'+str(num), ma)
+        return ma
 
 
 if __name__ == '__main__':
@@ -52,6 +50,6 @@ if __name__ == '__main__':
         print(len(ma_indicator.stock_list))
         ma_indicator.get_kline_data()
         ma5 = ma_indicator.save_ma(5)
-        ma_indicator.save_ma(10)
+        ma10 = ma_indicator.save_ma(10)
         # save_get_indicator = SaveGetIndicator()
         # a = save_get_indicator.get_indicator('ma5')

@@ -35,7 +35,7 @@ class TgwApiData(object):
         self.calendar = list(index_kline_df['kline_time'])
         return self.calendar
 
-    def get_code_list(self):
+    def get_code_list(self, add_market=False):
         item = tgw.SubCodeTableItem()
         item.market = tgw.MarketType.kNone
         item.security_code = ""
@@ -43,6 +43,9 @@ class TgwApiData(object):
         code_table_df = code_table_df[code_table_df['security_type'].isin(['02001', '02003', '02004', '02999'])]
         self.code_sh_list = list(code_table_df[code_table_df['market_type'] == 101]['security_code'])
         self.code_sz_list = list(code_table_df[code_table_df['market_type'] == 102]['security_code'])
+        if add_market:
+            self.code_sh_list = [i + '.SH' for i in self.code_sh_list]
+            self.code_sz_list = [i + '.SZ' for i in self.code_sz_list]
         return self.code_sh_list, self.code_sz_list
 
     def get_code_list_hist(self):
