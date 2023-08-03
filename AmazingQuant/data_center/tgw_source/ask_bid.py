@@ -22,8 +22,8 @@ class DataHandler(tgw.IPushSpi):
 
     def OnMDSnapshot(self, data, err):
         if not data is None:
-            # if data[0]['security_code'] == '000001':
-            #     print(data[0]['orig_time'], datetime.datetime.now())
+            if data[0]['security_code'] == '000002':
+                print(data[0]['orig_time'], data[0]['last_price']/1000000)
             pass
         else:
             print(err)
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     data_hander = DataHandler()
     data_hander.SetDfFormat(False)
     sub_item = tgw.SubscribeItem()
-    sub_item.security_code = ""
+    sub_item.security_code = "000002"
     sub_item.SubscribeDataType = tgw.SubscribeDataType.kSnapshot
     sub_item.VarietyCategory = tgw.VarietyCategory.kStock
     sub_item.market = tgw.MarketType.kNone

@@ -41,11 +41,10 @@ class UpAShareCapitalization(object):
         float_a_share = pd.DataFrame({})
         for i in share_capitalization_grouped:
             data = i[1].sort_values('EX_CHANGE_DATE')
-            data.drop_duplicates(subset=['EX_CHANGE_DATE'], keep='first', inplace = True, ignore_index = False)
+            data.drop_duplicates(subset=['EX_CHANGE_DATE'], keep='last', inplace = True, ignore_index = False)
             data = data.set_index('EX_CHANGE_DATE')
             total_share[i[0]] = data['TOT_SHARE'].reindex(index)
             float_a_share[i[0]] = data['FLOAT_A_SHARE'].reindex(index)
-            print(i[0])
 
         total_share = total_share.fillna(method='ffill').reindex(market_close_data.index)
         float_a_share = float_a_share.fillna(method='ffill').reindex(market_close_data.index)
