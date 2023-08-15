@@ -48,9 +48,9 @@ from AmazingQuant.data_center.api_data.get_share import GetShare
 from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
-from apps.server.database_server.database_field.field_multi_factor import FactorPreProcessingData
+# from apps.server.database_server.database_field.field_multi_factor import FactorPreProcessingData
 from AmazingQuant.constant import DatabaseName
-from AmazingQuant.utils.mongo_connection_me import MongoConnect
+# from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from AmazingQuant.utils.code_transfer import code_market_to_market_code
 
 
@@ -59,6 +59,7 @@ class FactorPreProcessing(object):
         self.raw_data = raw_data
 
     def data_filter(self, start=datetime(2010, 1, 1), end=datetime.now(), stock_list=None):
+        print(self.raw_data, self.raw_data.index)
         if stock_list is None:
             self.raw_data = self.raw_data.loc[start: end]
         else:
@@ -296,5 +297,5 @@ if __name__ == '__main__':
 
     # 补充空值的方法，已实现两种
     fill_nan_data = factor_pre_obj.fill_nan_processing(FillNanMethod.MEAN.value)
-    factor_pre_obj.save_factor_data(factor_name)
+    factor_pre_obj.save_factor_data(factor_name, 'hdf5')
 

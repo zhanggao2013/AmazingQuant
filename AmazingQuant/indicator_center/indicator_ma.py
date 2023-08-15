@@ -43,13 +43,13 @@ class MaIndicator(object):
 
 
 if __name__ == '__main__':
-    tgw_login()
+    tgw_login(server_mode=True)
     with Timer(True):
         ma_indicator = MaIndicator()
         ma_indicator.get_stock_list()
         print(len(ma_indicator.stock_list))
-        ma_indicator.get_kline_data()
-        ma5 = ma_indicator.save_ma(5)
-        ma10 = ma_indicator.save_ma(10)
+        # ma_indicator.get_kline_data()
+        # ma5 = ma_indicator.save_ma(5)
+        # ma10 = ma_indicator.save_ma(10)
         # save_get_indicator = SaveGetIndicator()
         # a = save_get_indicator.get_indicator('ma5')
