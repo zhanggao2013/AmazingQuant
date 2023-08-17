@@ -34,6 +34,10 @@ def date_to_datetime(date='20090101'):
     return datetime.strptime(date, "%Y%m%d")
 
 
+def datetime_to_int(date=datetime.now()):
+    return int(date.strftime('%Y%m%d'))
+
+
 if __name__ == "__main__":
     print(date_str_to_int(date="2010-01-01"))
     a = datetime_to_millisecond()

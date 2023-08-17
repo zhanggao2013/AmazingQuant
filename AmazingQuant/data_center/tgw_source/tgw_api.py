@@ -8,6 +8,8 @@
 # ------------------------------
 import tgw
 
+from AmazingQuant.utils.data_transfer import date_to_datetime
+
 
 class TgwApiData(object):
     def __init__(self, end_date):
@@ -17,7 +19,7 @@ class TgwApiData(object):
         self.stock_list = []
         self.code_list_hist = []
 
-    def get_calendar(self):
+    def get_calendar(self, data_type='datetime'):
         index_kline = tgw.ReqKline()
         index_kline.cq_flag = 0
         index_kline.auto_complete = 1
@@ -32,7 +34,9 @@ class TgwApiData(object):
 
         index_kline_df, _ = tgw.QueryKline(index_kline)
 
-        self.calendar = list(index_kline_df['kline_time'])
+        self.calendar = list(index_kline_df['kline_time'].sort_values(ascending=True))
+        if data_type == 'datetime':
+            self.calendar = [date_to_datetime(str(i)) for i in self.calendar]
         return self.calendar
 
     def get_code_list(self, add_market=False, all_code=False):

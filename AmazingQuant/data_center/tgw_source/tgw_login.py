@@ -44,7 +44,7 @@ def tgw_login(server_mode=False):
     if server_mode:
         cfg.coloca_cfg.channel_mode = tgw.ColocatChannelMode.kTCP | tgw.ColocatChannelMode.kQTCP \
                                       | tgw.ColocatChannelMode.kRTCP  # tcp订阅通道和查询通道初始化
-        cfg.coloca_cfg.qtcp_channel_thread = 2
+        cfg.coloca_cfg.qtcp_channel_thread = 8
         cfg.coloca_cfg.qtcp_max_req_cnt = 1000
         cfg.coloca_cfg.enable_order_book = tgw.OrderBookType.kNone
         cfg.coloca_cfg.entry_size = 10
