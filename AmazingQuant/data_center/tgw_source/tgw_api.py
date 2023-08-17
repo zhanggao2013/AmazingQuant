@@ -14,7 +14,7 @@ class TgwApiData(object):
         self.end_date = end_date
         self.calendar = []
         self.code_sh_list, self.code_sz_list = [], []
-
+        self.stock_list = []
         self.code_list_hist = []
 
     def get_calendar(self):
@@ -35,20 +35,29 @@ class TgwApiData(object):
         self.calendar = list(index_kline_df['kline_time'])
         return self.calendar
 
-    def get_code_list(self, add_market=False):
-        item = tgw.SubCodeTableItem()
-        item.market = tgw.MarketType.kNone
-        item.security_code = ""
-        print('qqqqqqqqq')
-        code_table_df, error = tgw.QuerySecuritiesInfo(item)
-        print('code_table_df', code_table_df)
-        code_table_df = code_table_df[code_table_df['security_type'].isin(['02001', '02003', '02004', '02999'])]
-        self.code_sh_list = list(code_table_df[code_table_df['market_type'] == 101]['security_code'])
-        self.code_sz_list = list(code_table_df[code_table_df['market_type'] == 102]['security_code'])
-        if add_market:
-            self.code_sh_list = [i + '.SH' for i in self.code_sh_list]
-            self.code_sz_list = [i + '.SZ' for i in self.code_sz_list]
-        return self.code_sh_list, self.code_sz_list
+    def get_code_list(self, add_market=False, all_code=False):
+        for market in [tgw.MarketType.kSZSE, tgw.MarketType.kSSE]:
+            item = tgw.SubCodeTableItem()
+            item.market = market
+            item.security_code = ""
+            code_table_df, error = tgw.QuerySecuritiesInfo(item)
+            print('code_table_df', code_table_df)
+            code_table_df = code_table_df[code_table_df['security_type'].isin(['02001', '02003', '02004', '02999'])]
+            code_list = list(code_table_df['security_code'])
+            if market == tgw.MarketType.kSZSE:
+                self.code_sz_list = code_list
+                if add_market:
+                    self.code_sz_list = [i + '.SZ' for i in self.code_sz_list]
+            elif market == tgw.MarketType.kSSE:
+                self.code_sh_list = code_list
+                if add_market:
+                    self.code_sh_list = [i + '.SH' for i in self.code_sh_list]
+
+        if all_code:
+            self.stock_list = self.code_sh_list + self.code_sz_list
+            return self.stock_list
+        else:
+            return self.code_sh_list, self.code_sz_list
 
     def get_code_list_hist(self):
         task_id = tgw.GetTaskID()

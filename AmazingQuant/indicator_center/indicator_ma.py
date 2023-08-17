@@ -25,8 +25,7 @@ class MaIndicator(object):
 
     def get_stock_list(self):
         tgw_api_object = TgwApiData(20991231)
-        stock_list_SH, stock_list_SZ = tgw_api_object.get_code_list(add_market=True)
-        self.stock_list = stock_list_SH + stock_list_SZ
+        self.stock_list = tgw_api_object.get_code_list(add_market=True, all_code=True)
         return self.stock_list
 
     def get_kline_data(self):
