@@ -118,5 +118,5 @@ if __name__ == '__main__':
            '//' + LocalDataFolderName.A_SHARE.value + '//'
 
     kline_object = DownloadKlineData(path)
-    field_data_dict = kline_object.get_kline_data(code_sh_list[:5], code_sz_list[:5], calendar_index)
+    field_data_dict = kline_object.get_kline_data(code_sh_list, code_sz_list, calendar_index)
 
