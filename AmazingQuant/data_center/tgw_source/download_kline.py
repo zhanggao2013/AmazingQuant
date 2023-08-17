@@ -44,8 +44,10 @@ class DownloadKlineData(object):
             date_list_min = min(date_list)
             download_begin_date = calendar_index[calendar_index.index(date_list_min) - 1]
             end_date = calendar_index[calendar_index.index(date_list_min) - 2]
+            print('download_begin_date', download_begin_date)
+            print('end_date', end_date)
             for i in self.field_dict.values():
-                # print(local_data[i].shape)
+                print(local_data[i].sort_index())
                 local_data[i] = local_data[i].loc[:end_date, :]
                 # print(local_data[i].shape)
             # print(download_begin_date)
@@ -94,7 +96,8 @@ class DownloadKlineData(object):
             field_data_pd = pd.DataFrame({key: value[i] for key, value in stock_data_dict.items()})
             field_data_dict[self.field_dict[i]] = field_data_pd
             if download_begin_date != 19900101:
-                field_data_dict[self.field_dict[i]] = pd.concat([local_data[self.field_dict[i]], field_data_pd])
+                field_data_dict[self.field_dict[i]] = pd.concat([local_data[self.field_dict[i]],
+                                                                 field_data_pd.loc[download_begin_date:, :]])
             save_data_to_hdf5(self.path, self.field_dict[i], field_data_dict[self.field_dict[i]])
             print('save_data_to_hdf5', self.field_dict[i])
         return field_data_dict
