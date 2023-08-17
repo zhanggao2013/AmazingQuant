@@ -50,10 +50,7 @@ class DownloadKlineData(object):
             print('download_begin_date', download_begin_date)
             print('end_date', end_date)
             for i in self.field_dict.values():
-                print(local_data[i].sort_index())
                 local_data[i] = local_data[i].loc[:end_date, :]
-                # print(local_data[i].shape)
-            # print(download_begin_date)
         except FileNotFoundError:
             for i in self.field_dict.values():
                 local_data[i] = pd.DataFrame({})
@@ -118,5 +115,5 @@ if __name__ == '__main__':
            '//' + LocalDataFolderName.A_SHARE.value + '//'
 
     kline_object = DownloadKlineData(path)
-    field_data_dict = kline_object.get_kline_data(code_sh_list[:5], code_sz_list[:5], calendar_index)
+    field_data_dict = kline_object.get_kline_data(code_sh_list, code_sz_list, calendar_index)
 
