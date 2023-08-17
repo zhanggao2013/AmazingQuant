@@ -38,19 +38,19 @@ class DownloadKlineData(object):
         local_data = {}
         try:
             date_list = []
-            for i in self.field:
+            for i in self.field_dict.values():
                 local_data[i] = get_local_data(self.path, i+'.h5').reindex(columns=code_market_list)
                 date_list.append(max(local_data[i].index))
             date_list_min = min(date_list)
             download_begin_date = calendar_index[calendar_index.index(date_list_min) - 1]
-            end_date = calendar_index[calendar_index.index(date_list_min) -2]
-            for i in self.field:
+            end_date = calendar_index[calendar_index.index(date_list_min) - 2]
+            for i in self.field_dict.values():
                 # print(local_data[i].shape)
                 local_data[i] = local_data[i].loc[:end_date, :]
                 # print(local_data[i].shape)
             # print(download_begin_date)
         except FileNotFoundError:
-            for i in self.field:
+            for i in self.field_dict.values():
                 local_data[i] = pd.DataFrame({})
             print('File does not exist')
         print('download_begin_date', download_begin_date)
@@ -94,14 +94,14 @@ class DownloadKlineData(object):
             field_data_pd = pd.DataFrame({key: value[i] for key, value in stock_data_dict.items()})
             field_data_dict[self.field_dict[i]] = field_data_pd
             if download_begin_date != 19900101:
-                field_data_dict[self.field_dict[i]] = pd.concat([local_data[i], field_data_pd])
+                field_data_dict[self.field_dict[i]] = pd.concat([local_data[self.field_dict[i]], field_data_pd])
             save_data_to_hdf5(self.path, self.field_dict[i], field_data_dict[self.field_dict[i]])
             print('save_data_to_hdf5', self.field_dict[i])
         return field_data_dict
 
 
 if __name__ == '__main__':
-    tgw_login()
+    tgw_login(server_mode=True)
 
     tgw_api_object = TgwApiData(20991231)
     code_sh_list, code_sz_list = tgw_api_object.get_code_list()

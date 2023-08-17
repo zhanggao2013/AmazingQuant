@@ -41,7 +41,7 @@ class TgwApiData(object):
             item.market = market
             item.security_code = ""
             code_table_df, error = tgw.QuerySecuritiesInfo(item)
-            print('code_table_df', code_table_df)
+            # print('code_table_df', code_table_df)
             code_table_df = code_table_df[code_table_df['security_type'].isin(['02001', '02003', '02004', '02999'])]
             code_list = list(code_table_df['security_code'])
             if market == tgw.MarketType.kSZSE:
