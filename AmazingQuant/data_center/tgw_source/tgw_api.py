@@ -19,7 +19,7 @@ class TgwApiData(object):
         self.stock_list = []
         self.code_list_hist = []
 
-    def get_calendar(self, data_type='datetime'):
+    def get_calendar(self, data_type=None):
         index_kline = tgw.ReqKline()
         index_kline.cq_flag = 0
         index_kline.auto_complete = 1
