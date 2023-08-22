@@ -288,7 +288,7 @@ if __name__ == '__main__':
     # extreme_data = factor_pre_obj.extreme_processing(dict(box_plot={'median_multiple': 3}))
 
     # 中性化方法，可选择行业和流通市值中性
-    neutralize_data = factor_pre_obj.neutralize_processing(dict(neutralize_method=[NeutralizeMethod.INDUSTRY.value, NeutralizeMethod.MARKET_VALUE.value]))
+    # neutralize_data = factor_pre_obj.neutralize_processing(dict(neutralize_method=[NeutralizeMethod.INDUSTRY.value, NeutralizeMethod.MARKET_VALUE.value]))
 
     # 归一化方法，三种
     # scale_data = factor_pre_obj.scale_processing(ScaleMethod.MIN_MAX.value)
