@@ -231,6 +231,6 @@ if __name__ == '__main__':
 qq群:：<br>
      788279189 [qq群链接](https://jq.qq.com/?_wv=1027&k=5gK6IDW) <br>
 知识星球:：<br>
-      ![](https://github.com/zhanggao2013/AmazingQuant/blob/master/documents/starGitHub.jpg)<br>
+      ![](https://github.com/zhanggao2013/AmazingQuant/blob/master/documents/starGitHub.png)<br>
 微信公众号：<br>
                     ![](https://github.com/zhanggao2013/AmazingQuant/blob/master/documents/wechat.jpg)
