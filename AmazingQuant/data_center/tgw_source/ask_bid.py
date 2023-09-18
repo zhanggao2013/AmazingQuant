@@ -12,7 +12,12 @@ import time, datetime
 import pandas as pd
 import tgw
 
+
+from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
 from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
+
+security_code_list = []
+market_type_list = []
 
 
 # 实现推送回调
@@ -22,8 +27,17 @@ class DataHandler(tgw.IPushSpi):
 
     def OnMDSnapshot(self, data, err):
         if not data is None:
-            if data[0]['security_code'] == '000002':
-                print(data[0]['orig_time'], data[0]['last_price']/1000000)
+            global security_code_list
+            global market_type_list
+            if data[0]['security_code'] not in security_code_list:
+                security_code_list.append(data[0]['security_code'])
+                print('security_code_list', len(security_code_list), data[0]['security_code'])
+
+            if data[0]['market_type'] not in market_type_list:
+                market_type_list.append(data[0]['market_type'])
+                print('market_type_list', len(market_type_list))
+            # if data[0]['security_code'] == '000002':
+            #     print(data[0]['orig_time'], data[0]['last_price']/1000000)
             pass
         else:
             print(err)
@@ -38,15 +52,29 @@ class DataHandler(tgw.IPushSpi):
 if __name__ == "__main__":
     tgw_login()
     g_is_running = True
-
+    tgw_api_object = TgwApiData(20991231)
+    code_sh_list, code_sz_list = tgw_api_object.get_code_list()
+    print(len(code_sh_list), len(code_sz_list))
+    sub_item_list = []
     data_hander = DataHandler()
     data_hander.SetDfFormat(False)
-    sub_item = tgw.SubscribeItem()
-    sub_item.security_code = "000002"
-    sub_item.SubscribeDataType = tgw.SubscribeDataType.kSnapshot
-    sub_item.VarietyCategory = tgw.VarietyCategory.kStock
-    sub_item.market = tgw.MarketType.kNone
-    success = tgw.Subscribe(sub_item, data_hander)
+    for code in code_sh_list:
+        sub_item = tgw.SubscribeItem()
+        sub_item.security_code = code
+        sub_item.SubscribeDataType = tgw.SubscribeDataType.kSnapshot
+        sub_item.VarietyCategory = tgw.VarietyCategory.kStock
+        sub_item.market = tgw.MarketType.kSSE
+        sub_item_list.append(sub_item)
+    for code in code_sz_list:
+        sub_item = tgw.SubscribeItem()
+        sub_item.security_code = code
+        sub_item.SubscribeDataType = tgw.SubscribeDataType.kSnapshot
+        sub_item.VarietyCategory = tgw.VarietyCategory.kStock
+        sub_item.market = tgw.MarketType.kSZSE
+        sub_item_list.append(sub_item)
+
+    success = tgw.Subscribe(sub_item_list,  data_hander)
+
     print('success', success)
     if success != tgw.ErrorCode.kSuccess:
         print(tgw.GetErrorMsg(success))

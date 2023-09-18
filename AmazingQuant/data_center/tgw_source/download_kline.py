@@ -24,13 +24,17 @@ from AmazingQuant.utils.data_transfer import date_to_datetime, datetime_to_int
 
 class DownloadKlineData(object):
     def __init__(self, path):
+        # 原始字段名
         self.field = ['open_price', 'high_price', 'low_price', 'close_price', 'volume_trade', 'value_trade']
+        # 本地落库字段名
         self.field_dict = {'open_price': 'open', 'high_price': 'high', 'low_price': 'low',
                             'close_price': 'close', 'volume_trade': 'volume', 'value_trade': 'amount'}
         self.path = path
 
     def get_kline_data(self, code_sh_list, code_sz_list, calendar):
+        # 取数据的入参，和返回值都为int，这里把交易日列表修改为int型
         calendar_int = [datetime_to_int(i) for i in calendar]
+        # 股票代码上交所加后缀'.SH'，深交所加后缀'.SZ'
         code_market_list = []
         for code in code_sh_list:
             code_market_list.append(code + '.SH')
