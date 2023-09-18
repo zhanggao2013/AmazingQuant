@@ -19,7 +19,7 @@ class TgwLogSpi(tgw.ILogSpi):
         pass
 
     def OnLog(self, level, log, len):
-        if level > 0:
+        if level > 1:
             print("TGW log: level: {}     log:   {}".format(level, log.strip('\n').strip('\r')))
             pass
 
