@@ -51,8 +51,8 @@ def tgw_login(server_mode=False):
         cfg.coloca_cfg.order_book_deliver_interval_microsecond = 10000
         success = tgw.Login(cfg, tgw.ApiMode.kColocationMode, './')  # 托管模式初始化，可指定证书文件地址
     else:
-        cfg.server_vip = TgwConfig.host2
-        cfg.server_port = TgwConfig.port2
+        cfg.server_vip = TgwConfig.host1
+        cfg.server_port = TgwConfig.port1
         success = tgw.Login(cfg, tgw.ApiMode.kInternetMode, './')  # 互联网模式初始化，可指定证书文件地址
 
     if not success:
