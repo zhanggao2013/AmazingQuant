@@ -99,7 +99,7 @@ class DownloadInfoData(object):
 
 
 if __name__ == '__main__':
-    tgw_login()
+    tgw_login(server_mode=True)
 
     tgw_api_object = TgwApiData(20991231)
     code_list_hist = tgw_api_object.get_code_list_hist()

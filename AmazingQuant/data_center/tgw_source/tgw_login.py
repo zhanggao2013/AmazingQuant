@@ -19,7 +19,7 @@ class TgwLogSpi(tgw.ILogSpi):
         pass
 
     def OnLog(self, level, log, len):
-        if level > 1:
+        if level > 0:
             print("TGW log: level: {}     log:   {}".format(level, log.strip('\n').strip('\r')))
             pass
 
@@ -35,13 +35,12 @@ def tgw_login(server_mode=False):
 
     # 第二步，登录
     cfg = tgw.Cfg()
-    cfg.server_vip = TgwConfig.host
-    cfg.server_port = TgwConfig.port
     cfg.username = TgwConfig.username
     cfg.password = TgwConfig.password
     success = False
-    # success = tgw.Login(cfg, tgw.ApiMode.kInternetMode, './')  # 互联网模式初始化，可指定证书文件地址
     if server_mode:
+        cfg.server_vip = TgwConfig.host2
+        cfg.server_port = TgwConfig.port2
         cfg.coloca_cfg.channel_mode = tgw.ColocatChannelMode.kTCP | tgw.ColocatChannelMode.kQTCP \
                                       | tgw.ColocatChannelMode.kRTCP  # tcp订阅通道和查询通道初始化
         cfg.coloca_cfg.qtcp_channel_thread = 10
@@ -51,6 +50,11 @@ def tgw_login(server_mode=False):
         cfg.coloca_cfg.order_queue_size = 10
         cfg.coloca_cfg.order_book_deliver_interval_microsecond = 10000
         success = tgw.Login(cfg, tgw.ApiMode.kColocationMode, './')  # 托管模式初始化，可指定证书文件地址
+    else:
+        cfg.server_vip = TgwConfig.host2
+        cfg.server_port = TgwConfig.port2
+        success = tgw.Login(cfg, tgw.ApiMode.kInternetMode, './')  # 互联网模式初始化，可指定证书文件地址
+
     if not success:
         print("login fail")
         exit(0)
