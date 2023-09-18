@@ -9,9 +9,9 @@
 import os
 import time, datetime
 
+import numpy as np
 import pandas as pd
 import tgw
-
 
 from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
 from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
@@ -22,6 +22,7 @@ market_type_list = []
 zhangfu_dict = {}
 price_spread_dict = {}
 volume_spread_dict = {}
+
 
 # 实现推送回调
 class DataHandler(tgw.IPushSpi):
@@ -41,18 +42,20 @@ class DataHandler(tgw.IPushSpi):
                 print('market_type_list', len(market_type_list))
 
             global zhangfu_dict
-            zhangfu_dict[data[0]['security_code']] = (data[0]['close_price']/data[0]['pre_close_price']-1)*100
+            zhangfu_dict[data[0]['security_code']] = (data[0]['close_price'] / data[0]['pre_close_price'] - 1) * 100
             global price_spread_dict
-            price_spread_dict[data[0]['security_code']] = (data[0]['offer_price1']-data[0]['bid_price1']) / 1000000
+            price_spread_dict[data[0]['security_code']] = (data[0]['offer_price1'] - data[0]['bid_price1']) / 1000000
 
             global volume_spread_dict
-            volume_spread_dict[data[0]['security_code']] = (data[0]['bid_volume1']+data[0]['bid_volume2']+
-                                                            data[0]['bid_volume3']+data[0]['bid_volume4']+
-                                                            data[0]['bid_volume5']-
-                                                            data[0]['offer_volume1']+data[0]['offer_volume2']+
-                                                            data[0]['offer_volume3']+data[0]['offer_volume4']+
-                                                            data[0]['offer_volume5']) / 100
-        else:
+            bid_volume_total = data[0]['bid_volume1'] + data[0]['bid_volume2'] + data[0]['bid_volume3'] + \
+                               data[0]['bid_volume4'] + data[0]['bid_volume5']
+            offer_volume_total = data[0]['offer_volume1'] + data[0]['offer_volume2'] + data[0]['offer_volume3'] + \
+                                 data[0]['offer_volume4'] + data[0]['offer_volume5']
+            if offer_volume_total > 0:
+                volume_spread_dict[data[0]['security_code']] = (bid_volume_total - offer_volume_total) / \
+                                                               offer_volume_total
+            else:
+                volume_spread_dict[data[0]['security_code']] = np.nan
             print(err)
 
     def OnMDIndexSnapshot(self, data, err):
@@ -86,7 +89,7 @@ if __name__ == "__main__":
         sub_item.market = tgw.MarketType.kSZSE
         sub_item_list.append(sub_item)
 
-    success = tgw.Subscribe(sub_item_list,  data_hander)
+    success = tgw.Subscribe(sub_item_list, data_hander)
 
     print('success', success)
     if success != tgw.ErrorCode.kSuccess:
