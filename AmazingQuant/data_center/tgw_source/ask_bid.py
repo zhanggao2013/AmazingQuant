@@ -19,6 +19,9 @@ from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
 security_code_list = []
 market_type_list = []
 
+zhangfu_dict = {}
+price_spread_dict = {}
+volume_spread_dict = {}
 
 # 实现推送回调
 class DataHandler(tgw.IPushSpi):
@@ -36,9 +39,19 @@ class DataHandler(tgw.IPushSpi):
             if data[0]['market_type'] not in market_type_list:
                 market_type_list.append(data[0]['market_type'])
                 print('market_type_list', len(market_type_list))
-            # if data[0]['security_code'] == '000002':
-            #     print(data[0]['orig_time'], data[0]['last_price']/1000000)
-            pass
+
+            global zhangfu_dict
+            zhangfu_dict[data[0]['security_code']] = (data[0]['close_price']/data[0]['pre_close_price']-1)*100
+            global price_spread_dict
+            price_spread_dict[data[0]['security_code']] = (data[0]['offer_price1']-data[0]['bid_price1']) / 1000000
+
+            global volume_spread_dict
+            volume_spread_dict[data[0]['security_code']] = (data[0]['bid_volume1']+data[0]['bid_volume2']+
+                                                            data[0]['bid_volume3']+data[0]['bid_volume4']+
+                                                            data[0]['bid_volume5']-
+                                                            data[0]['offer_volume1']+data[0]['offer_volume2']+
+                                                            data[0]['offer_volume3']+data[0]['offer_volume4']+
+                                                            data[0]['offer_volume5']) / 100
         else:
             print(err)
 
