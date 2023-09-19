@@ -33,16 +33,17 @@ class DataHandler(tgw.IPushSpi):
         if not data is None:
             global security_code_list
             global market_type_list
-            if data[0]['security_code'] not in security_code_list:
-                security_code_list.append(data[0]['security_code'])
-                print('security_code_list', len(security_code_list), data[0]['security_code'])
+            # if data[0]['security_code'] not in security_code_list:
+            #     security_code_list.append(data[0]['security_code'])
+            #     print('security_code_list', len(security_code_list), data[0]['security_code'])
 
             if data[0]['market_type'] not in market_type_list:
                 market_type_list.append(data[0]['market_type'])
                 print('market_type_list', len(market_type_list))
 
             global zhangfu_dict
-            zhangfu_dict[data[0]['security_code']] = (data[0]['close_price'] / data[0]['pre_close_price'] - 1) * 100
+            # zhangfu_dict[data[0]['security_code']] = data[0]['last_price']
+            zhangfu_dict[data[0]['security_code']] = (data[0]['last_price'] / data[0]['pre_close_price'] - 1) * 100
             global price_spread_dict
             price_spread_dict[data[0]['security_code']] = (data[0]['offer_price1'] - data[0]['bid_price1']) / 1000000
 
@@ -56,6 +57,7 @@ class DataHandler(tgw.IPushSpi):
                                                                offer_volume_total
             else:
                 volume_spread_dict[data[0]['security_code']] = np.nan
+        else:
             print(err)
 
     def OnMDIndexSnapshot(self, data, err):
@@ -77,15 +79,15 @@ if __name__ == "__main__":
     for code in code_sh_list:
         sub_item = tgw.SubscribeItem()
         sub_item.security_code = code
-        sub_item.SubscribeDataType = tgw.SubscribeDataType.kSnapshot
-        sub_item.VarietyCategory = tgw.VarietyCategory.kStock
+        sub_item.flag = tgw.SubscribeDataType.kSnapshot
+        sub_item.category_type = tgw.VarietyCategory.kStock
         sub_item.market = tgw.MarketType.kSSE
         sub_item_list.append(sub_item)
     for code in code_sz_list:
         sub_item = tgw.SubscribeItem()
         sub_item.security_code = code
-        sub_item.SubscribeDataType = tgw.SubscribeDataType.kSnapshot
-        sub_item.VarietyCategory = tgw.VarietyCategory.kStock
+        sub_item.flag = tgw.SubscribeDataType.kSnapshot
+        sub_item.category_type = tgw.VarietyCategory.kStock
         sub_item.market = tgw.MarketType.kSZSE
         sub_item_list.append(sub_item)
 
@@ -101,3 +103,6 @@ if __name__ == "__main__":
         except Exception as e:
             print(str(e))
         time.sleep(1)
+        code = '688597'
+        if code in zhangfu_dict:
+            print('zhangfu_dict', zhangfu_dict[code])
