@@ -3,11 +3,13 @@
 # ------------------------------
 # @Time    : 2023/6/26
 # @Author  : gao
-# @File    : ask_bid.py 
-# @Project : AmazingQuant 
+# @File    : ask_bid.py
+# @Project : AmazingQuant
 # ------------------------------
 import os
 import time, datetime
+import threading
+import queue
 
 import numpy as np
 import pandas as pd
@@ -28,35 +30,50 @@ volume_spread_dict = {}
 class DataHandler(tgw.IPushSpi):
     def __init__(self) -> None:
         super().__init__()
+        self.queue = queue.Queue()
+        self.thread = threading.Thread(target=self.process_data)
+        self.thread.start()
+
+    def process_data(self):
+        while True:
+            if self.queue.empty():
+                continue
+            else:
+                data = self.queue.get(False)
+
+            data_queue = data.copy()
+            global security_code_list
+            global market_type_list
+            if data_queue[0]['security_code'] not in security_code_list:
+                security_code_list.append(data_queue[0]['security_code'])
+                # print('security_code_list', len(security_code_list), data_queue[0]['security_code'])
+
+            if data_queue[0]['market_type'] not in market_type_list:
+                market_type_list.append(data_queue[0]['market_type'])
+            #     print('market_type_list', len(market_type_list))
+
+            global zhangfu_dict
+            if data_queue[0]['pre_close_price'] > 0:
+                zhangfu_dict[data_queue[0]['security_code']] = (data_queue[0]['last_price'] / data_queue[0]['pre_close_price'] - 1) * 100
+            else:
+                zhangfu_dict[data_queue[0]['security_code']] = np.nan
+            global price_spread_dict
+            price_spread_dict[data_queue[0]['security_code']] = (data_queue[0]['offer_price1'] - data_queue[0]['bid_price1']) / 1000000
+
+            global volume_spread_dict
+            bid_volume_total = data_queue[0]['bid_volume1'] + data_queue[0]['bid_volume2'] + data_queue[0]['bid_volume3'] + \
+                               data_queue[0]['bid_volume4'] + data_queue[0]['bid_volume5']
+            offer_volume_total = data_queue[0]['offer_volume1'] + data_queue[0]['offer_volume2'] + data_queue[0]['offer_volume3'] + \
+                                 data_queue[0]['offer_volume4'] + data_queue[0]['offer_volume5']
+            if offer_volume_total > 0:
+                volume_spread_dict[data_queue[0]['security_code']] = (bid_volume_total - offer_volume_total) / \
+                                                               offer_volume_total
+            else:
+                volume_spread_dict[data_queue[0]['security_code']] = np.nan
 
     def OnMDSnapshot(self, data, err):
         if not data is None:
-            global security_code_list
-            global market_type_list
-            # if data[0]['security_code'] not in security_code_list:
-            #     security_code_list.append(data[0]['security_code'])
-            #     print('security_code_list', len(security_code_list), data[0]['security_code'])
-
-            if data[0]['market_type'] not in market_type_list:
-                market_type_list.append(data[0]['market_type'])
-                print('market_type_list', len(market_type_list))
-
-            global zhangfu_dict
-            # zhangfu_dict[data[0]['security_code']] = data[0]['last_price']
-            zhangfu_dict[data[0]['security_code']] = (data[0]['last_price'] / data[0]['pre_close_price'] - 1) * 100
-            global price_spread_dict
-            price_spread_dict[data[0]['security_code']] = (data[0]['offer_price1'] - data[0]['bid_price1']) / 1000000
-
-            global volume_spread_dict
-            bid_volume_total = data[0]['bid_volume1'] + data[0]['bid_volume2'] + data[0]['bid_volume3'] + \
-                               data[0]['bid_volume4'] + data[0]['bid_volume5']
-            offer_volume_total = data[0]['offer_volume1'] + data[0]['offer_volume2'] + data[0]['offer_volume3'] + \
-                                 data[0]['offer_volume4'] + data[0]['offer_volume5']
-            if offer_volume_total > 0:
-                volume_spread_dict[data[0]['security_code']] = (bid_volume_total - offer_volume_total) / \
-                                                               offer_volume_total
-            else:
-                volume_spread_dict[data[0]['security_code']] = np.nan
+            self.queue.put(data)
         else:
             print(err)
 
@@ -76,22 +93,28 @@ if __name__ == "__main__":
     sub_item_list = []
     data_hander = DataHandler()
     data_hander.SetDfFormat(False)
-    for code in code_sh_list:
-        sub_item = tgw.SubscribeItem()
-        sub_item.security_code = code
-        sub_item.flag = tgw.SubscribeDataType.kSnapshot
-        sub_item.category_type = tgw.VarietyCategory.kStock
-        sub_item.market = tgw.MarketType.kSSE
-        sub_item_list.append(sub_item)
-    for code in code_sz_list:
-        sub_item = tgw.SubscribeItem()
-        sub_item.security_code = code
-        sub_item.flag = tgw.SubscribeDataType.kSnapshot
-        sub_item.category_type = tgw.VarietyCategory.kStock
-        sub_item.market = tgw.MarketType.kSZSE
-        sub_item_list.append(sub_item)
+    # for code in code_sh_list:
+    #     sub_item = tgw.SubscribeItem()
+    #     sub_item.security_code = code
+    #     sub_item.flag = tgw.SubscribeDataType.kSnapshot
+    #     sub_item.category_type = tgw.VarietyCategory.kNone
+    #     sub_item.market = tgw.MarketType.kSSE
+    #     sub_item_list.append(sub_item)
+    # for code in code_sz_list:
+    #     sub_item = tgw.SubscribeItem()
+    #     sub_item.security_code = code
+    #     sub_item.flag = tgw.SubscribeDataType.kSnapshot
+    #     sub_item.category_type = tgw.VarietyCategory.kNone
+    #     sub_item.market = tgw.MarketType.kSZSE
+    #     sub_item_list.append(sub_item)
+    # success = tgw.Subscribe(sub_item_list, data_hander)
 
-    success = tgw.Subscribe(sub_item_list, data_hander)
+    sub_item = tgw.SubscribeItem()
+    sub_item.security_code = ''
+    sub_item.flag = tgw.SubscribeDataType.kSnapshot
+    sub_item.category_type = tgw.VarietyCategory.kStock
+    sub_item.market = tgw.MarketType.kNone
+    success = tgw.Subscribe(sub_item, data_hander)
 
     print('success', success)
     if success != tgw.ErrorCode.kSuccess:
@@ -102,7 +125,7 @@ if __name__ == "__main__":
                 break
         except Exception as e:
             print(str(e))
-        time.sleep(1)
-        code = '688597'
-        if code in zhangfu_dict:
-            print('zhangfu_dict', zhangfu_dict[code])
+        # time.sleep(1)
+        # code = '688597'
+        # if code in zhangfu_dict:
+        #     print('zhangfu_dict', zhangfu_dict[code])
