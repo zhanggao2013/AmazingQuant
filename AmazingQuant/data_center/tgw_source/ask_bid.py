@@ -34,6 +34,15 @@ class DataHandler(tgw.IPushSpi):
         self.thread = threading.Thread(target=self.process_data)
         self.thread.start()
 
+        self.thread_queue = threading.Thread(target=self.process_queue)
+        self.thread_queue.start()
+
+    def process_queue(self):
+        while True:
+            if self.queue.empty():
+                continue
+            print('qsize:', self.queue.qsize())
+
     def process_data(self):
         while True:
             if self.queue.empty():
@@ -74,6 +83,7 @@ class DataHandler(tgw.IPushSpi):
     def OnMDSnapshot(self, data, err):
         if not data is None:
             self.queue.put(data)
+            pass
         else:
             print(err)
 
