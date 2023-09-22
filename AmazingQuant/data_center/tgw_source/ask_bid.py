@@ -31,8 +31,9 @@ class DataHandler(tgw.IPushSpi):
     def __init__(self) -> None:
         super().__init__()
         self.queue = queue.Queue()
-        self.thread = threading.Thread(target=self.process_data)
-        self.thread.start()
+        for i in range(4):
+            self.thread = threading.Thread(target=self.process_data)
+            self.thread.start()
 
         self.thread_queue = threading.Thread(target=self.process_queue)
         self.thread_queue.start()
@@ -41,44 +42,47 @@ class DataHandler(tgw.IPushSpi):
         while True:
             if self.queue.empty():
                 continue
-            print('qsize:', self.queue.qsize())
+            print('qsize:', datetime.datetime.now(), self.queue.qsize())
 
     def process_data(self):
         while True:
-            if self.queue.empty():
-                continue
-            else:
-                data = self.queue.get(False)
+            if not self.queue.empty():
+                data = self.queue.get()
 
-            data_queue = data.copy()
-            global security_code_list
-            global market_type_list
-            if data_queue[0]['security_code'] not in security_code_list:
-                security_code_list.append(data_queue[0]['security_code'])
-                # print('security_code_list', len(security_code_list), data_queue[0]['security_code'])
+                data_queue = data.copy()
+                global security_code_list
+                global market_type_list
+                if data_queue[0]['security_code'] not in security_code_list:
+                    security_code_list.append(data_queue[0]['security_code'])
+                    # print('security_code_list', len(security_code_list), data_queue[0]['security_code'])
 
-            if data_queue[0]['market_type'] not in market_type_list:
-                market_type_list.append(data_queue[0]['market_type'])
-            #     print('market_type_list', len(market_type_list))
+                if data_queue[0]['market_type'] not in market_type_list:
+                    market_type_list.append(data_queue[0]['market_type'])
+                #     print('market_type_list', len(market_type_list))
 
-            global zhangfu_dict
-            if data_queue[0]['pre_close_price'] > 0:
-                zhangfu_dict[data_queue[0]['security_code']] = (data_queue[0]['last_price'] / data_queue[0]['pre_close_price'] - 1) * 100
-            else:
-                zhangfu_dict[data_queue[0]['security_code']] = np.nan
-            global price_spread_dict
-            price_spread_dict[data_queue[0]['security_code']] = (data_queue[0]['offer_price1'] - data_queue[0]['bid_price1']) / 1000000
+                global zhangfu_dict
+                if data_queue[0]['pre_close_price'] > 0:
+                    zhangfu_dict[data_queue[0]['security_code']] = (data_queue[0]['last_price'] / data_queue[0][
+                        'pre_close_price'] - 1) * 100
+                else:
+                    zhangfu_dict[data_queue[0]['security_code']] = np.nan
+                global price_spread_dict
+                price_spread_dict[data_queue[0]['security_code']] = (data_queue[0]['offer_price1'] - data_queue[0][
+                    'bid_price1']) / 1000000
 
-            global volume_spread_dict
-            bid_volume_total = data_queue[0]['bid_volume1'] + data_queue[0]['bid_volume2'] + data_queue[0]['bid_volume3'] + \
-                               data_queue[0]['bid_volume4'] + data_queue[0]['bid_volume5']
-            offer_volume_total = data_queue[0]['offer_volume1'] + data_queue[0]['offer_volume2'] + data_queue[0]['offer_volume3'] + \
-                                 data_queue[0]['offer_volume4'] + data_queue[0]['offer_volume5']
-            if offer_volume_total > 0:
-                volume_spread_dict[data_queue[0]['security_code']] = (bid_volume_total - offer_volume_total) / \
-                                                               offer_volume_total
-            else:
-                volume_spread_dict[data_queue[0]['security_code']] = np.nan
+                global volume_spread_dict
+                bid_volume_total = data_queue[0]['bid_volume1'] + data_queue[0]['bid_volume2'] + data_queue[0][
+                    'bid_volume3'] + \
+                                   data_queue[0]['bid_volume4'] + data_queue[0]['bid_volume5']
+                offer_volume_total = data_queue[0]['offer_volume1'] + data_queue[0]['offer_volume2'] + data_queue[0][
+                    'offer_volume3'] + \
+                                     data_queue[0]['offer_volume4'] + data_queue[0]['offer_volume5']
+                if offer_volume_total > 0:
+                    volume_spread_dict[data_queue[0]['security_code']] = (bid_volume_total - offer_volume_total) / \
+                                                                         offer_volume_total
+                else:
+                    volume_spread_dict[data_queue[0]['security_code']] = np.nan
+                time.sleep(0.01)
 
     def OnMDSnapshot(self, data, err):
         if not data is None:
@@ -123,12 +127,22 @@ if __name__ == "__main__":
     sub_item.security_code = ''
     sub_item.flag = tgw.SubscribeDataType.kSnapshot
     sub_item.category_type = tgw.VarietyCategory.kStock
-    sub_item.market = tgw.MarketType.kNone
-    success = tgw.Subscribe(sub_item, data_hander)
+    sub_item.market = tgw.MarketType.kSSE
+    success_sh = tgw.Subscribe(sub_item, data_hander)
+    print('success_sz', success_sh)
+    if success_sh != tgw.ErrorCode.kSuccess:
+        print(tgw.GetErrorMsg(success_sh))
 
-    print('success', success)
-    if success != tgw.ErrorCode.kSuccess:
-        print(tgw.GetErrorMsg(success))
+    sub_item = tgw.SubscribeItem()
+    sub_item.security_code = ''
+    sub_item.flag = tgw.SubscribeDataType.kSnapshot
+    sub_item.category_type = tgw.VarietyCategory.kStock
+    sub_item.market = tgw.MarketType.kSZSE
+    success_sz = tgw.Subscribe(sub_item, data_hander)
+
+    print('success_sz', success_sz)
+    if success_sz != tgw.ErrorCode.kSuccess:
+        print(tgw.GetErrorMsg(success_sz))
     while True:
         try:
             if g_is_running != True:
