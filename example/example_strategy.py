@@ -93,7 +93,7 @@ class MaStrategy(StrategyBase):
             close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=index_member_list,
                                                               field=['close'],
                                                               start=self.time_tag, end=self.time_tag)
-            print('close_price_all', close_price_all)
+            # print('close_price_all', close_price_all)
             # 循环遍历股票池
             for stock in index_member_list:
                 # 取当前股票的收盘价

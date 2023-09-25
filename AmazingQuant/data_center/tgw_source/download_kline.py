@@ -117,11 +117,11 @@ if __name__ == '__main__':
     index_code_sh_list, index_code_sz_list = tgw_api_object.get_code_list(index = True)
     
     calendar_index = tgw_api_object.get_calendar(data_type='datetime')
-    # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
-    #        '//' + LocalDataFolderName.A_SHARE.value + '//'
-    #
-    # kline_object = DownloadKlineData(path)
-    # field_data_dict = kline_object.download_kline_data(code_sh_list, code_sz_list, calendar_index)
+    path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
+           '//' + LocalDataFolderName.A_SHARE.value + '//'
+
+    kline_object = DownloadKlineData(path)
+    field_data_dict = kline_object.download_kline_data(code_sh_list, code_sz_list, calendar_index)
     
     path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
            '//' + LocalDataFolderName.INDEX.value + '//'
