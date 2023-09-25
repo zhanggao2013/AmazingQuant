@@ -13,6 +13,7 @@ import pandas as pd
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.utils.data_transfer import datetime_to_int
 
 
 class GetIndexMember(object):
@@ -30,9 +31,9 @@ class GetIndexMember(object):
         return self.all_index_members_df
 
     def get_index_members(self, index_code):
-        self.index_members_df = self.all_index_members_df[self.all_index_members_df.index_code == index_code]
+        self.index_members_df = self.all_index_members_df[self.all_index_members_df.INDEX_CODE == index_code]
         self.index_members_df = self.index_members_df.fillna(datetime.now()).reset_index(drop=True)
-        self.index_members_all = list(set(self.index_members_df['security_code']))
+        self.index_members_all = list(set(self.index_members_df['CON_CODE']))
         return self.index_members_df, self.index_members_all
 
     def get_index_member_in_date(self, members_date=datetime.now()):
@@ -41,9 +42,11 @@ class GetIndexMember(object):
         :param members_date:
         :return:
         """
-        index_members_in_date_df = self.index_members_df[
-            (self.index_members_df.in_date <= members_date) & (self.index_members_df.out_date >= members_date)]
-        return list(index_members_in_date_df["security_code"])
+        members_date = str(datetime_to_int(members_date))
+        # index_members_in_date_df = self.index_members_df[
+        #     (self.index_members_df.CON_INDATE <= members_date) & (self.index_members_df.out_date >= members_date)]
+        index_members_in_date_df = self.index_members_df[self.index_members_df.CON_INDATE <= members_date]
+        return list(index_members_in_date_df["CON_CODE"])
 
 
 if __name__ == '__main__':
@@ -52,9 +55,7 @@ if __name__ == '__main__':
     # 深证综指
     index_members_df_SZ, index_members_all_SZ = index_member_obj.get_index_members('399106.SZ')
     # 上证Ａ股
-    index_members_df_SH, index_members_all_SH = index_member_obj.get_index_members('000001.SH')
-    # 申万行业指数--化工
-    index_members_df_SI, index_members_all_SI = index_member_obj.get_index_members('801030.SI')
+    index_members_df_SH, index_members_all_SH = index_member_obj.get_index_members('000300.SH')
 
     index_member_in_date = index_member_obj.get_index_member_in_date()
 
