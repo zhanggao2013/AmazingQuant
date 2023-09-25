@@ -31,7 +31,7 @@ class DownloadKlineData(object):
                             'close_price': 'close', 'volume_trade': 'volume', 'value_trade': 'amount'}
         self.path = path
 
-    def get_kline_data(self, code_sh_list, code_sz_list, calendar):
+    def download_kline_data(self, code_sh_list, code_sz_list, calendar):
         # 取数据的入参，和返回值都为int，这里把交易日列表修改为int型
         calendar_int = [datetime_to_int(i) for i in calendar]
         # 股票代码上交所加后缀'.SH'，深交所加后缀'.SZ'
@@ -86,8 +86,8 @@ class DownloadKlineData(object):
                 num += 1
                 stock_kline.security_code = code
                 stock_data_df, error = tgw.QueryKline(stock_kline)
-                print(error)
-                if error == "":
+                # print(stock_data_df, error, stock_data_df.empty)
+                if error == "" and not stock_data_df.empty:
                     stock_data_df.set_index(["kline_time"], inplace=True)
                     stock_data_df = stock_data_df[self.field]
                     # print(code, stock_data_df)
@@ -114,10 +114,18 @@ if __name__ == '__main__':
 
     tgw_api_object = TgwApiData(20991231)
     code_sh_list, code_sz_list = tgw_api_object.get_code_list()
+    index_code_sh_list, index_code_sz_list = tgw_api_object.get_code_list(index = True)
+    
     calendar_index = tgw_api_object.get_calendar(data_type='datetime')
+    # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
+    #        '//' + LocalDataFolderName.A_SHARE.value + '//'
+    #
+    # kline_object = DownloadKlineData(path)
+    # field_data_dict = kline_object.download_kline_data(code_sh_list, code_sz_list, calendar_index)
+    
     path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
-           '//' + LocalDataFolderName.A_SHARE.value + '//'
-
+           '//' + LocalDataFolderName.INDEX.value + '//'
     kline_object = DownloadKlineData(path)
-    field_data_dict = kline_object.get_kline_data(code_sh_list, code_sz_list, calendar_index)
+
+    field_data_dict = kline_object.download_kline_data(index_code_sh_list, index_code_sz_list, calendar_index)
 

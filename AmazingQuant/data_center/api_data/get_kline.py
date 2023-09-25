@@ -39,7 +39,7 @@ class GetKlineData(object):
             # print('adj_factor', adj_factor.shape)
         elif dividend_type == RightsAdjustment.BACKWARD.value:
             adj_factor = self.adj_factor_obj.get_adj_factor(RightsAdjustment.BACKWARD.value)
-            # print('adj_factor', adj_factor.shape)
+            # print('adj_factor', adj_factor)
         for i in self.field:
             data_name = i + '.h5'
             data = get_local_data(path, data_name)
