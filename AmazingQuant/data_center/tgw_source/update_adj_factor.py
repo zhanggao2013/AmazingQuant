@@ -19,6 +19,7 @@ from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hd
 from AmazingQuant.data_center.api_data.get_data import get_local_data
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.constant import LocalDataFolderName, AdjustmentFactor
+from AmazingQuant.utils.data_transfer import date_to_datetime
 
 
 class UpdateAdjFactor(object):
@@ -47,6 +48,7 @@ class UpdateAdjFactor(object):
         backward_factor.replace([np.inf, 0], np.nan, inplace=True)
         backward_factor.fillna(method='ffill', inplace=True)
         backward_factor.fillna(1, inplace=True)
+        backward_factor.index = pd.Series([date_to_datetime(str(i)) for i in backward_factor.index])
         return backward_factor
 
     def get_backward_factor_ratio(self, close_df, code_sh_list, code_sz_list, calendar_index):
