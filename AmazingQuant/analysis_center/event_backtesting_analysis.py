@@ -112,6 +112,6 @@ class EventBacktestingAnalysis(Event):
 
         position_data_df = position_data_df[position_data_df.index.get_level_values(1) == account[0]]
         position_analysis_obj = PositionAnalysis(position_data_df)
-        # position_analysis_result = position_analysis_obj.cal_position_analysis_result()
-        # for i in position_analysis_result:
-        #     Environment.logger.info(i, position_analysis_result[i])
+        position_analysis_result = position_analysis_obj.cal_position_analysis_result()
+        for i in position_analysis_result:
+            Environment.logger.info(i, position_analysis_result[i])

@@ -42,14 +42,14 @@ class DataHandler(tgw.IPushSpi):
         while True:
             if self.queue.empty():
                 continue
-            print('qsize:', datetime.datetime.now(), self.queue.qsize())
+            # print('qsize:', datetime.datetime.now(), self.queue.qsize())
 
     def process_data(self):
         while True:
             if not self.queue.empty():
                 data = self.queue.get()
-
                 data_queue = data.copy()
+                print('security_code', data_queue[0]['security_code'])
                 global security_code_list
                 global market_type_list
                 if data_queue[0]['security_code'] not in security_code_list:
@@ -107,42 +107,21 @@ if __name__ == "__main__":
     sub_item_list = []
     data_hander = DataHandler()
     data_hander.SetDfFormat(False)
-    # for code in code_sh_list:
-    #     sub_item = tgw.SubscribeItem()
-    #     sub_item.security_code = code
-    #     sub_item.flag = tgw.SubscribeDataType.kSnapshot
-    #     sub_item.category_type = tgw.VarietyCategory.kNone
-    #     sub_item.market = tgw.MarketType.kSSE
-    #     sub_item_list.append(sub_item)
-    # for code in code_sz_list:
-    #     sub_item = tgw.SubscribeItem()
-    #     sub_item.security_code = code
-    #     sub_item.flag = tgw.SubscribeDataType.kSnapshot
-    #     sub_item.category_type = tgw.VarietyCategory.kNone
-    #     sub_item.market = tgw.MarketType.kSZSE
-    #     sub_item_list.append(sub_item)
-    # success = tgw.Subscribe(sub_item_list, data_hander)
 
-    sub_item = tgw.SubscribeItem()
-    sub_item.security_code = ''
-    sub_item.flag = tgw.SubscribeDataType.kSnapshot
-    sub_item.category_type = tgw.VarietyCategory.kStock
-    sub_item.market = tgw.MarketType.kSSE
-    success_sh = tgw.Subscribe(sub_item, data_hander)
-    print('success_sz', success_sh)
-    if success_sh != tgw.ErrorCode.kSuccess:
-        print(tgw.GetErrorMsg(success_sh))
+    # 订阅可转债
+    for market_type in [tgw.MarketType.kSZSE, tgw.MarketType.kSSE]:
+        sub_item = tgw.SubscribeItem()
+        sub_item.security_code = ''
+        sub_item.flag = tgw.SubscribeDataType.kSnapshot
+        sub_item.category_type = tgw.VarietyCategory.kBond
+        sub_item.market = market_type
+        # 订阅
+        data_handler = DataHandler()
+        data_handler.SetDfFormat(True)
+        success = tgw.Subscribe(sub_item, data_handler)
+        if success != tgw.ErrorCode.kSuccess:
+            print(tgw.GetErrorMsg(success))
 
-    sub_item = tgw.SubscribeItem()
-    sub_item.security_code = ''
-    sub_item.flag = tgw.SubscribeDataType.kSnapshot
-    sub_item.category_type = tgw.VarietyCategory.kStock
-    sub_item.market = tgw.MarketType.kSZSE
-    success_sz = tgw.Subscribe(sub_item, data_hander)
-
-    print('success_sz', success_sz)
-    if success_sz != tgw.ErrorCode.kSuccess:
-        print(tgw.GetErrorMsg(success_sz))
     while True:
         try:
             if g_is_running != True:

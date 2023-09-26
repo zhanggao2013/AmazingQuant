@@ -35,7 +35,7 @@ class DownloadInfoData(object):
             code_list = self.code_list_hist
         elif para_code_list == 'index_list':
             code_list = self.index_list
-        # print('code_list', code_list)
+        result = {}
         for code in code_list:
             print(id, code, num)
             num += 1
@@ -58,14 +58,11 @@ class DownloadInfoData(object):
                 tgw.SetThirdInfoParam(task_id, "end_date", "20991231")
 
             df, error = tgw.QueryThirdInfo(task_id)
-            if result_df is None:
-                result_df = df
-            else:
-                result_df = pd.concat([result_df, df])
+            result[code] = df
             if error != '':
                 error_code_list.append(code)
                 print('error', type(error), error, error_code_list)
-        return result_df, error_code_list
+        return pd.concat(result.values()), error_code_list
 
     def download_industry_class(self):
         """
@@ -79,9 +76,19 @@ class DownloadInfoData(object):
 
     def download_index_member(self):
         """
-        指数成分股（含历史） A010200002
+        交易所指数成分股（含历史） A010200002
         """
         index_member_df, error_code_list = self.download_info_data('A010200002', para_code_list='index_list')
+        folder_name = LocalDataFolderName.INDEX_MEMBER.value
+        path = LocalDataPath.path + folder_name + '/'
+        save_data_to_hdf5(path, 'index_member', index_member_df)
+        return index_member_df
+
+    def download_sw_index_member(self):
+        """
+        申万指数成分股（含历史） A010200003
+        """
+        index_member_df, error_code_list = self.download_info_data('A010200003', para_code_list='index_list')
         folder_name = LocalDataFolderName.INDEX_MEMBER.value
         path = LocalDataPath.path + folder_name + '/'
         save_data_to_hdf5(path, 'index_member', index_member_df)
@@ -134,9 +141,9 @@ if __name__ == '__main__':
     calendar_index = tgw_api_object.get_calendar()
     info_data_object = DownloadInfoData(code_list_hist, index_list)
     # industry_class_df = info_data_object.download_industry_class()
-    index_member_df = info_data_object.download_index_member()
+    # index_member_df = info_data_object.download_index_member()
     # info_data_object.download_stock_struction()
-    # result = info_data_object.download_finance_data()
+    result = info_data_object.download_finance_data()
 
     # folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
     # path = LocalDataPath.path + folder_name + '/'
