@@ -57,7 +57,6 @@ class DownloadInfoData(object):
                 tgw.SetThirdInfoParam(task_id, "market_code", code)
             elif para_code_list in ['index_list', 'sw_index_list']:
                 tgw.SetThirdInfoParam(task_id, "index_code", code)
-                print('qweqweqweq')
 
             if para_date:
                 tgw.SetThirdInfoParam(task_id, "start_date", "19900101")
@@ -139,7 +138,7 @@ class DownloadInfoData(object):
 
 
 if __name__ == '__main__':
-    tgw_login(server_mode=True)
+    tgw_login()
     tgw_api_object = TgwApiData(20991231)
     calendar_index = tgw_api_object.get_calendar()
     info_data_object = DownloadInfoData(tgw_api_object)
