@@ -28,35 +28,38 @@ class GetIndexMember(object):
         path = LocalDataPath.path + folder_name + '/'
         data_name = folder_name + '.h5'
         self.all_index_members_df = get_local_data(path, data_name)
+
+        members_date = str(datetime_to_int(datetime.now()))
+        self.all_index_members_df.loc[self.all_index_members_df.CON_OUTDATE.isna(), 'CON_OUTDATE'] = members_date
+        self.all_index_members_df = self.all_index_members_df.reset_index(drop=True)
         return self.all_index_members_df
 
     def get_index_members(self, index_code):
-        self.index_members_df = self.all_index_members_df[self.all_index_members_df.INDEX_CODE == index_code]
-        self.index_members_df = self.index_members_df.fillna(datetime.now()).reset_index(drop=True)
-        self.index_members_all = list(set(self.index_members_df['CON_CODE']))
-        return self.index_members_df, self.index_members_all
+        index_members_df = self.all_index_members_df[(self.all_index_members_df.INDEX_CODE == index_code)]
+        index_members_all = list(set(index_members_df['CON_CODE']))
+        return index_members_all
 
-    def get_index_member_in_date(self, members_date=datetime.now()):
+    def get_index_member_in_date(self, members_date=datetime.now(), index_code=''):
         """
         取指定日期的指数成分股
         :param members_date:
         :return:
         """
         members_date = str(datetime_to_int(members_date))
-        # index_members_in_date_df = self.index_members_df[
-        #     (self.index_members_df.CON_INDATE <= members_date) & (self.index_members_df.out_date >= members_date)]
-        index_members_in_date_df = self.index_members_df[self.index_members_df.CON_INDATE <= members_date]
-        return list(index_members_in_date_df["CON_CODE"])
+        index_members_in_date_df = self.all_index_members_df[(self.all_index_members_df.CON_INDATE <= members_date) &
+                                                             (self.all_index_members_df.CON_OUTDATE >= members_date)]
+        if index_code:
+            index_members_in_date_df = index_members_in_date_df[(index_members_in_date_df.INDEX_CODE == index_code)]
+        index_members_in_date_list = list(set(index_members_in_date_df['CON_CODE']))
+        return index_members_in_date_list
 
 
 if __name__ == '__main__':
     index_member_obj = GetIndexMember()
     all_index_members_df = index_member_obj.get_all_index_members()
     # 深证综指
-    index_members_df_SZ, index_members_all_SZ = index_member_obj.get_index_members('399106.SZ')
+    index_members_all_SZ = index_member_obj.get_index_members(index_code='399106.SZ')
     # 上证Ａ股
-    index_members_df_SH, index_members_all_SH = index_member_obj.get_index_members('000300.SH')
-
-    index_member_in_date = index_member_obj.get_index_member_in_date()
-
-
+    index_members_all_SH = index_member_obj.get_index_members(index_code='000001.SH')
+    # 沪深300
+    index_member_in_date = index_member_obj.get_index_member_in_date(index_code='000300.SH')

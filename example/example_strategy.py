@@ -59,7 +59,8 @@ class MaStrategy(StrategyBase):
         # 设置运行周期
         self.period = 'daily'
         self.index_member_obj.get_all_index_members()
-        _, index_members_all = self.index_member_obj.get_index_members('000300.SH')
+        index_members_all = self.index_member_obj.get_index_members('000300.SH')
+        print('index_members_all', len(index_members_all))
         self.universe = index_members_all
 
         # 设置在运行前是否缓存日线，分钟线等各个周期数据
@@ -88,8 +89,8 @@ class MaStrategy(StrategyBase):
             for position in Environment.bar_position_data_list:
                 available_position_dict[
                     position.instrument + '.' + position.exchange] = position.position - position.frozen
-            index_member_list = self.index_member_obj.get_index_member_in_date(self.time_tag)
-
+            index_member_list = self.index_member_obj.get_index_member_in_date(self.time_tag, index_code=self.benchmark)
+            print('index_member_list', len(index_member_list))
             close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=index_member_list,
                                                               field=['close'],
                                                               start=self.time_tag, end=self.time_tag)
@@ -98,22 +99,25 @@ class MaStrategy(StrategyBase):
             for stock in index_member_list:
                 # 取当前股票的收盘价
                 close_price = close_price_all['close'][stock]
-                if close_price:
-                    ma5 = self.ma5[stock][self.time_tag]
-                    ma20 = self.ma10[stock][self.time_tag]
-                    if ma5 and ma20:
-                        # 如果5日均线突破20日均线，并且没有持仓，则买入这只股票100股，以收盘价为指定价交易
-                        if ma5 > ma20 and stock not in available_position_dict.keys() and stock in index_member_list:
-                            self.trade.order_shares(stock_code=stock, shares=100, price_type='fix',
-                                                    order_price=close_price,
-                                                    account_id=self.account[0])
-                            Environment.logger.info('buy', stock, -1, 'fix', close_price, self.account)
-                        # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
-                        elif ma5 < ma20 and stock in available_position_dict.keys():
-                            self.trade.order_shares(stock_code=stock, shares=-100, price_type='fix',
-                                                    order_price=close_price,
-                                                    account_id=self.account[0])
-                            Environment.logger.info('sell', stock, -1, 'fix', close_price, self.account)
+                if not close_price:
+                    continue
+                if not((stock in self.ma5) and (stock in self.ma10)):
+                    continue
+                ma5 = self.ma5[stock][self.time_tag]
+                ma20 = self.ma10[stock][self.time_tag]
+                if ma5 and ma20:
+                    # 如果5日均线突破20日均线，并且没有持仓，则买入这只股票100股，以收盘价为指定价交易
+                    if ma5 > ma20 and stock not in available_position_dict.keys() and stock in index_member_list:
+                        self.trade.order_shares(stock_code=stock, shares=100, price_type='fix',
+                                                order_price=close_price,
+                                                account_id=self.account[0])
+                        Environment.logger.info('buy', stock, -1, 'fix', close_price, self.account)
+                    # 如果20日均线突破5日均线，并且有持仓，则卖出这只股票100股，以收盘价为指定价交易
+                    elif ma5 < ma20 and stock in available_position_dict.keys():
+                        self.trade.order_shares(stock_code=stock, shares=-100, price_type='fix',
+                                                order_price=close_price,
+                                                account_id=self.account[0])
+                        Environment.logger.info('sell', stock, -1, 'fix', close_price, self.account)
             for stock in available_position_dict.keys():
                 if stock not in index_member_list:
                     Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',

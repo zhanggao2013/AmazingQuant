@@ -79,10 +79,9 @@ class DownloadInfoData(object):
 
     def download_index_member(self):
         """
-        指数成分股 A010200001
+        指数成分股（含历史） A010200002
         """
-        index_member_df, error_code_list = self.download_info_data('A010200001', para_code_list='index_list')
-        print('index_member_df', index_member_df)
+        index_member_df, error_code_list = self.download_info_data('A010200002', para_code_list='index_list')
         folder_name = LocalDataFolderName.INDEX_MEMBER.value
         path = LocalDataPath.path + folder_name + '/'
         save_data_to_hdf5(path, 'index_member', index_member_df)
