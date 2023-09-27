@@ -34,15 +34,8 @@ class GetIndexClass(object):
         self.index_class_df.loc[self.index_class_df.CON_OUTDATE.isna(), 'CON_OUTDATE'] = members_date
         self.index_class_df = self.index_class_df.reset_index(drop=True)
         self.code_list = self.index_class_df['CON_CODE'].unique()
+        self.zero_index_class = pd.DataFrame(index=self.code_list, columns=sw_industry_one.keys()).fillna(0)
         return self.index_class_df
-
-    def get_zero_index_class(self):
-        """
-        初始化一个0的dataframe
-        :return:
-        """
-        self.zero_index_class = pd.DataFrame(index=self.code_list,
-                                             columns=sw_industry_one.keys()).fillna(0)
 
     def get_code_index_class_in_date(self, code, members_date):
         industry = 'other'
@@ -50,7 +43,7 @@ class GetIndexClass(object):
             members_date = str(datetime_to_int(members_date))
             industry = self.index_class_df[(self.index_class_df.CON_INDATE <= members_date) &
                                            (self.index_class_df.CON_OUTDATE >= members_date) &
-                                           (self.index_class_df.CON_CODE == code)]['INDEXNAME'].values[0]
+                                           (self.index_class_df.CON_CODE == code)]['INDEX_CODE'].values[0]
         return industry
 
     def get_index_class_in_date(self, members_date):
@@ -58,9 +51,7 @@ class GetIndexClass(object):
         index_class_in_date = self.zero_index_class.copy()
         members_date_index_class = self.index_class_df[(self.index_class_df.CON_INDATE <= members_date) &
                                                        (self.index_class_df.CON_OUTDATE >= members_date)]
-        print(members_date_index_class)
         members_date_index_class_grouped = members_date_index_class.groupby('INDEX_CODE')
-        print(members_date_index_class_grouped.groups)
 
         def cal_class(x, members_date_index_class_groups):
             if x.name in members_date_index_class_groups:

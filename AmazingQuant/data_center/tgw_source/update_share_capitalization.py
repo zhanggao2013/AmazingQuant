@@ -40,16 +40,12 @@ class UpAShareCapitalization(object):
         index.sort()
         share_capitalization_grouped = self.a_share_capitalization.groupby('MARKET_CODE')
 
-        # total_share = pd.DataFrame({})
-        # float_a_share = pd.DataFrame({})
         total_share_list = []
         float_a_share_list = []
         for i in share_capitalization_grouped:
             data = i[1].sort_values('EX_CHANGE_DATE')
             data.drop_duplicates(subset=['EX_CHANGE_DATE'], keep='last', inplace=True, ignore_index=False)
             data = data.set_index('EX_CHANGE_DATE')
-            # total_share[i[0]] = data['TOT_SHARE'].reindex(index)
-            # float_a_share[i[0]] = data['FLOAT_A_SHARE'].reindex(index)
             total_share_list.append(data['TOT_SHARE'].reindex(index).rename(i[0]))
             float_a_share_list.append(data['FLOAT_A_SHARE'].reindex(index).rename(i[0]))
         total_share = pd.concat(total_share_list, axis=1)

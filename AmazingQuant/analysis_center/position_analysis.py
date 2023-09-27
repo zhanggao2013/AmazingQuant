@@ -62,24 +62,20 @@ class PositionAnalysis(object):
         :return:
         """
         index_class_obj = GetIndexClass()
-        index_class = index_class_obj.get_index_class()
-        index_class_obj.get_zero_index_class()
+        index_class_obj.get_index_class()
 
         share_data_obj = GetShare()
         share_data = share_data_obj.get_share('float_a_share_value')
 
-        def cal_industry_share_value(x, index_class, share_data):
+        def cal_industry_share_value(x, share_data):
             date_time = x.name
             stock_code = x['instrument_exchange']
-            # industry = index_class.loc[date_time, stock_code]
             industry = index_class_obj.get_code_index_class_in_date(stock_code, date_time)
             share_value = share_data.loc[date_time, stock_code]
-            # if not isinstance(industry, str):
-            #     industry = 'other'
             return industry, share_value
 
         self.position_data_df['industry'], self.position_data_df['share_value'] = \
-            zip(*self.position_data_df.apply(cal_industry_share_value, args=(index_class, share_data,), axis=1))
+            zip(*self.position_data_df.apply(cal_industry_share_value, args=(share_data,), axis=1))
 
     def cal_industry_value(self):
         """
@@ -115,6 +111,8 @@ class PositionAnalysis(object):
         :param delay:
         :return:
         """
+        turnover_num_list = []
+        turnover_value_list = []
         for i in range(len(self.position_index) - delay):
             turnover_num_dict = {}
             turnover_value_dict = {}
@@ -134,12 +132,15 @@ class PositionAnalysis(object):
                 turnover_value = 100 * stock_change_value / position_data_index['hold_value'].sum()
                 turnover_value_dict['delay_' + str(delay_num)] = turnover_value
             # 个数法换手率turnover_num，衰减周期默认为5
-            self.turnover_num_df = self.turnover_num_df.append(pd.Series(turnover_num_dict,
-                                                                         name=self.position_index[i]))
-
+            # self.turnover_num_df = self.turnover_num_df.append(pd.Series(turnover_num_dict,
+            #                                                              name=self.position_index[i]))
+            turnover_num_list.append(pd.Series(turnover_num_dict, name=self.position_index[i]))
             # 权重法换手率turnover_value，衰减周期默认为15
-            self.turnover_value_df = self.turnover_value_df.append(pd.Series(turnover_value_dict,
-                                                                             name=self.position_index[i]))
+            # self.turnover_value_df = self.turnover_value_df.append(pd.Series(turnover_value_dict,
+            #                                                                  name=self.position_index[i]))
+            turnover_value_list.append(pd.Series(turnover_num_dict, name=self.position_index[i]))
+        self.turnover_num_df = pd.concat(turnover_num_list, axis=1)
+        self.turnover_value_df = pd.concat(turnover_value_list, axis=1)
 
         # 个数法换手率均值
         self.turnover_num_mean = self.turnover_num_df.mean()
