@@ -94,9 +94,9 @@ class DownloadInfoData(object):
         申万指数成分股（含历史） A010200003
         """
         index_member_df, error_code_list = self.download_info_data('A010200003', para_code_list='sw_index_list')
-        folder_name = LocalDataFolderName.INDEX_MEMBER.value
+        folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
         path = LocalDataPath.path + folder_name + '/'
-        save_data_to_hdf5(path, 'index_member', index_member_df)
+        save_data_to_hdf5(path, 'sw_industry_one', index_member_df)
         return index_member_df
 
     def download_stock_struction(self):

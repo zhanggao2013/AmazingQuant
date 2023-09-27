@@ -19,6 +19,8 @@
 （3）position_industry_pct:行业市值占比-时序
 （4）position_industry_pct_mean：行业市值历史均值
 """
+import time
+
 import pandas as pd
 import numpy as np
 
@@ -69,10 +71,11 @@ class PositionAnalysis(object):
         def cal_industry_share_value(x, index_class, share_data):
             date_time = x.name
             stock_code = x['instrument_exchange']
-            industry = index_class.loc[date_time, stock_code]
+            # industry = index_class.loc[date_time, stock_code]
+            industry = index_class_obj.get_code_index_class_in_date(stock_code, date_time)
             share_value = share_data.loc[date_time, stock_code]
-            if not isinstance(industry, str):
-                industry = 'other'
+            # if not isinstance(industry, str):
+            #     industry = 'other'
             return industry, share_value
 
         self.position_data_df['industry'], self.position_data_df['share_value'] = \
