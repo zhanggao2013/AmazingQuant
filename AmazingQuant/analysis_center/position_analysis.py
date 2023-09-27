@@ -86,17 +86,23 @@ class PositionAnalysis(object):
             （4）position_industry_pct_mean：行业市值历史均值, Series, index:行业代码
         :return:
         """
+        position_industry_list = []
+        position_industry_pct_list = []
+        position_value_mean_list = []
         for i in self.position_index:
             position_data_index = self.position_data_df.loc[i].copy()
             position_data_hold_value = position_data_index.groupby('industry').sum()['hold_value']
             position_data_hold_value.name = i
-            self.position_industry = self.position_industry.append(position_data_hold_value)
+            position_industry_list.append(position_data_hold_value)
             total_value = position_data_hold_value.sum()
-            self.position_industry_pct = self.position_industry_pct.append(100 * position_data_hold_value / total_value)
+            position_industry_pct_list.append(100 * position_data_hold_value / total_value)
 
             position_stock_value_sum = pd.Series({'value_mean': position_data_index['hold_value'].sum()}, name=i)
-            self.position_value_mean = self.position_value_mean.append(position_stock_value_sum)
+            position_value_mean_list.append(position_stock_value_sum)
 
+        self.position_industry = pd.concat(position_industry_list)
+        self.position_industry_pct = pd.concat(position_industry_pct_list)
+        self.position_value_mean = pd.concat(position_value_mean_list)
         self.position_industry = self.position_industry.fillna(0)
         self.position_industry_pct = self.position_industry_pct.fillna(0)
         self.position_industry_pct_mean = self.position_industry_pct.mean()
