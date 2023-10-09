@@ -45,13 +45,15 @@ class CalIndicator(object):
         输入为一个时间序列
         输出为多个时间序列
         """
+
         def macd(x):
-            macd, macdsignal, macdhist = talib.MACD(x, fastperiod=fastperiod, slowperiod=slowperiod, signalperiod=signalperiod)
+            macd, macdsignal, macdhist = talib.MACD(x, fastperiod=fastperiod, slowperiod=slowperiod,
+                                                    signalperiod=signalperiod)
             return [macd, macdsignal, macdhist]
 
         result = self.close_df.apply(lambda x: macd(x), result_type='expand')
-        return pd.DataFrame(result.loc[0].T.to_dict()), pd.DataFrame(result.loc[1].T.to_dict()), \
-               pd.DataFrame(result.loc[2].T.to_dict()).multiply(2)
+        return pd.DataFrame(result.loc[0].T.to_dict()), pd.DataFrame(result.loc[1].T.to_dict()),\
+            pd.DataFrame(result.loc[2].T.to_dict()).multiply(2)
 
     def cal_ema(self, timeperiod=30):
         """
@@ -65,6 +67,7 @@ class CalIndicator(object):
         输入为多个时间序列
         输出为多个时间序列
         """
+
         def kdj(x):
             slowk, slowd = talib.STOCH(self.high_df[x.name], self.low_df[x.name], x,
                                        fastk_period=fastk_period, slowk_period=slowk_period, slowk_matype=slowk_matype,
@@ -74,7 +77,7 @@ class CalIndicator(object):
 
         result = self.close_df.apply(lambda x: kdj(x), result_type='expand')
         return pd.DataFrame(result.loc[0].T.to_dict()), pd.DataFrame(result.loc[1].T.to_dict()), \
-               pd.DataFrame(result.loc[2].T.to_dict())
+            pd.DataFrame(result.loc[2].T.to_dict())
 
 
 if __name__ == '__main__':
