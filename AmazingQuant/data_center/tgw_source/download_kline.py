@@ -19,7 +19,7 @@ from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hd
 from AmazingQuant.data_center.api_data.get_data import get_local_data
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.constant import LocalDataFolderName, AdjustmentFactor
-from AmazingQuant.utils.data_transfer import date_to_datetime, datetime_to_int, date_second_to_datetime
+from AmazingQuant.utils.data_transfer import date_to_datetime, datetime_to_int, date_minute_to_datetime
 
 
 class DownloadKlineData(object):
@@ -183,7 +183,7 @@ class DownloadKlineData(object):
 
                 stock_data_df_all = pd.concat(stock_data_df_list)
                 stock_data_df_all.rename(columns=self.field_dict, inplace=True)
-                stock_data_df_all.index = pd.Series([date_second_to_datetime(str(i)) for i in stock_data_df_all.index])
+                stock_data_df_all.index = pd.Series([date_minute_to_datetime(str(i)) for i in stock_data_df_all.index])
                 print(stock_data_df_all)
                 save_data_to_hdf5(path, market + code, stock_data_df_all)
         return stock_data_df_all
@@ -220,5 +220,5 @@ if __name__ == '__main__':
 
     path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_1MIN.value + \
            '//' + LocalDataFolderName.A_SHARE.value + '//'
-    field_data_dict = kline_object.download_min_kline_data(code_sh_list[:1], [], calendar_index, path)
+    field_data_dict = kline_object.download_min_kline_data(code_sh_list, code_sz_list, calendar_index, path)
 

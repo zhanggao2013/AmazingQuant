@@ -35,8 +35,8 @@ def date_to_datetime(date='20090101'):
     return datetime.strptime(date, "%Y%m%d")
 
 
-def date_second_to_datetime(date='20090101121212'):
-    return datetime.strptime(date, "%Y%m%d%H%M%S")
+def date_minute_to_datetime(date='200901011212'):
+    return datetime.strptime(date, "%Y%m%d%H%M")
 
 
 def datetime_to_int(date=datetime.now()):
