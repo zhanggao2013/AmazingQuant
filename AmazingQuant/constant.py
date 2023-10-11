@@ -63,6 +63,8 @@ class LocalDataFolderName(Enum):
     A_SHARE = 'a_share'
     INDEX = 'index'
 
+    KLINE_1MIN = 'kline_1min'
+
     SWS_INDEX = 'sws_index'
 
     INDUSTRY_CLASS = 'industry_class'

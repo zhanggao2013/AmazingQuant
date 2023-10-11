@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2020/1/10
 # @Author  : gao
-# @File    : update_adj_factor.py
+# @File    : download_adj_factor.py
 # @Project : AmazingQuant
 # ------------------------------
 import pandas as pd

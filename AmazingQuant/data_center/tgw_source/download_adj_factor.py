@@ -3,22 +3,19 @@
 # ------------------------------
 # @Time    : 2023/6/15
 # @Author  : gao
-# @File    : update_adj_factor.py 
+# @File    : download_adj_factor.py
 # @Project : AmazingQuant 
 # ------------------------------
-import os
-import time
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import tgw
 
-from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
-from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
-from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
-from AmazingQuant.data_center.api_data.get_data import get_local_data
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.constant import LocalDataFolderName, AdjustmentFactor
+from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
+from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
+from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
 from AmazingQuant.utils.data_transfer import date_to_datetime
 
 
@@ -144,5 +141,4 @@ if __name__ == '__main__':
     # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
     #        '//' + LocalDataFolderName.A_SHARE.value + '//'
     # close_df = get_local_data(path, 'close_price.h5')
-    # backward_factor_ratio = adj_factor_object.get_backward_factor_ratio(close_df, code_sh_list,  code_sz_list,
-    #                                                                     calendar_index)
+    # backward_factor_ratio = adj_factor_object.get_backward_factor_ratio(close_df, code_sh_list,  code_sz_list, calendar_index)
