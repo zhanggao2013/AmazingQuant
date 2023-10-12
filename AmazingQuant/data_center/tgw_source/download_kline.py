@@ -149,10 +149,12 @@ class DownloadKlineData(object):
             stock_kline.market_type = tgw.MarketType.kSSE
             code_list = code_sh_list
             market = 'SH'
+            market_path = LocalDataFolderName.SHANGHAI.value
             if market_type == tgw.MarketType.kSZSE:
                 stock_kline.market_type = tgw.MarketType.kSZSE
                 code_list = code_sz_list
                 market = 'SZ'
+                market_path = LocalDataFolderName.SHENZHEN.value
 
             for code in code_list:
                 time1 = time.time()
@@ -180,12 +182,12 @@ class DownloadKlineData(object):
 
                 time2 = time.time()
                 print(time2-time1)
-
-                stock_data_df_all = pd.concat(stock_data_df_list)
-                stock_data_df_all.rename(columns=self.field_dict, inplace=True)
-                stock_data_df_all.index = pd.Series([date_minute_to_datetime(str(i)) for i in stock_data_df_all.index])
-                print(stock_data_df_all)
-                save_data_to_hdf5(path, market + code, stock_data_df_all)
+                if stock_data_df_list:
+                    stock_data_df_all = pd.concat(stock_data_df_list)
+                    stock_data_df_all.rename(columns=self.field_dict, inplace=True)
+                    stock_data_df_all.index = pd.Series([date_minute_to_datetime(str(i)) for i in stock_data_df_all.index])
+                    # print(stock_data_df_all)
+                    save_data_to_hdf5(path+market_path+ '//', code, stock_data_df_all)
         return stock_data_df_all
         # field_data_dict = {}
         # for i in self.field:
@@ -220,5 +222,5 @@ if __name__ == '__main__':
 
     path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_1MIN.value + \
            '//' + LocalDataFolderName.A_SHARE.value + '//'
-    field_data_dict = kline_object.download_min_kline_data(code_sh_list, code_sz_list, calendar_index, path)
+    field_data_dict = kline_object.download_min_kline_data(code_sh_list[:2], code_sz_list[:2], calendar_index, path)
 

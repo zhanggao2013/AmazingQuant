@@ -54,6 +54,9 @@ class DatabaseName(Enum):
 class LocalDataFolderName(Enum):
     CALENDAR = 'calendar'
 
+    SHANGHAI = 'SH'
+    SHENZHEN = 'SZ'
+
     INDEX_MEMBER = 'index_member'
 
     ADJ_FACTOR = 'adj_factor'
