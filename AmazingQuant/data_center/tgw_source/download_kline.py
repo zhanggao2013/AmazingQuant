@@ -74,11 +74,11 @@ class DownloadKlineData(object):
         for market_type in [tgw.MarketType.kSSE, tgw.MarketType.kSZSE]:
             stock_kline.market_type = tgw.MarketType.kSSE
             code_list = code_sh_list
-            market = 'SH'
+            market = LocalDataFolderName.SHANGHAI.value
             if market_type == tgw.MarketType.kSZSE:
                 stock_kline.market_type = tgw.MarketType.kSZSE
                 code_list = code_sz_list
-                market = 'SZ'
+                market = LocalDataFolderName.SHENZHEN.value
 
             for code in code_list:
                 print(num, code)
@@ -110,20 +110,14 @@ class DownloadKlineData(object):
     def download_min_kline_data(self, code_sh_list, code_sz_list, calendar, path):
         # 取数据的入参，和返回值都为int，这里把交易日列表修改为int型
         calendar_int = [datetime_to_int(i) for i in calendar]
-        calendar_int_len = len(calendar_int)
-        # 股票代码上交所加后缀'.SH'，深交所加后缀'.SZ'
-        code_market_list = []
-        for code in code_sh_list:
-            code_market_list.append(code + '.SH')
-        for code in code_sz_list:
-            code_market_list.append(code + '.SZ')
 
+        # 股票代码上交所加后缀'.SH'，深交所加后缀'.SZ'
         download_begin_date = datetime.datetime(1990, 1, 1)
         local_data = {}
         try:
             date_list = []
             for i in self.field_dict.values():
-                local_data[i] = get_local_data(path, i + '.h5').reindex(columns=code_market_list)
+                local_data[i] = get_local_data(path, i + '.h5')
                 date_list.append(max(local_data[i].index))
             date_list_min = min(date_list)
             download_begin_date = calendar[calendar.index(date_list_min) - 1]
@@ -160,10 +154,15 @@ class DownloadKlineData(object):
                 time1 = time.time()
                 print(num, code)
                 num += 1
+                try:
+                    local_min_kline = get_local_data(path+market_path+ '//', code + '.h5')
+                    date_max = max(local_min_kline.index)
+                except FileNotFoundError:
                 stock_kline.security_code = code
 
                 stock_data_df_list = []
                 interval = 200
+                calendar_int_len = len(calendar_int)
                 for i in range(0, calendar_int_len, interval):
                     stock_kline.begin_date = calendar_int[i]
                     if i < calendar_int_len-interval:
