@@ -129,7 +129,6 @@ class DownloadKlineData(object):
                 market_path = LocalDataFolderName.SHENZHEN.value
 
             for code in code_list:
-
                 time1 = time.time()
                 print(num, code)
                 num += 1
