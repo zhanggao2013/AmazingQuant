@@ -185,17 +185,6 @@ class DownloadKlineData(object):
                     #     stock_data_df_all.index < date_replace.replace(hour=0, minute=0, second=0)]
                     # save_data_to_hdf5(path+market_path+ '//', code, stock_data_df_all)
         return stock_data_df_all
-        # field_data_dict = {}
-        # for i in self.field:
-        #     field_data_pd = pd.DataFrame({key: value[i] for key, value in stock_data_dict.items()})
-        #     field_data_pd.index = pd.Series([date_to_datetime(str(i)) for i in field_data_pd.index])
-        #     field_data_dict[self.field_dict[i]] = field_data_pd
-        #     if download_begin_date != datetime.datetime(1990, 1, 1):
-        #         field_data_dict[self.field_dict[i]] = pd.concat([local_data[self.field_dict[i]],
-        #                                                          field_data_pd.loc[download_begin_date:, :]])
-        #     save_data_to_hdf5(path, self.field_dict[i], field_data_dict[self.field_dict[i]])
-        #     print('save_data_to_hdf5', self.field_dict[i])
-        # return field_data_dict
 
 
 if __name__ == '__main__':
