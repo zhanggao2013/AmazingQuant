@@ -28,7 +28,7 @@ class DownloadKlineData(object):
         self.field = ['open_price', 'high_price', 'low_price', 'close_price', 'volume_trade', 'value_trade']
         # 本地落库字段名
         self.field_dict = {'open_price': 'open', 'high_price': 'high', 'low_price': 'low',
-                            'close_price': 'close', 'volume_trade': 'volume', 'value_trade': 'amount'}
+                           'close_price': 'close', 'volume_trade': 'volume', 'value_trade': 'amount'}
 
     def download_kline_data(self, code_sh_list, code_sz_list, calendar, path):
         # 取数据的入参，和返回值都为int，这里把交易日列表修改为int型
@@ -45,7 +45,7 @@ class DownloadKlineData(object):
         try:
             date_list = []
             for i in self.field_dict.values():
-                local_data[i] = get_local_data(path, i+'.h5').reindex(columns=code_market_list)
+                local_data[i] = get_local_data(path, i + '.h5').reindex(columns=code_market_list)
                 date_list.append(max(local_data[i].index))
             date_list_min = min(date_list)
             download_begin_date = calendar[calendar.index(date_list_min) - 1]
@@ -92,7 +92,7 @@ class DownloadKlineData(object):
                     # print(code, stock_data_df)
                     stock_data_df = stock_data_df.reindex(calendar_int).fillna(method='ffill')
                     # stock_data_df = stock_data_df.loc[:20230815, :]
-                    stock_data_df[['open_price', 'high_price', 'low_price', 'close_price']] =\
+                    stock_data_df[['open_price', 'high_price', 'low_price', 'close_price']] = \
                         stock_data_df[['open_price', 'high_price', 'low_price', 'close_price']] / 1000000
                     stock_data_dict[code + '.' + market] = stock_data_df
         field_data_dict = {}
@@ -110,27 +110,7 @@ class DownloadKlineData(object):
     def download_min_kline_data(self, code_sh_list, code_sz_list, calendar, path):
         # 取数据的入参，和返回值都为int，这里把交易日列表修改为int型
         calendar_int = [datetime_to_int(i) for i in calendar]
-
-        # 股票代码上交所加后缀'.SH'，深交所加后缀'.SZ'
-        download_begin_date = datetime.datetime(1990, 1, 1)
-        local_data = {}
-        try:
-            date_list = []
-            for i in self.field_dict.values():
-                local_data[i] = get_local_data(path, i + '.h5')
-                date_list.append(max(local_data[i].index))
-            date_list_min = min(date_list)
-            download_begin_date = calendar[calendar.index(date_list_min) - 1]
-            end_date = calendar[calendar.index(date_list_min) - 2]
-            print('download_begin_date', download_begin_date)
-            print('end_date', end_date)
-            for i in self.field_dict.values():
-                local_data[i] = local_data[i].loc[:end_date, :]
-        except FileNotFoundError:
-            for i in self.field_dict.values():
-                local_data[i] = pd.DataFrame({})
-            print('File does not exist')
-        print('download_begin_date', download_begin_date)
+        stock_data_df_all = None
         stock_kline = tgw.ReqKline()
         stock_kline.cq_flag = 0
         stock_kline.auto_complete = 1
@@ -142,31 +122,41 @@ class DownloadKlineData(object):
         for market_type in [tgw.MarketType.kSSE, tgw.MarketType.kSZSE]:
             stock_kline.market_type = tgw.MarketType.kSSE
             code_list = code_sh_list
-            market = 'SH'
             market_path = LocalDataFolderName.SHANGHAI.value
             if market_type == tgw.MarketType.kSZSE:
                 stock_kline.market_type = tgw.MarketType.kSZSE
                 code_list = code_sz_list
-                market = 'SZ'
                 market_path = LocalDataFolderName.SHENZHEN.value
 
             for code in code_list:
+
                 time1 = time.time()
                 print(num, code)
                 num += 1
-                try:
-                    local_min_kline = get_local_data(path+market_path+ '//', code + '.h5')
-                    date_max = max(local_min_kline.index)
-                except FileNotFoundError:
                 stock_kline.security_code = code
+                date_max = datetime.date(1990, 1, 1)
+                try:
+                    local_min_kline = get_local_data(path + market_path + '//', code + '.h5')
+                    date_max = max(local_min_kline.index)
+                    local_min_kline = local_min_kline[
+                        local_min_kline.index < date_max.replace(hour=23, minute=0, second=0)]
+                    print('date_max', datetime_to_int(date_max), local_min_kline)
+
+                except FileNotFoundError:
+                    print('File does not exist')
+                    local_min_kline = pd.DataFrame({})
+                    pass
 
                 stock_data_df_list = []
                 interval = 200
-                calendar_int_len = len(calendar_int)
+                date_max_int = datetime_to_int(date_max)
+                calendar_code = [i for i in calendar_int if i > date_max_int]
+
+                calendar_int_len = len(calendar_code)
                 for i in range(0, calendar_int_len, interval):
-                    stock_kline.begin_date = calendar_int[i]
-                    if i < calendar_int_len-interval:
-                        stock_kline.end_date = calendar_int[i+interval-1]
+                    stock_kline.begin_date = calendar_code[i]
+                    if i < calendar_int_len - interval:
+                        stock_kline.end_date = calendar_code[i + interval - 1]
                     else:
                         stock_kline.end_date = 20991231
                     stock_data_df, error = tgw.QueryKline(stock_kline)
@@ -180,13 +170,20 @@ class DownloadKlineData(object):
                         stock_data_df_list.append(stock_data_df)
 
                 time2 = time.time()
-                print(time2-time1)
+                print(time2 - time1)
                 if stock_data_df_list:
                     stock_data_df_all = pd.concat(stock_data_df_list)
                     stock_data_df_all.rename(columns=self.field_dict, inplace=True)
-                    stock_data_df_all.index = pd.Series([date_minute_to_datetime(str(i)) for i in stock_data_df_all.index])
-                    # print(stock_data_df_all)
-                    save_data_to_hdf5(path+market_path+ '//', code, stock_data_df_all)
+                    stock_data_df_all.index = pd.Series(
+                        [date_minute_to_datetime(str(i)) for i in stock_data_df_all.index])
+
+                    # print('stock_data_df_all', stock_data_df_all)
+                    if not local_min_kline.empty:
+                        stock_data_df_all = pd.concat([local_min_kline, stock_data_df_all])
+                    # date_replace = datetime.datetime(2023, 10, 11)
+                    # stock_data_df_all = stock_data_df_all[
+                    #     stock_data_df_all.index < date_replace.replace(hour=0, minute=0, second=0)]
+                    # save_data_to_hdf5(path+market_path+ '//', code, stock_data_df_all)
         return stock_data_df_all
         # field_data_dict = {}
         # for i in self.field:
@@ -206,8 +203,8 @@ if __name__ == '__main__':
 
     tgw_api_object = TgwApiData(20991231)
     code_sh_list, code_sz_list = tgw_api_object.get_code_list()
-    index_code_sh_list, index_code_sz_list = tgw_api_object.get_code_list(index = True)
-    
+    index_code_sh_list, index_code_sz_list = tgw_api_object.get_code_list(index=True)
+
     calendar_index = tgw_api_object.get_calendar(data_type='datetime')
     kline_object = DownloadKlineData()
 
@@ -221,5 +218,4 @@ if __name__ == '__main__':
 
     path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_1MIN.value + \
            '//' + LocalDataFolderName.A_SHARE.value + '//'
-    field_data_dict = kline_object.download_min_kline_data(code_sh_list[:2], code_sz_list[:2], calendar_index, path)
-
+    field_data_dict = kline_object.download_min_kline_data(code_sh_list, code_sz_list, calendar_index, path)
