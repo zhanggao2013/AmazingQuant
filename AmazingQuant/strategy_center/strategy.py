@@ -205,6 +205,7 @@ class StrategyBase(metaclass=ABCMeta):
             except IndexError:
                 if self.run_mode == RunMode.BACKTESTING.value:
                     if save_trade_record:
+
                         run_backtesting_analysis_engine(self)
                     break
 

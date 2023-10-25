@@ -100,9 +100,9 @@ class PositionAnalysis(object):
             position_stock_value_sum = pd.Series({'value_mean': position_data_index['hold_value'].sum()}, name=i)
             position_value_mean_list.append(position_stock_value_sum)
 
-        self.position_industry = pd.concat(position_industry_list)
-        self.position_industry_pct = pd.concat(position_industry_pct_list)
-        self.position_value_mean = pd.concat(position_value_mean_list)
+        self.position_industry = pd.concat(position_industry_list, axis=1).T
+        self.position_industry_pct = pd.concat(position_industry_pct_list, axis=1).T
+        self.position_value_mean = pd.concat(position_value_mean_list, axis=1).T
         self.position_industry = self.position_industry.fillna(0)
         self.position_industry_pct = self.position_industry_pct.fillna(0)
         self.position_industry_pct_mean = self.position_industry_pct.mean()
@@ -189,4 +189,4 @@ if __name__ == '__main__':
     # position_data_df = position_data_df.iloc[:10000]
 
     position_analysis_obj = PositionAnalysis(position_data_df)
-    # position_analysis_result = position_analysis_obj.cal_position_analysis_result()
+    position_analysis_result = position_analysis_obj.cal_position_analysis_result()
