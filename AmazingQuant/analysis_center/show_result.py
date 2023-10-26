@@ -120,14 +120,14 @@ class ShowResult(object):
         benchmark_max_drawdown = round(self.net_analysis_result['benchmark_max_drawdown'], 4)
         max_drawdown_line = Line() \
             .add_xaxis(list(self.net_analysis_result['net_value_df'].index.astype('str'))) \
-            .add_yaxis("策略最大回测", drawdown_list,
+            .add_yaxis("策略最大回撤", drawdown_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
-            .add_yaxis("基准最大回测", benchmark_drawdown_list,
+            .add_yaxis("基准最大回撤", benchmark_drawdown_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
             .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.5)) \
-            .set_global_opts(title_opts=opts.TitleOpts(title="最大回测分析",
-                                                       subtitle="策略历史最大回测为：" + str(net_max_drawdown) + "\n" +
-                                                                "基准历史最大回测为：" + str(benchmark_max_drawdown)),
+            .set_global_opts(title_opts=opts.TitleOpts(title="最大回撤分析",
+                                                       subtitle="策略历史最大回撤为：" + str(net_max_drawdown) + "\n" +
+                                                                "基准历史最大回撤为：" + str(benchmark_max_drawdown)),
                              # 标题
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
                              yaxis_opts=opts.AxisOpts(
