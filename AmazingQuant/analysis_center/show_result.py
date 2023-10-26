@@ -14,6 +14,7 @@ import pandas as pd
 from pyecharts.charts import Bar, Line, Page
 from pyecharts import options as opts
 from pyecharts.components import Table
+from pyecharts.options import ComponentTitleOpts
 
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.analysis_center.net_value_analysis import NetValueAnalysis
@@ -72,26 +73,130 @@ class ShowResult(object):
         self.net_analysis_result = net_analysis_result
         self.position_analysis_result = position_analysis_result
 
-    def profit_net_value(self):
+    def line_net_value(self):
         net_value_list = list(self.net_analysis_result['net_value_df'].round(4)['net_value'])
         benchmark_list = list(self.net_analysis_result['benchmark_df'].round(4)['net_value'])
-        all_list = net_value_list+benchmark_list
-        net_value_line = Line()\
+        all_list = net_value_list + benchmark_list
+        net_value_line = Line() \
             .add_xaxis(list(self.net_analysis_result['net_value_df'].index.astype('str'))) \
-            .add_yaxis("策略净值曲线", net_value_list) \
-            .add_yaxis("基准净值曲线", benchmark_list)\
-            .set_global_opts(title_opts=opts.TitleOpts(title="净值曲线"), #标题
-                             tooltip_opts=opts.TooltipOpts(trigger="axis"),#添加竖线信息
-                             yaxis_opts=opts.AxisOpts(min_=math.ceil(min(all_list)*90)/100,
-                                                      max_=int(max(all_list)*110)/100),
-                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100),)  # 设置Y轴范围
+            .add_yaxis("策略净值曲线", net_value_list,
+                       markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
+            .add_yaxis("基准净值曲线", benchmark_list,
+                       markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
+            .set_global_opts(title_opts=opts.TitleOpts(title="净值曲线",
+                                                       subtitle="策略净值为：" + str(net_value_list[-1]) + "\n" +
+                                                                "基准净值为：" + str(benchmark_list[-1])),  # 标题
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
+                             yaxis_opts=opts.AxisOpts(min_=math.ceil(min(all_list) * 90) / 100,
+                                                      max_=int(max(all_list) * 110) / 100),
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )  # 设置Y轴范围
         return net_value_line
 
-    def show_page(self):
+    def table_net_value(self):
+        indicator_dict = {'net_year_yield': "年化收益率",
+                          'benchmark_year_yield': "基准年化收益率",
+                          'bull_win_index_ratio': "牛市跑赢基准胜率",
+                          'bear_win_index_ratio': "熊市跑赢基准胜率",
+                          'net_day_win_ratio': "日胜率",
+                          'benchmark_day_win_ratio': "基准日胜率",
+                          'net_day_ratio_average': "日平均收益率",
+                          'benchmark_day_ratio_average': "基准日平均收益率",
+                          'net_month_ratio_average': "月平均收益率",
+                          'benchmark_month_ratio_average': "基准月平均收益率", }
+        table_net_value = Table()
+        headers = ["指标"]
+        rows = [["数据"]]
+        for key, value in indicator_dict.items():
+            headers.append(value)
+            rows[0].append(round(self.net_analysis_result[key], 4))
+        table_net_value.add(headers, rows)
+        table_net_value.set_global_opts(title_opts=ComponentTitleOpts(title='净值分析'))
+        return table_net_value
+
+    def line_max_drawdown(self):
+        drawdown_list = list(self.net_analysis_result['net_value_df'].round(4)['drawdown'])
+        benchmark_drawdown_list = list(self.net_analysis_result['benchmark_df'].round(4)['drawdown'])
+        net_max_drawdown = round(self.net_analysis_result['net_max_drawdown'], 4)
+        benchmark_max_drawdown = round(self.net_analysis_result['benchmark_max_drawdown'], 4)
+        max_drawdown_line = Line() \
+            .add_xaxis(list(self.net_analysis_result['net_value_df'].index.astype('str'))) \
+            .add_yaxis("策略最大回测", drawdown_list,
+                       markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
+            .add_yaxis("基准最大回测", benchmark_drawdown_list,
+                       markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
+            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.5)) \
+            .set_global_opts(title_opts=opts.TitleOpts(title="最大回测分析",
+                                                       subtitle="策略历史最大回测为：" + str(net_max_drawdown) + "\n" +
+                                                                "基准历史最大回测为：" + str(benchmark_max_drawdown)),
+                             # 标题
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
+                             yaxis_opts=opts.AxisOpts(
+                                 min_=int(min(net_max_drawdown, benchmark_max_drawdown) * 110) / 100,
+                                 max_=0),
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )  # 设置Y轴范围
+        return max_drawdown_line
+
+    def table_risk(self):
+        indicator_dict = {'net_year_volatility': "年化波动率",
+                          'benchmark_year_volatility': "基准年化波动率",
+                          'net_max_drawdown': "历史最大回撤",
+                          'benchmark_max_drawdown': "基准历史最大回撤",
+                          'net_day_volatility': "日收益率波动率",
+                          'benchmark_day_volatility': "基准日收益率波动率",
+                          'net_month_volatility': "月收益率波动率",
+                          'benchmark_month_volatility': "基准月收益率波动率",
+                          'downside_risk': "下行风险",
+                          'net_skewness': "偏度",
+                          'benchmark_skewness': "基准偏度",
+                          'net_kurtosis': "峰度",
+                          'benchmark_kurtosis': "基准峰度", }
+        table_risk_value = Table()
+        headers = ["指标"]
+        rows = [["数据"]]
+        for key, value in indicator_dict.items():
+            headers.append(value)
+            rows[0].append(round(self.net_analysis_result[key], 4))
+        table_risk_value.add(headers, rows)
+        table_risk_value.set_global_opts(title_opts=ComponentTitleOpts(title='风险分析'))
+        return table_risk_value
+
+    def table_profit_risk(self):
+        indicator_dict = {'beta': "beta",
+                          'tracking_error': "跟踪误差",
+                          'information_ratio': "信息比率",
+                          'alpha': "alpha",
+                          'sharpe': "夏普比率",
+                          'sortino_ratio': "索提诺比率",
+                          'treynor_ratio': "特雷诺比率",
+                          'calmar_ratio': "卡玛比率", }
+        table_profit_risk_value = Table()
+        headers = ["指标"]
+        rows = [["数据"]]
+        for key, value in indicator_dict.items():
+            headers.append(value)
+            rows[0].append(round(self.net_analysis_result[key], 4))
+        table_profit_risk_value.add(headers, rows)
+        table_profit_risk_value.set_global_opts(title_opts=ComponentTitleOpts(title='收益风险比分析'))
+        return table_profit_risk_value
+
+    def show_page(self, save_path_dir):
         page = Page()
-        net_value_line = self.profit_net_value()
+
+        net_value_line = self.line_net_value()
         page.add(net_value_line)
-        page.render("回测绩效分析报告.html")
+
+        table_net_value = self.table_net_value()
+        page.add(table_net_value)
+
+        max_drawdown_line = self.line_max_drawdown()
+        page.add(max_drawdown_line)
+
+        table_risk_value = self.table_risk()
+        page.add(table_risk_value)
+
+        table_profit_risk_value = self.table_profit_risk()
+        page.add(table_profit_risk_value)
+        page.render(save_path_dir+'/'+"回测绩效分析报告.html")
 
 
 if __name__ == '__main__':
