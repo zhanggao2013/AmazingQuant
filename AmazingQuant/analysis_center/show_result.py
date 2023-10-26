@@ -110,7 +110,7 @@ class ShowResult(object):
             headers.append(value)
             rows[0].append(round(self.net_analysis_result[key], 4))
         table_net_value.add(headers, rows)
-        table_net_value.set_global_opts(title_opts=ComponentTitleOpts(title='净值分析'))
+        table_net_value.set_global_opts(title_opts=ComponentTitleOpts(title='收益分析'))
         return table_net_value
 
     def line_max_drawdown(self):
