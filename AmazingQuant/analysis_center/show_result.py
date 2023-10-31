@@ -22,58 +22,16 @@ from AmazingQuant.analysis_center.position_analysis import PositionAnalysis
 
 
 class ShowResult(object):
-    """
-    收益
-    'net_value_df'（净值曲线）
-    'benchmark_df'（净值曲线）
-    'net_year_yield'
-    'benchmark_year_yield'
-    'bull_win_index_ratio'
-    'bear_win_index_ratio'
-    'net_day_win_ratio'
-    'benchmark_day_win_ratio'
-    'net_day_ratio_distribution'（柱状图）
-    'benchmark_day_ratio_distribution'（柱状图）
-    'net_day_ratio_average'
-    'benchmark_day_ratio_average'
-    'net_month_ratio'（柱状图）
-    'benchmark_month_ratio'（柱状图）
-    'net_month_ratio_average'
-    'benchmark_month_ratio_average'
-
-    风险
-    'net_value_df'（最大回撤曲线）
-    'benchmark_df'（最大回撤）
-    'net_year_volatility'
-    'benchmark_year_volatility'
-    'net_max_drawdown'
-    'benchmark_max_drawdown'
-    'net_day_volatility'
-    'benchmark_day_volatility'
-    'net_month_volatility'
-    'benchmark_month_volatility'
-    'downside_risk'
-    'net_skewness'
-    'net_kurtosis'
-    'benchmark_skewness'
-    'benchmark_kurtosis'
-
-    收益风险比
-    'beta'
-    'tracking_error'
-    'information_ratio'
-    'alpha'
-    'sharpe'
-    'sortino_ratio'
-    'treynor_ratio'
-    'calmar_ratio'
-    """
-
     def __init__(self, net_analysis_result, position_analysis_result):
         self.net_analysis_result = net_analysis_result
         self.position_analysis_result = position_analysis_result
 
     def line_net_value(self):
+        """
+        收益
+        net_value_df'（净值曲线）
+        benchmark_df'（净值曲线）
+        """
         net_value_list = list(self.net_analysis_result['net_value_df'].round(4)['net_value'])
         benchmark_list = list(self.net_analysis_result['benchmark_df'].round(4)['net_value'])
         all_list = net_value_list + benchmark_list
@@ -83,6 +41,7 @@ class ShowResult(object):
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
             .add_yaxis("基准净值曲线", benchmark_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
+            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1)) \
             .set_global_opts(title_opts=opts.TitleOpts(title="净值曲线",
                                                        subtitle="策略净值为：" + str(net_value_list[-1]) + "\n" +
                                                                 "基准净值为：" + str(benchmark_list[-1])),  # 标题
@@ -93,6 +52,19 @@ class ShowResult(object):
         return net_value_line
 
     def table_net_value(self):
+        """
+        收益
+        'net_year_yield'
+        'benchmark_year_yield'
+        'bull_win_index_ratio'
+        'bear_win_index_ratio'
+        'net_day_win_ratio'
+        'benchmark_day_win_ratio'
+        'net_day_ratio_average'
+        'benchmark_day_ratio_average'
+        'net_month_ratio_average'
+        'benchmark_month_ratio_average'
+        """
         indicator_dict = {'net_year_yield': "年化收益率",
                           'benchmark_year_yield': "基准年化收益率",
                           'bull_win_index_ratio': "牛市跑赢基准胜率",
@@ -113,7 +85,37 @@ class ShowResult(object):
         table_net_value.set_global_opts(title_opts=ComponentTitleOpts(title='收益分析'))
         return table_net_value
 
+    def bar_day_profit_ratio(self):
+        """
+        收益率分布
+        net_day_ratio_distribution'（柱状图）
+        benchmark_day_ratio_distribution'（柱状图）
+        net_month_ratio'（柱状图）
+        benchmark_month_ratio'（柱状图）
+        """
+        net_day_ratio_distribution_list = list(self.net_analysis_result['net_day_ratio_distribution'].values())
+        benchmark_day_ratio_distribution_list = list(
+            self.net_analysis_result['benchmark_day_ratio_distribution'].values())
+        bar_profit_ratio = Bar() \
+            .add_xaxis(list(self.net_analysis_result['net_day_ratio_distribution'].keys())) \
+            .add_yaxis("策略日收益率分布", [round(i, 4) for i in net_day_ratio_distribution_list],
+                       ) \
+            .add_yaxis("基准日收益率分布", [round(i, 4) for i in benchmark_day_ratio_distribution_list],
+                       ) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True))\
+            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
+                             title_opts=opts.TitleOpts(title="日收益率分布"), )
+
+
+        return bar_profit_ratio
+
     def line_max_drawdown(self):
+        """
+        风险
+        'net_value_df'（最大回撤曲线）
+        'benchmark_df'（最大回撤）
+        """
         drawdown_list = list(self.net_analysis_result['net_value_df'].round(4)['drawdown'])
         benchmark_drawdown_list = list(self.net_analysis_result['benchmark_df'].round(4)['drawdown'])
         net_max_drawdown = round(self.net_analysis_result['net_max_drawdown'], 4)
@@ -137,6 +139,22 @@ class ShowResult(object):
         return max_drawdown_line
 
     def table_risk(self):
+        """
+        风险
+        'net_year_volatility'
+        'benchmark_year_volatility'
+        'net_max_drawdown'
+        'benchmark_max_drawdown'
+        'net_day_volatility'
+        'benchmark_day_volatility'
+        'net_month_volatility'
+        'benchmark_month_volatility'
+        'downside_risk'
+        'net_skewness'
+        'net_kurtosis'
+        'benchmark_skewness'
+        'benchmark_kurtosis'
+        """
         indicator_dict = {'net_year_volatility': "年化波动率",
                           'benchmark_year_volatility': "基准年化波动率",
                           'net_max_drawdown': "历史最大回撤",
@@ -161,6 +179,17 @@ class ShowResult(object):
         return table_risk_value
 
     def table_profit_risk(self):
+        """
+        收益风险比
+        'beta'
+        'tracking_error'
+        'information_ratio'
+        'alpha'
+        'sharpe'
+        'sortino_ratio'
+        'treynor_ratio'
+        'calmar_ratio'
+        """
         indicator_dict = {'beta': "beta",
                           'tracking_error': "跟踪误差",
                           'information_ratio': "信息比率",
@@ -179,7 +208,7 @@ class ShowResult(object):
         table_profit_risk_value.set_global_opts(title_opts=ComponentTitleOpts(title='收益风险比分析'))
         return table_profit_risk_value
 
-    def show_page(self, save_path_dir):
+    def show_page(self, save_path_dir=''):
         page = Page()
 
         net_value_line = self.line_net_value()
@@ -187,6 +216,9 @@ class ShowResult(object):
 
         table_net_value = self.table_net_value()
         page.add(table_net_value)
+
+        bar_profit_ratio = self.bar_day_profit_ratio()
+        page.add(bar_profit_ratio)
 
         max_drawdown_line = self.line_max_drawdown()
         page.add(max_drawdown_line)
@@ -196,7 +228,8 @@ class ShowResult(object):
 
         table_profit_risk_value = self.table_profit_risk()
         page.add(table_profit_risk_value)
-        page.render(save_path_dir+'/'+"回测绩效分析报告.html")
+
+        page.render(save_path_dir + "回测绩效分析报告.html")
 
 
 if __name__ == '__main__':

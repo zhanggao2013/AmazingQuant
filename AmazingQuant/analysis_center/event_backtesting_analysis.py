@@ -118,7 +118,7 @@ class EventBacktestingAnalysis(Event):
             Environment.logger.info(i, position_analysis_result[i])
 
         show_result_object = ShowResult(net_analysis_result, position_analysis_result)
-        save_path_dir = event.event_data_dict["strategy_data"].strategy_name
+        save_path_dir = event.event_data_dict["strategy_data"].strategy_name + '/'
         if not os.path.exists(save_path_dir):
             os.mkdir(save_path_dir)
         show_result_object.show_page(save_path_dir)

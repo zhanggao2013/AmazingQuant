@@ -86,7 +86,7 @@ class DownloadKlineData(object):
                 stock_kline.security_code = code
                 stock_data_df, error = tgw.QueryKline(stock_kline)
                 # print(stock_data_df, error, stock_data_df.empty)
-                if error == "" and not stock_data_df.empty:
+                if error == 0 and not stock_data_df.empty:
                     stock_data_df.set_index(["kline_time"], inplace=True)
                     stock_data_df = stock_data_df[self.field]
                     # print(code, stock_data_df)
@@ -160,7 +160,7 @@ class DownloadKlineData(object):
                         stock_kline.end_date = 20991231
                     stock_data_df, error = tgw.QueryKline(stock_kline)
                     # print(stock_data_df, error, stock_data_df.empty)
-                    if error == "" and not stock_data_df.empty:
+                    if error == 0 and not stock_data_df.empty:
                         stock_data_df.set_index(["kline_time"], inplace=True)
                         stock_data_df = stock_data_df[self.field]
 
@@ -196,13 +196,13 @@ if __name__ == '__main__':
     calendar_index = tgw_api_object.get_calendar(data_type='datetime')
     kline_object = DownloadKlineData()
 
-    path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
-           '//' + LocalDataFolderName.A_SHARE.value + '//'
-    field_data_dict = kline_object.download_kline_data(code_sh_list, code_sz_list, calendar_index, path)
-
-    path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
-           '//' + LocalDataFolderName.INDEX.value + '//'
-    field_data_dict = kline_object.download_kline_data(index_code_sh_list, index_code_sz_list, calendar_index, path)
+    # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
+    #        '//' + LocalDataFolderName.A_SHARE.value + '//'
+    # field_data_dict = kline_object.download_kline_data(code_sh_list, code_sz_list, calendar_index, path)
+    #
+    # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
+    #        '//' + LocalDataFolderName.INDEX.value + '//'
+    # field_data_dict = kline_object.download_kline_data(index_code_sh_list, index_code_sz_list, calendar_index, path)
 
     path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_1MIN.value + \
            '//' + LocalDataFolderName.A_SHARE.value + '//'

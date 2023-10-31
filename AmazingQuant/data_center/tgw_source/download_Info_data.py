@@ -64,7 +64,7 @@ class DownloadInfoData(object):
 
             df, error = tgw.QueryThirdInfo(task_id)
             result[code] = df
-            if error != '':
+            if error != 0:
                 error_code_list.append(code)
                 print('error', type(error), error, error_code_list)
         return pd.concat(result.values()), error_code_list
