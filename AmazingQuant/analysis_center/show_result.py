@@ -87,16 +87,14 @@ class ShowResult(object):
 
     def bar_day_profit_ratio(self):
         """
-        收益率分布
+        日收益率分布
         net_day_ratio_distribution'（柱状图）
         benchmark_day_ratio_distribution'（柱状图）
-        net_month_ratio'（柱状图）
-        benchmark_month_ratio'（柱状图）
         """
         net_day_ratio_distribution_list = list(self.net_analysis_result['net_day_ratio_distribution'].values())
         benchmark_day_ratio_distribution_list = list(
             self.net_analysis_result['benchmark_day_ratio_distribution'].values())
-        bar_profit_ratio = Bar() \
+        bar_profit_ratio_day = Bar() \
             .add_xaxis(list(self.net_analysis_result['net_day_ratio_distribution'].keys())) \
             .add_yaxis("策略日收益率分布", [round(i, 4) for i in net_day_ratio_distribution_list],
                        ) \
@@ -106,9 +104,29 @@ class ShowResult(object):
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="日收益率分布"), )
+        return bar_profit_ratio_day
 
+    def bar_month_profit_ratio(self):
+        """
+        月度收益率
+        net_month_ratio'（柱状图）
+        benchmark_month_ratio'（柱状图）
+        """
+        net_month_ratio_distribution_list = list(self.net_analysis_result['net_month_ratio'].values())
+        benchmark_month_ratio_distribution_list = list(
+            self.net_analysis_result['benchmark_month_ratio'].values())
+        bar_profit_ratio_month = Bar() \
+            .add_xaxis(list(self.net_analysis_result['net_month_ratio'].keys())) \
+            .add_yaxis("策略月收益率", [round(i, 4) for i in net_month_ratio_distribution_list],
+                       ) \
+            .add_yaxis("基准月收益率", [round(i, 4) for i in benchmark_month_ratio_distribution_list],
+                       ) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True))\
+            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
+                             title_opts=opts.TitleOpts(title="月收益率"), )
 
-        return bar_profit_ratio
+        return bar_profit_ratio_month
 
     def line_max_drawdown(self):
         """
@@ -217,8 +235,11 @@ class ShowResult(object):
         table_net_value = self.table_net_value()
         page.add(table_net_value)
 
-        bar_profit_ratio = self.bar_day_profit_ratio()
-        page.add(bar_profit_ratio)
+        bar_profit_ratio_day = self.bar_day_profit_ratio()
+        page.add(bar_profit_ratio_day)
+
+        bar_profit_ratio_month = self.bar_month_profit_ratio()
+        page.add(bar_profit_ratio_month)
 
         max_drawdown_line = self.line_max_drawdown()
         page.add(max_drawdown_line)
