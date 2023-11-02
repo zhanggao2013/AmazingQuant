@@ -58,7 +58,7 @@ class PositionAnalysis(object):
         """
         持仓数据增加字段
         industry 行业,
-        share_value 股票的流通是指
+        share_value 股票的流通市值
         :return:
         """
         index_class_obj = GetIndexClass()
@@ -80,10 +80,10 @@ class PositionAnalysis(object):
     def cal_industry_value(self):
         """
         持仓分析
-            （1）position_value_mean：股票市值均值-时序, Dataframe, index:time_tag, column:value_mean
+            （1）position_value_mean：股票持仓市值-时序, Series, index:time_tag
             （2）position_industry：行业市值-时序, Dataframe, index:time_tag, column:行业代码
             （3）position_industry_pct:行业市值占比-时序, Dataframe, index:time_tag, column:行业代码
-            （4）position_industry_pct_mean：行业市值历史均值, Series, index:行业代码
+            （4）position_industry_pct_mean：行业市值历史占比均值, Series, index:行业代码
         :return:
         """
         position_industry_list = []
@@ -97,12 +97,12 @@ class PositionAnalysis(object):
             total_value = position_data_hold_value.sum()
             position_industry_pct_list.append(100 * position_data_hold_value / total_value)
 
-            position_stock_value_sum = pd.Series({'value_mean': position_data_index['hold_value'].sum()}, name=i)
-            position_value_mean_list.append(position_stock_value_sum)
+            position_stock_value_mean = pd.Series({'value_mean': position_data_index['hold_value'].sum()}, name=i)
+            position_value_mean_list.append(position_stock_value_mean)
 
         self.position_industry = pd.concat(position_industry_list, axis=1).T
         self.position_industry_pct = pd.concat(position_industry_pct_list, axis=1).T
-        self.position_value_mean = pd.concat(position_value_mean_list, axis=1).T
+        self.position_value_mean = pd.concat(position_value_mean_list, axis=1).T['value_mean']
         self.position_industry = self.position_industry.fillna(0)
         self.position_industry_pct = self.position_industry_pct.fillna(0)
         self.position_industry_pct_mean = self.position_industry_pct.mean()
@@ -141,7 +141,7 @@ class PositionAnalysis(object):
             # self.turnover_num_df = self.turnover_num_df.append(pd.Series(turnover_num_dict,
             #                                                              name=self.position_index[i]))
             turnover_num_list.append(pd.Series(turnover_num_dict, name=self.position_index[i]))
-            # 权重法换手率turnover_value，衰减周期默认为15
+            # 权重法换手率turnover_value，衰减周期默认为5
             # self.turnover_value_df = self.turnover_value_df.append(pd.Series(turnover_value_dict,
             #                                                                  name=self.position_index[i]))
             turnover_value_list.append(pd.Series(turnover_num_dict, name=self.position_index[i]))

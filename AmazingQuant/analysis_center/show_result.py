@@ -11,7 +11,7 @@ import math
 
 import pandas as pd
 
-from pyecharts.charts import Bar, Line, Page
+from pyecharts.charts import Bar, Line, Page, Timeline
 from pyecharts import options as opts
 from pyecharts.components import Table
 from pyecharts.options import ComponentTitleOpts
@@ -19,6 +19,7 @@ from pyecharts.options import ComponentTitleOpts
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.analysis_center.net_value_analysis import NetValueAnalysis
 from AmazingQuant.analysis_center.position_analysis import PositionAnalysis
+from AmazingQuant.config.industry_class import sw_industry_one
 
 
 class ShowResult(object):
@@ -100,10 +101,12 @@ class ShowResult(object):
                        ) \
             .add_yaxis("基准日收益率分布", [round(i, 4) for i in benchmark_day_ratio_distribution_list],
                        ) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True))\
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
-                             title_opts=opts.TitleOpts(title="日收益率分布"), )
+                             title_opts=opts.TitleOpts(title="日收益率分布"),
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
         return bar_profit_ratio_day
 
     def bar_month_profit_ratio(self):
@@ -121,10 +124,12 @@ class ShowResult(object):
                        ) \
             .add_yaxis("基准月收益率", [round(i, 4) for i in benchmark_month_ratio_distribution_list],
                        ) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True))\
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
-                             title_opts=opts.TitleOpts(title="月收益率"), )
+                             title_opts=opts.TitleOpts(title="月收益率"),
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
 
         return bar_profit_ratio_month
 
@@ -226,6 +231,120 @@ class ShowResult(object):
         table_profit_risk_value.set_global_opts(title_opts=ComponentTitleOpts(title='收益风险比分析'))
         return table_profit_risk_value
 
+    """
+    'position_industry_pct_mean',
+    'turnover_num_df',
+    'turnover_num_mean',
+    'turnover_value_df',
+    'turnover_value_mean'
+    """
+
+    def bar_position_value_mean(self):
+        """
+        'position_value_mean',
+        """
+        position_value_mean = list(self.position_analysis_result['position_value_mean'])
+        bar_position_value_mean = Bar() \
+            .add_xaxis(list(self.position_analysis_result['position_value_mean'].index.astype('str'))) \
+            .add_yaxis("股票持仓市值（万）", [round(i / 10000, 4) for i in position_value_mean]) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
+                             title_opts=opts.TitleOpts(title="股票持仓市值"),
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                             datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80), )
+
+        return bar_position_value_mean
+
+    def bar_position_industry_pct(self):
+        """
+        'position_industry_pct',
+        """
+
+        def get_industry_value(industry=None):
+            position_industry_pct = list(self.position_analysis_result['position_industry_pct'][industry].values)
+            position_industry_pct = [round(i, 4) for i in position_industry_pct]
+            title = sw_industry_one[industry] + "（%）"
+
+            bar_industry_value_pct = Bar()\
+                .add_xaxis(xaxis_data=list(self.position_analysis_result['position_industry_pct'].index.astype('str'))) \
+                .add_yaxis(title, position_industry_pct) \
+                .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+                .set_global_opts(title_opts=opts.TitleOpts(title="股票持仓行业市值占比", subtitle=title),
+                                 xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                                 yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}"),
+                                                          min_=min(position_industry_pct),
+                                                          max_=max(position_industry_pct)),
+                                 datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80),
+                                 tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                                 )  # 添加竖线信息
+
+            return bar_industry_value_pct
+
+        # 生成时间轴的图
+        timeline_position_industry_pct = Timeline()
+
+        for industry in sw_industry_one:
+            timeline_position_industry_pct.add(get_industry_value(industry), time_point=sw_industry_one[industry])
+
+        # 1.0.0 版本的 add_schema 暂时没有补上 return self 所以只能这么写着
+        timeline_position_industry_pct.add_schema(pos_bottom='-5px', pos_top='top', pos_left='left', pos_right='left', orient='vertical',
+                            play_interval=0)
+        return timeline_position_industry_pct
+
+    def line_position_industry(self):
+        """
+        'position_industry',
+        """
+        def get_industry_value(industry=None):
+            position_industry = list(self.position_analysis_result['position_industry'][industry].values)
+            position_industry = [round(i/10000, 4) for i in position_industry]
+            title = sw_industry_one[industry] + "（万）"
+
+            line_industry_value = Line() \
+                .add_xaxis(xaxis_data=list(self.position_analysis_result['position_industry'].index.astype('str'))) \
+                .add_yaxis(title, position_industry) \
+                .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+                .set_global_opts(title_opts=opts.TitleOpts(title="股票持仓行业市值", subtitle=title),
+                                 xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                                 yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}"),
+                                                          min_=min(position_industry),
+                                                          max_=max(position_industry)),
+                                 datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80),
+                                 tooltip_opts=opts.TooltipOpts(trigger="axis"), )  # 添加竖线信息
+
+            return line_industry_value
+
+        # 生成时间轴的图
+        timeline_position_industry = Timeline()
+
+        for industry in sw_industry_one:
+            timeline_position_industry.add(get_industry_value(industry), time_point=sw_industry_one[industry])
+
+        # 1.0.0 版本的 add_schema 暂时没有补上 return self 所以只能这么写着
+        timeline_position_industry.add_schema(pos_bottom='-5px', pos_top='top', pos_left='left', pos_right='left', orient='vertical',
+                            play_interval=0)
+        return timeline_position_industry
+
+    def bar_position_industry_pct_mean(self):
+        """
+        'position_industry_pct_mean',
+        """
+        position_value_mean = list(self.position_analysis_result['position_industry_pct_mean'])
+        position_industry_pct_mean = list(self.position_analysis_result['position_industry_pct_mean'].index.astype('str'))
+        bar_position_industry_pct_mean = Bar() \
+            .add_xaxis([sw_industry_one[i] for i in position_industry_pct_mean]) \
+            .add_yaxis("行业市值历史占比均值（%）", [round(i, 4) for i in position_value_mean]) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
+                             title_opts=opts.TitleOpts(title="行业市值历史占比均值"),
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                             datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80), )
+
+        return bar_position_industry_pct_mean
+
+
     def show_page(self, save_path_dir=''):
         page = Page()
 
@@ -250,6 +369,17 @@ class ShowResult(object):
         table_profit_risk_value = self.table_profit_risk()
         page.add(table_profit_risk_value)
 
+        bar_position_value_mean = self.bar_position_value_mean()
+        page.add(bar_position_value_mean)
+
+        bar_position_industry_pct = self.bar_position_industry_pct()
+        page.add(bar_position_industry_pct)
+
+        line_position_industry = self.line_position_industry()
+        page.add(line_position_industry)
+
+        bar_position_industry_pct_mean=self.bar_position_industry_pct_mean()
+        page.add(bar_position_industry_pct_mean)
         page.render(save_path_dir + "回测绩效分析报告.html")
 
 
@@ -277,5 +407,4 @@ if __name__ == '__main__':
     position_analysis_result = position_analysis_obj.cal_position_analysis_result()
 
     show_result_object = ShowResult(net_analysis_result, position_analysis_result)
-
     show_result_object.show_page()
