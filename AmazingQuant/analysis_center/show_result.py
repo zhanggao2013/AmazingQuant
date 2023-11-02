@@ -262,7 +262,7 @@ class ShowResult(object):
 
             bar_industry_value_pct = Bar() \
                 .add_xaxis(xaxis_data=list(self.position_analysis_result['position_industry_pct'].index.astype('str'))) \
-                .add_yaxis(title, position_industry_pct) \
+                .add_yaxis('行业市值占比', position_industry_pct) \
                 .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
                 .set_global_opts(title_opts=opts.TitleOpts(title="股票持仓行业市值占比", subtitle=title),
                                  xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
@@ -299,7 +299,7 @@ class ShowResult(object):
 
             line_industry_value = Line() \
                 .add_xaxis(xaxis_data=list(self.position_analysis_result['position_industry'].index.astype('str'))) \
-                .add_yaxis(title, position_industry) \
+                .add_yaxis('行业市值', position_industry) \
                 .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
                 .set_global_opts(title_opts=opts.TitleOpts(title="股票持仓行业市值", subtitle=title),
                                  xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
@@ -308,7 +308,6 @@ class ShowResult(object):
                                                           max_=max(position_industry)),
                                  datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80),
                                  tooltip_opts=opts.TooltipOpts(trigger="axis"), )  # 添加竖线信息
-
             return line_industry_value
 
         # 生成时间轴的图
@@ -343,24 +342,24 @@ class ShowResult(object):
 
         return bar_position_industry_pct_mean
 
-    """
-    权重法换手率, turnover_value_df，衰减周期默认为5, DataFrame  , index:time_tag, column:delay_1,delay_2, ... ,delay_n,
-    权重法换手率均值, turnover_value_mean, Series, index:delay_1,delay_2, ... ,delay_n,
-    """
     def bar_turnover_num(self, delay=5):
         """
         个数法换手率, turnover_num_df，衰减周期默认为delay=5,DataFrame, index:time_tag, column:delay_1,delay_2, ... ,delay_n,
+        权重法换手率, turnover_value_df，衰减周期默认为5, DataFrame  , index:time_tag, column:delay_1,delay_2, ... ,delay_n,
         """
-
         def get_turnover_num(delay):
             turnover_num_list = list(self.position_analysis_result['turnover_num_df'].loc[delay, :].values)
-            turnover_num_list = [round(i, 4) for i in turnover_num_list]
+            turnover_num_list = [round(i, 2) for i in turnover_num_list]
 
-            bar_industry_value_pct = Bar() \
+            turnover_value_list = list(self.position_analysis_result['turnover_value_df'].loc[delay, :].values)
+            turnover_value_list = [round(i, 2) for i in turnover_value_list]
+
+            bar_turnover_num = Bar() \
                 .add_xaxis(xaxis_data=list(self.position_analysis_result['turnover_num_df'].columns.astype('str'))) \
-                .add_yaxis(delay, turnover_num_list) \
+                .add_yaxis('个数法', turnover_num_list) \
+                .add_yaxis('权重法', turnover_value_list) \
                 .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
-                .set_global_opts(title_opts=opts.TitleOpts(title="个数法-换手率（%）"),
+                .set_global_opts(title_opts=opts.TitleOpts(title="换手率（%）"),
                                  xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                                  yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}"),
                                                           min_=min(turnover_num_list),
@@ -368,8 +367,7 @@ class ShowResult(object):
                                  datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80),
                                  tooltip_opts=opts.TooltipOpts(trigger="axis"),
                                  )  # 添加竖线信息
-
-            return bar_industry_value_pct
+            return bar_turnover_num
 
         # 生成时间轴的图
         timeline_turnover_num = Timeline()
@@ -377,7 +375,6 @@ class ShowResult(object):
         for delay in self.position_analysis_result['turnover_num_df'].index:
             timeline_turnover_num.add(get_turnover_num(delay), time_point=delay)
 
-        # 1.0.0 版本的 add_schema 暂时没有补上 return self 所以只能这么写着
         timeline_turnover_num.add_schema(pos_bottom='-5px', pos_top='top', pos_left='left', pos_right='left',
                                          orient='vertical', play_interval=0)
         return timeline_turnover_num
@@ -385,73 +382,25 @@ class ShowResult(object):
     def bar_turnover_num_mean(self):
         """
         个数法换手率均值, turnover_num_mean,  Series, index:delay_1,delay_2, ... ,delay_n,
+        权重法换手率均值, turnover_value_mean, Series, index:delay_1,delay_2, ... ,delay_n,
         """
         turnover_num_mean = list(self.position_analysis_result['turnover_num_mean'].values)
-        turnover_num_mean = [round(i, 4) for i in turnover_num_mean]
+        turnover_num_mean = [round(i, 2) for i in turnover_num_mean]
+
+        turnover_value_mean = list(self.position_analysis_result['turnover_value_mean'].values)
+        turnover_value_mean = [round(i, 2) for i in turnover_value_mean]
+
         bar_turnover_num_mean = Bar() \
             .add_xaxis(list(self.position_analysis_result['turnover_num_mean'].index.astype('str'))) \
-            .add_yaxis("个数法-换手率均值（%）", turnover_num_mean) \
+            .add_yaxis("个数法（%）", turnover_num_mean) \
+            .add_yaxis("权重法（%）", turnover_value_mean) \
             .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
-                             title_opts=opts.TitleOpts(title="个数法-换手率均值（%）"),
+                             title_opts=opts.TitleOpts(title="换手率均值（%）"),
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),
-                             datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80), )
-
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
         return bar_turnover_num_mean
-
-    def bar_turnover_value(self, delay=5):
-        """
-        权重法换手率, turnover_value_df，衰减周期默认为5, DataFrame  , index:time_tag, column:delay_1,delay_2, ... ,delay_n,
-        """
-        def get_turnover_value(delay):
-            turnover_value_list = list(self.position_analysis_result['turnover_value_df'].loc[delay, :].values)
-            turnover_value_list = [round(i, 4) for i in turnover_value_list]
-
-            bar_industry_value_pct = Bar() \
-                .add_xaxis(xaxis_data=list(self.position_analysis_result['turnover_value_df'].columns.astype('str'))) \
-                .add_yaxis(delay, turnover_value_list) \
-                .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
-                .set_global_opts(title_opts=opts.TitleOpts(title="个数法-换手率（%）"),
-                                 xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
-                                 yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}"),
-                                                          min_=min(turnover_value_list),
-                                                          max_=max(turnover_value_list)),
-                                 datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80),
-                                 tooltip_opts=opts.TooltipOpts(trigger="axis"),
-                                 )  # 添加竖线信息
-
-            return bar_industry_value_pct
-
-        # 生成时间轴的图
-        timeline_turnover_value = Timeline()
-
-        for delay in self.position_analysis_result['turnover_value_df'].index:
-            timeline_turnover_value.add(get_turnover_value(delay), time_point=delay)
-
-        # 1.0.0 版本的 add_schema 暂时没有补上 return self 所以只能这么写着
-        timeline_turnover_value.add_schema(pos_bottom='-5px', pos_top='top', pos_left='left', pos_right='left',
-                                         orient='vertical', play_interval=0)
-        return timeline_turnover_value
-
-    def bar_turnover_value_mean(self):
-        """
-        权重法换手率均值, turnover_value_mean,  Series, index:delay_1,delay_2, ... ,delay_n,
-        """
-        turnover_value_mean = list(self.position_analysis_result['turnover_value_mean'].values)
-        turnover_value_mean = [round(i, 4) for i in turnover_value_mean]
-        bar_turnover_value_mean = Bar() \
-            .add_xaxis(list(self.position_analysis_result['turnover_value_mean'].index.astype('str'))) \
-            .add_yaxis("权重法-换手率均值（%）", turnover_value_mean) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
-            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
-                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
-                             title_opts=opts.TitleOpts(title="权重法-换手率均值（%）"),
-                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
-                             datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80), )
-
-        return bar_turnover_value_mean
-
 
     def show_page(self, save_path_dir=''):
         page = Page()
@@ -494,12 +443,6 @@ class ShowResult(object):
 
         bar_turnover_num_mean = self.bar_turnover_num_mean()
         page.add(bar_turnover_num_mean)
-
-        timeline_turnover_value = self.bar_turnover_value()
-        page.add(timeline_turnover_value)
-
-        bar_turnover_value_mean = self.bar_turnover_value_mean()
-        page.add(bar_turnover_value_mean)
 
         page.render(save_path_dir + "回测绩效分析报告.html")
 
