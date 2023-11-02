@@ -138,20 +138,16 @@ class PositionAnalysis(object):
                 turnover_value = 100 * stock_change_value / position_data_index['hold_value'].sum()
                 turnover_value_dict['delay_' + str(delay_num)] = turnover_value
             # 个数法换手率turnover_num，衰减周期默认为5
-            # self.turnover_num_df = self.turnover_num_df.append(pd.Series(turnover_num_dict,
-            #                                                              name=self.position_index[i]))
             turnover_num_list.append(pd.Series(turnover_num_dict, name=self.position_index[i]))
             # 权重法换手率turnover_value，衰减周期默认为5
-            # self.turnover_value_df = self.turnover_value_df.append(pd.Series(turnover_value_dict,
-            #                                                                  name=self.position_index[i]))
-            turnover_value_list.append(pd.Series(turnover_num_dict, name=self.position_index[i]))
+            turnover_value_list.append(pd.Series(turnover_value_dict, name=self.position_index[i]))
         self.turnover_num_df = pd.concat(turnover_num_list, axis=1)
         self.turnover_value_df = pd.concat(turnover_value_list, axis=1)
 
         # 个数法换手率均值
-        self.turnover_num_mean = self.turnover_num_df.mean()
+        self.turnover_num_mean = self.turnover_num_df.T.mean()
         # 权重法换手率均值
-        self.turnover_value_mean = self.turnover_value_df.mean()
+        self.turnover_value_mean = self.turnover_value_df.T.mean()
 
     def cal_position_analysis_result(self):
         """

@@ -27,6 +27,7 @@ class ShowResult(object):
         self.net_analysis_result = net_analysis_result
         self.position_analysis_result = position_analysis_result
 
+    # 净值分析
     def line_net_value(self):
         """
         收益
@@ -231,17 +232,10 @@ class ShowResult(object):
         table_profit_risk_value.set_global_opts(title_opts=ComponentTitleOpts(title='收益风险比分析'))
         return table_profit_risk_value
 
-    """
-    'position_industry_pct_mean',
-    'turnover_num_df',
-    'turnover_num_mean',
-    'turnover_value_df',
-    'turnover_value_mean'
-    """
-
+    # 持仓分析
     def bar_position_value_mean(self):
         """
-        'position_value_mean',
+        'position_value_mean'：股票持仓市值-时序, Series, index:time_tag
         """
         position_value_mean = list(self.position_analysis_result['position_value_mean'])
         bar_position_value_mean = Bar() \
@@ -258,7 +252,7 @@ class ShowResult(object):
 
     def bar_position_industry_pct(self):
         """
-        'position_industry_pct',
+        'position_industry_pct',行业市值占比-时序, Dataframe, index:time_tag, column:行业代码
         """
 
         def get_industry_value(industry=None):
@@ -266,7 +260,7 @@ class ShowResult(object):
             position_industry_pct = [round(i, 4) for i in position_industry_pct]
             title = sw_industry_one[industry] + "（%）"
 
-            bar_industry_value_pct = Bar()\
+            bar_industry_value_pct = Bar() \
                 .add_xaxis(xaxis_data=list(self.position_analysis_result['position_industry_pct'].index.astype('str'))) \
                 .add_yaxis(title, position_industry_pct) \
                 .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
@@ -288,17 +282,19 @@ class ShowResult(object):
             timeline_position_industry_pct.add(get_industry_value(industry), time_point=sw_industry_one[industry])
 
         # 1.0.0 版本的 add_schema 暂时没有补上 return self 所以只能这么写着
-        timeline_position_industry_pct.add_schema(pos_bottom='-5px', pos_top='top', pos_left='left', pos_right='left', orient='vertical',
-                            play_interval=0)
+        timeline_position_industry_pct.add_schema(pos_bottom='-5px', pos_top='top', pos_left='left', pos_right='left',
+                                                  orient='vertical',
+                                                  play_interval=0)
         return timeline_position_industry_pct
 
     def line_position_industry(self):
         """
-        'position_industry',
+        'position_industry',行业市值-时序, Dataframe, index:time_tag, column:行业代码
         """
+
         def get_industry_value(industry=None):
             position_industry = list(self.position_analysis_result['position_industry'][industry].values)
-            position_industry = [round(i/10000, 4) for i in position_industry]
+            position_industry = [round(i / 10000, 4) for i in position_industry]
             title = sw_industry_one[industry] + "（万）"
 
             line_industry_value = Line() \
@@ -322,18 +318,21 @@ class ShowResult(object):
             timeline_position_industry.add(get_industry_value(industry), time_point=sw_industry_one[industry])
 
         # 1.0.0 版本的 add_schema 暂时没有补上 return self 所以只能这么写着
-        timeline_position_industry.add_schema(pos_bottom='-5px', pos_top='top', pos_left='left', pos_right='left', orient='vertical',
-                            play_interval=0)
+        timeline_position_industry.add_schema(pos_bottom='-5px', pos_top='top', pos_left='left', pos_right='left',
+                                              orient='vertical',
+                                              play_interval=0)
         return timeline_position_industry
 
     def bar_position_industry_pct_mean(self):
         """
-        'position_industry_pct_mean',
+        'position_industry_pct_mean',行业市值历史占比均值, Series, index:行业代码
         """
         position_value_mean = list(self.position_analysis_result['position_industry_pct_mean'])
-        position_industry_pct_mean = list(self.position_analysis_result['position_industry_pct_mean'].index.astype('str'))
+        position_value_mean_xaxis = list(
+            self.position_analysis_result['position_industry_pct_mean'].index.astype('str'))
+        position_value_mean_xaxis = [sw_industry_one[i] for i in position_value_mean_xaxis]
         bar_position_industry_pct_mean = Bar() \
-            .add_xaxis([sw_industry_one[i] for i in position_industry_pct_mean]) \
+            .add_xaxis(position_value_mean_xaxis) \
             .add_yaxis("行业市值历史占比均值（%）", [round(i, 4) for i in position_value_mean]) \
             .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
@@ -343,6 +342,115 @@ class ShowResult(object):
                              datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80), )
 
         return bar_position_industry_pct_mean
+
+    """
+    权重法换手率, turnover_value_df，衰减周期默认为5, DataFrame  , index:time_tag, column:delay_1,delay_2, ... ,delay_n,
+    权重法换手率均值, turnover_value_mean, Series, index:delay_1,delay_2, ... ,delay_n,
+    """
+    def bar_turnover_num(self, delay=5):
+        """
+        个数法换手率, turnover_num_df，衰减周期默认为delay=5,DataFrame, index:time_tag, column:delay_1,delay_2, ... ,delay_n,
+        """
+
+        def get_turnover_num(delay):
+            turnover_num_list = list(self.position_analysis_result['turnover_num_df'].loc[delay, :].values)
+            turnover_num_list = [round(i, 4) for i in turnover_num_list]
+
+            bar_industry_value_pct = Bar() \
+                .add_xaxis(xaxis_data=list(self.position_analysis_result['turnover_num_df'].columns.astype('str'))) \
+                .add_yaxis(delay, turnover_num_list) \
+                .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+                .set_global_opts(title_opts=opts.TitleOpts(title="个数法-换手率（%）"),
+                                 xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                                 yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}"),
+                                                          min_=min(turnover_num_list),
+                                                          max_=max(turnover_num_list)),
+                                 datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80),
+                                 tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                                 )  # 添加竖线信息
+
+            return bar_industry_value_pct
+
+        # 生成时间轴的图
+        timeline_turnover_num = Timeline()
+
+        for delay in self.position_analysis_result['turnover_num_df'].index:
+            timeline_turnover_num.add(get_turnover_num(delay), time_point=delay)
+
+        # 1.0.0 版本的 add_schema 暂时没有补上 return self 所以只能这么写着
+        timeline_turnover_num.add_schema(pos_bottom='-5px', pos_top='top', pos_left='left', pos_right='left',
+                                         orient='vertical', play_interval=0)
+        return timeline_turnover_num
+
+    def bar_turnover_num_mean(self):
+        """
+        个数法换手率均值, turnover_num_mean,  Series, index:delay_1,delay_2, ... ,delay_n,
+        """
+        turnover_num_mean = list(self.position_analysis_result['turnover_num_mean'].values)
+        turnover_num_mean = [round(i, 4) for i in turnover_num_mean]
+        bar_turnover_num_mean = Bar() \
+            .add_xaxis(list(self.position_analysis_result['turnover_num_mean'].index.astype('str'))) \
+            .add_yaxis("个数法-换手率均值（%）", turnover_num_mean) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
+                             title_opts=opts.TitleOpts(title="个数法-换手率均值（%）"),
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                             datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80), )
+
+        return bar_turnover_num_mean
+
+    def bar_turnover_value(self, delay=5):
+        """
+        权重法换手率, turnover_value_df，衰减周期默认为5, DataFrame  , index:time_tag, column:delay_1,delay_2, ... ,delay_n,
+        """
+        def get_turnover_value(delay):
+            turnover_value_list = list(self.position_analysis_result['turnover_value_df'].loc[delay, :].values)
+            turnover_value_list = [round(i, 4) for i in turnover_value_list]
+
+            bar_industry_value_pct = Bar() \
+                .add_xaxis(xaxis_data=list(self.position_analysis_result['turnover_value_df'].columns.astype('str'))) \
+                .add_yaxis(delay, turnover_value_list) \
+                .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+                .set_global_opts(title_opts=opts.TitleOpts(title="个数法-换手率（%）"),
+                                 xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                                 yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}"),
+                                                          min_=min(turnover_value_list),
+                                                          max_=max(turnover_value_list)),
+                                 datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80),
+                                 tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                                 )  # 添加竖线信息
+
+            return bar_industry_value_pct
+
+        # 生成时间轴的图
+        timeline_turnover_value = Timeline()
+
+        for delay in self.position_analysis_result['turnover_value_df'].index:
+            timeline_turnover_value.add(get_turnover_value(delay), time_point=delay)
+
+        # 1.0.0 版本的 add_schema 暂时没有补上 return self 所以只能这么写着
+        timeline_turnover_value.add_schema(pos_bottom='-5px', pos_top='top', pos_left='left', pos_right='left',
+                                         orient='vertical', play_interval=0)
+        return timeline_turnover_value
+
+    def bar_turnover_value_mean(self):
+        """
+        权重法换手率均值, turnover_value_mean,  Series, index:delay_1,delay_2, ... ,delay_n,
+        """
+        turnover_value_mean = list(self.position_analysis_result['turnover_value_mean'].values)
+        turnover_value_mean = [round(i, 4) for i in turnover_value_mean]
+        bar_turnover_value_mean = Bar() \
+            .add_xaxis(list(self.position_analysis_result['turnover_value_mean'].index.astype('str'))) \
+            .add_yaxis("权重法-换手率均值（%）", turnover_value_mean) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
+                             title_opts=opts.TitleOpts(title="权重法-换手率均值（%）"),
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                             datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80), )
+
+        return bar_turnover_value_mean
 
 
     def show_page(self, save_path_dir=''):
@@ -375,11 +483,24 @@ class ShowResult(object):
         bar_position_industry_pct = self.bar_position_industry_pct()
         page.add(bar_position_industry_pct)
 
-        line_position_industry = self.line_position_industry()
-        page.add(line_position_industry)
+        timeline_position_industry = self.line_position_industry()
+        page.add(timeline_position_industry)
 
-        bar_position_industry_pct_mean=self.bar_position_industry_pct_mean()
+        bar_position_industry_pct_mean = self.bar_position_industry_pct_mean()
         page.add(bar_position_industry_pct_mean)
+
+        timeline_turnover_num = self.bar_turnover_num()
+        page.add(timeline_turnover_num)
+
+        bar_turnover_num_mean = self.bar_turnover_num_mean()
+        page.add(bar_turnover_num_mean)
+
+        timeline_turnover_value = self.bar_turnover_value()
+        page.add(timeline_turnover_value)
+
+        bar_turnover_value_mean = self.bar_turnover_value_mean()
+        page.add(bar_turnover_value_mean)
+
         page.render(save_path_dir + "回测绩效分析报告.html")
 
 
