@@ -338,7 +338,7 @@ class ShowResult(object):
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="行业市值历史占比均值"),
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),
-                             datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80), )
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
 
         return bar_position_industry_pct_mean
 
