@@ -21,6 +21,7 @@ from AmazingQuant.environment import Environment
 from AmazingQuant.constant import RecordDataType, Period
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.analysis_center.position_analysis import PositionAnalysis
+from AmazingQuant.analysis_center.trade_analysis import TradeAnalysis
 from AmazingQuant.analysis_center.net_value_analysis import NetValueAnalysis
 from AmazingQuant.data_object import AccountData, OrderData, DealData, PositionData
 from AmazingQuant.analysis_center.show_result import ShowResult
@@ -117,7 +118,16 @@ class EventBacktestingAnalysis(Event):
         for i in position_analysis_result:
             Environment.logger.info(i, position_analysis_result[i])
 
-        show_result_object = ShowResult(net_analysis_result, position_analysis_result)
+        # 成交数据转pandas
+        trade_data_df = Environment.backtesting_record_order
+
+        trade_data_df = trade_data_df[trade_data_df.index.get_level_values(1) == account[0]]
+        trade_analysis_obj = TradeAnalysis(trade_data_df)
+        trade_analysis_result = trade_analysis_obj.cal_trade_analysis_result()
+        for i in trade_analysis_result:
+            Environment.logger.info(i, trade_analysis_result[i])
+
+        show_result_object = ShowResult(net_analysis_result, position_analysis_result, trade_analysis_result)
         save_path_dir = event.event_data_dict["strategy_data"].strategy_name + '/'
         if not os.path.exists(save_path_dir):
             os.mkdir(save_path_dir)

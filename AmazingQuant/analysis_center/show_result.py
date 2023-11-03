@@ -19,13 +19,15 @@ from pyecharts.options import ComponentTitleOpts
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.analysis_center.net_value_analysis import NetValueAnalysis
 from AmazingQuant.analysis_center.position_analysis import PositionAnalysis
+from AmazingQuant.analysis_center.trade_analysis import TradeAnalysis
 from AmazingQuant.config.industry_class import sw_industry_one
 
 
 class ShowResult(object):
-    def __init__(self, net_analysis_result, position_analysis_result):
+    def __init__(self, net_analysis_result, position_analysis_result, trade_analysis_result):
         self.net_analysis_result = net_analysis_result
         self.position_analysis_result = position_analysis_result
+        self.trade_analysis_result = trade_analysis_result
 
     # 净值分析
     def line_net_value(self):
@@ -43,7 +45,8 @@ class ShowResult(object):
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
             .add_yaxis("基准净值曲线", benchmark_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
-            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1)) \
+            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
+                             markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")])) \
             .set_global_opts(title_opts=opts.TitleOpts(title="净值曲线",
                                                        subtitle="策略净值为：" + str(net_value_list[-1]) + "\n" +
                                                                 "基准净值为：" + str(benchmark_list[-1])),  # 标题
@@ -347,6 +350,7 @@ class ShowResult(object):
         个数法换手率, turnover_num_df，衰减周期默认为delay=5,DataFrame, index:time_tag, column:delay_1,delay_2, ... ,delay_n,
         权重法换手率, turnover_value_df，衰减周期默认为5, DataFrame  , index:time_tag, column:delay_1,delay_2, ... ,delay_n,
         """
+
         def get_turnover_num(delay):
             turnover_num_list = list(self.position_analysis_result['turnover_num_df'].loc[delay, :].values)
             turnover_num_list = [round(i, 2) for i in turnover_num_list]
@@ -402,6 +406,85 @@ class ShowResult(object):
                              datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
         return bar_turnover_num_mean
 
+    def table_trade_num_amount(self):
+        indicator_dict = {'trade_day_num': "交易天数",
+                          'trade_day_num_ratio': "交易天数占比",
+                          'trade_stock_num': "交易股票总数量",
+                          'trade_stock_num_average': "平均日交易股票数量",
+                          'trade_amount': "交易总金额",
+                          'trade_amount_average': "平均日交易额"}
+        table_trade_num_amount = Table()
+        headers = ["指标"]
+        rows = [["数据"]]
+        for key, value in indicator_dict.items():
+            headers.append(value)
+            rows[0].append(round(self.trade_analysis_result[key], 2))
+        table_trade_num_amount.add(headers, rows)
+        table_trade_num_amount.set_global_opts(title_opts=ComponentTitleOpts(title='交易数量与金额分析'))
+        return table_trade_num_amount
+
+    # 交易分析
+    def bar_trade_num_amount(self):
+        # 每日交易股票数量 - 时序
+        # self.trade_stock_num_day
+        # 每日交易金额 - 时序
+        # self.trade_amount_day
+        trade_num_amount = list(self.trade_analysis_result['trade_stock_num_day'])
+        trade_amount_day = list(self.trade_analysis_result['trade_amount_day'])
+        bar_trade_num_amount = Bar() \
+            .add_xaxis(list(self.trade_analysis_result['trade_stock_num_day'].index.astype('str'))) \
+            .add_yaxis("每日交易股票数量", trade_num_amount) \
+            .extend_axis(yaxis=opts.AxisOpts(type_="value", position="right"))\
+            .add_yaxis("每日交易金额（万）", [round(i/10000, 2) for i in trade_amount_day], yaxis_index=1 ) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
+                             title_opts=opts.TitleOpts(title="每日交易股票数量与金额"),
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                             datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80), )
+
+        return bar_trade_num_amount
+
+    def table_trade_num_times(self):
+        indicator_dict = {'trade_num_times': "交易总次数",
+                          'trade_num_times_average': "平均交易次数",
+                          'open_num_times': "开仓总次数",
+                          'close_num_times': "平仓总次数",
+                          'open_num_times_average': "平均开仓次数",
+                          'close_num_times_average': "平均平仓次数"}
+        table_trade_num_times = Table()
+        headers = ["指标"]
+        rows = [["数据"]]
+        for key, value in indicator_dict.items():
+            headers.append(value)
+            rows[0].append(round(self.trade_analysis_result[key], 2))
+        table_trade_num_times.add(headers, rows)
+        table_trade_num_times.set_global_opts(title_opts=ComponentTitleOpts(title='交易次数分析'))
+        return table_trade_num_times
+
+    def bar_trade_num_times(self):
+        # 每日交易次数-时序
+        # self.trade_num_times_day = {}
+        # 开仓次数-时序
+        # self.open_num_times_day = {}
+        # 平仓次数-时序
+        # self.close_num_times_day = {}
+        trade_num_times_day = list(self.trade_analysis_result['trade_num_times_day'])
+        open_num_times_day = list(self.trade_analysis_result['open_num_times_day'])
+        close_num_times_day = list(self.trade_analysis_result['close_num_times_day'])
+        bar_trade_num_times = Bar() \
+            .add_xaxis(list(self.trade_analysis_result['trade_num_times_day'].index.astype('str'))) \
+            .add_yaxis("每日交易次数", trade_num_times_day) \
+            .add_yaxis("开仓次数", open_num_times_day) \
+            .add_yaxis("平仓次数", close_num_times_day) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
+                             title_opts=opts.TitleOpts(title="每日交易次数分析"),
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                             datazoom_opts=opts.DataZoomOpts(range_start=20, range_end=80), )
+        return bar_trade_num_times
+
     def show_page(self, save_path_dir=''):
         page = Page()
 
@@ -444,6 +527,17 @@ class ShowResult(object):
         bar_turnover_num_mean = self.bar_turnover_num_mean()
         page.add(bar_turnover_num_mean)
 
+        table_trade_num_amount = self.table_trade_num_amount()
+        page.add(table_trade_num_amount)
+
+        bar_trade_num_amount = self.bar_trade_num_amount()
+        page.add(bar_trade_num_amount)
+
+        table_trade_num_times = self.table_trade_num_times()
+        page.add(table_trade_num_times)
+
+        bar_trade_num_times = self.bar_trade_num_times()
+        page.add(bar_trade_num_times)
         page.render(save_path_dir + "回测绩效分析报告.html")
 
 
@@ -470,5 +564,11 @@ if __name__ == '__main__':
     position_analysis_obj = PositionAnalysis(position_data_df)
     position_analysis_result = position_analysis_obj.cal_position_analysis_result()
 
-    show_result_object = ShowResult(net_analysis_result, position_analysis_result)
+    trade_data_df = pd.read_csv('order_data.csv', index_col=[0, 1], parse_dates=['time_tag'],
+                                dtype={'instrument': str})
+    trade_data_df = trade_data_df[trade_data_df.index.get_level_values(1) == 'test0']
+    trade_data_obj = TradeAnalysis(trade_data_df)
+    trade_analysis_result = trade_data_obj.cal_trade_analysis_result()
+
+    show_result_object = ShowResult(net_analysis_result, position_analysis_result, trade_analysis_result)
     show_result_object.show_page()

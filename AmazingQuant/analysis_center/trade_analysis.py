@@ -104,7 +104,9 @@ class TradeAnalysis(object):
             self.open_num_times_day[i] = open_num_times
             # 卖出次数-时序
             self.close_num_times_day[i] = close_num_times
-
+        self.trade_num_times_day = pd.Series(self.trade_num_times_day)
+        self.open_num_times_day = pd.Series(self.open_num_times_day)
+        self.close_num_times_day = pd.Series(self.close_num_times_day)
         # 平均交易次数
         self.trade_num_times_average = round(self.trade_num_times / self.index_num, 2)
         # 平均买入次数
