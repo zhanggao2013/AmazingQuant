@@ -231,4 +231,5 @@ if __name__ == '__main__':
 微信号(可加入微信群):：<br>
      gao_me150 <br>
 微信公众号：<br>
+水善量化说<br>
      ![](https://github.com/zhanggao2013/AmazingQuant/blob/master/documents/wechat.jpg)
