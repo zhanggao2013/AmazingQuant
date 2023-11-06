@@ -70,22 +70,22 @@ class ShowResult(object):
         'net_month_ratio_average'
         'benchmark_month_ratio_average'
         """
-        indicator_dict = {'net_year_yield': "年化收益率",
-                          'benchmark_year_yield': "基准年化收益率",
-                          'bull_win_index_ratio': "牛市跑赢基准胜率",
-                          'bear_win_index_ratio': "熊市跑赢基准胜率",
-                          'net_day_win_ratio': "日胜率",
-                          'benchmark_day_win_ratio': "基准日胜率",
-                          'net_day_ratio_average': "日平均收益率",
-                          'benchmark_day_ratio_average': "基准日平均收益率",
-                          'net_month_ratio_average': "月平均收益率",
-                          'benchmark_month_ratio_average': "基准月平均收益率", }
+        indicator_dict = {'net_year_yield': "年化收益率（%）",
+                          'benchmark_year_yield': "基准年化收益率（%）",
+                          'bull_win_index_ratio': "牛市跑赢基准胜率（%）",
+                          'bear_win_index_ratio': "熊市跑赢基准胜率（%）",
+                          'net_day_win_ratio': "日胜率（%）",
+                          'benchmark_day_win_ratio': "基准日胜率（%）",
+                          'net_day_ratio_average': "日平均收益率（%）",
+                          'benchmark_day_ratio_average': "基准日平均收益率（%）",
+                          'net_month_ratio_average': "月平均收益率（%）",
+                          'benchmark_month_ratio_average': "基准月平均收益率（%）", }
         table_net_value = Table()
         headers = ["指标"]
         rows = [["数据"]]
         for key, value in indicator_dict.items():
             headers.append(value)
-            rows[0].append(round(self.net_analysis_result[key], 4))
+            rows[0].append(round(self.net_analysis_result[key], 2))
         table_net_value.add(headers, rows)
         table_net_value.set_global_opts(title_opts=ComponentTitleOpts(title='收益分析'))
         return table_net_value
@@ -101,9 +101,9 @@ class ShowResult(object):
             self.net_analysis_result['benchmark_day_ratio_distribution'].values())
         bar_profit_ratio_day = Bar() \
             .add_xaxis(list(self.net_analysis_result['net_day_ratio_distribution'].keys())) \
-            .add_yaxis("策略日收益率分布", [round(i, 4) for i in net_day_ratio_distribution_list],
+            .add_yaxis("策略日收益率分布（%）", [round(i*100, 2) for i in net_day_ratio_distribution_list],
                        ) \
-            .add_yaxis("基准日收益率分布", [round(i, 4) for i in benchmark_day_ratio_distribution_list],
+            .add_yaxis("基准日收益率分布（%）", [round(i*100, 2) for i in benchmark_day_ratio_distribution_list],
                        ) \
             .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
@@ -124,9 +124,9 @@ class ShowResult(object):
             self.net_analysis_result['benchmark_month_ratio'].values())
         bar_profit_ratio_month = Bar() \
             .add_xaxis(list(self.net_analysis_result['net_month_ratio'].keys())) \
-            .add_yaxis("策略月收益率", [round(i, 4) for i in net_month_ratio_distribution_list],
+            .add_yaxis("策略月收益率（%）", [round(i, 2) for i in net_month_ratio_distribution_list],
                        ) \
-            .add_yaxis("基准月收益率", [round(i, 4) for i in benchmark_month_ratio_distribution_list],
+            .add_yaxis("基准月收益率（%）", [round(i, 2) for i in benchmark_month_ratio_distribution_list],
                        ) \
             .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
@@ -143,20 +143,20 @@ class ShowResult(object):
         'net_value_df'（最大回撤曲线）
         'benchmark_df'（最大回撤）
         """
-        drawdown_list = list(self.net_analysis_result['net_value_df'].round(4)['drawdown'])
-        benchmark_drawdown_list = list(self.net_analysis_result['benchmark_df'].round(4)['drawdown'])
-        net_max_drawdown = round(self.net_analysis_result['net_max_drawdown'], 4)
-        benchmark_max_drawdown = round(self.net_analysis_result['benchmark_max_drawdown'], 4)
+        drawdown_list = list(self.net_analysis_result['net_value_df'].round(2)['drawdown'])
+        benchmark_drawdown_list = list(self.net_analysis_result['benchmark_df'].round(2)['drawdown'])
+        net_max_drawdown = round(self.net_analysis_result['net_max_drawdown'], 2)
+        benchmark_max_drawdown = round(self.net_analysis_result['benchmark_max_drawdown'], 2)
         max_drawdown_line = Line() \
             .add_xaxis(list(self.net_analysis_result['net_value_df'].index.astype('str'))) \
-            .add_yaxis("策略最大回撤", drawdown_list,
+            .add_yaxis("策略最大回撤（%）", drawdown_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
-            .add_yaxis("基准最大回撤", benchmark_drawdown_list,
+            .add_yaxis("基准最大回撤（%）", benchmark_drawdown_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
             .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.5)) \
             .set_global_opts(title_opts=opts.TitleOpts(title="最大回撤分析",
-                                                       subtitle="策略历史最大回撤为：" + str(net_max_drawdown) + "\n" +
-                                                                "基准历史最大回撤为：" + str(benchmark_max_drawdown)),
+                                                       subtitle="策略历史最大回撤为：" + str(net_max_drawdown) + "（%）\n" +
+                                                                "基准历史最大回撤为：" + str(benchmark_max_drawdown)+'（%）'),
                              # 标题
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
                              yaxis_opts=opts.AxisOpts(
@@ -182,15 +182,15 @@ class ShowResult(object):
         'benchmark_skewness'
         'benchmark_kurtosis'
         """
-        indicator_dict = {'net_year_volatility': "年化波动率",
-                          'benchmark_year_volatility': "基准年化波动率",
-                          'net_max_drawdown': "历史最大回撤",
-                          'benchmark_max_drawdown': "基准历史最大回撤",
-                          'net_day_volatility': "日收益率波动率",
-                          'benchmark_day_volatility': "基准日收益率波动率",
-                          'net_month_volatility': "月收益率波动率",
-                          'benchmark_month_volatility': "基准月收益率波动率",
-                          'downside_risk': "下行风险",
+        indicator_dict = {'net_year_volatility': "年化波动率（%）",
+                          'benchmark_year_volatility': "基准年化波动率（%）",
+                          'net_max_drawdown': "历史最大回撤（%）",
+                          'benchmark_max_drawdown': "基准历史最大回撤（%）",
+                          'net_day_volatility': "日收益率波动率（%）",
+                          'benchmark_day_volatility': "基准日收益率波动率（%）",
+                          'net_month_volatility': "月收益率波动率（%）",
+                          'benchmark_month_volatility': "基准月收益率波动率（%）",
+                          'downside_risk': "下行风险（%）",
                           'net_skewness': "偏度",
                           'benchmark_skewness': "基准偏度",
                           'net_kurtosis': "峰度",
@@ -200,7 +200,7 @@ class ShowResult(object):
         rows = [["数据"]]
         for key, value in indicator_dict.items():
             headers.append(value)
-            rows[0].append(round(self.net_analysis_result[key], 4))
+            rows[0].append(round(self.net_analysis_result[key], 2))
         table_risk_value.add(headers, rows)
         table_risk_value.set_global_opts(title_opts=ComponentTitleOpts(title='风险分析'))
         return table_risk_value
@@ -230,7 +230,7 @@ class ShowResult(object):
         rows = [["数据"]]
         for key, value in indicator_dict.items():
             headers.append(value)
-            rows[0].append(round(self.net_analysis_result[key], 4))
+            rows[0].append(round(self.net_analysis_result[key], 2))
         table_profit_risk_value.add(headers, rows)
         table_profit_risk_value.set_global_opts(title_opts=ComponentTitleOpts(title='收益风险比分析'))
         return table_profit_risk_value
@@ -243,7 +243,7 @@ class ShowResult(object):
         position_value_mean = list(self.position_analysis_result['position_value_mean'])
         bar_position_value_mean = Bar() \
             .add_xaxis(list(self.position_analysis_result['position_value_mean'].index.astype('str'))) \
-            .add_yaxis("股票持仓市值（万）", [round(i / 10000, 4) for i in position_value_mean]) \
+            .add_yaxis("股票持仓市值（万）", [round(i / 10000, 2) for i in position_value_mean]) \
             .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
@@ -260,7 +260,7 @@ class ShowResult(object):
 
         def get_industry_value(industry=None):
             position_industry_pct = list(self.position_analysis_result['position_industry_pct'][industry].values)
-            position_industry_pct = [round(i, 4) for i in position_industry_pct]
+            position_industry_pct = [round(i, 2) for i in position_industry_pct]
             title = sw_industry_one[industry] + "（%）"
 
             bar_industry_value_pct = Bar() \
@@ -297,7 +297,7 @@ class ShowResult(object):
 
         def get_industry_value(industry=None):
             position_industry = list(self.position_analysis_result['position_industry'][industry].values)
-            position_industry = [round(i / 10000, 4) for i in position_industry]
+            position_industry = [round(i / 10000, 2) for i in position_industry]
             title = sw_industry_one[industry] + "（万）"
 
             line_industry_value = Line() \
@@ -335,7 +335,7 @@ class ShowResult(object):
         position_value_mean_xaxis = [sw_industry_one[i] for i in position_value_mean_xaxis]
         bar_position_industry_pct_mean = Bar() \
             .add_xaxis(position_value_mean_xaxis) \
-            .add_yaxis("行业市值历史占比均值（%）", [round(i, 4) for i in position_value_mean]) \
+            .add_yaxis("行业市值历史占比均值（%）", [round(i, 2) for i in position_value_mean]) \
             .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
