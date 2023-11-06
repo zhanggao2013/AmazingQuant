@@ -13,11 +13,12 @@ import pandas as pd
 
 
 class TradeAnalysis(object):
-    def __init__(self, trade_data_df):
+    def __init__(self, trade_data_df, net_value_df):
         trade_data_df['instrument_exchange'] = trade_data_df['instrument'] + '.' + trade_data_df['exchange']
         self.trade_data_df = trade_data_df.reset_index(level='account_id', drop=True)
         self.trade_index = self.trade_data_df.index.unique()
-        self.index_num = self.trade_index.shape[0]
+        self.net_value_df = list(net_value_df.index.astype('str'))
+        self.index_num = len(self.trade_index)
         # 交易股票总数量
         self.trade_stock_num = 0
         # 每日交易股票数量 - 时序
@@ -79,7 +80,7 @@ class TradeAnalysis(object):
 
     def cal_trade_day_num(self):
         # 交易天数
-        self.trade_day_num = self.index_num
+        self.trade_day_num = self.trade_data_df.shape[0]
         # 交易天数占比
         self.trade_day_num_ratio = round(self.trade_day_num / self.index_num * 100, 2)
 
@@ -164,8 +165,16 @@ class TradeAnalysis(object):
 
 
 if __name__ == '__main__':
+    # 策略净值数据,index 为 datetime,取单个账户分析，后续可做多个账户
+    net_value_df = pd.read_csv('account_data.csv', index_col=0)
+    net_value_df.index = pd.DatetimeIndex(net_value_df.index)
+    net_value_single_account_df = pd.DataFrame({})
+    for i in net_value_df.groupby('account_id'):
+        net_value_single_account_df = i[1]
+        break
+
     trade_data_df = pd.read_csv('order_data.csv', index_col=[0, 1], parse_dates=['time_tag'],
                                 dtype={'instrument': str})
     trade_data_df = trade_data_df[trade_data_df.index.get_level_values(1) == 'test0']
-    trade_data_obj = TradeAnalysis(trade_data_df)
+    trade_data_obj = TradeAnalysis(trade_data_df, net_value_df)
     trade_analysis_result = trade_data_obj.cal_trade_analysis_result()

@@ -29,6 +29,29 @@ class ShowResult(object):
         self.position_analysis_result = position_analysis_result
         self.trade_analysis_result = trade_analysis_result
 
+    def table_strategy_information(self):
+        """
+        策略的总体概要
+        """
+        date_list = list(self.net_analysis_result['net_value_df'].index.astype('str'))
+        indicator_dict = {}
+        indicator_dict["开始时间"] = min(date_list)
+        indicator_dict["结束时间"] = max(date_list)
+        indicator_dict["年化收益率（%）"] = round(self.net_analysis_result['net_year_yield'], 2)
+        indicator_dict["历史最大回撤（%）"] = round(self.net_analysis_result['net_net_max_drawdown'], 2)
+        indicator_dict["超额年化收益（%）"] = indicator_dict["年化收益率（%）"] - round(self.net_analysis_result['benchmark_year_yield'], 2)
+        table_strategy_information = Table()
+        headers = ["指标"]
+        rows = [["数据"]]
+        for key, value in indicator_dict.items():
+            headers.append(key)
+            rows[0].append(value)
+        table_strategy_information.add(headers, rows)
+        table_strategy_information.set_global_opts(title_opts=ComponentTitleOpts(title='策略的总体概要'))
+        return table_strategy_information
+
+
+
     # 净值分析
     def line_net_value(self):
         """
@@ -360,10 +383,10 @@ class ShowResult(object):
 
             bar_turnover_num = Bar() \
                 .add_xaxis(xaxis_data=list(self.position_analysis_result['turnover_num_df'].columns.astype('str'))) \
-                .add_yaxis('个数法', turnover_num_list) \
-                .add_yaxis('权重法', turnover_value_list) \
+                .add_yaxis('个数法（%）', turnover_num_list) \
+                .add_yaxis('权重法（%）', turnover_value_list) \
                 .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
-                .set_global_opts(title_opts=opts.TitleOpts(title="换手率（%）"),
+                .set_global_opts(title_opts=opts.TitleOpts(title="换手率"),
                                  xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                                  yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}"),
                                                           min_=min(turnover_num_list),
@@ -401,7 +424,7 @@ class ShowResult(object):
             .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
-                             title_opts=opts.TitleOpts(title="换手率均值（%）"),
+                             title_opts=opts.TitleOpts(title="换手率均值"),
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),
                              datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
         return bar_turnover_num_mean
@@ -487,6 +510,9 @@ class ShowResult(object):
 
     def show_page(self, save_path_dir=''):
         page = Page()
+
+        table_strategy_information = self.table_strategy_information()
+        page.add(table_strategy_information)
 
         net_value_line = self.line_net_value()
         page.add(net_value_line)
