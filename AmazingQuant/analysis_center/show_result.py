@@ -38,7 +38,7 @@ class ShowResult(object):
         indicator_dict["开始时间"] = min(date_list)
         indicator_dict["结束时间"] = max(date_list)
         indicator_dict["年化收益率（%）"] = round(self.net_analysis_result['net_year_yield'], 2)
-        indicator_dict["历史最大回撤（%）"] = round(self.net_analysis_result['net_net_max_drawdown'], 2)
+        indicator_dict["历史最大回撤（%）"] = round(self.net_analysis_result['net_max_drawdown'], 2)
         indicator_dict["超额年化收益（%）"] = indicator_dict["年化收益率（%）"] - round(self.net_analysis_result['benchmark_year_yield'], 2)
         table_strategy_information = Table()
         headers = ["指标"]
@@ -593,7 +593,7 @@ if __name__ == '__main__':
     trade_data_df = pd.read_csv('order_data.csv', index_col=[0, 1], parse_dates=['time_tag'],
                                 dtype={'instrument': str})
     trade_data_df = trade_data_df[trade_data_df.index.get_level_values(1) == 'test0']
-    trade_data_obj = TradeAnalysis(trade_data_df)
+    trade_data_obj = TradeAnalysis(trade_data_df, net_value_df)
     trade_analysis_result = trade_data_obj.cal_trade_analysis_result()
 
     show_result_object = ShowResult(net_analysis_result, position_analysis_result, trade_analysis_result)
