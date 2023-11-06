@@ -229,6 +229,6 @@ if __name__ == '__main__':
  
 # 4.联系方式
 微信号(可加入微信群):：<br>
-     gao_me150 
+     gao_me150 <br>
 微信公众号：<br>
      ![](https://github.com/zhanggao2013/AmazingQuant/blob/master/documents/wechat.jpg)
