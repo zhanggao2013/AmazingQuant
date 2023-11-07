@@ -16,6 +16,7 @@ from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.config.industry_class import sw_industry_one
 from AmazingQuant.data_center.api_data.get_data import get_local_data
 from AmazingQuant.utils.data_transfer import datetime_to_int
+from AmazingQuant.utils.performance_test import Timer
 
 
 class GetIndexClass(object):
@@ -52,18 +53,19 @@ class GetIndexClass(object):
         members_date_index_class = self.index_class_df[(self.index_class_df.CON_INDATE <= members_date) &
                                                        (self.index_class_df.CON_OUTDATE >= members_date)]
         members_date_index_class_grouped = members_date_index_class.groupby('INDEX_CODE')
-
-        def cal_class(x, members_date_index_class_groups):
-            if x.name in members_date_index_class_groups:
-                x[members_date_index_class_groups[x.name]] = 1
+        members_date_index_class_grouped_dict = dict(list(members_date_index_class_grouped))
+        def cal_class(x, members_date_index_class_grouped_dict):
+            if x.name in members_date_index_class_grouped_dict:
+                code_list = members_date_index_class_grouped_dict[x.name]['CON_CODE']
+                x.loc[code_list] = 1
             return x
 
-        return index_class_in_date.apply(lambda x: cal_class(x, members_date_index_class_grouped.groups))
+        return index_class_in_date.apply(lambda x: cal_class(x, members_date_index_class_grouped_dict))
 
 
 if __name__ == '__main__':
     index_class_obj = GetIndexClass()
     index_class = index_class_obj.get_index_class()
-    index_class_obj.get_zero_index_class()
-
-    index_class_in_date = index_class_obj.get_index_class_in_date(datetime(2020, 12, 31))
+    # index_class_obj.get_zero_index_class()
+    with Timer(True):
+        index_class_in_date = index_class_obj.get_index_class_in_date(datetime(2020, 12, 31))

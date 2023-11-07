@@ -59,7 +59,7 @@ class FactorPreProcessing(object):
         self.raw_data = raw_data
 
     def data_filter(self, start=datetime(2010, 1, 1), end=datetime.now(), stock_list=None):
-        print(self.raw_data, self.raw_data.index)
+        # print(self.raw_data, self.raw_data.index)
         if stock_list is None:
             self.raw_data = self.raw_data.loc[start: end]
         else:
@@ -235,16 +235,19 @@ class Neutralize(object):
     def neutralize_method(self, method):
         index_class_obj = GetIndexClass()
         index_class_obj.get_index_class()
-        index_class_obj.get_zero_index_class()
+        # index_class_obj.get_zero_index_class()
 
         share_data = pd.DataFrame({})
         if NeutralizeMethod.MARKET_VALUE.value in method:
             share_data_obj = GetShare()
             share_data = share_data_obj.get_share('float_a_share_value')
 
-        def cal_resid(data, index_class_obj, share_data, method):
+        def cal_resid(data, index_class_obj, share_data, method, code_list):
             # 删除一些 , 因子数据为NAN的个股
             data = data.dropna()
+            # 全都是空数据的情况下，无法中性化
+            if data.empty:
+                return pd.Series({i: np.nan for i in code_list})
             index_class_in_date = pd.DataFrame({})
             share_data_in_date = pd.DataFrame({})
 
@@ -256,20 +259,21 @@ class Neutralize(object):
 
             # 行业中性与流通市值中性化取交集
             neutralize_data = index_class_in_date.join(share_data_in_date, how='outer').dropna()
-            # 因子数据的股票list与中性化数据的股票list,取交集
+            # 因子数据的股票list与中性化数据的股票list，取交集
             stock_code_list = list(set(data.index).intersection(set(neutralize_data.index)))
             # 因子数据取 有效股票列表数据，并排序
             factor = data[stock_code_list].sort_index()
             # 中性化数据取 有效股票列表数据，并排序
             neutralize_data = neutralize_data.reindex(stock_code_list).sort_index()
-
             # 回归
             neutralize_data = sm.add_constant(neutralize_data)
             model = sm.OLS(factor, neutralize_data)
             fit_result = model.fit()
             # 残差作为中性化后的数据
             return fit_result.resid
-        self.raw_data = self.raw_data.apply(cal_resid, args=(index_class_obj, share_data, method,), axis=1)
+
+        code_list = self.raw_data.columns
+        self.raw_data = self.raw_data.apply(cal_resid, args=(index_class_obj, share_data, method, code_list), axis=1)
         return self.raw_data
 
 
@@ -277,7 +281,7 @@ if __name__ == '__main__':
     indicator_name = 'ma5'
     factor_name = 'factor_' + indicator_name
     indicator_data = SaveGetIndicator().get_indicator(indicator_name)
-
+    indicator_data = indicator_data.iloc[:-50, :]
     factor_pre_obj = FactorPreProcessing(indicator_data)
     # 可根据时间和股票list过滤数据
     data_filter = factor_pre_obj.data_filter()
@@ -288,7 +292,7 @@ if __name__ == '__main__':
     # extreme_data = factor_pre_obj.extreme_processing(dict(box_plot={'median_multiple': 3}))
 
     # 中性化方法，可选择行业和流通市值中性
-    # neutralize_data = factor_pre_obj.neutralize_processing(dict(neutralize_method=[NeutralizeMethod.INDUSTRY.value, NeutralizeMethod.MARKET_VALUE.value]))
+    neutralize_data = factor_pre_obj.neutralize_processing(dict(neutralize_method=[NeutralizeMethod.INDUSTRY.value, NeutralizeMethod.MARKET_VALUE.value]))
 
     # 归一化方法，三种
     # scale_data = factor_pre_obj.scale_processing(ScaleMethod.MIN_MAX.value)
