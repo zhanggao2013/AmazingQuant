@@ -81,6 +81,7 @@ class LocalDataFolderName(Enum):
 
 
 
+
 @unique
 class EventType(Enum):
     EVENT_TIMER = 'event_timer'

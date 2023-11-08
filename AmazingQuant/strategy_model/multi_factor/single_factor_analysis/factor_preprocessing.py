@@ -124,8 +124,8 @@ class FactorPreProcessing(object):
             data_source = ['hdf5', 'mongo']
         if 'hdf5' in data_source:
             # 保存预处理之后的数据到本地hdf5，单因子检测使用
-            path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
-            save_data_to_hdf5(path, factor_name, self.raw_data)
+            path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/' + factor_name+ '/'
+            save_data_to_hdf5(path, factor_name+'_pre', self.raw_data)
 
         if 'mongo' in data_source:
             # 保存预处理之后的数据到mongo
