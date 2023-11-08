@@ -10,7 +10,7 @@
 import pandas as pd
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
-from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.utils.get_data import get_local_data
 
 
 class GetSwsIndex(object):

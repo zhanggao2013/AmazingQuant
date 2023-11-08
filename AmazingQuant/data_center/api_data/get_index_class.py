@@ -9,12 +9,11 @@
 from datetime import datetime
 
 import pandas as pd
-import numpy as np
 
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.config.industry_class import sw_industry_one
-from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.utils.get_data import get_local_data
 from AmazingQuant.utils.data_transfer import datetime_to_int
 from AmazingQuant.utils.performance_test import Timer
 

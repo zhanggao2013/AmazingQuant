@@ -11,14 +11,13 @@
 （1）根据因子排序分组，
 （2）每组持仓股票作为策略，进入回测模块分析，设置仓位（默认95%，因交易费用，满仓后无法买入）
 """
-import time
 
 import pandas as pd
 import numpy as np
 
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
-from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.utils.get_data import get_local_data
 
 # import strategy基类
 from AmazingQuant.strategy_center.strategy import *

@@ -7,15 +7,11 @@
 # @Project : AmazingQuant 
 # ------------------------------
 
-from datetime import datetime
-
-import numpy as np
-
 from AmazingQuant.constant import Period, RightsAdjustment, LocalDataFolderName
 from AmazingQuant.utils.performance_test import Timer
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.data_center.api_data.get_adj_factor import GetAdjFactor
-from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.utils.get_data import get_local_data
 
 
 class GetKlineData(object):

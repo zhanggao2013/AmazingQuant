@@ -12,7 +12,7 @@ import numpy as np
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from apps.server.database_server.database_field.field_a_share_ex_right_dividend import AShareExRightDividend
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
-from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
+from AmazingQuant.utils.save_data import save_data_to_hdf5
 from AmazingQuant.constant import DatabaseName, LocalDataFolderName, AdjustmentFactor
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.data_center.api_data.get_calender import GetCalendar

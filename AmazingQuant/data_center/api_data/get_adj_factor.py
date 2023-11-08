@@ -12,7 +12,7 @@ import pandas as pd
 from AmazingQuant.constant import LocalDataFolderName, RightsAdjustment, AdjustmentFactor
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.utils.performance_test import Timer
-from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.utils.get_data import get_local_data
 
 
 class GetAdjFactor(object):

@@ -23,7 +23,7 @@ import numpy as np
 
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
-from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.utils.get_data import get_local_data
 from AmazingQuant.constant import DatabaseName
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
 from apps.server.database_server.database_field.field_multi_factor import FactorRegressionAnalysisResult, \

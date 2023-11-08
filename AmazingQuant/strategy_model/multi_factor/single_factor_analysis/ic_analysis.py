@@ -33,7 +33,7 @@ import scipy.stats as stats
 
 from AmazingQuant.constant import LocalDataFolderName, RightsAdjustment
 from AmazingQuant.config.local_data_path import LocalDataPath
-from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.utils.get_data import get_local_data
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 # from apps.server.database_server.database_field.field_multi_factor import FactorIcAnalysisResult
 # from AmazingQuant.constant import DatabaseName
@@ -87,10 +87,8 @@ class IcAnalysis(object):
                                                        factor_data[stock_list].sort_index())
                 ic_dict[self.column_prefix + str(ic_decay + 1)] = corr
                 p_value_dict[self.column_prefix + str(ic_decay + 1)] = p_value
-            print(self.ic_df, 'qqqqqqq', pd.Series(ic_dict, name=self.factor.index[index]))
-            concat
-            self.ic_df = self.ic_df.append(pd.Series(ic_dict, name=self.factor.index[index]))
-            self.p_value_df = self.p_value_df.concat(pd.Series(p_value_dict, name=self.factor.index[index]))
+            self.ic_df = pd.concat([self.ic_df, pd.DataFrame(ic_dict, index=[self.factor.index[index]])])
+            self.p_value_df = pd.concat([self.p_value_df, pd.DataFrame(p_value_dict, index=[self.factor.index[index]])])
         return self.ic_df, self.p_value_df
 
     def cal_ic_indicator(self):
@@ -118,7 +116,7 @@ class IcAnalysis(object):
         self.ic_result.loc['ic_change_ratio'] = ic_change_num.div(ic_count) * 100
         self.ic_result.loc['ic_unchange_ratio'] = (ic_count - ic_change_num).div(ic_count) * 100
 
-    # def save_ic_analysis_result(self, factor_name):
+    def save_ic_analysis_result(self, factor_name):
     #     with MongoConnect(DatabaseName.MULTI_FACTOR_DATA.value):
     #         ic_df = self.ic_df.copy()
     #         p_value_df = self.p_value_df.copy()
@@ -142,10 +140,13 @@ class IcAnalysis(object):
     #         doc.save()
 
 
+
+
 if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
     factor_name = 'factor_ma5'
     factor_ma5 = get_local_data(path, factor_name + '.h5')
+    factor_ma5 = factor_ma5.iloc[:200, :]
     import datetime
     factor_ma5 = factor_ma5[factor_ma5.index < datetime.datetime(2016, 1, 1)]
 

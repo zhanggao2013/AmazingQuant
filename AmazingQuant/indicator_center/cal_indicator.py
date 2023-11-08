@@ -8,12 +8,8 @@
 # ------------------------------
 import talib
 import pandas as pd
-import numpy as np
-import tgw
 
-from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
-from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
-from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.utils.get_data import get_local_data
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.constant import LocalDataFolderName, AdjustmentFactor
 from AmazingQuant.utils.performance_test import Timer

@@ -6,20 +6,16 @@
 # @File    : download_Info_data.py
 # @Project : AmazingQuant 
 # ------------------------------
-import os
-import time
 
 import pandas as pd
-import numpy as np
 import tgw
 
 from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
 from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
-from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
-from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.utils.save_data import save_data_to_hdf5
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.config.industry_class import sw_industry_one
-from AmazingQuant.constant import LocalDataFolderName, AdjustmentFactor
+from AmazingQuant.constant import LocalDataFolderName
 
 
 class DownloadInfoData(object):

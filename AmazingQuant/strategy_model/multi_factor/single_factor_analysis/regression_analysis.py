@@ -39,7 +39,7 @@ import pandas as pd
 
 from AmazingQuant.constant import LocalDataFolderName, RightsAdjustment
 from AmazingQuant.config.local_data_path import LocalDataPath
-from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.utils.get_data import get_local_data
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass
 from AmazingQuant.data_center.api_data.get_share import GetShare

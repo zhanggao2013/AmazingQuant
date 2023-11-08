@@ -6,14 +6,13 @@
 # @File    : update_index_member.py
 # @Project : AmazingQuant 
 # ------------------------------
-from datetime import datetime
 
 import pandas as pd
 
 from AmazingQuant.constant import DatabaseName, LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
 from apps.server.database_server.database_field.field_a_share_index_members import AShareIndexMembers
-from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
+from AmazingQuant.utils.save_data import save_data_to_hdf5
 from AmazingQuant.utils.mongo_connection_me import MongoConnect
 
 

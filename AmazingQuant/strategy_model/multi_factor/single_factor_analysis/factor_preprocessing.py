@@ -45,7 +45,7 @@ from AmazingQuant.strategy_model.multi_factor.multi_factor_constant import Extre
     NeutralizeMethod
 from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass
 from AmazingQuant.data_center.api_data.get_share import GetShare
-from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
+from AmazingQuant.utils.save_data import save_data_to_hdf5
 from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.config.local_data_path import LocalDataPath
 # from apps.server.database_server.database_field.field_multi_factor import FactorPreProcessingData

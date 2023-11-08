@@ -6,7 +6,6 @@
 # @File    : download_kline.py
 # @Project : AmazingQuant
 # ------------------------------
-import os
 import time
 import datetime
 
@@ -15,10 +14,10 @@ import tgw
 
 from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
 from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
-from AmazingQuant.data_center.update_local_data.save_data import save_data_to_hdf5
-from AmazingQuant.data_center.api_data.get_data import get_local_data
+from AmazingQuant.utils.save_data import save_data_to_hdf5
+from AmazingQuant.utils.get_data import get_local_data
 from AmazingQuant.config.local_data_path import LocalDataPath
-from AmazingQuant.constant import LocalDataFolderName, AdjustmentFactor
+from AmazingQuant.constant import LocalDataFolderName
 from AmazingQuant.utils.data_transfer import date_to_datetime, datetime_to_int, date_minute_to_datetime
 
 
