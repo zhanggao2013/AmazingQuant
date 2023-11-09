@@ -28,6 +28,7 @@ class UpdateAdjFactor(object):
         adj_factor_date_min = min(calendar_index)
         market = 'SH'
         num = 1
+        backward_factor_list = []
         for market_type in [tgw.MarketType.kSSE, tgw.MarketType.kSZSE]:
             code_list = code_sh_list
             if market_type == tgw.MarketType.kSZSE:
@@ -41,12 +42,15 @@ class UpdateAdjFactor(object):
                     adj_factor = pd.DataFrame({}, columns=['cum_factor', 'ex_date'])
                 adj_factor.set_index(["ex_date"], inplace=True)
                 adj_factor.sort_index(inplace=True)
-                adj_factor = adj_factor.loc[adj_factor_date_min:, :]
-                if not adj_factor.empty:
-                    backward_factor.loc[:, code + '.' + market] = adj_factor['cum_factor']/adj_factor['cum_factor'].iloc[0]
+                adj_factor_date_max = max(adj_factor.index)
+                if not adj_factor.empty and adj_factor_date_min < adj_factor_date_max:
+                    adj_factor = adj_factor.loc[adj_factor_date_min:, :]
+                    adj_factor_code = pd.DataFrame(adj_factor['cum_factor']/adj_factor['cum_factor'].iloc[0])
+                    adj_factor_code.columns = [code + '.' + market]
+                    backward_factor_list.append(adj_factor_code)
                 else:
-                    backward_factor.loc[:, code + '.' + market] = np.nan
-
+                    backward_factor_list.append(pd.DataFrame(np.nan, columns=[code + '.' + market], index=calendar_index))
+        backward_factor = pd.concat(backward_factor_list, axis=1)
         backward_factor.replace([np.inf, 0], np.nan, inplace=True)
         backward_factor.fillna(method='ffill', inplace=True)
         backward_factor.fillna(1, inplace=True)
