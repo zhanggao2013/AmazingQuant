@@ -44,9 +44,9 @@ from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass
 from AmazingQuant.data_center.api_data.get_share import GetShare
 from AmazingQuant.analysis_center.net_value_analysis import NetValueAnalysis
-from apps.server.database_server.database_field.field_multi_factor import FactorRegressionAnalysisResult
-from AmazingQuant.constant import DatabaseName
-from AmazingQuant.utils.mongo_connection_me import MongoConnect
+# from apps.server.database_server.database_field.field_multi_factor import FactorRegressionAnalysisResult
+# from AmazingQuant.constant import DatabaseName
+# from AmazingQuant.utils.mongo_connection_me import MongoConnect
 
 
 class RegressionAnalysis(object):
@@ -79,7 +79,6 @@ class RegressionAnalysis(object):
         """
         index_class_obj = GetIndexClass()
         index_class_obj.get_index_class()
-        index_class_obj.get_zero_index_class()
 
         share_data_obj = GetShare()
         share_data = share_data_obj.get_share('float_a_share_value')
@@ -124,7 +123,9 @@ class RegressionAnalysis(object):
                 continue
             else:
                 results = wls_model.fit()
+
                 factor_return_daily[index_list[index]] = results.params[self.factor_name]
+                print('results.params[self.factor_name]', results.params[self.factor_name], )
                 factor_t_value_dict[index_list[index]] = results.tvalues[self.factor_name]
 
         self.factor_t_value = pd.Series(factor_t_value_dict)
@@ -156,46 +157,46 @@ class RegressionAnalysis(object):
             self.acf_result[i]['pacf'] = stattools.pacf(net_value.dropna().values, nlags=nlags)
         return self.acf_result
 
-    def save_regression_analysis_result(self, factor_name):
-        with MongoConnect(DatabaseName.MULTI_FACTOR_DATA.value):
-            factor_return = self.factor_return.copy()
-            factor_t_value = self.factor_t_value.copy()
-            net_analysis_result = self.net_analysis_result
-            factor_return.index = factor_return.index.format()
-            factor_t_value.index = factor_t_value.index.format()
-            net_analysis_result['cumsum']['net_value_df'].index = net_analysis_result['cumsum'][
-                'net_value_df'].index.format()
-            net_analysis_result['cumprod']['net_value_df'].index = net_analysis_result['cumprod'][
-                'net_value_df'].index.format()
-            net_analysis_result['cumsum']['benchmark_df'].index = net_analysis_result['cumsum'][
-                'benchmark_df'].index.format()
-            net_analysis_result['cumprod']['benchmark_df'].index = net_analysis_result['cumprod'][
-                'benchmark_df'].index.format()
-
-            doc = FactorRegressionAnalysisResult(
-                factor_name=factor_name,
-                # 因子数据开始时间
-                begin_date=self.factor.index[0],
-                # 因子数据结束时间
-                end_date=self.factor.index[-1],
-                # 因子收益率的自相关系数acf和偏自相关系数pacf,默认1-10阶,结果list len=11，取1-10个数
-                acf_result=self.acf_result,
-                # 因子收益率，单利，复利, 日收益率
-                factor_return=factor_return,
-                # 单因子检测的T值, Series, index为时间
-                factor_t_value=factor_t_value,
-                # 单因子检测的T值的统计值，'t_value_mean': 绝对值均值, 't_value_greater_two':绝对值序列大于2的占比
-                factor_t_value_statistics=self.factor_t_value_statistics,
-                # 净值分析结果
-                net_analysis_result=self.net_analysis_result
-            )
-            doc.save()
+    # def save_regression_analysis_result(self, factor_name):
+    #     with MongoConnect(DatabaseName.MULTI_FACTOR_DATA.value):
+    #         factor_return = self.factor_return.copy()
+    #         factor_t_value = self.factor_t_value.copy()
+    #         net_analysis_result = self.net_analysis_result
+    #         factor_return.index = factor_return.index.format()
+    #         factor_t_value.index = factor_t_value.index.format()
+    #         net_analysis_result['cumsum']['net_value_df'].index = net_analysis_result['cumsum'][
+    #             'net_value_df'].index.format()
+    #         net_analysis_result['cumprod']['net_value_df'].index = net_analysis_result['cumprod'][
+    #             'net_value_df'].index.format()
+    #         net_analysis_result['cumsum']['benchmark_df'].index = net_analysis_result['cumsum'][
+    #             'benchmark_df'].index.format()
+    #         net_analysis_result['cumprod']['benchmark_df'].index = net_analysis_result['cumprod'][
+    #             'benchmark_df'].index.format()
+    #
+    #         doc = FactorRegressionAnalysisResult(
+    #             factor_name=factor_name,
+    #             # 因子数据开始时间
+    #             begin_date=self.factor.index[0],
+    #             # 因子数据结束时间
+    #             end_date=self.factor.index[-1],
+    #             # 因子收益率的自相关系数acf和偏自相关系数pacf,默认1-10阶,结果list len=11，取1-10个数
+    #             acf_result=self.acf_result,
+    #             # 因子收益率，单利，复利, 日收益率
+    #             factor_return=factor_return,
+    #             # 单因子检测的T值, Series, index为时间
+    #             factor_t_value=factor_t_value,
+    #             # 单因子检测的T值的统计值，'t_value_mean': 绝对值均值, 't_value_greater_two':绝对值序列大于2的占比
+    #             factor_t_value_statistics=self.factor_t_value_statistics,
+    #             # 净值分析结果
+    #             net_analysis_result=self.net_analysis_result
+    #         )
+    #         doc.save()
 
 
 if __name__ == '__main__':
     factor_name = 'factor_ma5'
-    path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
-    factor_ma5 = get_local_data(path, factor_name + '.h5')
+    path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/' + factor_name + '/'
+    factor_ma5 = get_local_data(path, factor_name + '_pre' + '.h5')
     # 指数数据不全，需要删一部分因子数据
     factor_ma5 = factor_ma5[factor_ma5.index < datetime.datetime(2016, 1, 1)]
 
@@ -208,12 +209,12 @@ if __name__ == '__main__':
     benchmark_df = kline_object.get_market_data(all_index_data, stock_code=['000300.SH'],
                                                 field=['close']).to_frame(name='close')
     # 沪深300 的日线，有脏数据，后续单独处理
-    if datetime.datetime(2016, 1, 1) in benchmark_df.index:
-        benchmark_df = benchmark_df.drop(datetime.datetime(2016, 1, 1))
+    # if datetime.datetime(2016, 1, 1) in benchmark_df.index:
+    #     benchmark_df = benchmark_df.drop(datetime.datetime(2016, 1, 1))
     regression_analysis_obj = RegressionAnalysis(factor_ma5, 'factor_name', market_close_data, benchmark_df)
     regression_analysis_obj.cal_factor_return('float_value_inverse')
     regression_analysis_obj.cal_t_value_statistics()
     regression_analysis_obj.cal_net_analysis()
     regression_analysis_obj.cal_acf()
 
-    regression_analysis_obj.save_regression_analysis_result(factor_name)
+    # regression_analysis_obj.save_regression_analysis_result(factor_name)

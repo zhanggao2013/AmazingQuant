@@ -134,10 +134,10 @@ if __name__ == '__main__':
     factor_name = 'factor_ma5'
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/' + factor_name + '/'
     factor_ma5 = get_local_data(path, factor_name + '_pre' + '.h5')
-    factor_ma5 = factor_ma5.iloc[:200, :]
+    factor_ma5 = factor_ma5.iloc[:-50, :]
     import datetime
 
-    factor_ma5 = factor_ma5[factor_ma5.index < datetime.datetime(2016, 1, 1)]
+    # factor_ma5 = factor_ma5[factor_ma5.index < datetime.datetime(2016, 1, 1)]
 
     market_close_data = GetKlineData().cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value,
                                                             field=['close'])['close']
