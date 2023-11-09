@@ -171,6 +171,8 @@ if __name__ == '__main__':
     factor_ma5 = get_local_data(path, factor_name + '_pre' + '.h5')
     # 指数数据不全，需要删一部分因子数据
     factor_ma5 = factor_ma5[factor_ma5.index < datetime(2020, 1, 1)]
+    # 指数数据不全，需要删一部分因子数据
+    factor_ma5 = factor_ma5[factor_ma5.index > datetime(2013, 2, 1)]
     stratification_analysis_obj = StratificationAnalysis(factor_ma5, 'factor_ma5')
     stratification_analysis_obj.add_group()
     group_hold = stratification_analysis_obj.cal_group_hold(stratification_analysis_obj.group_key[0])

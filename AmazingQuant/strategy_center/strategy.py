@@ -176,13 +176,12 @@ class StrategyBase(metaclass=ABCMeta):
             self.daily_data_cache = True
         elif self.period == Period.ONE_MIN.value:
             self.one_min_data_cache = True
-        # 
-        security_list = copy.copy(self.universe)
-        security_list = list(set(security_list))
+
+        # security_list = copy.copy(self.universe)
+        # security_list = list(set(security_list))
         if self._daily_data_cache:
             Environment.daily_data = self._get_data.cache_all_stock_data(dividend_type=self.rights_adjustment)
             Environment.index_daily_data = self._get_data.cache_all_index_data()
-            print()
 
         if self.one_min_data_cache:
             Environment.one_min_data = self._get_data.cache_all_stock_data(period=Period.ONE_MIN.value)
