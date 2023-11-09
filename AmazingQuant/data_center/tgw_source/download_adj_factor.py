@@ -24,7 +24,6 @@ class UpdateAdjFactor(object):
         pass
 
     def get_backward_factor(self, code_sh_list, code_sz_list, calendar_index):
-        backward_factor = pd.DataFrame(index=calendar_index)
         adj_factor_date_min = min(calendar_index)
         market = 'SH'
         num = 1
@@ -47,7 +46,7 @@ class UpdateAdjFactor(object):
                     adj_factor_date_max = max(adj_factor.index)
                     if adj_factor_date_min < adj_factor_date_max:
                         adj_factor = adj_factor.loc[adj_factor_date_min:, :]
-                        adj_factor_code = pd.DataFrame(adj_factor['cum_factor']/adj_factor['cum_factor'].iloc[0])
+                        adj_factor_code = pd.DataFrame(adj_factor['cum_factor'] / adj_factor['cum_factor'].iloc[0])
                         adj_factor_code.columns = [code + '.' + market]
                         backward_factor_list.append(adj_factor_code)
                     else:
@@ -55,7 +54,15 @@ class UpdateAdjFactor(object):
                                                                  columns=[code + '.' + market],
                                                                  index=calendar_index))
                 else:
-                    backward_factor = pd.concat(backward_factor_list, axis=1)
+                    backward_factor_list.append(pd.DataFrame(np.nan,
+                                                             columns=[code + '.' + market],
+                                                             index=calendar_index))
+        backward_factor = pd.concat(backward_factor_list, axis=1)
+        index_add = list(set(calendar_index) - set(backward_factor.index))
+        backward_factor = pd.concat([backward_factor,
+                                     pd.DataFrame(np.nan, columns=backward_factor.columns, index=index_add)])
+        backward_factor = backward_factor.loc[calendar_index, :]
+        backward_factor.sort_index(inplace=True)
         backward_factor.replace([np.inf, 0], np.nan, inplace=True)
         backward_factor.fillna(method='ffill', inplace=True)
         backward_factor.fillna(1, inplace=True)

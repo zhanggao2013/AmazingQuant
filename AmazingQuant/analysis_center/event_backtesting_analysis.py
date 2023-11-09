@@ -42,7 +42,6 @@ class EventBacktestingAnalysis(Event):
     def save_backtesting_record_to_csv(cls, event):
         for data_type in RecordDataType.__members__.values():
             data_type_value = data_type.value
-            data_obj = None
             data_dict = None
             data_property = []
             if data_type_value == RecordDataType.ORDER_DATA.value:
@@ -122,7 +121,7 @@ class EventBacktestingAnalysis(Event):
         trade_data_df = Environment.backtesting_record_order
 
         trade_data_df = trade_data_df[trade_data_df.index.get_level_values(1) == account[0]]
-        trade_analysis_obj = TradeAnalysis(trade_data_df)
+        trade_analysis_obj = TradeAnalysis(trade_data_df, account_df)
         trade_analysis_result = trade_analysis_obj.cal_trade_analysis_result()
         for i in trade_analysis_result:
             Environment.logger.info(i, trade_analysis_result[i])

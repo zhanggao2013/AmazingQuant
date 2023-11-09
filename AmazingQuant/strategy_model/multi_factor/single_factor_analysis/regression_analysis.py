@@ -93,7 +93,7 @@ class RegressionAnalysis(object):
 
             stock_list = list(set(stock_return.index).intersection(set(factor_data.index)))
             stock_return = stock_return[stock_list].sort_index()
-            print(index_list[index], 'stock_return', stock_return.sort_values())
+            # print(index_list[index], 'stock_return', stock_return.sort_values())
             index_class_in_date = index_class_obj.get_index_class_in_date(index_list[index]).reindex(
                 stock_list).sort_index()
 
@@ -116,7 +116,7 @@ class RegressionAnalysis(object):
                 weights = share_data_in_date['float_a_share_value'].values ** 0.5
                 wls_model = sm.WLS(stock_return, x, weights=weights)
             weights.name = index_list[index]
-            print('weights', weights.mean())
+            # print('weights', weights.mean())
             if wls_model is None:
                 factor_return_daily[index_list[index]] = None
                 factor_t_value_dict[index_list[index]] = None
@@ -125,9 +125,9 @@ class RegressionAnalysis(object):
                 results = wls_model.fit()
 
                 factor_return_daily[index_list[index]] = results.params[self.factor_name]
-                print('results', results.params[self.factor_name], )
+                # print('results', results.params[self.factor_name], )
                 factor_t_value_dict[index_list[index]] = results.tvalues[self.factor_name]
-            print('*'*20)
+            # print('*'*20)
         self.factor_t_value = pd.Series(factor_t_value_dict)
         self.factor_return_daily = pd.Series(factor_return_daily)
         self.factor_return['cumsum'] = self.factor_return_daily.cumsum() + 1
