@@ -25,6 +25,7 @@ class UpdateAdjFactor(object):
 
     def get_backward_factor(self, code_sh_list, code_sz_list, calendar_index):
         backward_factor = pd.DataFrame(index=calendar_index)
+        adj_factor_date_min = min(calendar_index)
         market = 'SH'
         num = 1
         for market_type in [tgw.MarketType.kSSE, tgw.MarketType.kSZSE]:
@@ -40,7 +41,11 @@ class UpdateAdjFactor(object):
                     adj_factor = pd.DataFrame({}, columns=['cum_factor', 'ex_date'])
                 adj_factor.set_index(["ex_date"], inplace=True)
                 adj_factor.sort_index(inplace=True)
-                backward_factor[code + '.' + market] = adj_factor['cum_factor']
+                adj_factor = adj_factor.loc[adj_factor_date_min:, :]
+                if not adj_factor.empty:
+                    backward_factor.loc[:, code + '.' + market] = adj_factor['cum_factor']/adj_factor['cum_factor'].iloc[0]
+                else:
+                    backward_factor.loc[:, code + '.' + market] = np.nan
 
         backward_factor.replace([np.inf, 0], np.nan, inplace=True)
         backward_factor.fillna(method='ffill', inplace=True)
