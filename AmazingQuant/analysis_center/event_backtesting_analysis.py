@@ -61,7 +61,7 @@ class EventBacktestingAnalysis(Event):
                 # Environment.logger.info(time_tag_data_list)
                 time_tag_data_df = pd.DataFrame(data_dict[time_tag], columns=data_property)
                 time_tag_data_df.set_index('account_id', inplace=True)
-                Environment.logger.info(time_tag_data_df)
+                # Environment.logger.info(time_tag_data_df)
                 values.append(time_tag_data_df)
             all_data = pd.concat(values, keys=Environment.benchmark_index, names=('time_tag', 'account_id'))
 
