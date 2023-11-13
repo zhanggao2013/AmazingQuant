@@ -88,7 +88,7 @@ class MaStrategy(StrategyBase):
             available_position_dict = {}
             for position in Environment.bar_position_data_list:
                 available_position_dict[
-                    position.instrument + '.' + position.exchange] = position.position - position.frozen
+                    position['instrument'] + '.' + position['exchange']] = position['position'] - position['frozen']
             index_member_list = self.index_member_obj.get_index_member_in_date(self.time_tag, index_code=self.benchmark)
             print('index_member_list', len(index_member_list))
             close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=self.universe,

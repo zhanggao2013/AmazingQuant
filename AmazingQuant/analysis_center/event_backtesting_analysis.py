@@ -23,7 +23,7 @@ from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.analysis_center.position_analysis import PositionAnalysis
 from AmazingQuant.analysis_center.trade_analysis import TradeAnalysis
 from AmazingQuant.analysis_center.net_value_analysis import NetValueAnalysis
-from AmazingQuant.data_object import AccountData, OrderData, DealData, PositionData
+from AmazingQuant.data_object import account_data, order_data, deal_data, position_data
 from AmazingQuant.analysis_center.show_result import ShowResult
 
 
@@ -39,29 +39,29 @@ class EventBacktestingAnalysis(Event):
             data_property = []
             if data_type_value == RecordDataType.ORDER_DATA.value:
                 data_dict = Environment.order_data_dict
-                data_property = list(json.loads(OrderData().__str__()).keys())
+                data_property = list(order_data.keys())
 
             elif data_type_value == RecordDataType.DEAL_DATA.value:
                 data_dict = Environment.deal_data_dict
-                data_property = list(json.loads(DealData().__str__()).keys())
+                data_property = list(deal_data.keys())
 
             elif data_type_value == RecordDataType.POSITION_DATA.value:
                 data_dict = Environment.position_data_dict
-                data_property = list(json.loads(PositionData().__str__()).keys())
+                data_property = list(position_data.keys())
 
             elif data_type_value == RecordDataType.ACCOUNT_DATA.value:
                 data_dict = Environment.account_data_dict
-                data_property = list(json.loads(AccountData().__str__()).keys())
+                data_property = list(account_data.keys())
 
             values = []
             for time_tag in Environment.benchmark_index:
                 time_tag_data_list = []
-                for current_data in data_dict[time_tag]:
-                    time_tag_data_list.append([current_data.__dict__[property_data] for property_data in data_property])
+                # for current_data in data_dict[time_tag]:
+                #     time_tag_data_list.append([current_data.__dict__[property_data] for property_data in data_property])
                 # Environment.logger.info(time_tag_data_list)
-                time_tag_data_df = pd.DataFrame(time_tag_data_list, columns=data_property)
+                time_tag_data_df = pd.DataFrame(data_dict[time_tag], columns=data_property)
                 time_tag_data_df.set_index('account_id', inplace=True)
-                # Environment.logger.info(time_tag_data_df)
+                Environment.logger.info(time_tag_data_df)
                 values.append(time_tag_data_df)
             all_data = pd.concat(values, keys=Environment.benchmark_index, names=('time_tag', 'account_id'))
 

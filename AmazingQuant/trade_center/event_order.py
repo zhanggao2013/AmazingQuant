@@ -22,7 +22,7 @@ class EventOrder(Event):
         :param event:
         :return:
         """
-        Environment.current_order_data.total_volume = 100 * int(Environment.current_order_data.total_volume / 100)
+        Environment.current_order_data['total_volume'] = 100 * int(Environment.current_order_data['total_volume'] / 100)
 
     @classmethod
     def account_available_check(cls, event):
@@ -31,42 +31,42 @@ class EventOrder(Event):
         :param event:
         :return:
         """
-        trade_balance = Environment.current_order_data.total_volume * Environment.current_order_data.order_price
-        if Environment.current_order_data.offset == Offset.OPEN.value:
+        trade_balance = Environment.current_order_data['total_volume'] * Environment.current_order_data['order_price']
+        if Environment.current_order_data['offset'] == Offset.OPEN.value:
             for account_data in Environment.bar_account_data_list:
-                if account_data.account_id == Environment.current_order_data.session_id:
-                    if trade_balance > account_data.available:
-                        Environment.current_order_data.status = Status.WITHDRAW.value
+                if account_data['account_id'] == Environment.current_order_data['session_id']:
+                    if trade_balance > account_data['available']:
+                        Environment.current_order_data['status'] = Status.WITHDRAW.value
                         Environment.logger.info("Insufficient Available Capital")
 
     @classmethod
     def position_available_volume_check(cls, event):
-        if Environment.current_order_data.offset == Offset.CLOSE.value:
+        if Environment.current_order_data['offset'] == Offset.CLOSE.value:
             position_hold = False
             if Environment.bar_position_data_list:
                 for position_data in Environment.bar_position_data_list:
                     # 根据资金账号限制卖出数量
                     for account_data in Environment.bar_account_data_list:
-                        if account_data.account_id == Environment.current_order_data.account_id:
+                        if account_data['account_id'] == Environment.current_order_data['account_id']:
 
-                            if Environment.current_order_data.instrument + "." + Environment.current_order_data.exchange == \
-                                    position_data.instrument + "." + position_data.exchange:
+                            if Environment.current_order_data['instrument'] + "." + Environment.current_order_data['exchange'] == \
+                                    position_data['instrument'] + "." + position_data['exchange']:
                                 position_hold = True
-                                if Environment.current_order_data.total_volume > (
-                                        position_data.position - position_data.frozen):
+                                if Environment.current_order_data['total_volume'] > (
+                                        position_data['position'] - position_data['frozen']):
                                     Environment.logger.info("position_available_volume_check,"
                                                             " Insufficient Available Position")
-                                    Environment.current_order_data.status = Status.WITHDRAW.value
+                                    Environment.current_order_data['status'] = Status.WITHDRAW.value
                                     break
                 # 如果遍历完持仓，没有此次平仓的持仓，Status改为WITHDRAW
                 if position_hold is False:
                     Environment.logger.info("如果遍历完持仓，没有此次平仓的持仓，Status改为WITHDRAW, Insufficient Available Position")
-                    Environment.current_order_data.status = Status.WITHDRAW.value
+                    Environment.current_order_data['status'] = Status.WITHDRAW.value
 
             # 如果持仓为空，Status改为WITHDRAW
             else:
                 Environment.logger.info("如果持仓为空，Status改为WITHDRAW, Insufficient Available Position")
-                Environment.current_order_data.status = Status.WITHDRAW.value
+                Environment.current_order_data['status'] = Status.WITHDRAW.value
 
     pass
 

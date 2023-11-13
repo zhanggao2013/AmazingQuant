@@ -161,11 +161,11 @@ class StrategyBase(metaclass=ABCMeta):
         # 初始化　account_data
         if self.account:
             for account in self.account:
-                Environment.current_account_data = AccountData()
-                Environment.current_account_data.account_id = account
-                Environment.current_account_data.total_balance = self.capital[account]
-                Environment.current_account_data.available = self.capital[account]
-                # Environment.logger(Environment.current_account_data.account_id, Environment.current_account_data.available)
+                Environment.current_account_data = account_data
+                Environment.current_account_data['account_id'] = account
+                Environment.current_account_data['total_balance'] = self.capital[account]
+                Environment.current_account_data['available'] = self.capital[account]
+                # Environment.logger(Environment.current_account_data['account_id'], Environment.current_account_data['available)
                 Environment.bar_account_data_list.append(Environment.current_account_data)
         # if self.run_mode == RunMode.TRADE.value:
         #     self.end = self._get_data.get_end_time_tag(benchmark=self.benchmark, period=Period.DAILY.value)

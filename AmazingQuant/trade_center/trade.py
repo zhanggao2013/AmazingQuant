@@ -20,29 +20,29 @@ class Trade(object):
     def order_shares(self, stock_code="", shares=1, price_type=PriceType.LIMIT.value, order_price=None, account_id=""):
         """下单函数"""
         # 代码编号相关
-        Environment.current_order_data.account_id = account_id
-        Environment.current_order_data.order_id = generate_random_id(ID.ORDER_ID.value)
+        Environment.current_order_data['account_id'] = account_id
+        Environment.current_order_data['order_id'] = generate_random_id(ID.ORDER_ID.value)
         stock_code_split = stock_code.split('.')
-        Environment.current_order_data.instrument = stock_code_split[0]
-        Environment.current_order_data.exchange = stock_code_split[1]
+        Environment.current_order_data['instrument'] = stock_code_split[0]
+        Environment.current_order_data['exchange'] = stock_code_split[1]
 
         # 　报单相关
-        Environment.current_order_data.price_type = price_type
-        Environment.current_order_data.order_price = order_price
+        Environment.current_order_data['price_type'] = price_type
+        Environment.current_order_data[order_price] = order_price
         if shares > 0:
-            Environment.current_order_data.offset = Offset.OPEN.value
+            Environment.current_order_data['offset'] = Offset.OPEN.value
         else:
-            Environment.current_order_data.offset = Offset.CLOSE.value
+            Environment.current_order_data['offset'] = Offset.CLOSE.value
             # Environment.logger.info("shares < 0"*5, Environment.current_order_data.offset)
-        Environment.current_order_data.total_volume = abs(shares)
-        Environment.current_order_data.deal_volume = 0
-        Environment.current_order_data.status = Status.NOT_REPORTED.value
+        Environment.current_order_data['total_volume'] = abs(shares)
+        Environment.current_order_data['deal_volume'] = 0
+        Environment.current_order_data['status'] = Status.NOT_REPORTED.value
 
         # CTP相关
-        Environment.current_order_data.order_time = self._strategy.time_tag
+        Environment.current_order_data['order_time'] = self._strategy.time_tag
         for account_data in Environment.bar_account_data_list:
-            if account_data.account_id[:-9] == account_id:
-                Environment.current_order_data.session_id = account_data.account_id
+            if account_data['account_id'][:-9] == account_id:
+                Environment.current_order_data['session_id'] = account_data['account_id']
 
         run_mission_engine(strategy=self._strategy)
 

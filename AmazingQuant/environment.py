@@ -6,6 +6,8 @@
 # @File    : environment.py.py
 # @Project : AmazingQuant
 # ------------------------------
+import copy
+
 import pandas as pd
 
 from AmazingQuant.data_object import *
@@ -21,10 +23,10 @@ class Environment(object):
     position_data_dict = {}  # timetag : [position_data,position_data]  broker_engine deal 之后append
     account_data_dict = {}  # timetag : [account_data] ,account_data 只有一个，是当前bar最后一天的,main_engine market_close 之后append
 
-    current_order_data = OrderData()
-    current_deal_data = DealData()
-    current_position_data = PositionData()
-    current_account_data = AccountData()
+    current_order_data = copy.deepcopy(order_data)
+    current_deal_data = copy.deepcopy(deal_data)
+    current_position_data = copy.deepcopy(position_data)
+    current_account_data = copy.deepcopy(account_data)
 
     bar_order_data_list = []
     bar_deal_data_list = []
@@ -63,9 +65,9 @@ class Environment(object):
     # 每次下单交易完成，经过回测broker之后清空order和deal的数据，重置是否通过风控
     @classmethod
     def refresh_current_data(cls, event):
-        cls.current_order_data = OrderData()
-        cls.current_deal_data = DealData()
-        cls.current_position_data = PositionData()
+        cls.current_order_data = copy.deepcopy(order_data)
+        cls.current_deal_data = copy.deepcopy(deal_data)
+        cls.current_position_data = copy.deepcopy(position_data)
         cls.is_pass_risk = True
         cls.is_send_order = False
 
