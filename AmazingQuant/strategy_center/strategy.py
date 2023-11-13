@@ -6,11 +6,10 @@
 # @File    : strategy.py.py
 # @Project : AmazingQuant
 # ------------------------------
-
 from datetime import datetime
 from abc import ABCMeta, abstractmethod
 
-from AmazingQuant.utils import data_transfer, generate_random_id
+from AmazingQuant.utils import data_transfer
 from AmazingQuant.constant import RunMode, Period, RightsAdjustment, SlippageType, StockType
 from AmazingQuant.data_object import *
 from AmazingQuant.event_engine.event_analysis_engine import run_backtesting_analysis_engine

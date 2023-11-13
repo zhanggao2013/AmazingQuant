@@ -6,7 +6,6 @@
 # @File    : trade.py.py
 # @Project : AmazingQuant
 # ------------------------------
-
 from AmazingQuant.constant import *
 from AmazingQuant.utils.generate_random_id import generate_random_id
 from AmazingQuant.event_engine.event_mission_engine import run_mission_engine
@@ -18,8 +17,7 @@ class Trade(object):
     def __init__(self, strategy):
         self._strategy = strategy
 
-    def order_shares(self, stock_code="", shares=1, price_type=PriceType.LIMIT.value, order_price=None,
-                   account_id=""):
+    def order_shares(self, stock_code="", shares=1, price_type=PriceType.LIMIT.value, order_price=None, account_id=""):
         """下单函数"""
         # 代码编号相关
         Environment.current_order_data.account_id = account_id
@@ -62,8 +60,6 @@ class Trade(object):
 
         #ctp_send_order(order_data)
 
-
-
 if __name__ == "__main__":
-    # aa = EventTradeEngine()
+    aa = EventTradeEngine()
     EventTradeEngine().order_lots()

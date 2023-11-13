@@ -85,6 +85,7 @@ class LocalDataFolderName(Enum):
 @unique
 class EventType(Enum):
     EVENT_TIMER = 'event_timer'
+    EVENT_TRADE = 'event_trade'
     EVENT_ORDER = 'event_order'
     EVENT_RISK_MANAGEMENT = 'event_risk_management'
     EVENT_DEAL = 'event_deal'

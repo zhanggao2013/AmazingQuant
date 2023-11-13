@@ -6,8 +6,6 @@
 # @File    : event_broker_engine.py.py
 # @Project : AmazingQuant
 # ------------------------------
-from AmazingQuant.event_engine.event_engine_base import EventEngineBase
-from AmazingQuant.constant import EventType
 from AmazingQuant.trade_center.event_deal import EventDeal
 from AmazingQuant.environment import Environment
 
@@ -19,18 +17,12 @@ def run_broker_engine(strategy):
     :param new_order_data:
     :return:
     """
-    broker_engine = EventEngineBase()
     event_deal = EventDeal()
     event_deal.event_data_dict["strategy_data"] = strategy
-    broker_engine.put(event_deal)
-
-    broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.initialize_deal_data)
-    broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.slippage_calculate)
-    broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.commission_calculate)
-    broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.update_position_list)
-    broker_engine.register(EventType.EVENT_DEAL.value, EventDeal.update_account_list)
-    broker_engine.register(EventType.EVENT_DEAL.value, Environment().refresh_current_data)
-
-    broker_engine.start()
-    broker_engine.stop()
+    EventDeal.initialize_deal_data(event_deal)
+    EventDeal.slippage_calculate(event_deal)
+    EventDeal.commission_calculate(event_deal)
+    EventDeal.update_position_list(event_deal)
+    EventDeal.update_account_list(event_deal)
+    Environment().refresh_current_data(event_deal)
 

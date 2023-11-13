@@ -6,37 +6,24 @@
 # @File    : event_bar_engine.py.py
 # @Project : AmazingQuant
 # ------------------------------
-
-
 from AmazingQuant.strategy_center.event_market import *
 from AmazingQuant.strategy_center.event_save_record import *
 
 
 def run_bar_engine(strategy):
-    """
-
-    """
-    bar_engine = EventEngineBase()
     event_market = EventMarket()
     event_market.event_data_dict["strategy_data"] = strategy
-
-    bar_engine.put(event_market)
-    bar_engine.register(EventType.EVENT_MARKET.value, EventMarket.update_position_frozen)
-    bar_engine.register(EventType.EVENT_MARKET.value, strategy.handle_bar)
-
-    bar_engine.register(EventType.EVENT_MARKET.value, EventMarket.update_market_data)
-    bar_engine.register(EventType.EVENT_MARKET.value, EventMarket.delete_position_zero)
-    bar_engine.register(EventType.EVENT_MARKET.value, EventMarket.update_position_close)
-    bar_engine.register(EventType.EVENT_MARKET.value, EventMarket.update_account_close)
-
-    bar_engine.register(EventType.EVENT_MARKET.value, EventMarket.push_new_bar)
+    EventMarket.update_position_frozen(event_market)
+    strategy.handle_bar(event_market)
+    EventMarket.update_market_data(event_market)
+    EventMarket.delete_position_zero(event_market)
+    EventMarket.update_position_close(event_market)
+    EventMarket.update_account_close(event_market)
+    EventMarket.push_new_bar(event_market)
 
     event_save_record = EventSaveRecord()
     event_save_record.event_data_dict["strategy_data"] = strategy
-    bar_engine.put(event_save_record)
-    bar_engine.register(EventType.EVENT_SAVE_RECORD.value, EventSaveRecord.save_current_bar_data)
-    bar_engine.register(EventType.EVENT_SAVE_RECORD.value, Environment().refresh_list)
+    EventSaveRecord.save_current_bar_data(event_save_record)
 
-    bar_engine.start()
-    bar_engine.stop()
+    Environment().refresh_list(event_save_record)
 

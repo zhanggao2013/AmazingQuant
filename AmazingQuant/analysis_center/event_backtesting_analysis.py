@@ -27,13 +27,6 @@ from AmazingQuant.data_object import AccountData, OrderData, DealData, PositionD
 from AmazingQuant.analysis_center.show_result import ShowResult
 
 
-# from pyecharts import Line, Page, Grid
-
-
-class EmptyClass(object):
-    pass
-
-
 class EventBacktestingAnalysis(Event):
     def __init__(self):
         super().__init__(event_type=EventType.EVENT_BACKTESTING_ANALYSIS.value)

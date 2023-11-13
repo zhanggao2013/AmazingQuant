@@ -91,7 +91,7 @@ class MaStrategy(StrategyBase):
                     position.instrument + '.' + position.exchange] = position.position - position.frozen
             index_member_list = self.index_member_obj.get_index_member_in_date(self.time_tag, index_code=self.benchmark)
             print('index_member_list', len(index_member_list))
-            close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=index_member_list,
+            close_price_all = self.data_class.get_market_data(Environment.daily_data, stock_code=self.universe,
                                                               field=['close'],
                                                               start=self.time_tag, end=self.time_tag)
             # print('close_price_all', close_price_all)
@@ -120,6 +120,7 @@ class MaStrategy(StrategyBase):
                         Environment.logger.info('sell', stock, -1, 'fix', close_price, self.account)
             for stock in available_position_dict.keys():
                 if stock not in index_member_list:
+                    close_price = close_price_all['close'][stock]
                     Trade(self).order_shares(stock_code=stock, shares=-100, price_type='fix',
                                              order_price=close_price,
                                              account_id=self.account[0])

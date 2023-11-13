@@ -12,6 +12,7 @@ from AmazingQuant.data_object import *
 
 
 class Environment(object):
+
     # 日志工具，必须先初始化
     logger = None
     # key 都是每一根bar的timetag

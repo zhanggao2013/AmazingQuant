@@ -6,7 +6,6 @@
 # @File    : event_risk_management.py.py
 # @Project : AmazingQuant
 # ------------------------------
-
 from datetime import datetime
 
 from AmazingQuant.event_engine.event_engine_base import Event

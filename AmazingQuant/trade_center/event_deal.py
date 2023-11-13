@@ -6,7 +6,6 @@
 # @File    : __init__.py.py
 # @Project : AmazingQuant
 # ------------------------------
-
 from AmazingQuant.event_engine.event_engine_base import Event
 from AmazingQuant.environment import Environment
 from AmazingQuant.constant import *
