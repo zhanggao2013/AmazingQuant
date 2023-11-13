@@ -28,7 +28,7 @@ class Trade(object):
 
         # 　报单相关
         Environment.current_order_data['price_type'] = price_type
-        Environment.current_order_data[order_price] = order_price
+        Environment.current_order_data['order_price'] = order_price
         if shares > 0:
             Environment.current_order_data['offset'] = Offset.OPEN.value
         else:
