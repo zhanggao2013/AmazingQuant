@@ -6,8 +6,6 @@
 # @File    : data_object.py.py
 # @Project : AmazingQuant
 # ------------------------------
-import json
-
 from AmazingQuant.constant import Empty
 
 order_data = {  # 代码编号相关
@@ -77,7 +75,3 @@ account_data = {
     'available': Empty.EMPTY_FLOAT.value,  # 可用资金
 }
 
-
-
-if __name__ == '__main__':
-    print(json.loads(AccountData().__str__()))
