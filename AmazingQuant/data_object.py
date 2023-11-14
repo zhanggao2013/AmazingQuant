@@ -8,7 +8,8 @@
 # ------------------------------
 from AmazingQuant.constant import Empty
 
-order_data = {  # 代码编号相关
+order_data = {
+    # 代码编号相关
     'account_id': Empty.EMPTY_STRING.value,  # 资金账号
     'order_id': Empty.EMPTY_STRING.value,  # 订单编号
     'instrument': Empty.EMPTY_STRING.value,  # 合约代码
