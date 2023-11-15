@@ -156,7 +156,7 @@ class StrategyBase(metaclass=ABCMeta):
                                                    'close_today_commission': close_today_commission,
                                                    'min_commission': min_commission}
 
-    def run(self, save_trade_record=False):
+    def run(self, save_trade_record=False, cal_all=True):
         self.initialize()
         # 初始化　account_data
         if self.account:
@@ -203,8 +203,7 @@ class StrategyBase(metaclass=ABCMeta):
             except IndexError:
                 if self.run_mode == RunMode.BACKTESTING.value:
                     if save_trade_record:
-
-                        run_backtesting_analysis_engine(self)
+                        run_backtesting_analysis_engine(self, cal_all=cal_all)
                     break
 
                 # elif self.run_mode == RunMode.TRADE.value:

@@ -44,9 +44,6 @@ from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass
 from AmazingQuant.data_center.api_data.get_share import GetShare
 from AmazingQuant.analysis_center.net_value_analysis import NetValueAnalysis
-# from apps.server.database_server.database_field.field_multi_factor import FactorRegressionAnalysisResult
-# from AmazingQuant.constant import DatabaseName
-# from AmazingQuant.utils.mongo_connection_me import MongoConnect
 
 
 class RegressionAnalysis(object):

@@ -83,7 +83,7 @@ class EventBacktestingAnalysis(Event):
             all_data.to_csv(save_path_dir + '/' + data_type_value + '.csv')
 
     @classmethod
-    def show_backtesting_indicator(cls, event):
+    def show_backtesting_indicator(cls, event, cal_all=True):
         benchmark = event.event_data_dict['strategy_data'].benchmark
         account = event.event_data_dict['strategy_data'].account
         data_class = GetKlineData()
@@ -101,27 +101,28 @@ class EventBacktestingAnalysis(Event):
         for i in net_analysis_result:
             Environment.logger.info(i, net_analysis_result[i])
 
-        # 持仓数据转pandas
-        position_data_df = Environment.backtesting_record_position
+        if cal_all:
+            # 持仓数据转pandas
+            position_data_df = Environment.backtesting_record_position
 
-        position_data_df = position_data_df[position_data_df.index.get_level_values(1) == account[0]]
-        position_analysis_obj = PositionAnalysis(position_data_df)
-        position_analysis_result = position_analysis_obj.cal_position_analysis_result()
-        for i in position_analysis_result:
-            Environment.logger.info(i, position_analysis_result[i])
+            position_data_df = position_data_df[position_data_df.index.get_level_values(1) == account[0]]
+            position_analysis_obj = PositionAnalysis(position_data_df)
+            position_analysis_result = position_analysis_obj.cal_position_analysis_result()
+            for i in position_analysis_result:
+                Environment.logger.info(i, position_analysis_result[i])
 
-        # 成交数据转pandas
-        trade_data_df = Environment.backtesting_record_order
+            # 成交数据转pandas
+            trade_data_df = Environment.backtesting_record_order
 
-        trade_data_df = trade_data_df[trade_data_df.index.get_level_values(1) == account[0]]
-        trade_analysis_obj = TradeAnalysis(trade_data_df, account_df)
-        trade_analysis_result = trade_analysis_obj.cal_trade_analysis_result()
-        for i in trade_analysis_result:
-            Environment.logger.info(i, trade_analysis_result[i])
+            trade_data_df = trade_data_df[trade_data_df.index.get_level_values(1) == account[0]]
+            trade_analysis_obj = TradeAnalysis(trade_data_df, account_df)
+            trade_analysis_result = trade_analysis_obj.cal_trade_analysis_result()
+            for i in trade_analysis_result:
+                Environment.logger.info(i, trade_analysis_result[i])
 
-        show_result_object = ShowResult(net_analysis_result, position_analysis_result, trade_analysis_result)
-        save_path_dir = event.event_data_dict["strategy_data"].strategy_name + '/'
-        if not os.path.exists(save_path_dir):
-            os.mkdir(save_path_dir)
-        show_result_object.show_page(save_path_dir)
+            show_result_object = ShowResult(net_analysis_result, position_analysis_result, trade_analysis_result)
+            save_path_dir = event.event_data_dict["strategy_data"].strategy_name + '/'
+            if not os.path.exists(save_path_dir):
+                os.mkdir(save_path_dir)
+            show_result_object.show_page(save_path_dir)
 

@@ -112,8 +112,9 @@ class StratificationStrategy(StrategyBase):
         # 取当前bar的持仓情况
         available_position_dict = {}
         for position in Environment.bar_position_data_list:
-            if position.account_id == self.account[0]:
-                available_position_dict[position.instrument + '.' + position.exchange] = position.position - position.frozen
+            if position['account_id'] == self.account[0]:
+                available_position_dict[position['instrument'] + '.' + position['exchange']] = \
+                position['position'] - position['frozen']
 
         # 因子选股的持仓股票
         current_group_hold_list = self.group_hold.loc[self.time_tag].dropna().index.values
@@ -132,7 +133,7 @@ class StratificationStrategy(StrategyBase):
         Environment.logger.info(len(current_group_hold_list), len(position_stock_list), len(buy_stock_list),
                                 len(sell_stock_list))
 
-        print(Environment.bar_account_data_list[0].available)
+        print(Environment.bar_account_data_list[0]['available'])
         # 循环遍历股票池
         for stock in sell_stock_list:
             # 取当前股票的收盘价
@@ -144,11 +145,11 @@ class StratificationStrategy(StrategyBase):
             Environment.logger.info(self.time_tag, 'sell', stock, available_position_dict[stock],
                                     'fix', close_price, self.account[0])
 
-        print(Environment.bar_account_data_list[0].available, Environment.bar_account_data_list[0].account_id)
+        print(Environment.bar_account_data_list[0]['available'], Environment.bar_account_data_list[0]['account_id'])
         # print(position_stock_list)
         if position_stock_list:
-            self.single_stock_value = (Environment.bar_account_data_list[0].available -
-                                       Environment.bar_account_data_list[0].total_balance * (1 - self.hold_ratio)) / \
+            self.single_stock_value = (Environment.bar_account_data_list[0]['available'] -
+                                       Environment.bar_account_data_list[0]['total_balance'] * (1 - self.hold_ratio)) / \
                                       len(buy_stock_list)
             self.single_stock_value = max(self.single_stock_value, 0)
             print(self.single_stock_value)
@@ -173,12 +174,15 @@ if __name__ == '__main__':
     factor_ma5 = factor_ma5[factor_ma5.index < datetime(2020, 1, 1)]
     # 指数数据不全，需要删一部分因子数据
     factor_ma5 = factor_ma5[factor_ma5.index > datetime(2013, 2, 1)]
-    stratification_analysis_obj = StratificationAnalysis(factor_ma5, 'factor_ma5')
+    group_num = 5
+    stratification_analysis_obj = StratificationAnalysis(factor_ma5, 'factor_ma5', group_num=group_num)
     stratification_analysis_obj.add_group()
-    group_hold = stratification_analysis_obj.cal_group_hold(stratification_analysis_obj.group_key[0])
-    stratification_strategy = StratificationStrategy(group_hold)
-    import time
+    for i in range(group_num):
+        group_hold = stratification_analysis_obj.cal_group_hold(stratification_analysis_obj.group_key[i])
+        stratification_strategy = StratificationStrategy(group_hold)
+        import time
 
-    a = time.time()
-    stratification_strategy.run(save_trade_record=True)
-    print(time.time() - a)
+        a = time.time()
+        stratification_strategy.run(save_trade_record=True, cal_all=False)
+        print('group_num', group_num, time.time() - a)
+
