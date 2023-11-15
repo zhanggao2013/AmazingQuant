@@ -71,8 +71,10 @@ class EventMarket(Event):
         if Environment.bar_position_data_list:
             for position_data in Environment.bar_position_data_list:
                 stock_code = position_data['instrument'] + "." + position_data['exchange']
-                # print('stock_code', stock_code, cls.current_close_price_all)
-                current_close_price = cls.current_close_price_all["close"][stock_code]
+                if isinstance(cls.current_close_price_all, float):
+                    current_close_price = cls.current_close_price_all
+                else:
+                    current_close_price = cls.current_close_price_all["close"][stock_code]
                 position_data['position_profit'] = position_data['position'] * (
                         current_close_price - position_data['average_price'])
                 position_data['close'] = current_close_price
@@ -93,7 +95,10 @@ class EventMarket(Event):
                 for position_data in Environment.bar_position_data_list:
                     if account['account_id'] == position_data['account_id']:
                         stock_code = position_data['instrument'] + "." + position_data['exchange']
-                        current_close_price = cls.current_close_price_all["close"][stock_code]
+                        if isinstance(cls.current_close_price_all, float):
+                            current_close_price = cls.current_close_price_all
+                        else:
+                            current_close_price = cls.current_close_price_all["close"][stock_code]
                         hold_balance += position_data['position'] * current_close_price
                     account['total_balance'] = account['available'] + hold_balance
                 pass

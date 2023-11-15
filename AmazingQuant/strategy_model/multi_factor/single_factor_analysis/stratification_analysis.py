@@ -38,7 +38,7 @@ class StratificationAnalysis(object):
         self.group_key = ['group_' + str(i) for i in range(group_num)]
 
     def add_group(self, ascending=True):
-        factor_rank = self.factor.rank(axis=1, ascending=ascending)
+        factor_rank = self.factor.rank(axis=1, method='first', ascending=ascending)
         self.factor_group = factor_rank.apply(lambda x: pd.cut(x, self.group_num, labels=self.group_key), axis=1)
 
     def cal_group_hold(self, group_name):
@@ -47,10 +47,10 @@ class StratificationAnalysis(object):
     def group_analysis(self):
         self.add_group()
         for i in range(self.group_num):
-            group_hold = stratification_analysis_obj.cal_group_hold(stratification_analysis_obj.group_key[i])
-            stratification_strategy = StratificationStrategy(group_hold)
+            group_hold = self.cal_group_hold(stratification_analysis_obj.group_key[i])
+            print('group_num', i, group_hold)
+            stratification_strategy = StratificationStrategy(group_hold, strategy_name='group_' + str(i))
             stratification_strategy.run(save_trade_record=True, cal_all=False)
-            print('group_num', group_num)
 
 
 # 继承strategy基类
@@ -62,7 +62,7 @@ class StratificationStrategy(StrategyBase):
         :param strategy_name:
         """
         super().__init__(strategy_name=strategy_name)
-
+        self.strategy_name = strategy_name
         # 取K线数据实例
         self.data_class = GetKlineData()
         self.group_hold = group_hold
@@ -71,16 +71,17 @@ class StratificationStrategy(StrategyBase):
 
         # 初始仓位，因交易费用，满仓后无法慢如
         self.hold_ratio = hold_ratio
-        self.group_hold_num = self.group_hold.iloc[0].dropna().shape[0]
+        self.group_hold_num = None
+
         Environment.logger = Logger(strategy_name)
 
     def initialize(self):
         # 设置运行模式，回测或者交易
         self.run_mode = RunMode.BACKTESTING.value
         # 设置回测资金账号
-        self.account = ['test0']
+        self.account = [self.strategy_name]
         # 设置回测资金账号资金量
-        self.capital = {'test0': 100000000}
+        self.capital = {self.strategy_name: 100000000}
         # 设置回测基准
         self.benchmark = '000300.SH'
         # 设置复权方式
@@ -109,8 +110,6 @@ class StratificationStrategy(StrategyBase):
                             close_commission=0.0003,
                             close_today_commission=0, min_commission=5)
 
-        self.single_stock_value = self.capital[self.account[0]] * self.hold_ratio / self.group_hold_num
-
     def handle_bar(self, event):
         Environment.logger.info('self.time_tag', self.time_tag, datetime.now())
         # Environment.logger.debug(len(Environment.bar_position_data_list))
@@ -122,10 +121,13 @@ class StratificationStrategy(StrategyBase):
         for position in Environment.bar_position_data_list:
             if position['account_id'] == self.account[0]:
                 available_position_dict[position['instrument'] + '.' + position['exchange']] = \
-                position['position'] - position['frozen']
+                    position['position'] - position['frozen']
 
         # 因子选股的持仓股票
         current_group_hold_list = self.group_hold.loc[self.time_tag].dropna().index.values
+        self.group_hold_num = len(current_group_hold_list)
+        # print('因子选股的持仓股票', current_group_hold_list, self.group_hold_num)
+
         # 当前资金账户的持仓股票
         position_stock_list = list(available_position_dict.keys())
         # 需要买入调仓的股票
@@ -141,7 +143,6 @@ class StratificationStrategy(StrategyBase):
         Environment.logger.info(len(current_group_hold_list), len(position_stock_list), len(buy_stock_list),
                                 len(sell_stock_list))
 
-        print(Environment.bar_account_data_list[0]['available'])
         # 循环遍历股票池
         for stock in sell_stock_list:
             # 取当前股票的收盘价
@@ -153,16 +154,16 @@ class StratificationStrategy(StrategyBase):
             Environment.logger.info(self.time_tag, 'sell', stock, available_position_dict[stock],
                                     'fix', close_price, self.account[0])
 
-        print(Environment.bar_account_data_list[0]['available'], Environment.bar_account_data_list[0]['account_id'])
-        # print(position_stock_list)
-        if position_stock_list:
+        # print(Environment.bar_account_data_list[0]['available'], Environment.bar_account_data_list[0]['account_id'])
+        # print(buy_stock_list)
+        if len(buy_stock_list) > 0:
             self.single_stock_value = (Environment.bar_account_data_list[0]['available'] -
                                        Environment.bar_account_data_list[0]['total_balance'] * (1 - self.hold_ratio)) / \
                                       len(buy_stock_list)
             self.single_stock_value = max(self.single_stock_value, 0)
-            print(self.single_stock_value)
+        # print(self.single_stock_value)
 
-        if self.single_stock_value > 0:
+        if self.single_stock_value >= 0:
             for stock in buy_stock_list:
                 # 取当前股票的收盘价
                 close_price = close_price_all['close'][stock]
@@ -179,10 +180,9 @@ if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/' + factor_name + '/'
     factor_ma5 = get_local_data(path, factor_name + '_pre' + '.h5')
     # 指数数据不全，需要删一部分因子数据
-    factor_ma5 = factor_ma5[factor_ma5.index < datetime(2020, 1, 1)]
+    factor_ma5 = factor_ma5[factor_ma5.index < datetime(2020, 12, 31)]
     # 指数数据不全，需要删一部分因子数据
     factor_ma5 = factor_ma5[factor_ma5.index > datetime(2013, 2, 1)]
     group_num = 5
     stratification_analysis_obj = StratificationAnalysis(factor_ma5, 'factor_ma5', group_num=group_num)
-
-
+    stratification_analysis_obj.group_analysis()
