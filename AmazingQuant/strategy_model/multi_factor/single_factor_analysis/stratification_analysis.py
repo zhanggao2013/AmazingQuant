@@ -44,6 +44,14 @@ class StratificationAnalysis(object):
     def cal_group_hold(self, group_name):
         return self.factor_group[self.factor_group == group_name]
 
+    def group_analysis(self):
+        self.add_group()
+        for i in range(self.group_num):
+            group_hold = stratification_analysis_obj.cal_group_hold(stratification_analysis_obj.group_key[i])
+            stratification_strategy = StratificationStrategy(group_hold)
+            stratification_strategy.run(save_trade_record=True, cal_all=False)
+            print('group_num', group_num)
+
 
 # 继承strategy基类
 class StratificationStrategy(StrategyBase):
@@ -176,13 +184,5 @@ if __name__ == '__main__':
     factor_ma5 = factor_ma5[factor_ma5.index > datetime(2013, 2, 1)]
     group_num = 5
     stratification_analysis_obj = StratificationAnalysis(factor_ma5, 'factor_ma5', group_num=group_num)
-    stratification_analysis_obj.add_group()
-    for i in range(group_num):
-        group_hold = stratification_analysis_obj.cal_group_hold(stratification_analysis_obj.group_key[i])
-        stratification_strategy = StratificationStrategy(group_hold)
-        import time
 
-        a = time.time()
-        stratification_strategy.run(save_trade_record=True, cal_all=False)
-        print('group_num', group_num, time.time() - a)
 
