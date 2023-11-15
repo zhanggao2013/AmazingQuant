@@ -71,5 +71,14 @@ class Environment(object):
         cls.is_pass_risk = True
         cls.is_send_order = False
 
-
+    @classmethod
+    def refresh_backtesting_record(cls, event):
+        Environment.backtesting_record_order = pd.DataFrame()
+        Environment.backtesting_record_deal = pd.DataFrame()
+        Environment.backtesting_record_position = pd.DataFrame()
+        Environment.backtesting_record_account = pd.DataFrame()
+        Environment.bar_order_data_list = []
+        Environment.bar_deal_data_list = []
+        Environment.bar_position_data_list = []
+        Environment.bar_account_data_list = []
 

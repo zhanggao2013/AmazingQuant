@@ -98,7 +98,7 @@ class MaStrategy(StrategyBase):
             # 循环遍历股票池
             for stock in index_member_list:
                 # 取当前股票的收盘价
-                close_price = close_price_all['close'][stock]
+                close_price = close_price_all['close'][stock].values[0]
                 if not close_price:
                     continue
                 if not((stock in self.ma5) and (stock in self.ma10)):

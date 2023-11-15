@@ -50,21 +50,23 @@ class GetKlineData(object):
 
     def get_market_data(self, market_data, stock_code=None, field=None, start=None, end=None, count=-1):
         result = None
-        if stock_code is None and len(field) == 1:
-            result = market_data[field[0]]
-        elif len(stock_code) == 1 and len(field) == 1 and (end is None and start is None) and count == -1:
-            result = market_data[field[0]][stock_code[0]]
-        elif len(stock_code) == 1 and len(field) == 1 and start < end and count == -1:
-            result = market_data[field[0]][stock_code[0]][start: end]
-        elif len(stock_code) == 1 and len(field) == 1 and start == end and count == -1:
-            result = market_data[field[0]][stock_code[0]][start]
-        elif len(stock_code) > 1 and (start == end and start is not None) and count == -1:
-            result = {i: market_data[i].reindex(columns=stock_code).loc[start] for i in field}
-        elif len(stock_code) > 1 and (end is None and start is None) and count == -1:
-            result = {i: market_data[i].reindex(columns=stock_code) for i in field}
-        elif start != end and count == -1:
-            result = {i: market_data[i].reindex(columns=stock_code).loc[start: end] for i in field}
-        return result
+        # if stock_code is None and len(field) == 1:
+        #     result = market_data[field[0]]
+        # elif len(stock_code) == 1 and len(field) == 1 and (end is None and start is None) and count == -1:
+        #     result = market_data[field[0]][stock_code[0]]
+        # elif len(stock_code) == 1 and len(field) == 1 and start < end and count == -1:
+        #     result = market_data[field[0]][stock_code[0]][start: end]
+        # elif len(stock_code) == 1 and len(field) == 1 and start == end and count == -1:
+        #     result = market_data[field[0]][stock_code[0]][start]
+        # if len(stock_code) > 1 and (start == end and start is not None) and count == -1:
+        #     result = {i: market_data[i].reindex(columns=stock_code).loc[start] for i in field}
+        # elif len(stock_code) > 1 and (end is None and start is None) and count == -1:
+        #     result = {i: market_data[i].reindex(columns=stock_code) for i in field}
+        # elif start != end and count == -1:
+        #     result = {i: market_data[i].reindex(columns=stock_code).loc[start: end] for i in field}
+        # return result
+
+        return {i: market_data[i].reindex(columns=stock_code).loc[start: end] for i in field}
 
     def cache_all_index_data(self, period=Period.DAILY.value):
         folder_name = LocalDataFolderName.MARKET_DATA.value
