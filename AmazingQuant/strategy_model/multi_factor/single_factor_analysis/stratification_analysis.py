@@ -47,8 +47,8 @@ class StratificationAnalysis(object):
     def group_analysis(self):
         self.add_group()
         for i in range(self.group_num):
+            i = 4
             group_hold = self.cal_group_hold(stratification_analysis_obj.group_key[i])
-            print('group_num', i, group_hold)
             stratification_strategy = StratificationStrategy(group_hold, strategy_name='group_' + str(i))
             stratification_strategy.run(save_trade_record=True, cal_all=False)
 
@@ -168,6 +168,7 @@ class StratificationStrategy(StrategyBase):
                 # 取当前股票的收盘价
                 close_price = close_price_all['close'][stock]
                 if np.isnan(close_price):
+                    # print(stock, close_price)
                     continue
                 buy_share = int(self.single_stock_value / close_price / 100) * 100
                 Trade(self).order_shares(stock_code=stock, shares=buy_share, price_type='fix', order_price=close_price,
