@@ -38,7 +38,8 @@ class StratificationAnalysis(object):
         self.group_key = ['group_' + str(i) for i in range(group_num)]
 
     def add_group(self, ascending=True):
-        factor_rank = self.factor.rank(axis=1, method='first', ascending=ascending)
+        # 升序排列，按照出现顺序
+        factor_rank = self.factor.rank(axis=1, method='first', ascending=ascending, na_option='keep')
         self.factor_group = factor_rank.apply(lambda x: pd.cut(x, self.group_num, labels=self.group_key), axis=1)
 
     def cal_group_hold(self, group_name):
@@ -47,7 +48,7 @@ class StratificationAnalysis(object):
     def group_analysis(self):
         self.add_group()
         for i in range(self.group_num):
-            i = 4
+            # i = 4
             group_hold = self.cal_group_hold(stratification_analysis_obj.group_key[i])
             stratification_strategy = StratificationStrategy(group_hold, strategy_name='group_' + str(i))
             stratification_strategy.run(save_trade_record=True, cal_all=False)
@@ -181,7 +182,7 @@ if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/' + factor_name + '/'
     factor_ma5 = get_local_data(path, factor_name + '_pre' + '.h5')
     # 指数数据不全，需要删一部分因子数据
-    factor_ma5 = factor_ma5[factor_ma5.index < datetime(2020, 12, 31)]
+    factor_ma5 = factor_ma5[factor_ma5.index < datetime(2013, 3, 1)]
     # 指数数据不全，需要删一部分因子数据
     factor_ma5 = factor_ma5[factor_ma5.index > datetime(2013, 2, 1)]
     group_num = 5

@@ -39,6 +39,10 @@ class StrategyBase(metaclass=ABCMeta):
         self.bar_index = 0
         # 初始化交易函数
         self.trade = Trade(self)
+        # 回测结果保存
+        self.net_analysis_result = {}
+        self.position_analysis_result = {}
+        self.trade_analysis_result = {}
 
     @property
     def strategy_name(self):

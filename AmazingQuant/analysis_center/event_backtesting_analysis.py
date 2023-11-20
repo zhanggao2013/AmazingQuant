@@ -101,6 +101,7 @@ class EventBacktestingAnalysis(Event):
         for i in net_analysis_result:
             Environment.logger.info(i, net_analysis_result[i])
 
+        position_analysis_result, trade_analysis_result = {}, {}
         if cal_all:
             # 持仓数据转pandas
             position_data_df = Environment.backtesting_record_position
@@ -125,4 +126,6 @@ class EventBacktestingAnalysis(Event):
             if not os.path.exists(save_path_dir):
                 os.mkdir(save_path_dir)
             show_result_object.show_page(save_path_dir)
+
+        return net_analysis_result, position_analysis_result, trade_analysis_result
 
