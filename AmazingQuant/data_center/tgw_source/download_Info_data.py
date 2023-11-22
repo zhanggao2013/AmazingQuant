@@ -40,7 +40,7 @@ class DownloadInfoData(object):
         for code in self.code_list:
             print(id, code, num)
             num += 1
-            code_isalpha=False
+            code_isalpha = False
             for i in code[:-3]:
                 if i.isalpha():
                     code_isalpha = True
