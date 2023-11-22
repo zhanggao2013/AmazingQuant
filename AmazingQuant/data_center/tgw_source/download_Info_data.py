@@ -132,6 +132,15 @@ class DownloadInfoData(object):
         save_data_to_hdf5(path, 'longhubang', longhubang_df)
         return longhubang_df
 
+    def download_10_shareholder(self):
+        """
+        A股十大股东名单 A010040001
+        """
+        shareholder_df, error_code_list = self.download_info_data('A010040001', para_date=True)
+        folder_name = LocalDataFolderName.FINANCE.value
+        path = LocalDataPath.path + folder_name + '/'
+        save_data_to_hdf5(path, 'shareholder', shareholder_df)
+        return shareholder_df
 
 if __name__ == '__main__':
     tgw_login()
@@ -140,8 +149,8 @@ if __name__ == '__main__':
     info_data_object = DownloadInfoData(tgw_api_object)
     # industry_class_df = info_data_object.download_industry_class()
     # index_member_df = info_data_object.download_index_member()
-
-    sw_index_member_df = info_data_object.download_sw_index_member()
+    shareholder_df = info_data_object.download_10_shareholder()
+    # sw_index_member_df = info_data_object.download_sw_index_member()
     # info_data_object.download_stock_struction()
     # result = info_data_object.download_finance_data()
 
