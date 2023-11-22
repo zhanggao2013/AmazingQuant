@@ -19,7 +19,7 @@ from AmazingQuant.constant import LocalDataFolderName
 
 
 class DownloadInfoData(object):
-    def __init__(self,tgw_api_object):
+    def __init__(self, tgw_api_object):
         self.tgw_api_object = tgw_api_object
         self.code_list = []
 
@@ -139,8 +139,10 @@ class DownloadInfoData(object):
         shareholder_df, error_code_list = self.download_info_data('A010040001', para_date=True)
         folder_name = LocalDataFolderName.FINANCE.value
         path = LocalDataPath.path + folder_name + '/'
-        save_data_to_hdf5(path, 'shareholder', shareholder_df)
+        save_data_to_hdf5(path, 'shareholder', shareholder_df[shareholder_df['HOLDER_TYPE'] == 10])
+        save_data_to_hdf5(path, 'floatshareholder', shareholder_df[shareholder_df['HOLDER_TYPE'] == 20])
         return shareholder_df
+
 
 if __name__ == '__main__':
     tgw_login()
@@ -157,4 +159,3 @@ if __name__ == '__main__':
     # folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
     # path = LocalDataPath.path + folder_name + '/'
     # a = get_local_data(path, folder_name + '.h5')
-

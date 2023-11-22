@@ -18,14 +18,12 @@ class GetShare(object):
     def __init__(self):
         self.share_data = pd.DataFrame.empty
 
-    def get_share(self, field=None):
+    def get_share(self, field='total_share'):
         """
 
         :param field: 'total_share', 'float_a_share', 'total_share_value',  'float_a_share_value'
         :return:
         """
-        if field is None:
-            field = 'total_share'
         folder_name = LocalDataFolderName.INDICATOR_EVERYDAY.value
         path = LocalDataPath.path + folder_name + '/'
         data_name = field + '.h5'
