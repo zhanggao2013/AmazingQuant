@@ -36,6 +36,7 @@ class StratificationAnalysis(object):
         self.group_num = group_num
         self.factor_group = None
         self.group_key = ['group_' + str(i) for i in range(group_num)]
+        self.group_net_analysis_result = {}
 
     def add_group(self, ascending=True):
         # 升序排列，按照出现顺序
@@ -48,10 +49,11 @@ class StratificationAnalysis(object):
     def group_analysis(self):
         self.add_group()
         for i in range(self.group_num):
-            # i = 4
+            strategy_name='group_' + str(i)
             group_hold = self.cal_group_hold(stratification_analysis_obj.group_key[i])
-            stratification_strategy = StratificationStrategy(group_hold, strategy_name='group_' + str(i))
+            stratification_strategy = StratificationStrategy(group_hold, strategy_name=strategy_name)
             stratification_strategy.run(save_trade_record=True, cal_all=False)
+            self.group_net_analysis_result[strategy_name] = stratification_strategy.net_analysis_result
 
 
 # 继承strategy基类
@@ -182,7 +184,7 @@ if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/' + factor_name + '/'
     factor_ma5 = get_local_data(path, factor_name + '_pre' + '.h5')
     # 指数数据不全，需要删一部分因子数据
-    factor_ma5 = factor_ma5[factor_ma5.index < datetime(2013, 3, 1)]
+    factor_ma5 = factor_ma5[factor_ma5.index < datetime(2013, 5, 1)]
     # 指数数据不全，需要删一部分因子数据
     factor_ma5 = factor_ma5[factor_ma5.index > datetime(2013, 2, 1)]
     group_num = 5
