@@ -5,6 +5,9 @@
 
 # 1.简介
 AmazingaQuant——为交易而生的智能投研Lab。包含量化数据服务、因子计算服务、策略模型研究服务、绩效分析服务四大功能模块。	<br/>
+
+![](https://github.com/zhanggao2013/AmazingQuant/blob/master/documents/AmazingQuant.png)	<br/>
+
 1.1 量化数据服务	<br/>
 建立数据服务中台，数据聚集和清洗完成。<br/>
 1.1.1 历史数据存储	<br/>
