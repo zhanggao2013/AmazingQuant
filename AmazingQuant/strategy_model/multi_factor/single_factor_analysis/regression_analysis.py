@@ -45,6 +45,8 @@ from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass
 from AmazingQuant.data_center.api_data.get_share import GetShare
 from AmazingQuant.analysis_center.net_value_analysis import NetValueAnalysis
 
+from AmazingQuant.utils.save_data import save_data_to_hdf5, save_data_to_pkl
+
 
 class RegressionAnalysis(object):
     def __init__(self, factor, factor_name, market_close_data, benchmark_df):
@@ -150,9 +152,28 @@ class RegressionAnalysis(object):
     def cal_acf(self, nlags=10):
         for i in ['cumsum', 'cumprod']:
             net_value = self.factor_return[i]
-            self.acf_result[i]['acf'] = stattools.acf(net_value.dropna().values, fft=False, nlags=nlags)
-            self.acf_result[i]['pacf'] = stattools.pacf(net_value.dropna().values, nlags=nlags)
+            self.acf_result[i]['acf'] = stattools.acf(net_value.dropna().values, fft=False, nlags=nlags)[1:]
+            self.acf_result[i]['pacf'] = stattools.pacf(net_value.dropna().values, nlags=nlags)[1:]
         return self.acf_result
+
+    def save_regression_analysis_result(self, path, factor_name):
+        # 因子收益率，单利，复利, 日收益率
+        save_data_to_hdf5(path, factor_name + '_factor_return', self.factor_return)
+
+        # 单因子检测的T值, Series, index为时间
+        save_data_to_hdf5(path, factor_name + '_t_value', self.factor_t_value)
+        # 单因子检测的T值的统计值，'t_value_mean': 绝对值均值, 't_value_greater_two':绝对值序列大于2的占比
+        save_data_to_pkl(path, factor_name + '_t_value_statistics', self.factor_t_value_statistics)
+
+        # 因子收益率的自相关系数acf和偏自相关系数pacf,默认1-10阶, 单利
+        save_data_to_pkl(path, factor_name + '_acf_result_cumsum', self.acf_result['cumsum'])
+        # 因子收益率的自相关系数acf和偏自相关系数pacf,默认1-10阶, 复利
+        save_data_to_pkl(path, factor_name + '_acf_result_cumprod', self.acf_result['cumprod'])
+
+        # 净值分析结果_单利
+        save_data_to_pkl(path, factor_name + '_net_analysis_result_cumsum', self.net_analysis_result['cumsum'])
+        # 净值分析结果_复利
+        save_data_to_pkl(path, factor_name + '_net_analysis_result_cumprod', self.net_analysis_result['cumprod'])
 
     # def save_regression_analysis_result(self, factor_name):
     #     with MongoConnect(DatabaseName.MULTI_FACTOR_DATA.value):
@@ -214,4 +235,4 @@ if __name__ == '__main__':
     regression_analysis_obj.cal_net_analysis()
     regression_analysis_obj.cal_acf()
 
-    # regression_analysis_obj.save_regression_analysis_result(factor_name)
+    regression_analysis_obj.save_regression_analysis_result(path, factor_name)

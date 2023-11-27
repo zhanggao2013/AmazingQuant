@@ -49,7 +49,7 @@ class StratificationAnalysis(object):
     def group_analysis(self):
         self.add_group()
         for i in range(self.group_num):
-            strategy_name='group_' + str(i)
+            strategy_name = 'group_' + str(i)
             group_hold = self.cal_group_hold(stratification_analysis_obj.group_key[i])
             stratification_strategy = StratificationStrategy(group_hold, strategy_name=strategy_name)
             stratification_strategy.run(save_trade_record=True, cal_all=False)

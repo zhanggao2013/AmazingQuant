@@ -36,7 +36,7 @@ from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.utils.get_data import get_local_data
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 
-from AmazingQuant.utils.save_data import save_data_to_hdf5
+from AmazingQuant.utils.save_data import save_data_to_hdf5, save_data_to_pkl
 
 
 class IcAnalysis(object):
@@ -125,9 +125,8 @@ class IcAnalysis(object):
         # index是decay周期
         save_data_to_hdf5(path, factor_name + '_ic_result', self.ic_result)
         # 因子名称factor_name，因子数据开始时间begin_date,因子数据结束时间end_date,
-        basic_info = pd.DataFrame({"begin_date": self.factor.index[0], "end_date": self.factor.index[-1],
-                                   "factor_name": factor_name}, index=['data'])
-        save_data_to_hdf5(path, factor_name + '_basic_info', basic_info)
+        basic_info = {"begin_date": self.factor.index[0], "end_date": self.factor.index[-1], "factor_name": factor_name}
+        save_data_to_pkl(path, factor_name + '_basic_info', basic_info)
 
 
 if __name__ == '__main__':
