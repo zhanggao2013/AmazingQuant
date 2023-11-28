@@ -24,7 +24,7 @@ from AmazingQuant.analysis_center.position_analysis import PositionAnalysis
 from AmazingQuant.analysis_center.trade_analysis import TradeAnalysis
 from AmazingQuant.analysis_center.net_value_analysis import NetValueAnalysis
 from AmazingQuant.data_object import account_data, order_data, deal_data, position_data
-from AmazingQuant.analysis_center.show_result import ShowResult
+from AmazingQuant.analysis_center.strategy_analysis_report import ShowResult
 
 
 class EventBacktestingAnalysis(Event):

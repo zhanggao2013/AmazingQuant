@@ -27,6 +27,7 @@ from AmazingQuant.trade_center.trade import Trade
 
 from AmazingQuant.utils.logger import Logger
 from AmazingQuant.environment import Environment
+from AmazingQuant.utils.save_data import save_data_to_hdf5, save_data_to_pkl
 
 
 class StratificationAnalysis(object):
@@ -54,6 +55,9 @@ class StratificationAnalysis(object):
             stratification_strategy = StratificationStrategy(group_hold, strategy_name=strategy_name)
             stratification_strategy.run(save_trade_record=True, cal_all=False)
             self.group_net_analysis_result[strategy_name] = stratification_strategy.net_analysis_result
+
+    def save_group_analysis_result(self, path, factor_name):
+        save_data_to_pkl(path, factor_name + '_group_net_analysis_result', self.group_net_analysis_result)
 
 
 # 继承strategy基类

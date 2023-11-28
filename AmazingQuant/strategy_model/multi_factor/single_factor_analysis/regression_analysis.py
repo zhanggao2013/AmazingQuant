@@ -175,41 +175,6 @@ class RegressionAnalysis(object):
         # 净值分析结果_复利
         save_data_to_pkl(path, factor_name + '_net_analysis_result_cumprod', self.net_analysis_result['cumprod'])
 
-    # def save_regression_analysis_result(self, factor_name):
-    #     with MongoConnect(DatabaseName.MULTI_FACTOR_DATA.value):
-    #         factor_return = self.factor_return.copy()
-    #         factor_t_value = self.factor_t_value.copy()
-    #         net_analysis_result = self.net_analysis_result
-    #         factor_return.index = factor_return.index.format()
-    #         factor_t_value.index = factor_t_value.index.format()
-    #         net_analysis_result['cumsum']['net_value_df'].index = net_analysis_result['cumsum'][
-    #             'net_value_df'].index.format()
-    #         net_analysis_result['cumprod']['net_value_df'].index = net_analysis_result['cumprod'][
-    #             'net_value_df'].index.format()
-    #         net_analysis_result['cumsum']['benchmark_df'].index = net_analysis_result['cumsum'][
-    #             'benchmark_df'].index.format()
-    #         net_analysis_result['cumprod']['benchmark_df'].index = net_analysis_result['cumprod'][
-    #             'benchmark_df'].index.format()
-    #
-    #         doc = FactorRegressionAnalysisResult(
-    #             factor_name=factor_name,
-    #             # 因子数据开始时间
-    #             begin_date=self.factor.index[0],
-    #             # 因子数据结束时间
-    #             end_date=self.factor.index[-1],
-    #             # 因子收益率的自相关系数acf和偏自相关系数pacf,默认1-10阶,结果list len=11，取1-10个数
-    #             acf_result=self.acf_result,
-    #             # 因子收益率，单利，复利, 日收益率
-    #             factor_return=factor_return,
-    #             # 单因子检测的T值, Series, index为时间
-    #             factor_t_value=factor_t_value,
-    #             # 单因子检测的T值的统计值，'t_value_mean': 绝对值均值, 't_value_greater_two':绝对值序列大于2的占比
-    #             factor_t_value_statistics=self.factor_t_value_statistics,
-    #             # 净值分析结果
-    #             net_analysis_result=self.net_analysis_result
-    #         )
-    #         doc.save()
-
 
 if __name__ == '__main__':
     factor_name = 'factor_ma5'
