@@ -99,7 +99,7 @@ class IcAnalysis(object):
         ic_greater_zero = self.ic_df > 0
         self.ic_result.loc['ic_ratio'] = self.ic_df[ic_greater_zero].count().div(ic_count)
 
-        ic_abs = ic_analysis_obj.ic_df.abs()
+        ic_abs = self.ic_df.abs()
         self.ic_result.loc['ic_abs_ratio'] = ic_abs[ic_abs > 0.02].count().div(ic_count)
 
         self.ic_result.loc['ic_skewness'] = self.ic_df.skew()
