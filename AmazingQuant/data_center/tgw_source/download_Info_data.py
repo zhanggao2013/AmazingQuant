@@ -143,6 +143,22 @@ class DownloadInfoData(object):
         save_data_to_hdf5(path, 'floatshareholder', shareholder_df[shareholder_df['HOLDER_TYPE'] == 20])
         return shareholder_df
 
+    def download_hist_codelist(self):
+        """
+        历史股票列表(含期货期权、指数) A010010007
+        """
+        task_id = tgw.GetTaskID()
+        tgw.SetThirdInfoParam(task_id, "function_id", 'A010010008')
+        tgw.SetThirdInfoParam(task_id, "start_date", "20121231")
+        tgw.SetThirdInfoParam(task_id, "end_date", "20991231")
+        df, error = tgw.QueryThirdInfo(task_id)
+        # shareholder_df, error_code_list = self.download_info_data('A010010007', para_code_list='stock_list', para_date=True)
+        # folder_name = LocalDataFolderName.FINANCE.value
+        # path = LocalDataPath.path + folder_name + '/'
+        # save_data_to_hdf5(path, 'shareholder', shareholder_df[shareholder_df['HOLDER_TYPE'] == 10])
+        # save_data_to_hdf5(path, 'floatshareholder', shareholder_df[shareholder_df['HOLDER_TYPE'] == 20])
+        return df
+
 
 if __name__ == '__main__':
     tgw_login()
@@ -151,10 +167,12 @@ if __name__ == '__main__':
     info_data_object = DownloadInfoData(tgw_api_object)
     # industry_class_df = info_data_object.download_industry_class()
     # index_member_df = info_data_object.download_index_member()
-    shareholder_df = info_data_object.download_10_shareholder()
+    # shareholder_df = info_data_object.download_10_shareholder()
     # sw_index_member_df = info_data_object.download_sw_index_member()
     # info_data_object.download_stock_struction()
     # result = info_data_object.download_finance_data()
+    result = info_data_object.download_hist_codelist()
+
 
     # folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
     # path = LocalDataPath.path + folder_name + '/'
