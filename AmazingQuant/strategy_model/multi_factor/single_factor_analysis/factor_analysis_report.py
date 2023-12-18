@@ -14,6 +14,7 @@ from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 
 from AmazingQuant.strategy_model.multi_factor.single_factor_analysis.ic_analysis import IcAnalysis
 from AmazingQuant.strategy_model.multi_factor.single_factor_analysis.regression_analysis import RegressionAnalysis
+from AmazingQuant.strategy_model.multi_factor.single_factor_analysis.stratification_analysis import StratificationAnalysis
 
 
 class FactorAnalysis(object):
@@ -38,7 +39,7 @@ class FactorAnalysis(object):
         ic_analysis_obj.save_ic_analysis_result(path, factor_name)
 
     def regression_analysis(self):
-        regression_analysis_obj = RegressionAnalysis(self.factor, 'factor_name',
+        regression_analysis_obj = RegressionAnalysis(self.factor, self.factor_name,
                                                      self.market_close_data, self.benchmark_df)
         regression_analysis_obj.cal_factor_return('float_value_inverse')
         regression_analysis_obj.cal_t_value_statistics()
@@ -46,6 +47,11 @@ class FactorAnalysis(object):
         regression_analysis_obj.cal_acf()
 
         regression_analysis_obj.save_regression_analysis_result(path, factor_name)
+
+    def stratification_analysis(self):
+        group_num = 5
+        stratification_analysis_obj = StratificationAnalysis(self.factor, self.factor_name, group_num=group_num)
+        stratification_analysis_obj.group_analysis()
 
 
 if __name__ == '__main__':
@@ -55,6 +61,7 @@ if __name__ == '__main__':
     factor_ma5 = factor_ma5.iloc[:-50, :]
 
     factor_analysis_obj = FactorAnalysis(factor_ma5, factor_name)
-    # factor_analysis_obj.ic_analysis()
+    factor_analysis_obj.ic_analysis()
     factor_analysis_obj.regression_analysis()
+    factor_analysis_obj.stratification_analysis()
 

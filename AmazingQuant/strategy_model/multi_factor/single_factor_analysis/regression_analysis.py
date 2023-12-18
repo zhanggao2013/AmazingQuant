@@ -110,7 +110,7 @@ class RegressionAnalysis(object):
             if method == 'float_value_inverse':
                 weights = (1. / share_data_in_date['float_a_share_value'])
                 weights[np.isinf(weights)] = 0
-                print(stock_return, x)
+                # print(stock_return, x)
                 wls_model = sm.WLS(stock_return, x, weights=weights)
             elif method == 'float_value_square_root':
                 weights = share_data_in_date['float_a_share_value'].values ** 0.5
