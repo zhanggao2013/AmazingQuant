@@ -22,6 +22,7 @@ class DownloadInfoData(object):
     def __init__(self, tgw_api_object):
         self.tgw_api_object = tgw_api_object
         self.code_list = []
+        self.calendar_index = []
 
     def get_code_list(self, para_code_list='stock_list'):
         if para_code_list == 'stock_list':
@@ -31,6 +32,9 @@ class DownloadInfoData(object):
         elif para_code_list == 'sw_index_list':
             self.code_list = sw_industry_one.keys()
         return self.code_list
+
+    def get_calendar_index(self):
+        self.calendar_index = self.tgw_api_object.get_calendar()
 
     def download_info_data(self, id, para_code_list='stock_list', para_date=False):
         num = 1
@@ -143,27 +147,51 @@ class DownloadInfoData(object):
         save_data_to_hdf5(path, 'floatshareholder', shareholder_df[shareholder_df['HOLDER_TYPE'] == 20])
         return shareholder_df
 
-    def download_hist_codelist(self):
+    def download_hist_codelist(self, id='A010010008', interval=250):
         """
-        历史股票列表(含期货期权、指数) A010010007
+        历史代码列表(含期货、期权、指数) A010010007
+        历史代码列表(含期货、期权、指数) A010010008
         """
-        task_id = tgw.GetTaskID()
-        tgw.SetThirdInfoParam(task_id, "function_id", 'A010010008')
-        tgw.SetThirdInfoParam(task_id, "start_date", "20121231")
-        tgw.SetThirdInfoParam(task_id, "end_date", "20991231")
-        df, error = tgw.QueryThirdInfo(task_id)
-        # shareholder_df, error_code_list = self.download_info_data('A010010007', para_code_list='stock_list', para_date=True)
-        # folder_name = LocalDataFolderName.FINANCE.value
-        # path = LocalDataPath.path + folder_name + '/'
-        # save_data_to_hdf5(path, 'shareholder', shareholder_df[shareholder_df['HOLDER_TYPE'] == 10])
-        # save_data_to_hdf5(path, 'floatshareholder', shareholder_df[shareholder_df['HOLDER_TYPE'] == 20])
-        return df
+        self.calendar_index = self.tgw_api_object.get_calendar()
+        calendar_list = []
+        error_code_list = []
+        result = []
+        num = 0
+        for i in range(0, len(self.calendar_index), interval):
+            start_date = str(self.calendar_index[i])
+            try:
+                end_date = str(self.calendar_index[i + interval - 1])
+            except IndexError:
+                end_date = str(self.calendar_index[-1])
+            calendar_list.append([start_date, end_date])
+        for date_list in calendar_list:
+            print(id, date_list, num)
+            num += 1
+            task_id = tgw.GetTaskID()
+            tgw.SetThirdInfoParam(task_id, "function_id", id)
+            tgw.SetThirdInfoParam(task_id, "start_date", date_list[0])
+            tgw.SetThirdInfoParam(task_id, "end_date", date_list[1])
+            df, error = tgw.QueryThirdInfo(task_id)
+            result.append(df)
+            if error != 0:
+                error_code_list.append(date_list)
+                print('error', type(error), error, date_list)
+        result_df = pd.concat(result)
+        result_df.drop_duplicates(subset=['MARKET_CODE'], inplace=True)
+
+        folder_name = LocalDataFolderName.FINANCE.value
+        path = LocalDataPath.path + folder_name + '/'
+        if id == 'A010010007':
+            save_data_to_hdf5(path, 'hist_codelist1', result_df)
+        elif id == 'A010010008':
+            save_data_to_hdf5(path, 'hist_codelist2', result_df)
+
+        return result_df, error_code_list
 
 
 if __name__ == '__main__':
     tgw_login()
     tgw_api_object = TgwApiData(20991231)
-    calendar_index = tgw_api_object.get_calendar()
     info_data_object = DownloadInfoData(tgw_api_object)
     # industry_class_df = info_data_object.download_industry_class()
     # index_member_df = info_data_object.download_index_member()
@@ -171,7 +199,8 @@ if __name__ == '__main__':
     # sw_index_member_df = info_data_object.download_sw_index_member()
     # info_data_object.download_stock_struction()
     # result = info_data_object.download_finance_data()
-    result = info_data_object.download_hist_codelist()
+    hist_codelist1 = info_data_object.download_hist_codelist(id='A010010007')
+    hist_codelist2 = info_data_object.download_hist_codelist(id='A010010008')
 
 
     # folder_name = LocalDataFolderName.INDUSTRY_CLASS.value

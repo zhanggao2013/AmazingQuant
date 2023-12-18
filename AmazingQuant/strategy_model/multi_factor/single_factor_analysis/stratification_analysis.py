@@ -66,7 +66,7 @@ class StratificationStrategy(StrategyBase):
         """
         用户定义类变量
         取本地数据
-        :param strategy_name:
+        :param strategy_name
         """
         super().__init__(strategy_name=strategy_name)
         self.strategy_name = strategy_name
