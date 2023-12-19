@@ -188,7 +188,7 @@ if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/' + factor_name + '/'
     factor_ma5 = get_local_data(path, factor_name + '_pre' + '.h5')
     # 指数数据不全，需要删一部分因子数据
-    factor_ma5 = factor_ma5[factor_ma5.index < datetime(2013, 5, 1)]
+    # factor_ma5 = factor_ma5[factor_ma5.index < datetime(2013, 5, 1)]
     # 指数数据不全，需要删一部分因子数据
     factor_ma5 = factor_ma5[factor_ma5.index > datetime(2013, 2, 1)]
     group_num = 5

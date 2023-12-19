@@ -63,7 +63,8 @@ class IcAnalysis(object):
 
     def cal_ic_df(self, method='spearmanr'):
         """
-        method = {‘pearsonr’, ‘spearmanr’}
+        method = {‘pearsonr’,:皮尔逊相关系数，非排名类因子
+                  ‘spearmanr’:斯皮尔曼相关系数，排名类因子}
         :param method:
         :return:
         """

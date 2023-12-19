@@ -32,24 +32,37 @@ class FactorAnalysis(object):
         self.benchmark_df = kline_object.get_market_data(all_index_data, stock_code=[self.benchmark_code],
                                                          field=['close']).to_frame(name='close')
 
-    def ic_analysis(self):
+    def ic_analysis(self, corr_method='spearmanr'):
+        """
+        corr_method = {‘pearsonr’,:皮尔逊相关系数，非排名类因子
+                    ‘spearmanr’:斯皮尔曼相关系数，排名类因子}
+        """
         ic_analysis_obj = IcAnalysis(self.factor, self.factor_name, self.market_close_data)
-        ic_analysis_obj.cal_ic_df(method='spearmanr')
+        ic_analysis_obj.cal_ic_df(method=corr_method)
         ic_analysis_obj.cal_ic_indicator()
         ic_analysis_obj.save_ic_analysis_result(path, factor_name)
 
-    def regression_analysis(self):
+    def regression_analysis(self, wls_weight_method='float_value_inverse', nlags=10):
+        """
+        以流通市值平方根或者流通市值的倒数为权重做WLS（加权最小二乘法估计）,
+        wls_weight_method = {‘float_value_inverse’：流通市值的倒数,
+                             ‘float_value_square_root’：流通市值的倒数}
+
+        nlags: 因子收益率的自相关系数acf和偏自相关系数pacf，的阶数
+        """
         regression_analysis_obj = RegressionAnalysis(self.factor, self.factor_name,
                                                      self.market_close_data, self.benchmark_df)
-        regression_analysis_obj.cal_factor_return('float_value_inverse')
+        regression_analysis_obj.cal_factor_return(method=wls_weight_method)
         regression_analysis_obj.cal_t_value_statistics()
         regression_analysis_obj.cal_net_analysis()
-        regression_analysis_obj.cal_acf()
+        regression_analysis_obj.cal_acf(nlags=nlags)
 
         regression_analysis_obj.save_regression_analysis_result(path, factor_name)
 
-    def stratification_analysis(self):
-        group_num = 5
+    def stratification_analysis(self, group_num=5):
+        """
+        group_num，分组组数
+        """
         stratification_analysis_obj = StratificationAnalysis(self.factor, self.factor_name, group_num=group_num)
         stratification_analysis_obj.group_analysis()
 
@@ -61,7 +74,10 @@ if __name__ == '__main__':
     factor_ma5 = factor_ma5.iloc[:-50, :]
 
     factor_analysis_obj = FactorAnalysis(factor_ma5, factor_name)
+    print('-'*20, 'ic_analysis',  '-'*20)
     factor_analysis_obj.ic_analysis()
+    print('-'*20, 'regression_analysis',  '-'*20)
     factor_analysis_obj.regression_analysis()
+    print('-'*20, 'stratification_analysis',  '-'*20)
     factor_analysis_obj.stratification_analysis()
 

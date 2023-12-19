@@ -9,7 +9,7 @@
 
 """
 回归法分析
-以流通市值平方根或者市值的倒数为权重做WLS,
+以流通市值平方根或者市值的倒数为权重做WLS（加权最小二乘法估计）,
 将因子T期的因子暴露与T+1期股票收益，加权最小二乘法估计因子收益率，得到T-1个数据的因子收益率序列。
 
 (1)单因子回归方程系数T检验值的绝对值均值，通常该值大于2认为是理想的结果，表明因子对收益率的影响显著性程度较高；
@@ -72,7 +72,8 @@ class RegressionAnalysis(object):
 
     def cal_factor_return(self, method='float_value_inverse'):
         """
-        method = {‘float_value_inverse’, ‘float_value_square_root’}
+        以流通市值平方根或者流通市值的倒数为权重做WLS（加权最小二乘法估计）,
+        method = {‘float_value_inverse’：流通市值的倒数, ‘float_value_square_root’：流通市值的倒数}
         :param method:
         :return:
         """
@@ -96,7 +97,8 @@ class RegressionAnalysis(object):
             index_class_in_date = index_class_obj.get_index_class_in_date(index_list[index]).reindex(
                 stock_list).sort_index()
 
-            share_data_in_date = share_data.loc[index_list[index]].reindex(stock_list).dropna()
+            share_data_in_date = share_data.loc[index_list[index]].reindex(stock_list).fillna(0)
+            # print(share_data_in_date[stock_list])
             share_data_in_date = pd.DataFrame({'float_a_share_value': share_data_in_date[stock_list].sort_index()})
             factor_data = pd.DataFrame({self.factor_name: factor_data[stock_list].sort_index()})
 
@@ -107,10 +109,11 @@ class RegressionAnalysis(object):
                 continue
             wls_model = None
             weights = None
+            x = x.fillna(0)
             if method == 'float_value_inverse':
                 weights = (1. / share_data_in_date['float_a_share_value'])
                 weights[np.isinf(weights)] = 0
-                # print(stock_return, x)
+                # print(stock_return, x['801020.SI'], x.columns)
                 wls_model = sm.WLS(stock_return, x, weights=weights)
             elif method == 'float_value_square_root':
                 weights = share_data_in_date['float_a_share_value'].values ** 0.5
@@ -151,6 +154,9 @@ class RegressionAnalysis(object):
         return self.net_analysis_result
 
     def cal_acf(self, nlags=10):
+        """
+        nlags: 因子收益率的自相关系数acf和偏自相关系数pacf，的阶数
+        """
         for i in ['cumsum', 'cumprod']:
             net_value = self.factor_return[i]
             self.acf_result[i]['acf'] = stattools.acf(net_value.dropna().values, fft=False, nlags=nlags)[1:]
@@ -182,7 +188,7 @@ if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/' + factor_name + '/'
     factor_ma5 = get_local_data(path, factor_name + '_pre' + '.h5')
     # 指数数据不全，需要删一部分因子数据
-    factor_ma5 = factor_ma5[factor_ma5.index < datetime.datetime(2016, 1, 1)]
+    factor_ma5 = factor_ma5[factor_ma5.index > datetime.datetime(2019, 1, 1)]
 
     kline_object = GetKlineData()
     market_data = kline_object.cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value, field=['close'])
