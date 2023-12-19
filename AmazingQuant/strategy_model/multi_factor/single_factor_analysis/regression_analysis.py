@@ -192,9 +192,7 @@ if __name__ == '__main__':
     all_index_data = kline_object.cache_all_index_data()
     benchmark_df = kline_object.get_market_data(all_index_data, stock_code=['000300.SH'],
                                                 field=['close']).to_frame(name='close')
-    # 沪深300 的日线，有脏数据，后续单独处理
-    # if datetime.datetime(2016, 1, 1) in benchmark_df.index:
-    #     benchmark_df = benchmark_df.drop(datetime.datetime(2016, 1, 1))
+
     regression_analysis_obj = RegressionAnalysis(factor_ma5, 'factor_name', market_close_data, benchmark_df)
     regression_analysis_obj.cal_factor_return('float_value_inverse')
     regression_analysis_obj.cal_t_value_statistics()
