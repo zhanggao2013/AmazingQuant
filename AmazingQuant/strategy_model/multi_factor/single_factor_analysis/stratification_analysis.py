@@ -42,6 +42,7 @@ class StratificationAnalysis(object):
     def add_group(self, ascending=True):
         # 升序排列，按照出现顺序
         factor_rank = self.factor.rank(axis=1, method='first', ascending=ascending, na_option='keep')
+        print(factor_rank)
         self.factor_group = factor_rank.apply(lambda x: pd.cut(x, self.group_num, labels=self.group_key), axis=1)
 
     def cal_group_hold(self, group_name):
@@ -51,7 +52,7 @@ class StratificationAnalysis(object):
         self.add_group()
         for i in range(self.group_num):
             strategy_name = 'group_' + str(i)
-            group_hold = self.cal_group_hold(stratification_analysis_obj.group_key[i])
+            group_hold = self.cal_group_hold(self.group_key[i])
             stratification_strategy = StratificationStrategy(group_hold, strategy_name=strategy_name)
             stratification_strategy.run(save_trade_record=True, cal_all=False)
             self.group_net_analysis_result[strategy_name] = stratification_strategy.net_analysis_result
