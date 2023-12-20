@@ -56,8 +56,8 @@ class ShowResult(object):
     def line_net_value(self):
         """
         收益
-        net_value_df'（净值曲线）
-        benchmark_df'（净值曲线）
+        net_value_df（净值曲线）
+        benchmark_df（净值曲线）
         """
         net_value_list = list(self.net_analysis_result['net_value_df'].round(4)['net_value'])
         benchmark_list = list(self.net_analysis_result['benchmark_df'].round(4)['net_value'])

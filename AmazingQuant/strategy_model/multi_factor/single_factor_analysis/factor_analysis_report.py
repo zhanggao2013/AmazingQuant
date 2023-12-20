@@ -79,16 +79,37 @@ class FactorAnalysis(object):
         self.stratification_analysis_obj.group_analysis()
         return self.stratification_analysis_obj
 
+    def table_factor_information(self):
+        """
+        因子评价的总体概要
+        """
+        date_list = list(self.factor.index.astype('str'))
+        indicator_dict = {}
+        indicator_dict["因子名称"] = self.factor_name
+        indicator_dict["开始时间"] = min(date_list)
+        indicator_dict["结束时间"] = max(date_list)
+        table_factor_information = Table()
+        headers = ["指标"]
+        rows = [["数据"]]
+        for key, value in indicator_dict.items():
+            headers.append(key)
+            rows[0].append(value)
+        table_factor_information.add(headers, rows)
+        table_factor_information.set_global_opts(title_opts=ComponentTitleOpts(title='因子评价的总体概要'))
+        return table_factor_information
+
     def show_page(self, save_path_dir=''):
         page = Page()
 
-        table_strategy_information = self.table_strategy_information()
-        page.add(table_strategy_information)
+        table_factor_information = self.table_factor_information()
+        page.add(table_factor_information)
 
-        net_value_line = self.line_net_value()
-        page.add(net_value_line)
+        # net_value_line = self.line_net_value()
+        # page.add(net_value_line)
+        #
+        # table_net_value = self.table_net_value()
 
-        table_net_value = self.table_net_value()
+        page.render(save_path_dir + "因子评价报告.html")
 
 
 if __name__ == '__main__':
@@ -97,7 +118,8 @@ if __name__ == '__main__':
     factor_ma5 = get_local_data(path, factor_name + '_pre' + '.h5')
 
     factor_ma5 = factor_ma5[factor_ma5.index > datetime(2013, 2, 1)]
-    factor_ma5 = factor_ma5.iloc[:-50, :]
+    factor_ma5 = factor_ma5[factor_ma5.index < datetime(2013, 4, 1)]
+    # factor_ma5 = factor_ma5.iloc[:-50, :]
 
     factor_analysis_obj = FactorAnalysis(factor_ma5, factor_name)
     print('-'*20, 'ic_analysis',  '-'*20)
@@ -106,4 +128,4 @@ if __name__ == '__main__':
     regression_analysis_obj = factor_analysis_obj.regression_analysis()
     print('-'*20, 'stratification_analysis',  '-'*20)
     stratification_analysis_obj = factor_analysis_obj.stratification_analysis()
-
+    factor_analysis_obj.show_page(path)

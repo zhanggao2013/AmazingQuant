@@ -49,7 +49,8 @@ class DataHandler(tgw.IPushSpi):
             if not self.queue.empty():
                 data = self.queue.get()
                 data_queue = data.copy()
-                print('security_code', data_queue[0]['security_code'])
+                # print('security_code', data_queue)
+                print('security_code:', data_queue[0]['security_code'])
                 global security_code_list
                 global market_type_list
                 if data_queue[0]['security_code'] not in security_code_list:
@@ -104,9 +105,6 @@ if __name__ == "__main__":
     tgw_api_object = TgwApiData(20991231)
     code_sh_list, code_sz_list = tgw_api_object.get_code_list()
     print(len(code_sh_list), len(code_sz_list))
-    sub_item_list = []
-    data_hander = DataHandler()
-    data_hander.SetDfFormat(False)
 
     # 订阅可转债
     for market_type in [tgw.MarketType.kSZSE, tgw.MarketType.kSSE]:
@@ -117,7 +115,7 @@ if __name__ == "__main__":
         sub_item.market = market_type
         # 订阅
         data_handler = DataHandler()
-        data_handler.SetDfFormat(True)
+        data_handler.SetDfFormat(False)
         success = tgw.Subscribe(sub_item, data_handler)
         if success != tgw.ErrorCode.kSuccess:
             print(tgw.GetErrorMsg(success))
