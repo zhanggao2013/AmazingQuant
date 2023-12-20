@@ -7,6 +7,12 @@
 # @Project : AmazingQuant 
 # ------------------------------
 from datetime import datetime
+
+from pyecharts.charts import Bar, Line, Page, Timeline
+from pyecharts import options as opts
+from pyecharts.components import Table
+from pyecharts.options import ComponentTitleOpts
+
 from AmazingQuant.constant import LocalDataFolderName, RightsAdjustment
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.utils.get_data import get_local_data
@@ -23,6 +29,10 @@ class FactorAnalysis(object):
         self.factor_name = factor_name
         self.benchmark_code = benchmark_code
 
+        self.stratification_analysis_obj = None
+        self.regression_analysis_obj = None
+        self.ic_analysis_obj = None
+
         kline_object = GetKlineData()
         market_data = kline_object.cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value, field=['close'])
         self.market_close_data = kline_object.get_market_data(market_data, field=['close'])
@@ -37,10 +47,11 @@ class FactorAnalysis(object):
         corr_method = {‘pearsonr’,:皮尔逊相关系数，非排名类因子
                     ‘spearmanr’:斯皮尔曼相关系数，排名类因子}
         """
-        ic_analysis_obj = IcAnalysis(self.factor, self.factor_name, self.market_close_data)
-        ic_analysis_obj.cal_ic_df(method=corr_method)
-        ic_analysis_obj.cal_ic_indicator()
-        ic_analysis_obj.save_ic_analysis_result(path, factor_name)
+        self.ic_analysis_obj = IcAnalysis(self.factor, self.factor_name, self.market_close_data)
+        self.ic_analysis_obj.cal_ic_df(method=corr_method)
+        self.ic_analysis_obj.cal_ic_indicator()
+        self.ic_analysis_obj.save_ic_analysis_result(path, factor_name)
+        return self.ic_analysis_obj
 
     def regression_analysis(self, wls_weight_method='float_value_inverse', nlags=10):
         """
@@ -50,21 +61,34 @@ class FactorAnalysis(object):
 
         nlags: 因子收益率的自相关系数acf和偏自相关系数pacf，的阶数
         """
-        regression_analysis_obj = RegressionAnalysis(self.factor, self.factor_name,
+        self.regression_analysis_obj = RegressionAnalysis(self.factor, self.factor_name,
                                                      self.market_close_data, self.benchmark_df)
-        regression_analysis_obj.cal_factor_return(method=wls_weight_method)
-        regression_analysis_obj.cal_t_value_statistics()
-        regression_analysis_obj.cal_net_analysis()
-        regression_analysis_obj.cal_acf(nlags=nlags)
+        self.regression_analysis_obj.cal_factor_return(method=wls_weight_method)
+        self.regression_analysis_obj.cal_t_value_statistics()
+        self.regression_analysis_obj.cal_net_analysis()
+        self.regression_analysis_obj.cal_acf(nlags=nlags)
 
-        regression_analysis_obj.save_regression_analysis_result(path, factor_name)
+        self.regression_analysis_obj.save_regression_analysis_result(path, factor_name)
+        return self.regression_analysis_obj
 
     def stratification_analysis(self, group_num=5):
         """
         group_num，分组组数
         """
-        stratification_analysis_obj = StratificationAnalysis(self.factor, self.factor_name, group_num=group_num)
-        stratification_analysis_obj.group_analysis()
+        self.stratification_analysis_obj = StratificationAnalysis(self.factor, self.factor_name, group_num=group_num)
+        self.stratification_analysis_obj.group_analysis()
+        return self.stratification_analysis_obj
+
+    def show_page(self, save_path_dir=''):
+        page = Page()
+
+        table_strategy_information = self.table_strategy_information()
+        page.add(table_strategy_information)
+
+        net_value_line = self.line_net_value()
+        page.add(net_value_line)
+
+        table_net_value = self.table_net_value()
 
 
 if __name__ == '__main__':
@@ -77,9 +101,9 @@ if __name__ == '__main__':
 
     factor_analysis_obj = FactorAnalysis(factor_ma5, factor_name)
     print('-'*20, 'ic_analysis',  '-'*20)
-    factor_analysis_obj.ic_analysis()
+    ic_analysis_obj = factor_analysis_obj.ic_analysis()
     print('-'*20, 'regression_analysis',  '-'*20)
-    factor_analysis_obj.regression_analysis()
+    regression_analysis_obj = factor_analysis_obj.regression_analysis()
     print('-'*20, 'stratification_analysis',  '-'*20)
-    factor_analysis_obj.stratification_analysis()
+    stratification_analysis_obj = factor_analysis_obj.stratification_analysis()
 
