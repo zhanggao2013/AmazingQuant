@@ -89,6 +89,9 @@ class IcAnalysis(object):
                 p_value_dict[self.column_prefix + str(ic_decay + 1)] = p_value
             self.ic_df = pd.concat([self.ic_df, pd.DataFrame(ic_dict, index=[self.factor.index[index]])])
             self.p_value_df = pd.concat([self.p_value_df, pd.DataFrame(p_value_dict, index=[self.factor.index[index]])])
+
+        self.ic_df = self.ic_df.applymap(lambda x: round(x, 2))
+        self.p_value_df = self.p_value_df.applymap(lambda x: round(x, 4))
         return self.ic_df, self.p_value_df
 
     def cal_ic_indicator(self):
@@ -115,6 +118,7 @@ class IcAnalysis(object):
 
         self.ic_result.loc['ic_change_ratio'] = ic_change_num.div(ic_count) * 100
         self.ic_result.loc['ic_unchange_ratio'] = (ic_count - ic_change_num).div(ic_count) * 100
+        self.ic_result = self.ic_result.applymap(lambda x: round(x, 2))
 
     def save_ic_analysis_result(self, path, factor_name):
         # IC信号衰减计算，index 是时间序列， columns是decay周期，[1, self.ic_decay], 闭区间

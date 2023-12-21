@@ -109,7 +109,7 @@ class FactorAnalysis(object):
         #
         # table_net_value = self.table_net_value()
 
-        page.render(save_path_dir + "因子评价报告.html")
+        page.render(save_path_dir + self.factor_name + "_因子评价报告.html")
 
 
 if __name__ == '__main__':
@@ -124,8 +124,9 @@ if __name__ == '__main__':
     factor_analysis_obj = FactorAnalysis(factor_ma5, factor_name)
     print('-'*20, 'ic_analysis',  '-'*20)
     ic_analysis_obj = factor_analysis_obj.ic_analysis()
-    print('-'*20, 'regression_analysis',  '-'*20)
-    regression_analysis_obj = factor_analysis_obj.regression_analysis()
-    print('-'*20, 'stratification_analysis',  '-'*20)
-    stratification_analysis_obj = factor_analysis_obj.stratification_analysis()
-    factor_analysis_obj.show_page(path)
+    # print('-'*20, 'regression_analysis',  '-'*20)
+    # regression_analysis_obj = factor_analysis_obj.regression_analysis()
+    # print('-'*20, 'stratification_analysis',  '-'*20)
+    # stratification_analysis_obj = factor_analysis_obj.stratification_analysis()
+    # factor_analysis_obj.show_page(path)
+
