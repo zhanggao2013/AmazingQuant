@@ -509,7 +509,7 @@ class ShowResult(object):
         return bar_trade_num_times
 
     def show_page(self, save_path_dir=''):
-        page = Page()
+        page = Page(page_title='回测分析报告')
 
         table_strategy_information = self.table_strategy_information()
         page.add(table_strategy_information)

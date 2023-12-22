@@ -11,7 +11,7 @@ from datetime import datetime
 from pyecharts.charts import Bar, Line, Page, Timeline
 from pyecharts import options as opts
 from pyecharts.components import Table
-from pyecharts.options import ComponentTitleOpts
+from pyecharts.options import ComponentTitleOpts, InitOpts
 
 from AmazingQuant.constant import LocalDataFolderName, RightsAdjustment
 from AmazingQuant.config.local_data_path import LocalDataPath
@@ -103,18 +103,17 @@ class FactorAnalysis(object):
         table_factor_information.set_global_opts(title_opts=ComponentTitleOpts(title='因子评价的总体概要'))
         return table_factor_information
 
+    # IC分析
     def table_ic_result(self):
         """
         ic_result
         """
-        date_list = list(self.ic_analysis_obj.ic_result.index.astype('str'))
-
         table_ic_result = Table()
         indicator_dict = {'ic_mean': 'IC均值', 'ic_std': 'IC标准差', 'ic_ir': 'IC_IR比率', 'ic_ratio': 'IC>0占比',
                           'ic_abs_ratio': '|IC|>0.02占比', 'ic_skewness': '偏度', 'ic_kurtosis': '峰度',
                           'ic_positive_ratio': '正相关显著比例', 'ic_negative_ratio': '负相关显著比例',
                           'ic_change_ratio': '状态切换比例', 'ic_unchange_ratio': '同向比例'}
-        headers = ["衰减周期"] + [str(i+1) + '日' for i in range(self.ic_decay)]
+        headers = ["衰减周期"] + [str(i + 1) + '日' for i in range(self.ic_decay)]
         rows = []
         ic_result = self.ic_analysis_obj.ic_result.applymap(lambda x: format(x, '.4f'))
         for key, value in indicator_dict.items():
@@ -124,17 +123,102 @@ class FactorAnalysis(object):
         table_ic_result.set_global_opts(title_opts=ComponentTitleOpts(title='IC分析结果'))
         return table_ic_result
 
+    def line_ic(self):
+        """
+        IC时序图
+        """
+        date_list = list(self.ic_analysis_obj.ic_df.index.astype('str'))
+        selected_map_dict = {str(i+1)+'日': False for i in range(self.ic_decay) if 'delay_' + str(i+1) != 'delay_1'}
+        line_ic = Bar() \
+            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
+                             markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")])) \
+            .set_global_opts(title_opts=opts.TitleOpts(title="IC时序图",
+                                                       subtitle="衰减周期：" + str(self.ic_decay)),  # 标题
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100),
+                             legend_opts=opts.LegendOpts(orient='vertical',
+                                                         pos_bottom='bottom',
+                                                         pos_top='top',
+                                                         pos_left='right',
+                                                         pos_right='right',
+                                                         selected_map=selected_map_dict
+                                                         ))  # 设置Y轴范围
+        for i in range(self.ic_decay):
+            ic_list = list(self.ic_analysis_obj.ic_df['delay_' + str(i + 1)].round(4))
+            line_ic = line_ic \
+                .add_xaxis(date_list) \
+                .add_yaxis(str(i + 1) + "日", ic_list)
+
+        return line_ic
+
+    def line_ic_p_value(self):
+        """
+        IC检测时序图
+        """
+        date_list = list(self.ic_analysis_obj.p_value_df.index.astype('str'))
+        selected_map_dict = {str(i+1)+'日': False for i in range(self.ic_decay) if 'delay_' + str(i+1) != 'delay_1'}
+        line_ic_p_value = Bar() \
+            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
+                             markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")])) \
+            .set_global_opts(title_opts=opts.TitleOpts(title="IC检测P值时序图",
+                                                       subtitle="衰减周期：" + str(self.ic_decay)),  # 标题
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100),
+                             legend_opts=opts.LegendOpts(orient='vertical',
+                                                         pos_bottom='bottom',
+                                                         pos_top='top',
+                                                         pos_left='right',
+                                                         pos_right='right',
+                                                         selected_map=selected_map_dict
+                                                         ))  # 设置Y轴范围
+        for i in range(self.ic_decay):
+            ic_p_value_list = list(self.ic_analysis_obj.p_value_df['delay_' + str(i + 1)].round(4))
+            line_ic_p_value = line_ic_p_value \
+                .add_xaxis(date_list) \
+                .add_yaxis(str(i + 1) + "日", ic_p_value_list)
+        return line_ic_p_value
+
+    # 回归分析
+    def line_net_value(self):
+        """
+        收益
+        net_value_df（净值曲线）
+        benchmark_df（净值曲线）
+        """
+        net_value_list = list(self.net_analysis_result['net_value_df'].round(4)['net_value'])
+        benchmark_list = list(self.net_analysis_result['benchmark_df'].round(4)['net_value'])
+        all_list = net_value_list + benchmark_list
+        net_value_line = Line() \
+            .add_xaxis(list(self.net_analysis_result['net_value_df'].index.astype('str'))) \
+            .add_yaxis("策略净值曲线", net_value_list,
+                       markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
+            .add_yaxis("基准净值曲线", benchmark_list,
+                       markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
+            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
+                             markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")])) \
+            .set_global_opts(title_opts=opts.TitleOpts(title="净值曲线",
+                                                       subtitle="策略净值为：" + str(net_value_list[-1]) + "\n" +
+                                                                "基准净值为：" + str(benchmark_list[-1])),  # 标题
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
+                             yaxis_opts=opts.AxisOpts(min_=math.ceil(min(all_list) * 90) / 100,
+                                                      max_=int(max(all_list) * 110) / 100),
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )  # 设置Y轴范围
+        return net_value_line
+
     def show_page(self, save_path_dir=''):
-        page = Page()
+        page = Page(page_title='因子评价报告')
 
         table_factor_information = self.table_factor_information()
+
         page.add(table_factor_information)
-        table_ic_result = self.table_ic_result()
-        page.add(table_ic_result)
-        # net_value_line = self.line_net_value()
-        # page.add(net_value_line)
+        # table_ic_result = self.table_ic_result()
+        # page.add(table_ic_result)
         #
-        # table_net_value = self.table_net_value()
+        # line_ic = self.line_ic()
+        # page.add(line_ic)
+        #
+        # line_ic_p_value = self.line_ic_p_value()
+        # page.add(line_ic_p_value)
 
         page.render(save_path_dir + self.factor_name + "_因子评价报告.html")
 
@@ -151,8 +235,8 @@ if __name__ == '__main__':
     factor_analysis_obj = FactorAnalysis(factor_ma5, factor_name)
     print('-' * 20, 'ic_analysis', '-' * 20)
     ic_analysis_obj = factor_analysis_obj.ic_analysis()
-    # print('-'*20, 'regression_analysis',  '-'*20)
-    # regression_analysis_obj = factor_analysis_obj.regression_analysis()
+    print('-'*20, 'regression_analysis',  '-'*20)
+    regression_analysis_obj = factor_analysis_obj.regression_analysis()
     # print('-'*20, 'stratification_analysis',  '-'*20)
     # stratification_analysis_obj = factor_analysis_obj.stratification_analysis()
     factor_analysis_obj.show_page(path)
