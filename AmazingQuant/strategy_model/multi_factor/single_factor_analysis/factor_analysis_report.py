@@ -6,6 +6,7 @@
 # @File    : factor_analysis_report.py 
 # @Project : AmazingQuant 
 # ------------------------------
+import math
 from datetime import datetime
 
 from pyecharts.charts import Bar, Line, Page, Timeline
@@ -128,7 +129,8 @@ class FactorAnalysis(object):
         IC时序图
         """
         date_list = list(self.ic_analysis_obj.ic_df.index.astype('str'))
-        selected_map_dict = {str(i+1)+'日': False for i in range(self.ic_decay) if 'delay_' + str(i+1) != 'delay_1'}
+        selected_map_dict = {str(i + 1) + '日': False for i in range(self.ic_decay) if
+                             'delay_' + str(i + 1) != 'delay_1'}
         line_ic = Bar() \
             .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
                              markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")])) \
@@ -156,7 +158,8 @@ class FactorAnalysis(object):
         IC检测时序图
         """
         date_list = list(self.ic_analysis_obj.p_value_df.index.astype('str'))
-        selected_map_dict = {str(i+1)+'日': False for i in range(self.ic_decay) if 'delay_' + str(i+1) != 'delay_1'}
+        selected_map_dict = {str(i + 1) + '日': False for i in range(self.ic_decay) if
+                             'delay_' + str(i + 1) != 'delay_1'}
         line_ic_p_value = Bar() \
             .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
                              markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")])) \
@@ -182,28 +185,81 @@ class FactorAnalysis(object):
     def line_net_value(self):
         """
         收益
-        net_value_df（净值曲线）
-        benchmark_df（净值曲线）
+        cumsum（累加因子净值）
+        cumprod（累乘因子净值）
+        benchmark_df（基准净值曲线）
         """
-        net_value_list = list(self.net_analysis_result['net_value_df'].round(4)['net_value'])
-        benchmark_list = list(self.net_analysis_result['benchmark_df'].round(4)['net_value'])
-        all_list = net_value_list + benchmark_list
+        cumsum_list = list(self.regression_analysis_obj.factor_return['cumsum'].round(4))
+        cumprod_list = list(self.regression_analysis_obj.factor_return['cumprod'].round(4))
+        benchmark_list = list(
+            self.regression_analysis_obj.net_analysis_result['cumsum']['benchmark_df']['net_value'].round(4))
+        all_list = cumsum_list + benchmark_list + cumprod_list
+        date_list = list(self.regression_analysis_obj.factor_return.index.astype('str'))
         net_value_line = Line() \
-            .add_xaxis(list(self.net_analysis_result['net_value_df'].index.astype('str'))) \
-            .add_yaxis("策略净值曲线", net_value_list,
+            .add_xaxis(date_list) \
+            .add_yaxis("累加因子净值", cumsum_list,
+                       markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
+            .add_yaxis("累乘因子净值", cumprod_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
             .add_yaxis("基准净值曲线", benchmark_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
             .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
                              markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")])) \
-            .set_global_opts(title_opts=opts.TitleOpts(title="净值曲线",
-                                                       subtitle="策略净值为：" + str(net_value_list[-1]) + "\n" +
+            .set_global_opts(title_opts=opts.TitleOpts(title="回归分析的净值曲线",
+                                                       subtitle="累加因子净值为：" + str(cumsum_list[-1]) + "\t"*5 +
+                                                                "累乘因子净值为：" + str(cumprod_list[-1]) + "\t"*5 +
                                                                 "基准净值为：" + str(benchmark_list[-1])),  # 标题
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
                              yaxis_opts=opts.AxisOpts(min_=math.ceil(min(all_list) * 90) / 100,
                                                       max_=int(max(all_list) * 110) / 100),
                              datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )  # 设置Y轴范围
+
+        bar_daily = Bar().add_xaxis(date_list) \
+            .add_yaxis("因子日收益率（%）",
+                       list((self.regression_analysis_obj.factor_return['daily'] * 100).round(4)),
+                       yaxis_index=1)
+        bar_daily.overlap(net_value_line)
         return net_value_line
+
+    def bar_day_profit_ratio(self):
+        """
+        daily（因子日收益率）
+        """
+        date_list = list(self.regression_analysis_obj.factor_return.index.astype('str'))
+        daily_list = list((self.regression_analysis_obj.factor_return['daily'] * 100).round(4))
+        bar_profit_ratio_day = Bar() \
+            .add_xaxis(date_list) \
+            .add_yaxis("因子日收益率（%）", daily_list) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
+                             title_opts=opts.TitleOpts(title="因子日收益率"),
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
+        return bar_profit_ratio_day
+
+    def bar_t_value(self):
+        """
+        't_value_mean': 绝对值均值, 't_value_greater_two': 绝对值序列大于2的占比
+        t_value: 时序数据
+        """
+        t_value_statistics_dict = self.regression_analysis_obj.factor_t_value_statistics.round(4).to_dict()
+        date_list = list(self.regression_analysis_obj.factor_t_value.index.astype('str'))
+        t_value_list = list(self.regression_analysis_obj.factor_t_value.round(4))
+        bar_t_value = Bar() \
+            .add_xaxis(date_list) \
+            .add_yaxis("t值", t_value_list) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
+                             title_opts=opts.TitleOpts(title="t值时序图",
+                                                       subtitle="t值的绝对值均值为：" +
+                                                                str(t_value_statistics_dict['t_value_mean']) + "\t"*5 +
+                                                                "t值的绝对值序列大于2的占比为：" +
+                                                                str(t_value_statistics_dict['t_value_mean'])),
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
+        return bar_t_value
 
     def show_page(self, save_path_dir=''):
         page = Page(page_title='因子评价报告')
@@ -211,14 +267,22 @@ class FactorAnalysis(object):
         table_factor_information = self.table_factor_information()
 
         page.add(table_factor_information)
-        # table_ic_result = self.table_ic_result()
-        # page.add(table_ic_result)
-        #
-        # line_ic = self.line_ic()
-        # page.add(line_ic)
-        #
-        # line_ic_p_value = self.line_ic_p_value()
-        # page.add(line_ic_p_value)
+        table_ic_result = self.table_ic_result()
+        page.add(table_ic_result)
+
+        line_ic = self.line_ic()
+        page.add(line_ic)
+
+        line_ic_p_value = self.line_ic_p_value()
+        page.add(line_ic_p_value)
+        net_value_line = self.line_net_value()
+        page.add(net_value_line)
+
+        bar_day_profit_ratio = self.bar_day_profit_ratio()
+        page.add(bar_day_profit_ratio)
+
+        bar_t_value = self.bar_t_value()
+        page.add(bar_t_value)
 
         page.render(save_path_dir + self.factor_name + "_因子评价报告.html")
 
@@ -235,7 +299,7 @@ if __name__ == '__main__':
     factor_analysis_obj = FactorAnalysis(factor_ma5, factor_name)
     print('-' * 20, 'ic_analysis', '-' * 20)
     ic_analysis_obj = factor_analysis_obj.ic_analysis()
-    print('-'*20, 'regression_analysis',  '-'*20)
+    print('-' * 20, 'regression_analysis', '-' * 20)
     regression_analysis_obj = factor_analysis_obj.regression_analysis()
     # print('-'*20, 'stratification_analysis',  '-'*20)
     # stratification_analysis_obj = factor_analysis_obj.stratification_analysis()

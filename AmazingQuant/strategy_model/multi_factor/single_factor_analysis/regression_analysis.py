@@ -133,9 +133,9 @@ class RegressionAnalysis(object):
             # print('*'*20)
         self.factor_t_value = pd.Series(factor_t_value_dict)
         self.factor_return_daily = pd.Series(factor_return_daily)
-        self.factor_return['cumsum'] = self.factor_return_daily.cumsum() + 1
-        self.factor_return['cumprod'] = (self.factor_return_daily.add(1)).cumprod()
-        self.factor_return['daily'] = self.factor_return_daily
+        self.factor_return['cumsum'] = (self.factor_return_daily.cumsum() + 1).fillna(1)
+        self.factor_return['cumprod'] = (self.factor_return_daily.add(1)).cumprod().fillna(1)
+        self.factor_return['daily'] = self.factor_return_daily.fillna(0)
 
     def cal_t_value_statistics(self):
         t_value_abs = self.factor_t_value.abs()
