@@ -205,9 +205,9 @@ class FactorAnalysis(object):
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
             .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
                              markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")])) \
-            .set_global_opts(title_opts=opts.TitleOpts(title="回归分析的净值曲线",
-                                                       subtitle="累加因子净值为：" + str(cumsum_list[-1]) + "\t"*5 +
-                                                                "累乘因子净值为：" + str(cumprod_list[-1]) + "\t"*5 +
+            .set_global_opts(title_opts=opts.TitleOpts(title="因子收益率—回归分析的净值曲线",
+                                                       subtitle="累加因子净值为：" + str(cumsum_list[-1]) + "\t" * 5 +
+                                                                "累乘因子净值为：" + str(cumprod_list[-1]) + "\t" * 5 +
                                                                 "基准净值为：" + str(benchmark_list[-1])),  # 标题
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
                              yaxis_opts=opts.AxisOpts(min_=math.ceil(min(all_list) * 90) / 100,
@@ -221,6 +221,77 @@ class FactorAnalysis(object):
         bar_daily.overlap(net_value_line)
         return net_value_line
 
+    def bar_t_value(self):
+        """
+        't_value_mean': 绝对值均值,
+        't_value_greater_two': 绝对值序列大于2的占比
+        't_value': 时序数据
+        """
+        t_value_statistics_dict = self.regression_analysis_obj.factor_t_value_statistics.round(4).to_dict()
+        date_list = list(self.regression_analysis_obj.factor_t_value.index.astype('str'))
+        t_value_list = list(self.regression_analysis_obj.factor_t_value.round(4))
+        bar_t_value = Bar() \
+            .add_xaxis(date_list) \
+            .add_yaxis("t值", t_value_list) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
+                             title_opts=opts.TitleOpts(title="因子收益率—t值时序图",
+                                                       subtitle="t值的绝对值均值为：" +
+                                                                str(t_value_statistics_dict[
+                                                                        't_value_mean']) + "\t" * 5 +
+                                                                "t值的绝对值序列大于2的占比为：" +
+                                                                str(t_value_statistics_dict['t_value_mean'])),
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
+        return bar_t_value
+
+    def table_net_value(self):
+        """
+        收益
+        cumsum（累加因子净值）
+        'net_year_yield'
+        'net_day_win_ratio'
+        'net_day_ratio_average'
+        'net_month_ratio_average'
+
+        cumprod（累乘因子净值）
+        'net_year_yield'
+        'net_day_win_ratio'
+        'net_day_ratio_average'
+        'net_month_ratio_average'
+
+        benchmark（基准）
+        'benchmark_year_yield'
+        'benchmark_day_win_ratio'
+        'benchmark_day_ratio_average'
+        'benchmark_month_ratio_average'
+        """
+        indicator_dict = {'net_year_yield': "年化收益率（%）",
+                          'net_day_win_ratio': "日胜率（%）",
+                          'net_day_ratio_average': "日平均收益率（%）",
+                          'net_month_ratio_average': "月平均收益率（%）", }
+        benchmark_indicator_list = ['benchmark_year_yield',
+                                    'benchmark_day_win_ratio',
+                                    'benchmark_day_ratio_average',
+                                    'benchmark_month_ratio_average']
+        table_net_value = Table()
+        headers = ["指标", "累加净值", "累乘净值", "基准净值"]
+        rows = []
+        i = 0
+        for key, value in indicator_dict.items():
+            data_list = [value,
+                         round(self.regression_analysis_obj.net_analysis_result['cumsum'][key], 2),
+                         round(self.regression_analysis_obj.net_analysis_result['cumprod'][key], 2),
+                         round(self.regression_analysis_obj.net_analysis_result['cumprod'][benchmark_indicator_list[i]],
+                               2),
+                         ]
+            i += 1
+            rows.append(data_list)
+        table_net_value.add(headers, rows)
+        table_net_value.set_global_opts(title_opts=ComponentTitleOpts(title='因子收益率—收益分析'))
+        return table_net_value
+
     def bar_day_profit_ratio(self):
         """
         daily（因子日收益率）
@@ -233,40 +304,158 @@ class FactorAnalysis(object):
             .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
-                             title_opts=opts.TitleOpts(title="因子日收益率"),
+                             title_opts=opts.TitleOpts(title="因子收益率—因子日收益率"),
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),
                              datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
         return bar_profit_ratio_day
 
-    def bar_t_value(self):
+    def bar_day_ratio_distribution(self):
         """
-        't_value_mean': 绝对值均值, 't_value_greater_two': 绝对值序列大于2的占比
-        t_value: 时序数据
+        日收益率分布
+        cumsum_net_day_ratio_distribution'（柱状图）
+        cumprod_net_day_ratio_distribution'（柱状图）
+        benchmark_day_ratio_distribution'（柱状图）
         """
-        t_value_statistics_dict = self.regression_analysis_obj.factor_t_value_statistics.round(4).to_dict()
-        date_list = list(self.regression_analysis_obj.factor_t_value.index.astype('str'))
-        t_value_list = list(self.regression_analysis_obj.factor_t_value.round(4))
-        bar_t_value = Bar() \
-            .add_xaxis(date_list) \
-            .add_yaxis("t值", t_value_list) \
+        cumsum_net_day_ratio_distribution_list = list(
+            self.regression_analysis_obj.net_analysis_result['cumsum']['net_day_ratio_distribution'].values())
+        cumprod_net_day_ratio_distribution_list = list(
+            self.regression_analysis_obj.net_analysis_result['cumprod']['net_day_ratio_distribution'].values())
+
+        benchmark_day_ratio_distribution_list = list(
+            self.regression_analysis_obj.net_analysis_result['cumsum']['benchmark_day_ratio_distribution'].values())
+        bar_day_ratio_distribution = Bar() \
+            .add_xaxis(
+            list(self.regression_analysis_obj.net_analysis_result['cumsum']['net_day_ratio_distribution'].keys())) \
+            .add_yaxis("累加因子净值（%）", [round(i * 100, 2) for i in cumsum_net_day_ratio_distribution_list],
+                       ) \
+            .add_yaxis("累乘因子净值（%）", [round(i * 100, 2) for i in cumprod_net_day_ratio_distribution_list],
+                       ) \
+            .add_yaxis("基准（%）", [round(i * 100, 2) for i in benchmark_day_ratio_distribution_list],
+                       ) \
             .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
-                             title_opts=opts.TitleOpts(title="t值时序图",
-                                                       subtitle="t值的绝对值均值为：" +
-                                                                str(t_value_statistics_dict['t_value_mean']) + "\t"*5 +
-                                                                "t值的绝对值序列大于2的占比为：" +
-                                                                str(t_value_statistics_dict['t_value_mean'])),
+                             title_opts=opts.TitleOpts(title="因子收益率—日收益率分布"),
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),
                              datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
-        return bar_t_value
+        return bar_day_ratio_distribution
+
+    def bar_month_profit_ratio(self):
+        """
+        月度收益率
+        cumsum_net_month_ratio_distribution'（柱状图）
+        cumprod_benchmark_month_ratio_distribution'（柱状图）
+        benchmark_month_ratio'（柱状图）
+        """
+        cumsum_net_month_ratio_distribution_list = list(
+            self.regression_analysis_obj.net_analysis_result['cumsum']['net_month_ratio'].values())
+        cumprod_net_ratio_distribution_list = list(
+            self.regression_analysis_obj.net_analysis_result['cumprod']['net_month_ratio'].values())
+        benchmark_month_ratio_distribution_list = list(
+            self.regression_analysis_obj.net_analysis_result['cumprod']['benchmark_month_ratio'].values())
+        bar_profit_ratio_month = Bar() \
+            .add_xaxis(list(self.regression_analysis_obj.net_analysis_result['cumsum']['net_month_ratio'].keys())) \
+            .add_yaxis("累加因子（%）", [round(i, 2) for i in cumsum_net_month_ratio_distribution_list],
+                       ) \
+            .add_yaxis("累乘因子（%）", [round(i, 2) for i in cumprod_net_ratio_distribution_list],
+                       ) \
+            .add_yaxis("基准（%）", [round(i, 2) for i in benchmark_month_ratio_distribution_list],
+                       ) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
+                             title_opts=opts.TitleOpts(title="因子收益率—月度收益率"),
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
+
+        return bar_profit_ratio_month
+
+    def line_max_drawdown(self):
+        """
+        风险
+        'cumsum_net_value_df'（最大回撤曲线）
+        'cumprod_net_value_df'（最大回撤曲线）
+        'benchmark_df'（最大回撤）
+        """
+        cumsum_drawdown_list = list(
+            self.regression_analysis_obj.net_analysis_result['cumsum']['net_value_df'].round(2)['drawdown'])
+        cumprod_drawdown_list = list(
+            self.regression_analysis_obj.net_analysis_result['cumprod']['net_value_df'].round(2)['drawdown'])
+        benchmark_drawdown_list = list(
+            self.regression_analysis_obj.net_analysis_result['cumsum']['benchmark_df'].round(2)['drawdown'])
+        cumsum_net_max_drawdown = round(self.regression_analysis_obj.net_analysis_result['cumsum']['net_max_drawdown'],
+                                        2)
+        cumprod_net_max_drawdown = round(self.regression_analysis_obj.net_analysis_result['cumsum']['net_max_drawdown'],
+                                         2)
+        benchmark_max_drawdown = round(
+            self.regression_analysis_obj.net_analysis_result['cumsum']['benchmark_max_drawdown'], 2)
+        max_drawdown_line = Line() \
+            .add_xaxis(
+            list(self.regression_analysis_obj.net_analysis_result['cumsum']['net_value_df'].index.astype('str'))) \
+            .add_yaxis("累加因子（%）", cumsum_drawdown_list,
+                       markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
+            .add_yaxis("累乘因子（%）", cumprod_drawdown_list,
+                       markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
+            .add_yaxis("基准（%）", benchmark_drawdown_list,
+                       markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
+            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.5)) \
+            .set_global_opts(title_opts=opts.TitleOpts(title="因子收益率—最大回撤分析",
+                                                       subtitle="历史最大回撤:" + "（%）\n" +
+                                                                "累加因子为：" + str(cumsum_net_max_drawdown) + "%\n" +
+                                                                "累乘因子为：" + str(cumprod_net_max_drawdown) + "%\n" +
+                                                                "基准为：" + str(benchmark_max_drawdown) + '%'),
+                             # 标题
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
+                             yaxis_opts=opts.AxisOpts(
+                                 min_=int(min(cumsum_net_max_drawdown, cumprod_net_max_drawdown,
+                                              benchmark_max_drawdown) * 110) / 100,
+                                 max_=0),
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )  # 设置Y轴范围
+        return max_drawdown_line
+
+    def table_risk(self):
+        """
+        风险
+        """
+        indicator_dict = {'net_year_volatility': "年化波动率（%）",
+                          'net_max_drawdown': "历史最大回撤（%）",
+                          'net_day_volatility': "日收益率波动率（%）",
+                          'net_month_volatility': "月收益率波动率（%）",
+                          'downside_risk': "下行风险（%）",
+                          'net_skewness': "偏度",
+                          'net_kurtosis': "峰度",
+                          }
+        benchmark_indicator_list = ['benchmark_year_volatility',
+                                    'benchmark_max_drawdown',
+                                    'benchmark_day_volatility',
+                                    'benchmark_month_volatility',
+                                    "benchmark_downside_risk",
+                                    'benchmark_skewness',
+                                    'benchmark_kurtosis',
+                                    ]
+        table_risk_value = Table()
+        headers = ["指标", "累加净值", "累乘净值", "基准净值"]
+        rows = []
+        i = 0
+        for key, value in indicator_dict.items():
+            data_list = [value,
+                         round(self.regression_analysis_obj.net_analysis_result['cumsum'][key], 2),
+                         round(self.regression_analysis_obj.net_analysis_result['cumprod'][key], 2),
+                         round(self.regression_analysis_obj.net_analysis_result['cumprod'][benchmark_indicator_list[i]],
+                               2),
+                         ]
+            i += 1
+            rows.append(data_list)
+        table_risk_value.add(headers, rows)
+        table_risk_value.set_global_opts(title_opts=ComponentTitleOpts(title='因子收益率—风险分析'))
+        return table_risk_value
 
     def show_page(self, save_path_dir=''):
         page = Page(page_title='因子评价报告')
 
         table_factor_information = self.table_factor_information()
-
         page.add(table_factor_information)
+        # IC分析
         table_ic_result = self.table_ic_result()
         page.add(table_ic_result)
 
@@ -275,14 +464,30 @@ class FactorAnalysis(object):
 
         line_ic_p_value = self.line_ic_p_value()
         page.add(line_ic_p_value)
+        # 回归分析
         net_value_line = self.line_net_value()
         page.add(net_value_line)
+
+        bar_t_value = self.bar_t_value()
+        page.add(bar_t_value)
+
+        table_net_value = self.table_net_value()
+        page.add(table_net_value)
 
         bar_day_profit_ratio = self.bar_day_profit_ratio()
         page.add(bar_day_profit_ratio)
 
-        bar_t_value = self.bar_t_value()
-        page.add(bar_t_value)
+        bar_day_ratio_distribution = self.bar_day_ratio_distribution()
+        page.add(bar_day_ratio_distribution)
+
+        bar_month_profit_ratio = self.bar_month_profit_ratio()
+        page.add(bar_month_profit_ratio)
+
+        line_max_drawdown = self.line_max_drawdown()
+        page.add(line_max_drawdown)
+
+        table_risk_value = self.table_risk()
+        page.add(table_risk_value)
 
         page.render(save_path_dir + self.factor_name + "_因子评价报告.html")
 
@@ -298,7 +503,7 @@ if __name__ == '__main__':
 
     factor_analysis_obj = FactorAnalysis(factor_ma5, factor_name)
     print('-' * 20, 'ic_analysis', '-' * 20)
-    ic_analysis_obj = factor_analysis_obj.ic_analysis()
+    # ic_analysis_obj = factor_analysis_obj.ic_analysis()
     print('-' * 20, 'regression_analysis', '-' * 20)
     regression_analysis_obj = factor_analysis_obj.regression_analysis()
     # print('-'*20, 'stratification_analysis',  '-'*20)

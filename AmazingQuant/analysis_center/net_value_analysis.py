@@ -330,6 +330,10 @@ class NetValueAnalysis(object):
         # 下行风险
         downside_risk = self.cal_downside_risk(self.net_value_df['profit_ratio'])
         net_analysis_result['downside_risk'] = downside_risk
+
+        benchmark_downside_risk = self.cal_downside_risk(self.benchmark_df['profit_ratio'])
+        net_analysis_result['benchmark_downside_risk'] = benchmark_downside_risk
+
         # 索提诺比率
         sortino_ratio = self.cal_sortino_ratio(net_year_yield, downside_risk)
         net_analysis_result['sortino_ratio'] = sortino_ratio
