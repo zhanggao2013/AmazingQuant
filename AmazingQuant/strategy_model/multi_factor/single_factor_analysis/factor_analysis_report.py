@@ -460,10 +460,12 @@ class FactorAnalysis(object):
         group_net_dict = {}
         for i in range(self.group_num):
             group_net_dict['group_' + str(i)] = \
-                list(self.stratification_analysis_obj.group_net_analysis_result['group_' + str(i)]['net_value_df']['net_value'].round(4))
+                list(self.stratification_analysis_obj.group_net_analysis_result['group_' + str(i)]['net_value_df'][
+                         'net_value'].round(4))
             all_list = all_list + group_net_dict['group_' + str(i)]
 
-        date_list = list(self.stratification_analysis_obj.group_net_analysis_result['group_0']['net_value_df'].index.astype('str'))
+        date_list = list(
+            self.stratification_analysis_obj.group_net_analysis_result['group_0']['net_value_df'].index.astype('str'))
         net_value_line = Line() \
             .add_xaxis(date_list) \
             .add_yaxis("基准", benchmark_list) \
@@ -476,7 +478,7 @@ class FactorAnalysis(object):
                                                       max_=int(max(all_list) * 110) / 100),
                              datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )  # 设置Y轴范围
         for group_name in group_net_dict:
-            net_value_line = net_value_line\
+            net_value_line = net_value_line \
                 .add_xaxis(date_list) \
                 .add_yaxis(group_name, group_net_dict[group_name])
 
@@ -485,63 +487,66 @@ class FactorAnalysis(object):
     def bar_stratification_day_ratio_distribution(self):
         """
         日收益率分布
-        cumsum_net_day_ratio_distribution'（柱状图）
-        cumprod_net_day_ratio_distribution'（柱状图）
-        benchmark_day_ratio_distribution'（柱状图）
+        benchmark_day_ratio_distribution（柱状图）
         """
-        cumsum_net_day_ratio_distribution_list = list(
-            self.regression_analysis_obj.net_analysis_result['cumsum']['net_day_ratio_distribution'].values())
-        cumprod_net_day_ratio_distribution_list = list(
-            self.regression_analysis_obj.net_analysis_result['cumprod']['net_day_ratio_distribution'].values())
+        benchmark_day_ratio_distribution_list = list(self.stratification_analysis_obj.
+                                                     group_net_analysis_result['group_0']
+                                                     ['benchmark_day_ratio_distribution'].values())
+        group_day_ratio_distribution_dict = {}
+        for i in range(self.group_num):
+            group_day_ratio_distribution_dict['group_' + str(i)] = \
+                list(self.stratification_analysis_obj.group_net_analysis_result['group_' + str(i)]
+                     ['net_day_ratio_distribution'].values())
 
-        benchmark_day_ratio_distribution_list = list(
-            self.regression_analysis_obj.net_analysis_result['cumsum']['benchmark_day_ratio_distribution'].values())
-        bar_day_ratio_distribution = Bar() \
-            .add_xaxis(
-            list(self.regression_analysis_obj.net_analysis_result['cumsum']['net_day_ratio_distribution'].keys())) \
-            .add_yaxis("累加因子净值（%）", [round(i * 100, 2) for i in cumsum_net_day_ratio_distribution_list],
-                       ) \
-            .add_yaxis("累乘因子净值（%）", [round(i * 100, 2) for i in cumprod_net_day_ratio_distribution_list],
-                       ) \
-            .add_yaxis("基准（%）", [round(i * 100, 2) for i in benchmark_day_ratio_distribution_list],
-                       ) \
+        date_list = list(self.stratification_analysis_obj.
+                         group_net_analysis_result['group_0']['net_day_ratio_distribution'].keys())
+
+        bar_stratification_day_ratio_distribution = Bar() \
+            .add_xaxis(date_list) \
+            .add_yaxis("基准（%）", [round(i * 100, 2) for i in benchmark_day_ratio_distribution_list]) \
             .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
-                             title_opts=opts.TitleOpts(title="因子收益率—日收益率分布"),
+                             title_opts=opts.TitleOpts(title="分层分析—日收益率分布"),
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),
-                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
-        return bar_day_ratio_distribution
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100))
+        for group_name in group_day_ratio_distribution_dict:
+            bar_stratification_day_ratio_distribution = bar_stratification_day_ratio_distribution \
+                .add_xaxis(date_list) \
+                .add_yaxis(group_name, [round(i * 100, 2) for i in group_day_ratio_distribution_dict[group_name]])
+        return bar_stratification_day_ratio_distribution
 
     def bar_stratification_month_profit_ratio(self):
         """
         月度收益率
-        cumsum_net_month_ratio_distribution'（柱状图）
-        cumprod_benchmark_month_ratio_distribution'（柱状图）
         benchmark_month_ratio'（柱状图）
         """
-        cumsum_net_month_ratio_distribution_list = list(
-            self.regression_analysis_obj.net_analysis_result['cumsum']['net_month_ratio'].values())
-        cumprod_net_ratio_distribution_list = list(
-            self.regression_analysis_obj.net_analysis_result['cumprod']['net_month_ratio'].values())
-        benchmark_month_ratio_distribution_list = list(
-            self.regression_analysis_obj.net_analysis_result['cumprod']['benchmark_month_ratio'].values())
-        bar_profit_ratio_month = Bar() \
-            .add_xaxis(list(self.regression_analysis_obj.net_analysis_result['cumsum']['net_month_ratio'].keys())) \
-            .add_yaxis("累加因子（%）", [round(i, 2) for i in cumsum_net_month_ratio_distribution_list],
-                       ) \
-            .add_yaxis("累乘因子（%）", [round(i, 2) for i in cumprod_net_ratio_distribution_list],
-                       ) \
-            .add_yaxis("基准（%）", [round(i, 2) for i in benchmark_month_ratio_distribution_list],
-                       ) \
+        benchmark_month_ratio_list = list(self.stratification_analysis_obj.
+                                          group_net_analysis_result['group_0']
+                                          ['benchmark_month_ratio'].values())
+        group_month_ratio_dict = {}
+        for i in range(self.group_num):
+            group_month_ratio_dict['group_' + str(i)] = \
+                list(self.stratification_analysis_obj.group_net_analysis_result['group_' + str(i)]
+                     ['net_month_ratio'].values())
+
+        date_list = list(self.stratification_analysis_obj.
+                         group_net_analysis_result['group_0']['net_month_ratio'].keys())
+
+        bar_stratification_month_profit_ratio = Bar() \
+            .add_xaxis(date_list) \
+            .add_yaxis("基准（%）", [round(i, 2) for i in benchmark_month_ratio_list]) \
             .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
-                             title_opts=opts.TitleOpts(title="因子收益率—月度收益率"),
+                             title_opts=opts.TitleOpts(title="分层分析—月度收益率"),
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),
                              datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
-
-        return bar_profit_ratio_month
+        for group_name in group_month_ratio_dict:
+            bar_stratification_month_profit_ratio = bar_stratification_month_profit_ratio \
+                .add_xaxis(date_list) \
+                .add_yaxis(group_name, [round(i * 100, 2) for i in group_month_ratio_dict[group_name]])
+        return bar_stratification_month_profit_ratio
 
     def table_stratification_risk(self):
         """
@@ -563,61 +568,59 @@ class FactorAnalysis(object):
                                     'benchmark_skewness',
                                     'benchmark_kurtosis',
                                     ]
-        table_risk_value = Table()
-        headers = ["指标", "累加净值", "累乘净值", "基准净值"]
+        table_stratification_risk = Table()
+        headers = ["指标"] + ['group_' + str(i) for i in range(self.group_num)] + ["基准净值"]
         rows = []
         i = 0
         for key, value in indicator_dict.items():
-            data_list = [value,
-                         round(self.regression_analysis_obj.net_analysis_result['cumsum'][key], 2),
-                         round(self.regression_analysis_obj.net_analysis_result['cumprod'][key], 2),
-                         round(self.regression_analysis_obj.net_analysis_result['cumprod'][benchmark_indicator_list[i]],
-                               2),
-                         ]
+            data_list = [value] + \
+                        [round(self.stratification_analysis_obj.group_net_analysis_result['group_' + str(i)][key], 2)
+                         for i in range(self.group_num)] + \
+                        [round(self.stratification_analysis_obj.group_net_analysis_result['group_0' + str(i)][
+                                   benchmark_indicator_list[i]], 2)]
             i += 1
             rows.append(data_list)
-        table_risk_value.add(headers, rows)
-        table_risk_value.set_global_opts(title_opts=ComponentTitleOpts(title='因子收益率—风险分析'))
-        return table_risk_value
+        table_stratification_risk.add(headers, rows)
+        table_stratification_risk.set_global_opts(title_opts=ComponentTitleOpts(title='分层分析—风险分析'))
+        return table_stratification_risk
 
     def line_stratification_max_drawdown(self):
         """
         风险
-        'cumsum_net_value_df'（最大回撤曲线）
-        'cumprod_net_value_df'（最大回撤曲线）
         'benchmark_df'（最大回撤）
         """
-        cumsum_drawdown_list = list(
-            self.regression_analysis_obj.net_analysis_result['cumsum']['net_value_df'].round(2)['drawdown'])
-        cumprod_drawdown_list = list(
-            self.regression_analysis_obj.net_analysis_result['cumprod']['net_value_df'].round(2)['drawdown'])
         benchmark_drawdown_list = list(
-            self.regression_analysis_obj.net_analysis_result['cumsum']['benchmark_df'].round(2)['drawdown'])
-        cumsum_net_max_drawdown = round(self.regression_analysis_obj.net_analysis_result['cumsum']['net_max_drawdown'],
-                                        2)
-        cumprod_net_max_drawdown = round(self.regression_analysis_obj.net_analysis_result['cumsum']['net_max_drawdown'],
-                                         2)
-        benchmark_max_drawdown = round(
-            self.regression_analysis_obj.net_analysis_result['cumsum']['benchmark_max_drawdown'], 2)
-        max_drawdown_line = Line() \
-            .add_xaxis(
-            list(self.regression_analysis_obj.net_analysis_result['cumsum']['net_value_df'].index.astype('str'))) \
-            .add_yaxis("累加因子（%）", cumsum_drawdown_list,
-                       markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
-            .add_yaxis("累乘因子（%）", cumprod_drawdown_list,
-                       markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
+            self.stratification_analysis_obj.group_net_analysis_result['group_0']['benchmark_df']['drawdown'].round(4))
+        all_list = benchmark_drawdown_list
+
+        group_max_drawdown_dict = {}
+        for i in range(self.group_num):
+            group_max_drawdown_dict['group_' + str(i)] = \
+                list(self.stratification_analysis_obj.group_net_analysis_result['group_' + str(i)]['net_value_df'][
+                         'drawdown'].round(4))
+            all_list = all_list + group_max_drawdown_dict['group_' + str(i)]
+
+        date_list = list(
+            self.stratification_analysis_obj.group_net_analysis_result['group_0']['net_value_df'].index.astype('str'))
+
+        line_stratification_max_drawdown = Line() \
+            .add_xaxis(date_list) \
             .add_yaxis("基准（%）", benchmark_drawdown_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
             .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.5)) \
-            .set_global_opts(title_opts=opts.TitleOpts(title="因子收益率—最大回撤分析"),
+            .set_global_opts(title_opts=opts.TitleOpts(title="分层分析—最大回撤分析"),
                              # 标题
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
                              yaxis_opts=opts.AxisOpts(
-                                 min_=int(min(cumsum_net_max_drawdown, cumprod_net_max_drawdown,
-                                              benchmark_max_drawdown) * 110) / 100,
+                                 min_=int(min(all_list) * 110) / 100,
                                  max_=0),
                              datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )  # 设置Y轴范围
-        return max_drawdown_line
+        for group_name in group_max_drawdown_dict:
+            line_stratification_max_drawdown = line_stratification_max_drawdown \
+                .add_xaxis(date_list) \
+                .add_yaxis(group_name, group_max_drawdown_dict[group_name])
+
+        return line_stratification_max_drawdown
 
     def show_page(self, save_path_dir=''):
         page = Page(page_title='因子评价报告')
@@ -662,6 +665,18 @@ class FactorAnalysis(object):
         line_stratification_net_value = self.line_stratification_net_value()
         page.add(line_stratification_net_value)
 
+        bar_stratification_day_ratio_distribution = self.bar_stratification_day_ratio_distribution()
+        page.add(bar_stratification_day_ratio_distribution)
+
+        bar_stratification_month_profit_ratio = self.bar_stratification_month_profit_ratio()
+        page.add(bar_stratification_month_profit_ratio)
+
+        table_stratification_risk = self.table_stratification_risk()
+        page.add(table_stratification_risk)
+
+        line_stratification_max_drawdown = self.line_stratification_max_drawdown()
+        page.add(line_stratification_max_drawdown)
+
         page.render(save_path_dir + self.factor_name + "_因子评价报告.html")
 
 
@@ -679,6 +694,6 @@ if __name__ == '__main__':
     ic_analysis_obj = factor_analysis_obj.ic_analysis()
     print('-' * 20, 'regression_analysis', '-' * 20)
     regression_analysis_obj = factor_analysis_obj.regression_analysis()
-    print('-' * 20, 'stratification_analysis',  '-'*20)
+    print('-' * 20, 'stratification_analysis', '-' * 20)
     stratification_analysis_obj = factor_analysis_obj.stratification_analysis()
     factor_analysis_obj.show_page(path)
