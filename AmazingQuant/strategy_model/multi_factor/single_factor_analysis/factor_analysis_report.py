@@ -142,7 +142,7 @@ class FactorAnalysis(object):
                              datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100),
                              legend_opts=opts.LegendOpts(orient='vertical',
                                                          pos_bottom='bottom',
-                                                         pos_top='top',
+                                                         pos_top='58px',
                                                          pos_left='right',
                                                          pos_right='right',
                                                          selected_map=selected_map_dict
@@ -171,7 +171,7 @@ class FactorAnalysis(object):
                              datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100),
                              legend_opts=opts.LegendOpts(orient='vertical',
                                                          pos_bottom='bottom',
-                                                         pos_top='top',
+                                                         pos_top='58px',
                                                          pos_left='right',
                                                          pos_right='right',
                                                          selected_map=selected_map_dict
@@ -207,7 +207,7 @@ class FactorAnalysis(object):
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
             .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
                              markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")])) \
-            .set_global_opts(title_opts=opts.TitleOpts(title="因子收益率—回归分析的净值曲线",
+            .set_global_opts(title_opts=opts.TitleOpts(title="因子收益率—净值曲线",
                                                        subtitle="累加因子净值为：" + str(cumsum_list[-1]) + "\t" * 5 +
                                                                 "累乘因子净值为：" + str(cumprod_list[-1]) + "\t" * 5 +
                                                                 "基准净值为：" + str(benchmark_list[-1])),  # 标题
@@ -299,7 +299,7 @@ class FactorAnalysis(object):
         daily（因子日收益率）
         """
         date_list = list(self.regression_analysis_obj.factor_return.index.astype('str'))
-        daily_list = list((self.regression_analysis_obj.factor_return['daily'] * 100).round(4))
+        daily_list = list((self.regression_analysis_obj.factor_return['daily'] * 100).round(2))
         bar_profit_ratio_day = Bar() \
             .add_xaxis(date_list) \
             .add_yaxis("因子日收益率（%）", daily_list) \
@@ -476,7 +476,13 @@ class FactorAnalysis(object):
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
                              yaxis_opts=opts.AxisOpts(min_=math.ceil(min(all_list) * 90) / 100,
                                                       max_=int(max(all_list) * 110) / 100),
-                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )  # 设置Y轴范围
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100),
+                             legend_opts=opts.LegendOpts(orient='vertical',
+                                                         pos_bottom='bottom',
+                                                         pos_top='58px',
+                                                         pos_left='right',
+                                                         pos_right='right')
+                             )  # 设置Y轴范围
         for group_name in group_net_dict:
             net_value_line = net_value_line \
                 .add_xaxis(date_list) \
@@ -503,13 +509,19 @@ class FactorAnalysis(object):
 
         bar_stratification_day_ratio_distribution = Bar() \
             .add_xaxis(date_list) \
-            .add_yaxis("基准（%）", [round(i * 100, 2) for i in benchmark_day_ratio_distribution_list]) \
+            .add_yaxis("基准", [round(i * 100, 2) for i in benchmark_day_ratio_distribution_list]) \
             .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
-                             title_opts=opts.TitleOpts(title="分层分析—日收益率分布"),
+                             title_opts=opts.TitleOpts(title="分层分析—日收益率分布（%）"),
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),
-                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100))
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100),
+                             legend_opts=opts.LegendOpts(orient='vertical',
+                                                         pos_bottom='bottom',
+                                                         pos_top='58px',
+                                                         pos_left='right',
+                                                         pos_right='right'
+                                                         ))
         for group_name in group_day_ratio_distribution_dict:
             bar_stratification_day_ratio_distribution = bar_stratification_day_ratio_distribution \
                 .add_xaxis(date_list) \
@@ -535,13 +547,19 @@ class FactorAnalysis(object):
 
         bar_stratification_month_profit_ratio = Bar() \
             .add_xaxis(date_list) \
-            .add_yaxis("基准（%）", [round(i, 2) for i in benchmark_month_ratio_list]) \
+            .add_yaxis("基准", [round(i, 2) for i in benchmark_month_ratio_list]) \
             .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
-                             title_opts=opts.TitleOpts(title="分层分析—月度收益率"),
+                             title_opts=opts.TitleOpts(title="分层分析—月度收益率（%）"),
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),
-                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100),
+                             legend_opts=opts.LegendOpts(orient='vertical',
+                                                         pos_bottom='bottom',
+                                                         pos_top='58px',
+                                                         pos_left='right',
+                                                         pos_right='right'
+                                                         ) )
         for group_name in group_month_ratio_dict:
             bar_stratification_month_profit_ratio = bar_stratification_month_profit_ratio \
                 .add_xaxis(date_list) \
@@ -571,14 +589,14 @@ class FactorAnalysis(object):
         table_stratification_risk = Table()
         headers = ["指标"] + ['group_' + str(i) for i in range(self.group_num)] + ["基准净值"]
         rows = []
-        i = 0
+        indicator_num = 0
         for key, value in indicator_dict.items():
             data_list = [value] + \
                         [round(self.stratification_analysis_obj.group_net_analysis_result['group_' + str(i)][key], 2)
                          for i in range(self.group_num)] + \
-                        [round(self.stratification_analysis_obj.group_net_analysis_result['group_0' + str(i)][
-                                   benchmark_indicator_list[i]], 2)]
-            i += 1
+                        [round(self.stratification_analysis_obj.group_net_analysis_result['group_0'][
+                                   benchmark_indicator_list[indicator_num]], 2)]
+            indicator_num += 1
             rows.append(data_list)
         table_stratification_risk.add(headers, rows)
         table_stratification_risk.set_global_opts(title_opts=ComponentTitleOpts(title='分层分析—风险分析'))
@@ -590,14 +608,14 @@ class FactorAnalysis(object):
         'benchmark_df'（最大回撤）
         """
         benchmark_drawdown_list = list(
-            self.stratification_analysis_obj.group_net_analysis_result['group_0']['benchmark_df']['drawdown'].round(4))
+            self.stratification_analysis_obj.group_net_analysis_result['group_0']['benchmark_df']['drawdown'].round(2))
         all_list = benchmark_drawdown_list
 
         group_max_drawdown_dict = {}
         for i in range(self.group_num):
             group_max_drawdown_dict['group_' + str(i)] = \
                 list(self.stratification_analysis_obj.group_net_analysis_result['group_' + str(i)]['net_value_df'][
-                         'drawdown'].round(4))
+                         'drawdown'].round(2))
             all_list = all_list + group_max_drawdown_dict['group_' + str(i)]
 
         date_list = list(
@@ -605,21 +623,28 @@ class FactorAnalysis(object):
 
         line_stratification_max_drawdown = Line() \
             .add_xaxis(date_list) \
-            .add_yaxis("基准（%）", benchmark_drawdown_list,
+            .add_yaxis("基准", benchmark_drawdown_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
-            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.5)) \
-            .set_global_opts(title_opts=opts.TitleOpts(title="分层分析—最大回撤分析"),
+            .set_global_opts(title_opts=opts.TitleOpts(title="分层分析—最大回撤分析（%）"),
                              # 标题
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
                              yaxis_opts=opts.AxisOpts(
                                  min_=int(min(all_list) * 110) / 100,
                                  max_=0),
-                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )  # 设置Y轴范围
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100),
+                             legend_opts=opts.LegendOpts(orient='vertical',
+                                                         pos_bottom='bottom',
+                                                         pos_top='58px',
+                                                         pos_left='right',
+                                                         pos_right='-15px'
+                                                         ))  # 设置Y轴范围
         for group_name in group_max_drawdown_dict:
             line_stratification_max_drawdown = line_stratification_max_drawdown \
                 .add_xaxis(date_list) \
-                .add_yaxis(group_name, group_max_drawdown_dict[group_name])
+                .add_yaxis(group_name, group_max_drawdown_dict[group_name],
+                           markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')]))
 
+        line_stratification_max_drawdown.set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.5))
         return line_stratification_max_drawdown
 
     def show_page(self, save_path_dir=''):
