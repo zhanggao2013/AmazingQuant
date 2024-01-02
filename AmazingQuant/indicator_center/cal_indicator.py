@@ -66,7 +66,7 @@ class CalIndicator(object):
         """
 
         def kdj(x):
-            slowk, slowd = talib.STOCH(self.high_df[x.name], self.low_df[x.name], x,
+            slowk, slowd = talib.KDJ(self.high_df[x.name], self.low_df[x.name], x,
                                        fastk_period=fastk_period, slowk_period=slowk_period, slowk_matype=slowk_matype,
                                        slowd_period=slowd_period, slowd_matype=slowd_matype)
             slowj = 3 * slowk - 2 * slowd
@@ -86,7 +86,8 @@ class CalIndicator(object):
         return self.value_trade_df.apply(lambda x: talib.MA(x, timeperiod=timeperiod))
 
     def cal_turnover(self, share_data):
-        return self.value_trade_df.div(share_data)
+        return self.volume_trade_df.div(share_data)*100
+
 
 if __name__ == '__main__':
     # tgw_login()
@@ -112,7 +113,7 @@ if __name__ == '__main__':
     cal_indicator_object.adj_data()
 
     share_data_obj = GetShare()
-    share_data = share_data_obj.get_share('float_a_share_value')
+    share_data = share_data_obj.get_share('float_a_share')
     with Timer(True):
         # dif, dea, macd = cal_indicator_object.cal_macd()
         # ema = cal_indicator_object.cal_ema()

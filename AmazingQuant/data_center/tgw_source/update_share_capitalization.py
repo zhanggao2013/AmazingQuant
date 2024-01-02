@@ -41,22 +41,20 @@ class UpAShareCapitalization(object):
 
         total_share_list = []
         float_a_share_list = []
-        a = 0
+
         for i in share_capitalization_grouped:
             data = i[1].sort_values(by=['EX_CHANGE_DATE'])
             data.drop_duplicates(subset=['EX_CHANGE_DATE'], keep='last', inplace=True, ignore_index=False)
             data = data.set_index('EX_CHANGE_DATE')
             total_share_list.append(data['TOT_SHARE'].reindex(index).rename(i[0]))
             float_a_share_list.append(data['FLOAT_A_SHARE'].reindex(index).rename(i[0]))
-            a += 1
-            print(a)
         total_share = pd.concat(total_share_list, axis=1)
         float_a_share = pd.concat(float_a_share_list, axis=1)
 
-        total_share = total_share.fillna(method='ffill').reindex(market_close_data.index)
-        float_a_share = float_a_share.fillna(method='ffill').reindex(market_close_data.index)
-        total_share_value = total_share.multiply(10000) * market_close_data
-        float_a_share_value = float_a_share.multiply(10000) * market_close_data
+        total_share = total_share.fillna(method='ffill').reindex(market_close_data.index).multiply(10000)
+        float_a_share = float_a_share.fillna(method='ffill').reindex(market_close_data.index).multiply(10000)
+        total_share_value = total_share * market_close_data
+        float_a_share_value = float_a_share * market_close_data
 
         folder_name = LocalDataFolderName.INDICATOR_EVERYDAY.value
         path = LocalDataPath.path + folder_name + '/'
