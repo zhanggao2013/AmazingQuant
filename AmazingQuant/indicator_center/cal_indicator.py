@@ -76,18 +76,6 @@ class CalIndicator(object):
         return pd.DataFrame(result.loc[0].T.to_dict()), pd.DataFrame(result.loc[1].T.to_dict()), \
             pd.DataFrame(result.loc[2].T.to_dict())
 
-    def cal_zhangfu(self):
-        return self.close_df.pct_change()*100
-
-    def cal_close_n_high(self, timeperiod=20):
-        return self.close_df.fillna(0).apply(lambda x: talib.MAX(x, timeperiod=timeperiod))
-
-    def cal_ma_value(self, timeperiod=30):
-        return self.value_trade_df.apply(lambda x: talib.MA(x, timeperiod=timeperiod))
-
-    def cal_turnover(self, share_data):
-        return self.volume_trade_df.div(share_data)*100
-
 
 if __name__ == '__main__':
     # tgw_login()
