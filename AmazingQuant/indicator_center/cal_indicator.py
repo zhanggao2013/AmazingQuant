@@ -103,10 +103,9 @@ if __name__ == '__main__':
     share_data_obj = GetShare()
     share_data = share_data_obj.get_share('float_a_share')
     with Timer(True):
-        # dif, dea, macd = cal_indicator_object.cal_macd()
-        # ema = cal_indicator_object.cal_ema()
-        # k, d, j = cal_indicator_object.cal_kdj()
-        close_n_high = cal_indicator_object.cal_close_n_high()
-        turnover = cal_indicator_object.cal_turnover(share_data)
+        dif, dea, macd = cal_indicator_object.cal_macd()
+        ema = cal_indicator_object.cal_ema()
+        k, d, j = cal_indicator_object.cal_kdj()
+
 
 
