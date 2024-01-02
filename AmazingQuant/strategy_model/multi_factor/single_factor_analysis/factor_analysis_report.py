@@ -151,7 +151,7 @@ class FactorAnalysis(object):
             ic_list = list(self.ic_analysis_obj.ic_df['delay_' + str(i + 1)].round(4))
             bar_ic = bar_ic \
                 .add_xaxis(date_list) \
-                .add_yaxis(str(i + 1) + "日", ic_list)
+                .add_yaxis(str(i + 1) + "日", ic_list, label_opts=opts.LabelOpts(is_show=False), )
 
         return bar_ic
 
@@ -180,7 +180,7 @@ class FactorAnalysis(object):
             ic_p_value_list = list(self.ic_analysis_obj.p_value_df['delay_' + str(i + 1)].round(4))
             bar_ic_p_value = bar_ic_p_value \
                 .add_xaxis(date_list) \
-                .add_yaxis(str(i + 1) + "日", ic_p_value_list)
+                .add_yaxis(str(i + 1) + "日", ic_p_value_list, label_opts=opts.LabelOpts(is_show=False), )
         return bar_ic_p_value
 
     # 回归分析
@@ -206,7 +206,8 @@ class FactorAnalysis(object):
             .add_yaxis("基准净值曲线", benchmark_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
             .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
-                             markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")])) \
+                             markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")]),
+                             label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(title_opts=opts.TitleOpts(title="因子收益率—净值曲线",
                                                        subtitle="累加因子净值为：" + str(cumsum_list[-1]) + "\t" * 5 +
                                                                 "累乘因子净值为：" + str(cumprod_list[-1]) + "\t" * 5 +
@@ -235,7 +236,7 @@ class FactorAnalysis(object):
         bar_t_value = Bar() \
             .add_xaxis(date_list) \
             .add_yaxis("t值", t_value_list) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="因子收益率—t值时序图",
@@ -243,7 +244,7 @@ class FactorAnalysis(object):
                                                                 str(t_value_statistics_dict[
                                                                         't_value_mean']) + "\t" * 5 +
                                                                 "t值的绝对值序列大于2的占比为：" +
-                                                                str(t_value_statistics_dict['t_value_mean'])),
+                                                                str(t_value_statistics_dict['t_value_greater_two'])),
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),
                              datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
         return bar_t_value
@@ -303,7 +304,7 @@ class FactorAnalysis(object):
         bar_profit_ratio_day = Bar() \
             .add_xaxis(date_list) \
             .add_yaxis("因子日收益率（%）", daily_list) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="因子收益率—因子日收益率"),
@@ -328,13 +329,10 @@ class FactorAnalysis(object):
         bar_day_ratio_distribution = Bar() \
             .add_xaxis(
             list(self.regression_analysis_obj.net_analysis_result['cumsum']['net_day_ratio_distribution'].keys())) \
-            .add_yaxis("累加因子净值（%）", [round(i * 100, 2) for i in cumsum_net_day_ratio_distribution_list],
-                       ) \
-            .add_yaxis("累乘因子净值（%）", [round(i * 100, 2) for i in cumprod_net_day_ratio_distribution_list],
-                       ) \
-            .add_yaxis("基准（%）", [round(i * 100, 2) for i in benchmark_day_ratio_distribution_list],
-                       ) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .add_yaxis("累加因子净值（%）", [round(i * 100, 2) for i in cumsum_net_day_ratio_distribution_list]) \
+            .add_yaxis("累乘因子净值（%）", [round(i * 100, 2) for i in cumprod_net_day_ratio_distribution_list]) \
+            .add_yaxis("基准（%）", [round(i * 100, 2) for i in benchmark_day_ratio_distribution_list]) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="因子收益率—日收益率分布"),
@@ -358,12 +356,12 @@ class FactorAnalysis(object):
         bar_profit_ratio_month = Bar() \
             .add_xaxis(list(self.regression_analysis_obj.net_analysis_result['cumsum']['net_month_ratio'].keys())) \
             .add_yaxis("累加因子（%）", [round(i, 2) for i in cumsum_net_month_ratio_distribution_list],
-                       ) \
+                       label_opts=opts.LabelOpts(is_show=False), ) \
             .add_yaxis("累乘因子（%）", [round(i, 2) for i in cumprod_net_ratio_distribution_list],
-                       ) \
+                       label_opts=opts.LabelOpts(is_show=False), ) \
             .add_yaxis("基准（%）", [round(i, 2) for i in benchmark_month_ratio_distribution_list],
-                       ) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+                       label_opts=opts.LabelOpts(is_show=False), ) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="因子收益率—月度收益率"),
@@ -437,7 +435,8 @@ class FactorAnalysis(object):
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
             .add_yaxis("基准（%）", benchmark_drawdown_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
-            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.5)) \
+            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.5),
+                             label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(title_opts=opts.TitleOpts(title="因子收益率—最大回撤分析"),
                              # 标题
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
@@ -468,9 +467,14 @@ class FactorAnalysis(object):
             self.stratification_analysis_obj.group_net_analysis_result['group_0']['net_value_df'].index.astype('str'))
         net_value_line = Line() \
             .add_xaxis(date_list) \
-            .add_yaxis("基准", benchmark_list) \
-            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
-                             markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")])) \
+            .add_yaxis("基准", benchmark_list)
+        for group_name in group_net_dict:
+            net_value_line = net_value_line \
+                .add_xaxis(date_list) \
+                .add_yaxis(group_name, group_net_dict[group_name])
+
+        net_value_line\
+            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1), label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(title_opts=opts.TitleOpts(title="分层分析——净值图",
                                                        subtitle="分为：" + str(self.group_num) + "组"),  # 标题
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
@@ -483,11 +487,6 @@ class FactorAnalysis(object):
                                                          pos_left='right',
                                                          pos_right='right')
                              )  # 设置Y轴范围
-        for group_name in group_net_dict:
-            net_value_line = net_value_line \
-                .add_xaxis(date_list) \
-                .add_yaxis(group_name, group_net_dict[group_name])
-
         return net_value_line
 
     def bar_stratification_day_ratio_distribution(self):
@@ -509,8 +508,15 @@ class FactorAnalysis(object):
 
         bar_stratification_day_ratio_distribution = Bar() \
             .add_xaxis(date_list) \
-            .add_yaxis("基准", [round(i * 100, 2) for i in benchmark_day_ratio_distribution_list]) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .add_yaxis("基准", [round(i * 100, 2) for i in benchmark_day_ratio_distribution_list])
+
+        for group_name in group_day_ratio_distribution_dict:
+            bar_stratification_day_ratio_distribution = bar_stratification_day_ratio_distribution \
+                .add_xaxis(date_list) \
+                .add_yaxis(group_name, [round(i * 100, 2) for i in group_day_ratio_distribution_dict[group_name]])
+
+        bar_stratification_day_ratio_distribution \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="分层分析—日收益率分布（%）"),
@@ -522,10 +528,6 @@ class FactorAnalysis(object):
                                                          pos_left='right',
                                                          pos_right='right'
                                                          ))
-        for group_name in group_day_ratio_distribution_dict:
-            bar_stratification_day_ratio_distribution = bar_stratification_day_ratio_distribution \
-                .add_xaxis(date_list) \
-                .add_yaxis(group_name, [round(i * 100, 2) for i in group_day_ratio_distribution_dict[group_name]])
         return bar_stratification_day_ratio_distribution
 
     def bar_stratification_month_profit_ratio(self):
@@ -547,8 +549,14 @@ class FactorAnalysis(object):
 
         bar_stratification_month_profit_ratio = Bar() \
             .add_xaxis(date_list) \
-            .add_yaxis("基准", [round(i, 2) for i in benchmark_month_ratio_list]) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .add_yaxis("基准", [round(i, 2) for i in benchmark_month_ratio_list])
+        for group_name in group_month_ratio_dict:
+            bar_stratification_month_profit_ratio = bar_stratification_month_profit_ratio \
+                .add_xaxis(date_list) \
+                .add_yaxis(group_name, [round(i * 100, 2) for i in group_month_ratio_dict[group_name]])
+
+        bar_stratification_month_profit_ratio \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="分层分析—月度收益率（%）"),
@@ -559,11 +567,7 @@ class FactorAnalysis(object):
                                                          pos_top='58px',
                                                          pos_left='right',
                                                          pos_right='right'
-                                                         ) )
-        for group_name in group_month_ratio_dict:
-            bar_stratification_month_profit_ratio = bar_stratification_month_profit_ratio \
-                .add_xaxis(date_list) \
-                .add_yaxis(group_name, [round(i * 100, 2) for i in group_month_ratio_dict[group_name]])
+                                                         ))
         return bar_stratification_month_profit_ratio
 
     def table_stratification_risk(self):
@@ -644,7 +648,8 @@ class FactorAnalysis(object):
                 .add_yaxis(group_name, group_max_drawdown_dict[group_name],
                            markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')]))
 
-        line_stratification_max_drawdown.set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.5))
+        line_stratification_max_drawdown.set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.5),
+                                                         label_opts=opts.LabelOpts(is_show=False))
         return line_stratification_max_drawdown
 
     def show_page(self, save_path_dir=''):
@@ -710,8 +715,8 @@ if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/' + factor_name + '/'
     factor_ma5 = get_local_data(path, factor_name + '_pre' + '.h5')
 
-    factor_ma5 = factor_ma5[factor_ma5.index > datetime(2013, 2, 1)]
-    factor_ma5 = factor_ma5[factor_ma5.index < datetime(2013, 4, 1)]
+    factor_ma5 = factor_ma5[factor_ma5.index >= datetime(2013, 2, 1)]
+    factor_ma5 = factor_ma5[factor_ma5.index < datetime(2023, 4, 1)]
     # factor_ma5 = factor_ma5.iloc[:-50, :]
 
     factor_analysis_obj = FactorAnalysis(factor_ma5, factor_name)
