@@ -13,6 +13,7 @@ from AmazingQuant.utils.get_data import get_local_data
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.constant import LocalDataFolderName, AdjustmentFactor
 from AmazingQuant.utils.performance_test import Timer
+from AmazingQuant.data_center.api_data.get_share import GetShare
 
 
 class CalIndicator(object):
@@ -75,6 +76,17 @@ class CalIndicator(object):
         return pd.DataFrame(result.loc[0].T.to_dict()), pd.DataFrame(result.loc[1].T.to_dict()), \
             pd.DataFrame(result.loc[2].T.to_dict())
 
+    def cal_zhangfu(self):
+        return self.close_df.pct_change()*100
+
+    def cal_close_n_high(self, timeperiod=20):
+        return self.close_df.fillna(0).apply(lambda x: talib.MAX(x, timeperiod=timeperiod))
+
+    def cal_ma_value(self, timeperiod=30):
+        return self.value_trade_df.apply(lambda x: talib.MA(x, timeperiod=timeperiod))
+
+    def cal_turnover(self, share_data):
+        return self.value_trade_df.div(share_data)
 
 if __name__ == '__main__':
     # tgw_login()
@@ -98,7 +110,14 @@ if __name__ == '__main__':
     cal_indicator_object = CalIndicator(open_df, high_df, low_df, close_df, volume_trade_df, value_trade_df,
                                         forward_factor)
     cal_indicator_object.adj_data()
+
+    share_data_obj = GetShare()
+    share_data = share_data_obj.get_share('float_a_share_value')
     with Timer(True):
-        dif, dea, macd = cal_indicator_object.cal_macd()
-        ema = cal_indicator_object.cal_ema()
-        k, d, j = cal_indicator_object.cal_kdj()
+        # dif, dea, macd = cal_indicator_object.cal_macd()
+        # ema = cal_indicator_object.cal_ema()
+        # k, d, j = cal_indicator_object.cal_kdj()
+        close_n_high = cal_indicator_object.cal_close_n_high()
+        turnover = cal_indicator_object.cal_turnover(share_data)
+
+
