@@ -305,7 +305,10 @@ class ShowResult(object):
         timeline_position_industry_pct = Timeline()
 
         for industry in sw_industry_one:
-            timeline_position_industry_pct.add(get_industry_value(industry), time_point=sw_industry_one[industry])
+            try:
+                timeline_position_industry_pct.add(get_industry_value(industry), time_point=sw_industry_one[industry])
+            except KeyError:
+                pass
 
         # 1.0.0 版本的 add_schema 暂时没有补上 return self 所以只能这么写着
         timeline_position_industry_pct.add_schema(pos_bottom='-5px', pos_top='top', pos_left='left', pos_right='left',
@@ -340,7 +343,10 @@ class ShowResult(object):
         timeline_position_industry = Timeline()
 
         for industry in sw_industry_one:
-            timeline_position_industry.add(get_industry_value(industry), time_point=sw_industry_one[industry])
+            try:
+                timeline_position_industry.add(get_industry_value(industry), time_point=sw_industry_one[industry])
+            except KeyError:
+                pass
 
         # 1.0.0 版本的 add_schema 暂时没有补上 return self 所以只能这么写着
         timeline_position_industry.add_schema(pos_bottom='-5px', pos_top='top', pos_left='left', pos_right='left',
