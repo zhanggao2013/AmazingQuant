@@ -40,10 +40,14 @@ class GetIndexClass(object):
     def get_code_index_class_in_date(self, code, members_date):
         industry = 'other'
         if code in self.code_list:
-            members_date = str(datetime_to_int(members_date))
-            industry = self.index_class_df[(self.index_class_df.CON_INDATE <= members_date) &
-                                           (self.index_class_df.CON_OUTDATE >= members_date) &
-                                           (self.index_class_df.CON_CODE == code)]['INDEX_CODE'].values[0]
+            try:
+                members_date = str(datetime_to_int(members_date))
+                industry = self.index_class_df[(self.index_class_df.CON_INDATE <= members_date) &
+                                               (self.index_class_df.CON_OUTDATE >= members_date) &
+                                               (self.index_class_df.CON_CODE == code)]['INDEX_CODE'].values[0]
+            except IndexError:
+                industry = 'other'
+
         return industry
 
     def get_index_class_in_date(self, members_date):
