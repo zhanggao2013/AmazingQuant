@@ -91,11 +91,11 @@ class PositionAnalysis(object):
         position_value_mean_list = []
         for i in self.position_index:
             position_data_index = self.position_data_df.loc[i].copy()
-            position_data_hold_value = pd.DataFrame()
-            if isinstance(position_data_index, pd.DataFrame):
-                position_data_hold_value = position_data_index.groupby('industry').sum()['hold_value']
-            elif isinstance(position_data_index, pd.Series):
-                position_data_hold_value = pd.concat([position_data_index], axis=1)
+            if isinstance(position_data_index, pd.Series):
+                position_data_index = pd.DataFrame({i: position_data_index}).T
+                position_data_index.index.name = 'time_tag'
+
+            position_data_hold_value = position_data_index.groupby('industry').sum()['hold_value']
             position_data_hold_value.name = i
             position_industry_list.append(position_data_hold_value)
             total_value = position_data_hold_value.sum()
@@ -127,12 +127,20 @@ class PositionAnalysis(object):
             turnover_num_dict = {}
             turnover_value_dict = {}
             for delay_num in range(1, delay + 1, 1):
-                position_stock_last = self.position_data_df.loc[self.position_index[i]]['instrument_exchange'].values
+                position_data_in_index = self.position_data_df.loc[self.position_index[i]]
+                if isinstance(position_data_in_index, pd.Series):
+                    position_data_in_index = pd.DataFrame({i: position_data_in_index}).T
+                    position_data_in_index.index.name = 'time_tag'
+
+                position_stock_last = position_data_in_index['instrument_exchange'].values
                 position_data_index = self.position_data_df.loc[self.position_index[i + delay_num]]
+
+                if isinstance(position_data_index, pd.Series):
+                    position_data_index = pd.DataFrame({i: position_data_index}).T
+                    position_data_index.index.name = 'time_tag'
+
                 position_num = position_data_index.shape[0]
-                position_stock = position_data_index['instrument_exchange']
-                if isinstance(position_data_index, pd.DataFrame):
-                    position_stock = position_data_index['instrument_exchange'].values
+                position_stock = position_data_index['instrument_exchange'].values
                 stock_change = np.setdiff1d(position_stock, position_stock_last)
                 stock_change_num = stock_change.shape[0]
                 turnover_num = 100 * stock_change_num / position_num

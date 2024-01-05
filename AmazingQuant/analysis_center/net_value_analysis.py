@@ -216,7 +216,7 @@ class NetValueAnalysis(object):
 
     @staticmethod
     def cal_day_win_ratio(profit_ratio):
-        return np.sum(profit_ratio >= 0) / len(profit_ratio)
+        return np.sum(profit_ratio >= 0) / len(profit_ratio)*100
 
     @staticmethod
     def cal_day_ratio_distribution(profit_ratio):
@@ -353,8 +353,7 @@ class NetValueAnalysis(object):
         # 日胜率
         net_day_win_ratio = self.cal_day_win_ratio(self.net_value_df['profit_ratio'])
         net_analysis_result['net_day_win_ratio'] = net_day_win_ratio
-        benchmark_day_win_ratio = self.cal_day_win_ratio(
-            self.benchmark_df['profit_ratio'])
+        benchmark_day_win_ratio = self.cal_day_win_ratio(self.benchmark_df['profit_ratio'])
         net_analysis_result['benchmark_day_win_ratio'] = benchmark_day_win_ratio
 
         # 日收益率分布
