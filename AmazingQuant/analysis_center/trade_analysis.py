@@ -90,6 +90,11 @@ class TradeAnalysis(object):
     def cal_trade_num_times(self):
         for i in self.trade_index:
             trade_data_index = self.trade_data_df.loc[i].copy()
+
+            if isinstance(trade_data_index, pd.Series):
+                trade_data_index = pd.DataFrame({i: trade_data_index}).T
+                trade_data_index.index.name = 'time_tag'
+
             trade_num_times = trade_data_index.shape[0]
             # 交易总次数
             self.trade_num_times += trade_num_times
