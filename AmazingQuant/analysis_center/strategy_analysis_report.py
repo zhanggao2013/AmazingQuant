@@ -567,35 +567,36 @@ class ShowResult(object):
         table_profit_risk_value = self.table_profit_risk()
         page.add(table_profit_risk_value)
 
-        # bar_position_value_mean = self.bar_position_value_mean()
-        # page.add(bar_position_value_mean)
-        #
-        # bar_position_industry_pct = self.bar_position_industry_pct()
-        # page.add(bar_position_industry_pct)
-        #
-        # timeline_position_industry = self.line_position_industry()
-        # page.add(timeline_position_industry)
-        #
-        # bar_position_industry_pct_mean = self.bar_position_industry_pct_mean()
-        # page.add(bar_position_industry_pct_mean)
-        #
-        # timeline_turnover_num = self.bar_turnover_num()
-        # page.add(timeline_turnover_num)
-        #
-        # bar_turnover_num_mean = self.bar_turnover_num_mean()
-        # page.add(bar_turnover_num_mean)
-        #
-        # table_trade_num_amount = self.table_trade_num_amount()
-        # page.add(table_trade_num_amount)
-        #
-        # bar_trade_num_amount = self.bar_trade_num_amount()
-        # page.add(bar_trade_num_amount)
-        #
-        # table_trade_num_times = self.table_trade_num_times()
-        # page.add(table_trade_num_times)
-        #
-        # bar_trade_num_times = self.bar_trade_num_times()
-        # page.add(bar_trade_num_times)
+        bar_position_value_mean = self.bar_position_value_mean()
+        page.add(bar_position_value_mean)
+
+        bar_position_industry_pct = self.bar_position_industry_pct()
+        page.add(bar_position_industry_pct)
+
+        timeline_position_industry = self.line_position_industry()
+        page.add(timeline_position_industry)
+
+        bar_position_industry_pct_mean = self.bar_position_industry_pct_mean()
+        page.add(bar_position_industry_pct_mean)
+
+        timeline_turnover_num = self.bar_turnover_num()
+        page.add(timeline_turnover_num)
+
+        bar_turnover_num_mean = self.bar_turnover_num_mean()
+        page.add(bar_turnover_num_mean)
+
+        table_trade_num_amount = self.table_trade_num_amount()
+        page.add(table_trade_num_amount)
+
+        bar_trade_num_amount = self.bar_trade_num_amount()
+        page.add(bar_trade_num_amount)
+
+        table_trade_num_times = self.table_trade_num_times()
+        page.add(table_trade_num_times)
+
+        bar_trade_num_times = self.bar_trade_num_times()
+        page.add(bar_trade_num_times)
+
         page.render(save_path_dir + "回测绩效分析报告.html")
 
 
@@ -616,18 +617,18 @@ if __name__ == '__main__':
     net_value_analysis_obj = NetValueAnalysis(net_value_single_account_df, benchmark_df, start_time, end_time)
     net_analysis_result = net_value_analysis_obj.cal_net_analysis_result()
 
-    # position_data_df = pd.read_csv('position_data.csv', index_col=[0, 1], parse_dates=['time_tag'],
-    #                                dtype={'instrument': str})
-    # position_data_df = position_data_df[position_data_df.index.get_level_values(1) == 'test0']
-    # position_analysis_obj = PositionAnalysis(position_data_df)
-    # position_analysis_result = position_analysis_obj.cal_position_analysis_result()
-    #
-    # trade_data_df = pd.read_csv('order_data.csv', index_col=[0, 1], parse_dates=['time_tag'],
-    #                             dtype={'instrument': str})
-    # trade_data_df = trade_data_df[trade_data_df.index.get_level_values(1) == 'test0']
-    # trade_data_obj = TradeAnalysis(trade_data_df, net_value_df)
-    # trade_analysis_result = trade_data_obj.cal_trade_analysis_result()
+    position_data_df = pd.read_csv('position_data.csv', index_col=[0, 1], parse_dates=['time_tag'],
+                                   dtype={'instrument': str})
+    position_data_df = position_data_df[position_data_df.index.get_level_values(1) == 'test0']
+    position_analysis_obj = PositionAnalysis(position_data_df)
+    position_analysis_result = position_analysis_obj.cal_position_analysis_result()
 
-    # show_result_object = ShowResult(net_analysis_result, position_analysis_result, trade_analysis_result)
+    trade_data_df = pd.read_csv('order_data.csv', index_col=[0, 1], parse_dates=['time_tag'],
+                                dtype={'instrument': str})
+    trade_data_df = trade_data_df[trade_data_df.index.get_level_values(1) == 'test0']
+    trade_data_obj = TradeAnalysis(trade_data_df, net_value_df)
+    trade_analysis_result = trade_data_obj.cal_trade_analysis_result()
+
+    show_result_object = ShowResult(net_analysis_result, position_analysis_result, trade_analysis_result)
     show_result_object = ShowResult(net_analysis_result, 0, 0)
     show_result_object.show_page()
