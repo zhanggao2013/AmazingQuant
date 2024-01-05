@@ -119,6 +119,11 @@ class NetValueAnalysis(object):
         self.benchmark_df.insert(loc=0, column='net_value',
                                  value=self.benchmark_df['close'] / self.benchmark_df['close'].iloc[0])
 
+    def cal_capital_utilization(self):
+        capital_utilization = 100 * (self.net_value_df['total_balance'] - self.net_value_df['available']) / \
+                                self.net_value_df['total_balance']
+        self.net_value_df.insert(loc=0, column='capital_utilization', value=capital_utilization)
+
     def cal_profit_ratio(self):
         self.net_value_df.insert(loc=0, column='profit_ratio', value=self.net_value_df['net_value'].pct_change() * 100)
         self.benchmark_df.insert(loc=0, column='profit_ratio', value=self.benchmark_df['net_value'].pct_change() * 100)
@@ -280,6 +285,7 @@ class NetValueAnalysis(object):
         self.cal_net_value()
         self.cal_profit_ratio()
         self.cal_drawdown()
+        self.cal_capital_utilization()
         net_analysis_result['net_value_df'] = self.net_value_df
         net_analysis_result['benchmark_df'] = self.benchmark_df
         # 年化收益率

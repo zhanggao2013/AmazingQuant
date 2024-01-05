@@ -59,6 +59,9 @@ class TradeAnalysis(object):
     def cal_trade_stock_amount(self):
         for i in self.trade_index:
             trade_data_index = self.trade_data_df.loc[i].copy()
+            if isinstance(trade_data_index, pd.Series):
+                trade_data_index = pd.DataFrame({i: trade_data_index}).T
+                trade_data_index.index.name = 'time_tag'
             trade_stock_num = len(trade_data_index['instrument'].unique())
             # 交易股票总数量
             self.trade_stock_num += trade_stock_num

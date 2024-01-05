@@ -68,7 +68,8 @@ class ShowResult(object):
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
             .add_yaxis("基准净值曲线", benchmark_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='max')])) \
-            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False),
+                             areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
                              markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")])) \
             .set_global_opts(title_opts=opts.TitleOpts(title="净值曲线",
                                                        subtitle="策略净值为：" + str(net_value_list[-1]) + "\n" +
@@ -78,6 +79,26 @@ class ShowResult(object):
                                                       max_=int(max(all_list) * 110) / 100),
                              datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )  # 设置Y轴范围
         return net_value_line
+
+    def bar_capital_utilization(self):
+        """
+        仓位
+        net_value_df ['capital_utilization']（净值曲线）（柱状图）
+        """
+        bar_capital_utilization_list = list(self.net_analysis_result['net_value_df'].round(2)['capital_utilization'])
+        bar_capital_utilization = Bar() \
+            .add_xaxis(list(self.net_analysis_result['net_value_df'].index.astype('str'))) \
+            .add_yaxis("仓位（%）", bar_capital_utilization_list) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False),
+                             markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=100, name="yAxis=1")])) \
+            .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
+                             yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}"),
+                                                      min_=105,
+                                                      max_=0),
+                             title_opts=opts.TitleOpts(title="仓位"),
+                             tooltip_opts=opts.TooltipOpts(trigger="axis"),
+                             datazoom_opts=opts.DataZoomOpts(range_start=0, range_end=100), )
+        return bar_capital_utilization
 
     def table_net_value(self):
         """
@@ -128,7 +149,7 @@ class ShowResult(object):
                        ) \
             .add_yaxis("基准日收益率分布（%）", [round(i*100, 2) for i in benchmark_day_ratio_distribution_list],
                        ) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="日收益率分布"),
@@ -151,7 +172,7 @@ class ShowResult(object):
                        ) \
             .add_yaxis("基准月收益率（%）", [round(i, 2) for i in benchmark_month_ratio_distribution_list],
                        ) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="月收益率"),
@@ -176,10 +197,12 @@ class ShowResult(object):
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
             .add_yaxis("基准最大回撤（%）", benchmark_drawdown_list,
                        markpoint_opts=opts.MarkPointOpts(data=[opts.MarkPointItem(type_='min')])) \
-            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.5)) \
+            .set_series_opts(areastyle_opts=opts.AreaStyleOpts(opacity=0.5),
+                             label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(title_opts=opts.TitleOpts(title="最大回撤分析",
-                                                       subtitle="策略历史最大回撤为：" + str(net_max_drawdown) + "（%）\n" +
-                                                                "基准历史最大回撤为：" + str(benchmark_max_drawdown)+'（%）'),
+                                                       subtitle="历史最大回撤：" + "\t"
+                                                                "策略——" + str(net_max_drawdown) + "%\t\t\t" +
+                                                                "基准——" + str(benchmark_max_drawdown)+'%'),
                              # 标题
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
                              yaxis_opts=opts.AxisOpts(
@@ -267,7 +290,7 @@ class ShowResult(object):
         bar_position_value_mean = Bar() \
             .add_xaxis(list(self.position_analysis_result['position_value_mean'].index.astype('str'))) \
             .add_yaxis("股票持仓市值（万）", [round(i / 10000, 2) for i in position_value_mean]) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="股票持仓市值"),
@@ -289,7 +312,7 @@ class ShowResult(object):
             bar_industry_value_pct = Bar() \
                 .add_xaxis(xaxis_data=list(self.position_analysis_result['position_industry_pct'].index.astype('str'))) \
                 .add_yaxis('行业市值占比', position_industry_pct) \
-                .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+                .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
                 .set_global_opts(title_opts=opts.TitleOpts(title="股票持仓行业市值占比", subtitle=title),
                                  xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                                  yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}"),
@@ -329,7 +352,7 @@ class ShowResult(object):
             line_industry_value = Line() \
                 .add_xaxis(xaxis_data=list(self.position_analysis_result['position_industry'].index.astype('str'))) \
                 .add_yaxis('行业市值', position_industry) \
-                .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+                .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
                 .set_global_opts(title_opts=opts.TitleOpts(title="股票持仓行业市值", subtitle=title),
                                  xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                                  yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}"),
@@ -365,7 +388,7 @@ class ShowResult(object):
         bar_position_industry_pct_mean = Bar() \
             .add_xaxis(position_value_mean_xaxis) \
             .add_yaxis("行业市值历史占比均值（%）", [round(i, 2) for i in position_value_mean]) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="行业市值历史占比均值"),
@@ -391,7 +414,7 @@ class ShowResult(object):
                 .add_xaxis(xaxis_data=list(self.position_analysis_result['turnover_num_df'].columns.astype('str'))) \
                 .add_yaxis('个数法（%）', turnover_num_list) \
                 .add_yaxis('权重法（%）', turnover_value_list) \
-                .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+                .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
                 .set_global_opts(title_opts=opts.TitleOpts(title="换手率"),
                                  xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                                  yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}"),
@@ -427,7 +450,7 @@ class ShowResult(object):
             .add_xaxis(list(self.position_analysis_result['turnover_num_mean'].index.astype('str'))) \
             .add_yaxis("个数法（%）", turnover_num_mean) \
             .add_yaxis("权重法（%）", turnover_value_mean) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="换手率均值"),
@@ -465,7 +488,7 @@ class ShowResult(object):
             .add_yaxis("每日交易股票数量", trade_num_amount) \
             .extend_axis(yaxis=opts.AxisOpts(type_="value", position="right"))\
             .add_yaxis("每日交易金额（万）", [round(i/10000, 2) for i in trade_amount_day], yaxis_index=1 ) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="每日交易股票数量与金额"),
@@ -506,7 +529,7 @@ class ShowResult(object):
             .add_yaxis("每日交易次数", trade_num_times_day) \
             .add_yaxis("开仓次数", open_num_times_day) \
             .add_yaxis("平仓次数", close_num_times_day) \
-            .set_series_opts(label_opts=opts.LabelOpts(is_show=True)) \
+            .set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(xaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(rotate=-15)),
                              yaxis_opts=opts.AxisOpts(axislabel_opts=opts.LabelOpts(formatter="{value}")),
                              title_opts=opts.TitleOpts(title="每日交易次数分析"),
@@ -522,6 +545,9 @@ class ShowResult(object):
 
         net_value_line = self.line_net_value()
         page.add(net_value_line)
+
+        bar_capital_utilization = self.bar_capital_utilization()
+        page.add(bar_capital_utilization)
 
         table_net_value = self.table_net_value()
         page.add(table_net_value)
@@ -541,35 +567,35 @@ class ShowResult(object):
         table_profit_risk_value = self.table_profit_risk()
         page.add(table_profit_risk_value)
 
-        bar_position_value_mean = self.bar_position_value_mean()
-        page.add(bar_position_value_mean)
-
-        bar_position_industry_pct = self.bar_position_industry_pct()
-        page.add(bar_position_industry_pct)
-
-        timeline_position_industry = self.line_position_industry()
-        page.add(timeline_position_industry)
-
-        bar_position_industry_pct_mean = self.bar_position_industry_pct_mean()
-        page.add(bar_position_industry_pct_mean)
-
-        timeline_turnover_num = self.bar_turnover_num()
-        page.add(timeline_turnover_num)
-
-        bar_turnover_num_mean = self.bar_turnover_num_mean()
-        page.add(bar_turnover_num_mean)
-
-        table_trade_num_amount = self.table_trade_num_amount()
-        page.add(table_trade_num_amount)
-
-        bar_trade_num_amount = self.bar_trade_num_amount()
-        page.add(bar_trade_num_amount)
-
-        table_trade_num_times = self.table_trade_num_times()
-        page.add(table_trade_num_times)
-
-        bar_trade_num_times = self.bar_trade_num_times()
-        page.add(bar_trade_num_times)
+        # bar_position_value_mean = self.bar_position_value_mean()
+        # page.add(bar_position_value_mean)
+        #
+        # bar_position_industry_pct = self.bar_position_industry_pct()
+        # page.add(bar_position_industry_pct)
+        #
+        # timeline_position_industry = self.line_position_industry()
+        # page.add(timeline_position_industry)
+        #
+        # bar_position_industry_pct_mean = self.bar_position_industry_pct_mean()
+        # page.add(bar_position_industry_pct_mean)
+        #
+        # timeline_turnover_num = self.bar_turnover_num()
+        # page.add(timeline_turnover_num)
+        #
+        # bar_turnover_num_mean = self.bar_turnover_num_mean()
+        # page.add(bar_turnover_num_mean)
+        #
+        # table_trade_num_amount = self.table_trade_num_amount()
+        # page.add(table_trade_num_amount)
+        #
+        # bar_trade_num_amount = self.bar_trade_num_amount()
+        # page.add(bar_trade_num_amount)
+        #
+        # table_trade_num_times = self.table_trade_num_times()
+        # page.add(table_trade_num_times)
+        #
+        # bar_trade_num_times = self.bar_trade_num_times()
+        # page.add(bar_trade_num_times)
         page.render(save_path_dir + "回测绩效分析报告.html")
 
 
@@ -590,17 +616,18 @@ if __name__ == '__main__':
     net_value_analysis_obj = NetValueAnalysis(net_value_single_account_df, benchmark_df, start_time, end_time)
     net_analysis_result = net_value_analysis_obj.cal_net_analysis_result()
 
-    position_data_df = pd.read_csv('position_data.csv', index_col=[0, 1], parse_dates=['time_tag'],
-                                   dtype={'instrument': str})
-    position_data_df = position_data_df[position_data_df.index.get_level_values(1) == 'test0']
-    position_analysis_obj = PositionAnalysis(position_data_df)
-    position_analysis_result = position_analysis_obj.cal_position_analysis_result()
+    # position_data_df = pd.read_csv('position_data.csv', index_col=[0, 1], parse_dates=['time_tag'],
+    #                                dtype={'instrument': str})
+    # position_data_df = position_data_df[position_data_df.index.get_level_values(1) == 'test0']
+    # position_analysis_obj = PositionAnalysis(position_data_df)
+    # position_analysis_result = position_analysis_obj.cal_position_analysis_result()
+    #
+    # trade_data_df = pd.read_csv('order_data.csv', index_col=[0, 1], parse_dates=['time_tag'],
+    #                             dtype={'instrument': str})
+    # trade_data_df = trade_data_df[trade_data_df.index.get_level_values(1) == 'test0']
+    # trade_data_obj = TradeAnalysis(trade_data_df, net_value_df)
+    # trade_analysis_result = trade_data_obj.cal_trade_analysis_result()
 
-    trade_data_df = pd.read_csv('order_data.csv', index_col=[0, 1], parse_dates=['time_tag'],
-                                dtype={'instrument': str})
-    trade_data_df = trade_data_df[trade_data_df.index.get_level_values(1) == 'test0']
-    trade_data_obj = TradeAnalysis(trade_data_df, net_value_df)
-    trade_analysis_result = trade_data_obj.cal_trade_analysis_result()
-
-    show_result_object = ShowResult(net_analysis_result, position_analysis_result, trade_analysis_result)
+    # show_result_object = ShowResult(net_analysis_result, position_analysis_result, trade_analysis_result)
+    show_result_object = ShowResult(net_analysis_result, 0, 0)
     show_result_object.show_page()
