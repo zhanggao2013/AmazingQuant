@@ -50,8 +50,6 @@ class ShowResult(object):
         table_strategy_information.set_global_opts(title_opts=ComponentTitleOpts(title='策略的总体概要'))
         return table_strategy_information
 
-
-
     # 净值分析
     def line_net_value(self):
         """
@@ -72,8 +70,9 @@ class ShowResult(object):
                              areastyle_opts=opts.AreaStyleOpts(opacity=0.1),
                              markline_opts=opts.MarkLineOpts(data=[opts.MarkLineItem(y=1, name="yAxis=1")])) \
             .set_global_opts(title_opts=opts.TitleOpts(title="净值曲线",
-                                                       subtitle="策略净值为：" + str(net_value_list[-1]) + "\n" +
-                                                                "基准净值为：" + str(benchmark_list[-1])),  # 标题
+                                                       subtitle="期末净值为：" +
+                                                                "策略：" + str(net_value_list[-1]) + "\t\t\t" +
+                                                                "基准：" + str(benchmark_list[-1])),  # 标题
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
                              yaxis_opts=opts.AxisOpts(min_=math.ceil(min(all_list) * 90) / 100,
                                                       max_=int(max(all_list) * 110) / 100),
@@ -201,8 +200,8 @@ class ShowResult(object):
                              label_opts=opts.LabelOpts(is_show=False)) \
             .set_global_opts(title_opts=opts.TitleOpts(title="最大回撤分析",
                                                        subtitle="历史最大回撤：" + "\t"
-                                                                "策略——" + str(net_max_drawdown) + "%\t\t\t" +
-                                                                "基准——" + str(benchmark_max_drawdown)+'%'),
+                                                                "策略：" + str(net_max_drawdown) + "%\t\t\t" +
+                                                                "基准：" + str(benchmark_max_drawdown)+'%'),
                              # 标题
                              tooltip_opts=opts.TooltipOpts(trigger="axis"),  # 添加竖线信息
                              yaxis_opts=opts.AxisOpts(
