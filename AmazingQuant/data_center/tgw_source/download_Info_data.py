@@ -198,7 +198,7 @@ if __name__ == '__main__':
     # shareholder_df = info_data_object.download_10_shareholder()
     # sw_index_member_df = info_data_object.download_sw_index_member()
     # info_data_object.download_stock_struction()
-    # result = info_data_object.download_finance_data()
+    result = info_data_object.download_finance_data()
     hist_codelist1 = info_data_object.download_hist_codelist(id='A010010007')
     hist_codelist2 = info_data_object.download_hist_codelist(id='A010010008')
 

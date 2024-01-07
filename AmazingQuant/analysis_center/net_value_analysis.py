@@ -120,6 +120,7 @@ class NetValueAnalysis(object):
                                  value=self.benchmark_df['close'] / self.benchmark_df['close'].iloc[0])
 
     def cal_capital_utilization(self):
+        print(self.net_value_df)
         capital_utilization = 100 * (self.net_value_df['total_balance'] - self.net_value_df['available']) / \
                                 self.net_value_df['total_balance']
         self.net_value_df.insert(loc=0, column='capital_utilization', value=capital_utilization)

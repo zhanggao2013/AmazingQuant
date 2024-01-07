@@ -148,6 +148,7 @@ class RegressionAnalysis(object):
         start_time, end_time = self.factor_return.dropna().index.min(), self.factor_return.dropna().index.max()
         for i in ['cumsum', 'cumprod']:
             net_value = self.factor_return[i].to_frame('total_balance')
+            net_value.insert(loc=0, column='available', value=0)
             net_value[net_value < 0] = 0
             net_value_analysis_obj = NetValueAnalysis(net_value, self.benchmark_df, start_time, end_time)
             self.net_analysis_result[i] = net_value_analysis_obj.cal_net_analysis_result()

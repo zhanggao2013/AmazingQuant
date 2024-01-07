@@ -716,7 +716,7 @@ if __name__ == '__main__':
     factor_ma5 = get_local_data(path, factor_name + '_pre' + '.h5')
 
     factor_ma5 = factor_ma5[factor_ma5.index >= datetime(2013, 2, 1)]
-    factor_ma5 = factor_ma5[factor_ma5.index < datetime(2023, 4, 1)]
+    factor_ma5 = factor_ma5[factor_ma5.index < datetime(2013, 4, 1)]
     # factor_ma5 = factor_ma5.iloc[:-50, :]
 
     factor_analysis_obj = FactorAnalysis(factor_ma5, factor_name)

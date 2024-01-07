@@ -12,6 +12,7 @@ import numpy as np
 import talib
 
 from AmazingQuant.utils.performance_test import Timer
+from AmazingQuant.constant import RightsAdjustment
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
 from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
@@ -30,7 +31,7 @@ class MaIndicator(object):
 
     def get_kline_data(self):
         kline_data = GetKlineData()
-        all_stock_data = kline_data.cache_all_stock_data()
+        all_stock_data = kline_data.cache_all_stock_data(dividend_type=RightsAdjustment.FROWARD.value)
         self.kline = kline_data.get_market_data(all_stock_data, stock_code=self.stock_list, field=['close'])
         return self.kline
 
@@ -42,7 +43,7 @@ class MaIndicator(object):
 
 
 if __name__ == '__main__':
-    tgw_login(server_mode=True)
+    tgw_login()
     with Timer(True):
         ma_indicator = MaIndicator()
         ma_indicator.get_stock_list()
