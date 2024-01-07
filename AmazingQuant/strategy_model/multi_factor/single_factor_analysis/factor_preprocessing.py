@@ -40,7 +40,7 @@ import pandas as pd
 import numpy as np
 import statsmodels.api as sm
 
-from AmazingQuant.indicator_center.save_get_indicator import SaveGetIndicator
+from AmazingQuant.factor_center.save_get_indicator import SaveGetIndicator
 from AmazingQuant.strategy_model.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod, FillNanMethod, \
     NeutralizeMethod
 from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass

@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2023/6/19
 # @Author  : gao
-# @File    : cal_indicator.py
+# @File    : cal_factor.py
 # @Project : AmazingQuant
 # ------------------------------
 import talib
