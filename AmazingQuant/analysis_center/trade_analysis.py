@@ -83,7 +83,7 @@ class TradeAnalysis(object):
 
     def cal_trade_day_num(self):
         # 交易天数
-        self.trade_day_num = self.trade_data_df.shape[0]
+        self.trade_day_num = len(set(self.trade_data_df.index.get_level_values(0)))
         # 交易天数占比
         self.trade_day_num_ratio = round(self.trade_day_num / self.index_num * 100, 2)
 
@@ -184,5 +184,5 @@ if __name__ == '__main__':
     trade_data_df = pd.read_csv('order_data.csv', index_col=[0, 1], parse_dates=['time_tag'],
                                 dtype={'instrument': str})
     trade_data_df = trade_data_df[trade_data_df.index.get_level_values(1) == 'test0']
-    trade_data_obj = TradeAnalysis(trade_data_df, net_value_df)
-    trade_analysis_result = trade_data_obj.cal_trade_analysis_result()
+    # trade_data_obj = TradeAnalysis(trade_data_df, net_value_df)
+    # trade_analysis_result = trade_data_obj.cal_trade_analysis_result()
