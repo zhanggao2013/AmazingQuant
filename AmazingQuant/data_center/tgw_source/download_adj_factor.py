@@ -46,7 +46,8 @@ class UpdateAdjFactor(object):
                     adj_factor_date_max = max(adj_factor.index)
                     if adj_factor_date_min < adj_factor_date_max:
                         adj_factor = adj_factor.loc[adj_factor_date_min:, :]
-                        adj_factor_code = pd.DataFrame(adj_factor['cum_factor'] / adj_factor['cum_factor'].iloc[0])
+                        # adj_factor_code = pd.DataFrame(adj_factor['cum_factor'] / adj_factor['cum_factor'].iloc[0])
+                        adj_factor_code = pd.DataFrame(adj_factor['cum_factor'])
                         adj_factor_code.columns = [code + '.' + market]
                         backward_factor_list.append(adj_factor_code)
                     else:
@@ -65,7 +66,7 @@ class UpdateAdjFactor(object):
         backward_factor.sort_index(inplace=True)
         backward_factor.replace([np.inf, 0], np.nan, inplace=True)
         backward_factor.fillna(method='ffill', inplace=True)
-        backward_factor.fillna(1, inplace=True)
+        backward_factor.fillna(method='bfill', inplace=True)
         backward_factor.index = pd.Series([date_to_datetime(str(i)) for i in backward_factor.index])
         return backward_factor
 

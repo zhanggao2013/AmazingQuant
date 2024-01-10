@@ -34,4 +34,11 @@ if __name__ == '__main__':
     with Timer(True):
         adj_factor_obj = GetAdjFactor()
         result = adj_factor_obj.get_adj_factor(RightsAdjustment.FROWARD.value)
+        b = result['600754.SH']
+
+        import tgw
+
+        from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
+        tgw_login()
+        adj_factor, error = tgw.QueryExFactorTable('600754')
 

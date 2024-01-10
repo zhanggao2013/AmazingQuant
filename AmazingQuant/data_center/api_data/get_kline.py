@@ -42,8 +42,9 @@ class GetKlineData(object):
             if isinstance(adj_factor, int):
                 all_market_date[i] = data
             else:
-                if i in ['open', 'high', 'low', 'close']:
-                    all_market_date[i] = data.multiply(adj_factor)
+                if i in ['open', 'high', 'low', 'close', 'volume']:
+                    # all_market_date[i] = data.multiply(adj_factor)
+                    all_market_date[i] = data * adj_factor
                 else:
                     all_market_date[i] = data
         return all_market_date
@@ -84,9 +85,18 @@ class GetKlineData(object):
 if __name__ == '__main__':
     with Timer(True):
         kline_object = GetKlineData()
-        all_market_data = kline_object.cache_all_stock_data(dividend_type=RightsAdjustment.BACKWARD.value)
+        all_market_data = kline_object.cache_all_stock_data(dividend_type=RightsAdjustment.NONE.value)
         a = all_market_data['close']
-        b = a['003816.SZ']
+        b = a['600754.SH']
+
+        adj_factor_obj = GetAdjFactor()
+        result = adj_factor_obj.get_adj_factor(RightsAdjustment.FROWARD.value)
+        c = result['600754.SH']
+        d = b*c
+        all_market_data = kline_object.cache_all_stock_data(dividend_type=RightsAdjustment.NONE.value)
+        e = all_market_data['close']
+        f = e['600754.SH']
+
         print(b)
         # all_index_data = kline_object.cache_all_index_data()
         #

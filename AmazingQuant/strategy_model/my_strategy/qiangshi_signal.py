@@ -61,7 +61,7 @@ class CalCondition(object):
         zhangting = zhangfu.applymap(lambda x: 1 if x>9.99 else 0)
         return zhangting.apply(lambda x: talib.MAX(x, timeperiod=timeperiod))
 
-    def condition2(self, timeperiod=20):
+    def condition2(self, timeperiod=5):
         """
         {条件2：最新价小于前N2日最高价}
         N2:=20;
@@ -73,7 +73,7 @@ class CalCondition(object):
         close_n_high = close_n_high.replace(False, 0)
         return close_n_high
 
-    def condition3(self, timeperiod=5, N1=20, M=2):
+    def condition3(self, timeperiod=5, N1=10, M=2):
         """
         {条件3：MA5（VOL）与前N3日的MA5（VOL）比，大于M}
         N3:=20;
@@ -106,11 +106,11 @@ class CalCondition(object):
         condition2 = self.condition2()
         condition3 = self.condition3()
         condition4 = self.condition4(share_data)
-        result = condition1 + condition2 + condition3 + condition4
-        result = result > 3
-        result = result.replace(True, 1)
-        result = result.replace(False, 0)
-        return result
+        condition_result = condition1 + condition2 + condition3 + condition4
+        condition_result = condition_result > 3
+        condition_result = condition_result.replace(True, 1)
+        condition_result = condition_result.replace(False, 0)
+        return condition_result
 
 
 if __name__ == '__main__':
@@ -138,3 +138,24 @@ if __name__ == '__main__':
         result_path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/' + factor_name + '/'
         result = cal_condition_object.cal_result(share_data).shift(1)
         save_data_to_hdf5(result_path, factor_name, result)
+    result_num_sum = result.sum(axis=1).shift(1)
+    ref_open = cal_condition_object.open_df.shift(1)
+    close_df = cal_condition_object.close_df
+    ratio = (close_df-ref_open)/ref_open*100
+    result_s = result.shift(1)
+    result_ratio = ratio * result_s
+    result_ratio_sum = result_ratio.sum(axis=1)
+
+    result_ave_ratio = result_ratio_sum/result_num_sum
+
+    result_ave_ratio = result_ave_ratio.fillna(0)
+
+    import datetime
+    import matplotlib.pyplot as plt
+    a = result_ratio.loc[datetime.datetime(2015, 8, 25), :].dropna()
+    cumsum = (result_ave_ratio/100).loc[datetime.datetime(2022, 1, 1):].cumsum()+1
+    cumprod = (result_ave_ratio/100+1).loc[datetime.datetime(2022, 1, 1):].cumprod()
+    cumsum.plot.line()
+    cumprod.plot.line()
+    plt.show()
+
