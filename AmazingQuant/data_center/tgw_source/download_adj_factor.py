@@ -145,7 +145,7 @@ class UpdateAdjFactor(object):
 
 
 if __name__ == '__main__':
-    tgw_login()
+    tgw_login(server_mode=True)
 
     tgw_api_object = TgwApiData(20991231)
     code_sh_list, code_sz_list = tgw_api_object.get_code_list()
