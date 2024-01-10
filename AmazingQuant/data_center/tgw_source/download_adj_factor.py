@@ -43,17 +43,9 @@ class UpdateAdjFactor(object):
                 adj_factor.sort_index(inplace=True)
 
                 if not adj_factor.empty:
-                    adj_factor_date_max = max(adj_factor.index)
-                    if adj_factor_date_min < adj_factor_date_max:
-                        adj_factor = adj_factor.loc[adj_factor_date_min:, :]
-                        # adj_factor_code = pd.DataFrame(adj_factor['cum_factor'] / adj_factor['cum_factor'].iloc[0])
-                        adj_factor_code = pd.DataFrame(adj_factor['cum_factor'])
-                        adj_factor_code.columns = [code + '.' + market]
-                        backward_factor_list.append(adj_factor_code)
-                    else:
-                        backward_factor_list.append(pd.DataFrame(np.nan,
-                                                                 columns=[code + '.' + market],
-                                                                 index=calendar_index))
+                    adj_factor_code = pd.DataFrame(adj_factor['cum_factor'])
+                    adj_factor_code.columns = [code + '.' + market]
+                    backward_factor_list.append(adj_factor_code)
                 else:
                     backward_factor_list.append(pd.DataFrame(np.nan,
                                                              columns=[code + '.' + market],
@@ -62,11 +54,14 @@ class UpdateAdjFactor(object):
         index_add = list(set(calendar_index) - set(backward_factor.index))
         backward_factor = pd.concat([backward_factor,
                                      pd.DataFrame(np.nan, columns=backward_factor.columns, index=index_add)])
-        backward_factor = backward_factor.loc[calendar_index, :]
         backward_factor.sort_index(inplace=True)
         backward_factor.replace([np.inf, 0], np.nan, inplace=True)
         backward_factor.fillna(method='ffill', inplace=True)
         backward_factor.fillna(1, inplace=True)
+        backward_factor = backward_factor.loc[calendar_index, :]
+
+
+
         backward_factor.index = pd.Series([date_to_datetime(str(i)) for i in backward_factor.index])
         return backward_factor
 
@@ -145,7 +140,7 @@ class UpdateAdjFactor(object):
 
 
 if __name__ == '__main__':
-    tgw_login(server_mode=True)
+    tgw_login()
 
     tgw_api_object = TgwApiData(20991231)
     code_sh_list, code_sz_list = tgw_api_object.get_code_list()
@@ -153,6 +148,8 @@ if __name__ == '__main__':
 
     adj_factor_object = UpdateAdjFactor()
     backward_factor = adj_factor_object.get_backward_factor(code_sh_list, code_sz_list, calendar_index)
+    # backward_factor = adj_factor_object.get_backward_factor(['600000'], code_sz_list[:10], calendar_index)
+
     folder_name = LocalDataFolderName.ADJ_FACTOR.value
     path = LocalDataPath.path + folder_name + '/'
     save_data_to_hdf5(path, AdjustmentFactor.BACKWARD_ADJ_FACTOR.value, backward_factor)
