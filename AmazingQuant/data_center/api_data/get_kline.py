@@ -93,7 +93,7 @@ if __name__ == '__main__':
         result = adj_factor_obj.get_adj_factor(RightsAdjustment.FROWARD.value)
         c = result['600754.SH']
         d = b*c
-        all_market_data = kline_object.cache_all_stock_data(dividend_type=RightsAdjustment.NONE.value)
+        all_market_data = kline_object.cache_all_stock_data(dividend_type=RightsAdjustment.FROWARD.value)
         e = all_market_data['close']
         f = e['600754.SH']
 

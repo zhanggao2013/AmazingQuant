@@ -66,7 +66,7 @@ class UpdateAdjFactor(object):
         backward_factor.sort_index(inplace=True)
         backward_factor.replace([np.inf, 0], np.nan, inplace=True)
         backward_factor.fillna(method='ffill', inplace=True)
-        backward_factor.fillna(method='bfill', inplace=True)
+        backward_factor.fillna(1, inplace=True)
         backward_factor.index = pd.Series([date_to_datetime(str(i)) for i in backward_factor.index])
         return backward_factor
 
