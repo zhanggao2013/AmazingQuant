@@ -186,7 +186,7 @@ class DownloadKlineData(object):
 
 
 if __name__ == '__main__':
-    tgw_login(server_mode=True)
+    tgw_login()
 
     tgw_api_object = TgwApiData(20991231)
     code_sh_list, code_sz_list = tgw_api_object.get_code_list()
@@ -198,11 +198,11 @@ if __name__ == '__main__':
     path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
            '//' + LocalDataFolderName.A_SHARE.value + '//'
     field_data_dict = kline_object.download_kline_data(code_sh_list, code_sz_list, calendar_index, path)
-    #
-    # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
-    #        '//' + LocalDataFolderName.INDEX.value + '//'
-    # field_data_dict = kline_object.download_kline_data(index_code_sh_list, index_code_sz_list, calendar_index, path)
-    #
-    # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_1MIN.value + \
-    #        '//' + LocalDataFolderName.A_SHARE.value + '//'
-    # field_data_dict = kline_object.download_min_kline_data(code_sh_list, code_sz_list, calendar_index, path)
+
+    path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
+           '//' + LocalDataFolderName.INDEX.value + '//'
+    field_data_dict = kline_object.download_kline_data(index_code_sh_list, index_code_sz_list, calendar_index, path)
+
+    path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_1MIN.value + \
+           '//' + LocalDataFolderName.A_SHARE.value + '//'
+    field_data_dict = kline_object.download_min_kline_data(code_sh_list, code_sz_list, calendar_index, path)

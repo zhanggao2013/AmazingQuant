@@ -8,7 +8,7 @@
 # ------------------------------
 import tgw
 
-from AmazingQuant.utils.data_transfer import date_to_datetime
+from AmazingQuant.utils.data_transfer import date_to_datetime, datetime_to_int
 from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
 
 
@@ -72,7 +72,7 @@ class TgwApiData(object):
 
 
 if __name__ == '__main__':
-    tgw_login(server_mode=True)
+    tgw_login()
 
     tgw_api_object = TgwApiData(20991231)
     calendar = tgw_api_object.get_calendar()
