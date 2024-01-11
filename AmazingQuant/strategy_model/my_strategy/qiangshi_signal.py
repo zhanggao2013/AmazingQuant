@@ -48,6 +48,7 @@ class CalCondition(object):
         return self.value_trade_df.apply(lambda x: talib.MA(x, timeperiod=timeperiod))
 
     def cal_turnover(self, share_data):
+        share_data = share_data.reindex(columns=self.volume_trade_df.columns)
         return self.volume_trade_df.div(share_data)*100
 
     def condition1(self, timeperiod=10):
@@ -140,22 +141,32 @@ if __name__ == '__main__':
         save_data_to_hdf5(result_path, factor_name, result)
     result_num_sum = result.sum(axis=1).shift(1)
     ref_open = cal_condition_object.open_df.shift(1)
+
+    open_df = cal_condition_object.open_df
     close_df = cal_condition_object.close_df
     ratio = (close_df-ref_open)/ref_open*100
     result_s = result.shift(1)
     result_ratio = ratio * result_s
     result_ratio_sum = result_ratio.sum(axis=1)
-
     result_ave_ratio = result_ratio_sum/result_num_sum
-
     result_ave_ratio = result_ave_ratio.fillna(0)
 
+    # 当日盈亏
+    today_ratio = (close_df-open_df)/open_df*100
+    result_today_ratio = today_ratio * result
+    result_today_ratio_sum = result_today_ratio.sum(axis=1)
+    result_toda_num_sum = result.sum(axis=1)
+    result_today_ave_ratio = result_today_ratio_sum/result_toda_num_sum
+    result_today_ave_ratio = result_today_ave_ratio.fillna(0)
+
+    a = (result_ave_ratio + result_today_ave_ratio)/2
     import datetime
     import matplotlib.pyplot as plt
-    a = result_ratio.loc[datetime.datetime(2015, 8, 25), :].dropna()
-    cumsum = (result_ave_ratio/100).loc[datetime.datetime(2022, 1, 1):].cumsum()+1
-    cumprod = (result_ave_ratio/100+1).loc[datetime.datetime(2022, 1, 1):].cumprod()
+
+    cumsum = (a/100).loc[datetime.datetime(2013, 1, 1):].cumsum()+1
+    cumprod = (a/100+1).loc[datetime.datetime(2013, 1, 1):].cumprod()
     cumsum.plot.line()
+    plt.show()
     cumprod.plot.line()
     plt.show()
 

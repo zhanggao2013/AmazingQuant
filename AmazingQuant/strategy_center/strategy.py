@@ -184,6 +184,9 @@ class StrategyBase(metaclass=ABCMeta):
         # security_list = list(set(security_list))
         if self._daily_data_cache:
             Environment.daily_data = self._get_data.cache_all_stock_data(dividend_type=self.rights_adjustment)
+            for field in Environment.daily_data:
+                Environment.daily_data[field] = Environment.daily_data[field][self.universe]
+
             Environment.index_daily_data = self._get_data.cache_all_index_data()
 
         if self.one_min_data_cache:

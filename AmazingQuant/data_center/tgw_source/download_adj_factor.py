@@ -6,6 +6,7 @@
 # @File    : download_adj_factor.py
 # @Project : AmazingQuant 
 # ------------------------------
+import datetime
 
 import numpy as np
 import pandas as pd
@@ -136,28 +137,29 @@ class UpdateAdjFactor(object):
         return security_code_market_data
 
     def cal_forward_factor(self, backward_factor):
-        return backward_factor.div(backward_factor.iloc[-1])
+        forward_factor = backward_factor.div(backward_factor.iloc[-1])
+        return forward_factor.loc[datetime.datetime(2013, 1, 1):]
 
 
 if __name__ == '__main__':
-    tgw_login()
+    tgw_login(server_mode=True)
 
     tgw_api_object = TgwApiData(20991231)
     code_sh_list, code_sz_list = tgw_api_object.get_code_list()
-    calendar_index = tgw_api_object.get_calendar()
-
-    adj_factor_object = UpdateAdjFactor()
-    backward_factor = adj_factor_object.get_backward_factor(code_sh_list, code_sz_list, calendar_index)
-    # backward_factor = adj_factor_object.get_backward_factor(['600000'], code_sz_list[:10], calendar_index)
-
-    folder_name = LocalDataFolderName.ADJ_FACTOR.value
-    path = LocalDataPath.path + folder_name + '/'
-    save_data_to_hdf5(path, AdjustmentFactor.BACKWARD_ADJ_FACTOR.value, backward_factor)
-
-    forward_factor = adj_factor_object.cal_forward_factor(backward_factor)
-    save_data_to_hdf5(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value, forward_factor)
-
-    # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
-    #        '//' + LocalDataFolderName.A_SHARE.value + '//'
-    # close_df = get_local_data(path, 'close_price.h5')
-    # backward_factor_ratio = adj_factor_object.get_backward_factor_ratio(close_df, code_sh_list,  code_sz_list, calendar_index)
+    # calendar_index = tgw_api_object.get_calendar()
+    #
+    # adj_factor_object = UpdateAdjFactor()
+    # backward_factor = adj_factor_object.get_backward_factor(code_sh_list, code_sz_list, calendar_index)
+    # # backward_factor = adj_factor_object.get_backward_factor(['600000'], code_sz_list[:10], calendar_index)
+    #
+    # folder_name = LocalDataFolderName.ADJ_FACTOR.value
+    # path = LocalDataPath.path + folder_name + '/'
+    # save_data_to_hdf5(path, AdjustmentFactor.BACKWARD_ADJ_FACTOR.value, backward_factor)
+    #
+    # forward_factor = adj_factor_object.cal_forward_factor(backward_factor)
+    # save_data_to_hdf5(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value, forward_factor)
+    #
+    # # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
+    # #        '//' + LocalDataFolderName.A_SHARE.value + '//'
+    # # close_df = get_local_data(path, 'close_price.h5')
+    # # backward_factor_ratio = adj_factor_object.get_backward_factor_ratio(close_df, code_sh_list,  code_sz_list, calendar_index)

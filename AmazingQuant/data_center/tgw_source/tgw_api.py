@@ -21,21 +21,16 @@ class TgwApiData(object):
         self.code_list_hist = []
 
     def get_calendar(self, data_type=None):
-        index_kline = tgw.ReqKline()
-        index_kline.cq_flag = 0
-        index_kline.auto_complete = 1
-        index_kline.cyc_type = tgw.MDDatatype.kDayKline
-        index_kline.begin_date = 19900101
-        index_kline.end_date = self.end_date
-        index_kline.begin_time = 930
-        index_kline.end_time = 1700
+        today = datetime_to_int()
+        task_id = tgw.GetTaskID()
+        tgw.SetThirdInfoParam(task_id, "function_id", "A010060001")
+        tgw.SetThirdInfoParam(task_id, "start_date", "19900101")
+        tgw.SetThirdInfoParam(task_id, "end_date", str(today)[:4]+"1231")
+        tgw.SetThirdInfoParam(task_id, "market", 'SSE')
 
-        index_kline.security_code = '000001'
-        index_kline.market_type = tgw.MarketType.kSSE
-
-        index_kline_df, _ = tgw.QueryKline(index_kline)
-
-        self.calendar = list(index_kline_df['kline_time'].sort_values(ascending=True))
+        trade_days_df, _ = tgw.QueryThirdInfo(task_id)
+        trade_days_df['TRADE_DAYS'] = trade_days_df['TRADE_DAYS'].astype(int)
+        self.calendar = list(trade_days_df['TRADE_DAYS'].sort_values(ascending=True))
         if data_type == 'datetime':
             self.calendar = [date_to_datetime(str(i)) for i in self.calendar]
         return self.calendar
@@ -78,7 +73,7 @@ class TgwApiData(object):
 
 
 if __name__ == '__main__':
-    tgw_login()
+    tgw_login(server_mode=True)
 
     tgw_api_object = TgwApiData(20991231)
     calendar = tgw_api_object.get_calendar()
