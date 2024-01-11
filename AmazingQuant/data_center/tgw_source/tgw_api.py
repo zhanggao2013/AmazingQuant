@@ -25,7 +25,7 @@ class TgwApiData(object):
         task_id = tgw.GetTaskID()
         tgw.SetThirdInfoParam(task_id, "function_id", "A010060001")
         tgw.SetThirdInfoParam(task_id, "start_date", "19900101")
-        tgw.SetThirdInfoParam(task_id, "end_date", str(today)[:4]+"1231")
+        tgw.SetThirdInfoParam(task_id, "end_date", str(today))
         tgw.SetThirdInfoParam(task_id, "market", 'SSE')
 
         trade_days_df, _ = tgw.QueryThirdInfo(task_id)

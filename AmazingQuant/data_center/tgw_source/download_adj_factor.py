@@ -142,12 +142,12 @@ class UpdateAdjFactor(object):
 
 
 if __name__ == '__main__':
-    tgw_login(server_mode=True)
+    tgw_login()
 
     tgw_api_object = TgwApiData(20991231)
     code_sh_list, code_sz_list = tgw_api_object.get_code_list()
-    # calendar_index = tgw_api_object.get_calendar()
-    #
+    calendar_index = tgw_api_object.get_calendar()
+
     # adj_factor_object = UpdateAdjFactor()
     # backward_factor = adj_factor_object.get_backward_factor(code_sh_list, code_sz_list, calendar_index)
     # # backward_factor = adj_factor_object.get_backward_factor(['600000'], code_sz_list[:10], calendar_index)
