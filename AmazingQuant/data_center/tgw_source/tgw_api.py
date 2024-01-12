@@ -13,8 +13,7 @@ from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
 
 
 class TgwApiData(object):
-    def __init__(self, end_date):
-        self.end_date = end_date
+    def __init__(self, ):
         self.calendar = []
         self.code_sh_list, self.code_sz_list = [], []
         self.stock_list = []
@@ -75,5 +74,5 @@ class TgwApiData(object):
 if __name__ == '__main__':
     tgw_login(server_mode=True)
 
-    tgw_api_object = TgwApiData(20991231)
+    tgw_api_object = TgwApiData()
     calendar = tgw_api_object.get_calendar()

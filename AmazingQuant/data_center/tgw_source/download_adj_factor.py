@@ -61,8 +61,6 @@ class UpdateAdjFactor(object):
         backward_factor.fillna(1, inplace=True)
         backward_factor = backward_factor.loc[calendar_index, :]
 
-
-
         backward_factor.index = pd.Series([date_to_datetime(str(i)) for i in backward_factor.index])
         return backward_factor
 
@@ -144,21 +142,20 @@ class UpdateAdjFactor(object):
 if __name__ == '__main__':
     tgw_login()
 
-    tgw_api_object = TgwApiData(20991231)
+    tgw_api_object = TgwApiData()
     code_sh_list, code_sz_list = tgw_api_object.get_code_list()
     calendar_index = tgw_api_object.get_calendar()
 
-    # adj_factor_object = UpdateAdjFactor()
-    # backward_factor = adj_factor_object.get_backward_factor(code_sh_list, code_sz_list, calendar_index)
-    # # backward_factor = adj_factor_object.get_backward_factor(['600000'], code_sz_list[:10], calendar_index)
-    #
-    # folder_name = LocalDataFolderName.ADJ_FACTOR.value
-    # path = LocalDataPath.path + folder_name + '/'
-    # save_data_to_hdf5(path, AdjustmentFactor.BACKWARD_ADJ_FACTOR.value, backward_factor)
-    #
-    # forward_factor = adj_factor_object.cal_forward_factor(backward_factor)
-    # save_data_to_hdf5(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value, forward_factor)
-    #
+    adj_factor_object = UpdateAdjFactor()
+    backward_factor = adj_factor_object.get_backward_factor(code_sh_list, code_sz_list, calendar_index)
+
+    folder_name = LocalDataFolderName.ADJ_FACTOR.value
+    path = LocalDataPath.path + folder_name + '/'
+    save_data_to_hdf5(path, AdjustmentFactor.BACKWARD_ADJ_FACTOR.value, backward_factor)
+
+    forward_factor = adj_factor_object.cal_forward_factor(backward_factor)
+    save_data_to_hdf5(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value, forward_factor)
+
     # # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
     # #        '//' + LocalDataFolderName.A_SHARE.value + '//'
     # # close_df = get_local_data(path, 'close_price.h5')
