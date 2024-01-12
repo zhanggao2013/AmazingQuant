@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import datetime
 # ------------------------------
 # @Time    : 2023/6/15
 # @Author  : gao
@@ -7,18 +8,17 @@
 # @Project : AmazingQuant
 # ------------------------------
 import time
-import datetime
 
 import pandas as pd
 import tgw
 
-from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
-from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
-from AmazingQuant.utils.save_data import save_data_to_hdf5
-from AmazingQuant.utils.get_data import get_local_data
 from AmazingQuant.config.local_data_path import LocalDataPath
 from AmazingQuant.constant import LocalDataFolderName
+from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
+from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
 from AmazingQuant.utils.data_transfer import date_to_datetime, datetime_to_int, date_minute_to_datetime
+from AmazingQuant.utils.get_data import get_local_data
+from AmazingQuant.utils.save_data import save_data_to_hdf5
 
 
 class DownloadKlineData(object):
@@ -102,7 +102,8 @@ class DownloadKlineData(object):
             if download_begin_date != datetime.datetime(1990, 1, 1):
                 field_data_dict[self.field_dict[i]] = pd.concat([local_data[self.field_dict[i]],
                                                                  field_data_pd.loc[download_begin_date:, :]])
-            save_data_to_hdf5(path, self.field_dict[i], field_data_dict[self.field_dict[i]])
+            save_data_to_hdf5(path, self.field_dict[i],
+                              field_data_dict[self.field_dict[i]].loc[datetime.datetime(2013, 1, 4), :])
             print('save_data_to_hdf5', self.field_dict[i])
         return field_data_dict
 
@@ -181,7 +182,8 @@ class DownloadKlineData(object):
                     # date_replace = datetime.datetime(2023, 10, 11)
                     # stock_data_df_all = stock_data_df_all[
                     #     stock_data_df_all.index < date_replace.replace(hour=0, minute=0, second=0)]
-                    save_data_to_hdf5(path+market_path+ '//', code, stock_data_df_all)
+                    save_data_to_hdf5(path + market_path + '//', code,
+                                      stock_data_df_all.loc[datetime.datetime(2013, 1, 4), :])
         return stock_data_df_all
 
 
@@ -205,4 +207,5 @@ if __name__ == '__main__':
 
     # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_1MIN.value + \
     #        '//' + LocalDataFolderName.A_SHARE.value + '//'
+
     # field_data_dict = kline_object.download_min_kline_data(code_sh_list, code_sz_list, calendar_index, path)
