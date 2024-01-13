@@ -54,8 +54,8 @@ class MaStrategy(StrategyBase):
         # 设置复权方式
         self.rights_adjustment = RightsAdjustment.FROWARD.value
         # 设置回测起止时间
-        self.start = datetime(2018, 1, 1)
-        self.end = datetime(2019, 1, 1)
+        self.start = datetime(2018, 1, 8)
+        self.end = datetime(2019, 1, 20)
         # 设置运行周期
         self.period = 'daily'
         self.index_member_obj.get_all_index_members()

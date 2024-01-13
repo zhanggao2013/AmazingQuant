@@ -246,18 +246,13 @@ class NetValueAnalysis(object):
 
     @staticmethod
     def cal_month_ratio(net_value_series):
-        month_ratio_list = {}
-        for i in net_value_series.index:
-            if str(i.year * 100 + i.month) in month_ratio_list.keys():
-                month_ratio_list[str(i.year * 100 + i.month)].append(net_value_series[i])
-            else:
-                month_ratio_list[str(i.year * 100 + i.month)] = [net_value_series[i]]
-        month_ratio = {key: 0 for key, value in month_ratio_list.items()}
-        for key, value in month_ratio_list.items():
-            if value[0] > 0:
-                month_ratio[key] = 100 * (value[-1] / value[0] - 1)
-            else:
-                print(key, value[0], 'net_value length is less than 0')
+        month_first = net_value_series.resample('MS').first()
+        month_last = net_value_series.resample('M').last()
+        month_ratio_series = month_last.pct_change()
+        month_ratio_series.iloc[0] = (month_last.iloc[0] - month_first.iloc[0])/month_first.iloc[0]
+        month_ratio = {}
+        for i in month_ratio_series.index:
+            month_ratio[str(i.year * 100 + i.month)] = month_ratio_series[i]*100
         return month_ratio
 
     @staticmethod
@@ -424,7 +419,8 @@ if __name__ == '__main__':
     for i in net_value_df.groupby('account_id'):
         net_value_single_account_df = i[1]
         break
-
-    net_value_analysis_obj = NetValueAnalysis(net_value_single_account_df, benchmark_df, start_time, end_time)
-
-    net_analysis_result = net_value_analysis_obj.cal_net_analysis_result()
+    a = net_value_single_account_df.resample('MS').first()
+    b = net_value_single_account_df.resample('M').last()
+    # net_value_analysis_obj = NetValueAnalysis(net_value_single_account_df, benchmark_df, start_time, end_time)
+    #
+    # net_analysis_result = net_value_analysis_obj.cal_net_analysis_result()
