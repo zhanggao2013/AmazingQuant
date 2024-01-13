@@ -82,11 +82,14 @@ class MaStrategy(StrategyBase):
 
         # 回测股票手续费和印花税，卖出印花税，千分之一；开仓手续费，万分之三；平仓手续费，万分之三，最低手续费，５元
         # 沪市，卖出有十万分之二的过户费，加入到卖出手续费
-        self.set_commission(stock_type=StockType.STOCK_SH.value, tax=0, open_commission=0,
+        self.set_commission(stock_type=StockType.STOCK_SH.value,
+                            tax=0, open_commission=0,
                             close_commission=0,
-                            close_today_commission=0, min_commission=5)
+                            close_today_commission=0,
+                            min_commission=0)
         # 深市不加过户费
-        self.set_commission(stock_type=StockType.STOCK_SZ.value, tax=0, open_commission=0,
+        self.set_commission(stock_type=StockType.STOCK_SZ.value,
+                            tax=0, open_commission=0,
                             close_commission=0,
                             close_today_commission=0,
                             min_commission=0)
