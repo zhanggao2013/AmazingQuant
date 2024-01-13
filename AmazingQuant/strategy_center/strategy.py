@@ -182,9 +182,7 @@ class StrategyBase(metaclass=ABCMeta):
         if self._daily_data_cache:
             Environment.daily_data = self._get_data.cache_all_stock_data(dividend_type=self.rights_adjustment)
             for field in Environment.daily_data:
-                print(Environment.daily_data[field])
                 Environment.daily_data[field] = Environment.daily_data[field].reindex(columns=self.universe)
-                print(Environment.daily_data[field])
 
             Environment.index_daily_data = self._get_data.cache_all_index_data()
 
