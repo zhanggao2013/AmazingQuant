@@ -44,6 +44,7 @@ class DownloadKlineData(object):
         try:
             date_list = []
             for i in self.field_dict.values():
+                print(get_local_data(path, i + '.h5'))
                 local_data[i] = get_local_data(path, i + '.h5').reindex(columns=code_market_list)
                 date_list.append(max(local_data[i].index))
             date_list_min = min(date_list)
@@ -102,8 +103,8 @@ class DownloadKlineData(object):
             if download_begin_date != datetime.datetime(1990, 1, 1):
                 field_data_dict[self.field_dict[i]] = pd.concat([local_data[self.field_dict[i]],
                                                                  field_data_pd.loc[download_begin_date:, :]])
-            save_data_to_hdf5(path, self.field_dict[i],
-                              field_data_dict[self.field_dict[i]].loc[datetime.datetime(2013, 1, 4), :])
+            field_data_dict[self.field_dict[i]] = field_data_dict[self.field_dict[i]].loc[datetime.datetime(2013, 1, 4):, :]
+            save_data_to_hdf5(path, self.field_dict[i], field_data_dict[self.field_dict[i]])
             print('save_data_to_hdf5', self.field_dict[i])
         return field_data_dict
 
@@ -182,13 +183,14 @@ class DownloadKlineData(object):
                     # date_replace = datetime.datetime(2023, 10, 11)
                     # stock_data_df_all = stock_data_df_all[
                     #     stock_data_df_all.index < date_replace.replace(hour=0, minute=0, second=0)]
-                    save_data_to_hdf5(path + market_path + '//', code,
-                                      stock_data_df_all.loc[datetime.datetime(2013, 1, 4), :])
+
+                    stock_data_df_all = stock_data_df_all.loc[datetime.datetime(2013, 1, 4):, :]
+                    save_data_to_hdf5(path + market_path + '//', code, stock_data_df_all)
         return stock_data_df_all
 
 
 if __name__ == '__main__':
-    tgw_login(server_mode=True)
+    tgw_login()
 
     tgw_api_object = TgwApiData()
     code_sh_list, code_sz_list = tgw_api_object.get_code_list()
@@ -207,5 +209,5 @@ if __name__ == '__main__':
 
     # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_1MIN.value + \
     #        '//' + LocalDataFolderName.A_SHARE.value + '//'
-
+    #
     # field_data_dict = kline_object.download_min_kline_data(code_sh_list, code_sz_list, calendar_index, path)
