@@ -250,9 +250,8 @@ class NetValueAnalysis(object):
         month_last = net_value_series.resample('M').last()
         month_ratio_series = month_last.pct_change()
         month_ratio_series.iloc[0] = (month_last.iloc[0] - month_first.iloc[0])/month_first.iloc[0]
-        month_ratio = {}
-        for i in month_ratio_series.index:
-            month_ratio[str(i.year * 100 + i.month)] = month_ratio_series[i]*100
+        month_ratio = {str(date_index.year * 100 + date_index.month): month_ratio_series[date_index]*100
+                       for date_index in month_ratio_series.index}
         return month_ratio
 
     @staticmethod
