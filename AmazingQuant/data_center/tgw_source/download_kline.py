@@ -180,9 +180,6 @@ class DownloadKlineData(object):
                     # print('stock_data_df_all', stock_data_df_all)
                     if not local_min_kline.empty:
                         stock_data_df_all = pd.concat([local_min_kline, stock_data_df_all])
-                    # date_replace = datetime.datetime(2023, 10, 11)
-                    # stock_data_df_all = stock_data_df_all[
-                    #     stock_data_df_all.index < date_replace.replace(hour=0, minute=0, second=0)]
 
                     stock_data_df_all = stock_data_df_all.loc[datetime.datetime(2013, 1, 4):, :]
                     save_data_to_hdf5(path + market_path + '//', code, stock_data_df_all)
