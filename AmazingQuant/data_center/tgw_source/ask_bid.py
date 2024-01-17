@@ -30,24 +30,24 @@ volume_spread_dict = {}
 class DataHandler(tgw.IPushSpi):
     def __init__(self) -> None:
         super().__init__()
-        self.queue = queue.Queue()
+        self.stock_data_queue = queue.Queue()
         for i in range(4):
-            self.thread = threading.Thread(target=self.process_data)
+            self.thread = threading.Thread(target=self.process_stock_data)
             self.thread.start()
 
-        self.thread_queue = threading.Thread(target=self.process_queue)
+        self.index_data_queue = queue.Queue()
+        self.thread_queue = threading.Thread(target=self.process_index_data)
         self.thread_queue.start()
 
-    def process_queue(self):
+    def process_index_data(self):
         while True:
-            if self.queue.empty():
+            if self.index_data_queue.empty():
                 continue
-            # print('qsize:', datetime.datetime.now(), self.queue.qsize())
 
-    def process_data(self):
+    def process_stock_data(self):
         while True:
-            if not self.queue.empty():
-                data = self.queue.get()
+            if not self.stock_data_queue.empty():
+                data = self.stock_data_queue.get()
                 data_queue = data.copy()
                 # print('security_code', data_queue)
                 print('security_code:', data_queue[0]['security_code'])
@@ -55,11 +55,9 @@ class DataHandler(tgw.IPushSpi):
                 global market_type_list
                 if data_queue[0]['security_code'] not in security_code_list:
                     security_code_list.append(data_queue[0]['security_code'])
-                    # print('security_code_list', len(security_code_list), data_queue[0]['security_code'])
 
                 if data_queue[0]['market_type'] not in market_type_list:
                     market_type_list.append(data_queue[0]['market_type'])
-                #     print('market_type_list', len(market_type_list))
 
                 global zhangfu_dict
                 if data_queue[0]['pre_close_price'] > 0:
@@ -83,18 +81,18 @@ class DataHandler(tgw.IPushSpi):
                                                                          offer_volume_total
                 else:
                     volume_spread_dict[data_queue[0]['security_code']] = np.nan
-                time.sleep(0.01)
+
 
     def OnMDSnapshot(self, data, err):
         if not data is None:
-            self.queue.put(data)
+            self.stock_data_queue.put(data)
             pass
         else:
             print(err)
 
     def OnMDIndexSnapshot(self, data, err):
         if not data is None:
-            pass
+            self.index_data_queue.put(data)
         else:
             print(err)
 
@@ -102,23 +100,34 @@ class DataHandler(tgw.IPushSpi):
 if __name__ == "__main__":
     tgw_login()
     g_is_running = True
-    tgw_api_object = TgwApiData(20991231)
-    code_sh_list, code_sz_list = tgw_api_object.get_code_list()
-    print(len(code_sh_list), len(code_sz_list))
+    tgw_api_object = TgwApiData()
 
-    # 订阅可转债
+    # 订阅沪深股票的实时五档快照行情
     for market_type in [tgw.MarketType.kSZSE, tgw.MarketType.kSSE]:
         sub_item = tgw.SubscribeItem()
         sub_item.security_code = ''
         sub_item.flag = tgw.SubscribeDataType.kSnapshot
-        sub_item.category_type = tgw.VarietyCategory.kBond
+        sub_item.category_type = tgw.VarietyCategory.kIndex
         sub_item.market = market_type
         # 订阅
         data_handler = DataHandler()
         data_handler.SetDfFormat(False)
         success = tgw.Subscribe(sub_item, data_handler)
-        if success != tgw.ErrorCode.kSuccess:
-            print(tgw.GetErrorMsg(success))
+
+    # # 订阅沪深指数的实时五档快照行情
+    # for market_type in [tgw.MarketType.kSZSE, tgw.MarketType.kSSE]:
+    #     sub_item = tgw.SubscribeItem()
+    #     sub_item.security_code = ''
+    #     sub_item.flag = tgw.SubscribeDataType.kIndexSnapshot
+    #     sub_item.category_type = tgw.VarietyCategory.kIndex
+    #     sub_item.market = market_type
+    #     # 订阅
+    #     data_handler = DataHandler()
+    #     data_handler.SetDfFormat(False)
+    #     success = tgw.Subscribe(sub_item, data_handler)
+    #
+    #     if success != tgw.ErrorCode.kSuccess:
+    #         print(tgw.GetErrorMsg(success))
 
     while True:
         try:
@@ -126,7 +135,4 @@ if __name__ == "__main__":
                 break
         except Exception as e:
             print(str(e))
-        # time.sleep(1)
-        # code = '688597'
-        # if code in zhangfu_dict:
-        #     print('zhangfu_dict', zhangfu_dict[code])
+
