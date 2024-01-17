@@ -36,13 +36,17 @@ class DataHandler(tgw.IPushSpi):
             self.thread.start()
 
         self.index_data_queue = queue.Queue()
-        self.thread_queue = threading.Thread(target=self.process_index_data)
-        self.thread_queue.start()
+        for i in range(8):
+            self.thread_queue = threading.Thread(target=self.process_index_data)
+            self.thread_queue.start()
 
     def process_index_data(self):
         while True:
-            if self.index_data_queue.empty():
-                continue
+            if not self.index_data_queue.empty():
+                index_data = self.index_data_queue.get()
+                index_data_queue = index_data.copy()
+                print('security_code:', index_data_queue[0]['security_code'])
+                print('market_type:', index_data_queue[0]['market_type'])
 
     def process_stock_data(self):
         while True:
@@ -50,7 +54,6 @@ class DataHandler(tgw.IPushSpi):
                 data = self.stock_data_queue.get()
                 data_queue = data.copy()
                 # print('security_code', data_queue)
-                print('security_code:', data_queue[0]['security_code'])
                 global security_code_list
                 global market_type_list
                 if data_queue[0]['security_code'] not in security_code_list:
@@ -58,6 +61,8 @@ class DataHandler(tgw.IPushSpi):
 
                 if data_queue[0]['market_type'] not in market_type_list:
                     market_type_list.append(data_queue[0]['market_type'])
+
+                print('security_code:', len(security_code_list))
 
                 global zhangfu_dict
                 if data_queue[0]['pre_close_price'] > 0:
@@ -81,7 +86,6 @@ class DataHandler(tgw.IPushSpi):
                                                                          offer_volume_total
                 else:
                     volume_spread_dict[data_queue[0]['security_code']] = np.nan
-
 
     def OnMDSnapshot(self, data, err):
         if not data is None:
@@ -107,6 +111,18 @@ if __name__ == "__main__":
         sub_item = tgw.SubscribeItem()
         sub_item.security_code = ''
         sub_item.flag = tgw.SubscribeDataType.kSnapshot
+        sub_item.category_type = tgw.VarietyCategory.kStock
+        sub_item.market = market_type
+        # 订阅
+        data_handler = DataHandler()
+        data_handler.SetDfFormat(False)
+        success = tgw.Subscribe(sub_item, data_handler)
+
+    # 订阅沪深指数的实时五档快照行情
+    for market_type in [tgw.MarketType.kSZSE, tgw.MarketType.kSSE]:
+        sub_item = tgw.SubscribeItem()
+        sub_item.security_code = ''
+        sub_item.flag = tgw.SubscribeDataType.kIndexSnapshot
         sub_item.category_type = tgw.VarietyCategory.kIndex
         sub_item.market = market_type
         # 订阅
@@ -114,20 +130,8 @@ if __name__ == "__main__":
         data_handler.SetDfFormat(False)
         success = tgw.Subscribe(sub_item, data_handler)
 
-    # # 订阅沪深指数的实时五档快照行情
-    # for market_type in [tgw.MarketType.kSZSE, tgw.MarketType.kSSE]:
-    #     sub_item = tgw.SubscribeItem()
-    #     sub_item.security_code = ''
-    #     sub_item.flag = tgw.SubscribeDataType.kIndexSnapshot
-    #     sub_item.category_type = tgw.VarietyCategory.kIndex
-    #     sub_item.market = market_type
-    #     # 订阅
-    #     data_handler = DataHandler()
-    #     data_handler.SetDfFormat(False)
-    #     success = tgw.Subscribe(sub_item, data_handler)
-    #
-    #     if success != tgw.ErrorCode.kSuccess:
-    #         print(tgw.GetErrorMsg(success))
+        if success != tgw.ErrorCode.kSuccess:
+            print(tgw.GetErrorMsg(success))
 
     while True:
         try:
