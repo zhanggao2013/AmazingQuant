@@ -32,7 +32,6 @@ class TgwLogSpi(tgw.ILogSpi):
 def tgw_login(server_mode=False):
     log_spi = TgwLogSpi()
     tgw.SetLogSpi(log_spi)
-
     # 第二步，登录
     cfg = tgw.Cfg()
     cfg.username = TgwConfig.username
