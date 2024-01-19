@@ -78,11 +78,6 @@ class CalIFactor(object):
 
 
 if __name__ == '__main__':
-    # tgw_login()
-
-    # tgw_api_object = TgwApiData(20991231)
-    # code_sh_list, code_sz_list = tgw_api_object.get_code_list()
-    # calendar_index = tgw_api_object.get_calendar()
     path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
            '//' + LocalDataFolderName.A_SHARE.value + '//'
 

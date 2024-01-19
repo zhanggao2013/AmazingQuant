@@ -72,16 +72,12 @@ AmazingaQuant——为交易而生的智能投研Lab。包含量化数据服务�
     * multi_factor     多因子选股模块，包含单因子检测、大类因子合成和组合优化  
 
 # 2.安装配置
-* MongoDB 3.4 <br> 
-      建议使用shard，[配置启动项示例](https://github.com/zhanggao2013/AmazingQuant/blob/master/documents/MongoDB_config.md)
-* pymongo <br> 
-      python调用MongoDB
 * talib <br> 
       技术指标计算库
 * anaconda <br> 
       python 3.5 的版本，如果大于3.5的版本，ctp的接口暂时不能用，因为编译问题，后续可以解决
 * Linux Ubuntu <br> 
-      开发环境是ubuntu，当然也可以在windows下用，但是数据库的配置和ctp等交易接口需要重新做
+      开发环境是ubuntu，当然也可以在windows下用
 * 安装AmazingQuant
       pip install AmazingQuant  直接安装
 

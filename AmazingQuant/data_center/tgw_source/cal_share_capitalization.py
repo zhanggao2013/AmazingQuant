@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2020/5/23
 # @Author  : gao
-# @File    : update_share_capitalization.py
+# @File    : cal_share_capitalization.py
 # @Project : AmazingQuant
 # ------------------------------
 
