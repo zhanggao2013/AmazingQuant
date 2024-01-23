@@ -16,7 +16,7 @@ from AmazingQuant.utils.performance_test import Timer
 from AmazingQuant.data_center.api_data.get_share import GetShare
 
 
-class CalIFactor(object):
+class CalFactor(object):
     def __init__(self, open_df, high_df, low_df, close_df, volume_trade_df, value_trade_df, forward_factor):
         self.open_df = open_df
         self.high_df = high_df
@@ -50,7 +50,7 @@ class CalIFactor(object):
 
         result = self.close_df.apply(lambda x: macd(x), result_type='expand')
         return pd.DataFrame(result.loc[0].T.to_dict()), pd.DataFrame(result.loc[1].T.to_dict()), \
-               pd.DataFrame(result.loc[2].T.to_dict()).multiply(2)
+            pd.DataFrame(result.loc[2].T.to_dict()).multiply(2)
 
     def cal_ema(self, timeperiod=30):
         """
@@ -66,15 +66,18 @@ class CalIFactor(object):
         """
 
         def kdj(x):
-            slowk, slowd = talib.KDJ(self.high_df[x.name], self.low_df[x.name], x,
-                                     fastk_period=fastk_period, slowk_period=slowk_period, slowk_matype=slowk_matype,
-                                     slowd_period=slowd_period, slowd_matype=slowd_matype)
+            slowk, slowd = talib.STOCH(self.high_df[x.name], self.low_df[x.name], x,
+                                       fastk_period=fastk_period,
+                                       slowk_period=slowk_period,
+                                       slowk_matype=slowk_matype,
+                                       slowd_period=slowd_period,
+                                       slowd_matype=slowd_matype)
             slowj = 3 * slowk - 2 * slowd
             return [slowk, slowd, slowj]
 
         result = self.close_df.apply(lambda x: kdj(x), result_type='expand')
         return pd.DataFrame(result.loc[0].T.to_dict()), pd.DataFrame(result.loc[1].T.to_dict()), \
-               pd.DataFrame(result.loc[2].T.to_dict())
+            pd.DataFrame(result.loc[2].T.to_dict())
 
 
 if __name__ == '__main__':
@@ -91,8 +94,8 @@ if __name__ == '__main__':
     adj_factor_path = LocalDataPath.path + LocalDataFolderName.ADJ_FACTOR.value + '/'
     forward_factor = get_local_data(adj_factor_path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value + '.h5')
 
-    cal_factor_object = CalIFactor(open_df, high_df, low_df, close_df, volume_trade_df, value_trade_df,
-                                   forward_factor)
+    cal_factor_object = CalFactor(open_df, high_df, low_df, close_df, volume_trade_df, value_trade_df,
+                                  forward_factor)
     cal_factor_object.adj_data()
 
     share_data_obj = GetShare()
