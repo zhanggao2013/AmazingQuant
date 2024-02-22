@@ -64,7 +64,6 @@ class CalFactor(object):
         输入为多个时间序列
         输出为多个时间序列
         """
-
         def kdj(x):
             slowk, slowd = talib.STOCH(self.high_df[x.name], self.low_df[x.name], x,
                                        fastk_period=fastk_period,
