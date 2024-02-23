@@ -17,16 +17,12 @@ w.isconnected()  # 判断WindPy是否已经登录成功
 
 rptdate = '20231231'
 result_dict = {}
-proportion_dict = {}
 for code in code_list:
     result = w.wset("allfundhelddetail", "rptdate=" + rptdate + ";windcode=" + code)
     result_df = pd.DataFrame(result.Data, index=result.Fields).T
     if not result_df.empty:
         result_dict[code] = result_df
-        proportion = result_df['proportiontototalstockinvestments'].sum()
-        if proportion > 30:
-            print(code, proportion)
-            result_df.to_csv('./etf_stockhold/'+ rptdate + '/'+ code+'.csv')
-            proportion_dict[code] = proportion
+        print(code)
+        result_df.to_csv('./etf_stockhold/'+ rptdate + '/'+ code+'.csv')
 
 

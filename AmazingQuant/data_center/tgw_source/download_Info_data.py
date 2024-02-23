@@ -191,16 +191,16 @@ class DownloadInfoData(object):
 
 if __name__ == '__main__':
     tgw_login()
-    tgw_api_object = TgwApiData(20991231)
+    tgw_api_object = TgwApiData()
     info_data_object = DownloadInfoData(tgw_api_object)
     # industry_class_df = info_data_object.download_industry_class()
     # index_member_df = info_data_object.download_index_member()
     # shareholder_df = info_data_object.download_10_shareholder()
     # sw_index_member_df = info_data_object.download_sw_index_member()
-    # info_data_object.download_stock_struction()
+    info_data_object.download_stock_struction()
     result = info_data_object.download_finance_data()
-    hist_codelist1 = info_data_object.download_hist_codelist(id='A010010007')
-    hist_codelist2 = info_data_object.download_hist_codelist(id='A010010008')
+    # hist_codelist1 = info_data_object.download_hist_codelist(id='A010010007')
+    # hist_codelist2 = info_data_object.download_hist_codelist(id='A010010008')
 
 
     # folder_name = LocalDataFolderName.INDUSTRY_CLASS.value
