@@ -30,6 +30,12 @@ volume_spread_dict = {}
 class DataHandler(tgw.IPushSpi):
     def __init__(self) -> None:
         super().__init__()
+        self.stock_data_queue = None
+        self.index_data_queue = None
+        self.thread = None
+        self.thread_queue = None
+
+    def create_queue(self):
         self.stock_data_queue = queue.Queue()
         for i in range(4):
             self.thread = threading.Thread(target=self.process_stock_data)
@@ -63,6 +69,7 @@ class DataHandler(tgw.IPushSpi):
                     market_type_list.append(data_queue[0]['market_type'])
 
                 print('security_code:', len(security_code_list))
+                print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), data_queue[0]['orig_time'])
 
                 global zhangfu_dict
                 if data_queue[0]['pre_close_price'] > 0:
@@ -97,6 +104,7 @@ class DataHandler(tgw.IPushSpi):
     def OnMDIndexSnapshot(self, data, err):
         if not data is None:
             self.index_data_queue.put(data)
+            pass
         else:
             print(err)
 
@@ -107,31 +115,67 @@ if __name__ == "__main__":
     tgw_api_object = TgwApiData()
 
     # 订阅沪深股票的实时五档快照行情
-    for market_type in [tgw.MarketType.kSZSE, tgw.MarketType.kSSE]:
+    # for market_type in [tgw.MarketType.kSZSE, tgw.MarketType.kSSE]:
+    #     sub_item = tgw.SubscribeItem()
+    #     sub_item.security_code = ''
+    #     sub_item.flag = tgw.SubscribeDataType.kSnapshot
+    #     sub_item.category_type = tgw.VarietyCategory.kStock
+    #     sub_item.market = market_type
+    #     # 订阅
+    #     data_handler = DataHandler()
+    #     data_handler.SetDfFormat(False)
+    #     success = tgw.Subscribe(sub_item, data_handler)
+    #
+    # # 订阅沪深指数的实时五档快照行情
+    # for market_type in [tgw.MarketType.kSZSE, tgw.MarketType.kSSE]:
+    #     sub_item = tgw.SubscribeItem()
+    #     sub_item.security_code = ''
+    #     sub_item.flag = tgw.SubscribeDataType.kIndexSnapshot
+    #     sub_item.category_type = tgw.VarietyCategory.kIndex
+    #     sub_item.market = market_type
+    #     # 订阅
+    #     data_handler = DataHandler()
+    #     data_handler.SetDfFormat(False)
+    #     success = tgw.Subscribe(sub_item, data_handler)
+    #
+    #     if success != tgw.ErrorCode.kSuccess:
+    #         print(tgw.GetErrorMsg(success))
+
+
+    base_data_object = TgwApiData()
+    calendar = base_data_object.get_calendar()
+    code_sh_list, code_sz_list = base_data_object.get_code_list()
+    sub_items = []
+    for code in code_sh_list:
         sub_item = tgw.SubscribeItem()
-        sub_item.security_code = ''
+        sub_item.market = tgw.MarketType.kSZSE
+        if code[0] == '6':
+            sub_item.market = tgw.MarketType.kSSE
+
         sub_item.flag = tgw.SubscribeDataType.kSnapshot
+
         sub_item.category_type = tgw.VarietyCategory.kStock
-        sub_item.market = market_type
-        # 订阅
-        data_handler = DataHandler()
-        data_handler.SetDfFormat(False)
-        success = tgw.Subscribe(sub_item, data_handler)
+        sub_item.security_code = code
+        sub_items.append(sub_item)
 
-    # 订阅沪深指数的实时五档快照行情
-    for market_type in [tgw.MarketType.kSZSE, tgw.MarketType.kSSE]:
+    for code in code_sz_list:
         sub_item = tgw.SubscribeItem()
-        sub_item.security_code = ''
-        sub_item.flag = tgw.SubscribeDataType.kIndexSnapshot
-        sub_item.category_type = tgw.VarietyCategory.kIndex
-        sub_item.market = market_type
-        # 订阅
-        data_handler = DataHandler()
-        data_handler.SetDfFormat(False)
-        success = tgw.Subscribe(sub_item, data_handler)
+        sub_item.market = tgw.MarketType.kSZSE
+        if code[0] == '6':
+            sub_item.market = tgw.MarketType.kSSE
 
-        if success != tgw.ErrorCode.kSuccess:
-            print(tgw.GetErrorMsg(success))
+        sub_item.flag = tgw.SubscribeDataType.kSnapshot
+
+        sub_item.category_type = tgw.VarietyCategory.kStock
+        sub_item.security_code = code
+        sub_items.append(sub_item)
+    print(len(sub_items))
+    data_handler = DataHandler()
+    data_handler.create_queue()
+    data_handler.SetDfFormat(False)
+    success = tgw.Subscribe(sub_items, push_spi = data_handler)
+    if success != tgw.ErrorCode.kSuccess:
+        print(tgw.GetErrorMsg(success))
 
     while True:
         try:

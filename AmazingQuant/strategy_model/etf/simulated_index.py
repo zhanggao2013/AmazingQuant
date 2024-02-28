@@ -22,7 +22,7 @@ for file in os.listdir(current_dir):
     # if os.path.isfile(file):
     #     print(file)
     etf_hold_detail = pd.read_csv(current_dir+'/'+file)
-    etf_hold_detail = etf_hold_detail.sort_values(by=['proportiontototalstockinvestments'], ascending=False).iloc[:10,:]
+    etf_hold_detail = etf_hold_detail.sort_values(by=['proportiontototalstockinvestments'], ascending=False).iloc[:10, :]
 
     proportion = etf_hold_detail['proportiontototalstockinvestments'].sum()
     if proportion > 30:
