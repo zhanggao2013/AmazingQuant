@@ -104,7 +104,6 @@ class DownloadInfoData(object):
         股本结构 A010010004
         """
         stock_struction_df, error_code_list = self.download_info_data('A010010004', para_date=True)
-
         folder_name = LocalDataFolderName.FINANCE.value
         path = LocalDataPath.path + folder_name + '/'
         save_data_to_hdf5(path, 'stock_struction', stock_struction_df)

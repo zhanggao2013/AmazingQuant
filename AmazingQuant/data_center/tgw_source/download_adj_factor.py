@@ -18,6 +18,7 @@ from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
 from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
 from AmazingQuant.utils.save_data import save_data_to_hdf5
 from AmazingQuant.utils.data_transfer import date_to_datetime
+from AmazingQuant.utils.get_data import get_local_data
 
 
 class UpdateAdjFactor(object):
@@ -87,6 +88,7 @@ class UpdateAdjFactor(object):
                 tgw.SetThirdInfoParam(task_id, "end_date", "20991231")
                 tgw.SetThirdInfoParam(task_id, "market_code", code + '.' + market)
                 df, _ = tgw.QueryThirdInfo(task_id)
+                print(df)
                 if ex_right_dividend_df is None:
                     ex_right_dividend_df = df
                 else:
@@ -143,20 +145,22 @@ if __name__ == '__main__':
     tgw_login()
 
     tgw_api_object = TgwApiData()
-    code_sh_list, code_sz_list = tgw_api_object.get_code_list()
+    # code_sh_list, code_sz_list = tgw_api_object.get_code_list()
     calendar_index = tgw_api_object.get_calendar()
 
     adj_factor_object = UpdateAdjFactor()
-    backward_factor = adj_factor_object.get_backward_factor(code_sh_list, code_sz_list, calendar_index)
+    # backward_factor = adj_factor_object.get_backward_factor(code_sh_list, code_sz_list, calendar_index)
+    #
+    # folder_name = LocalDataFolderName.ADJ_FACTOR.value
+    # path = LocalDataPath.path + folder_name + '/'
+    # save_data_to_hdf5(path, AdjustmentFactor.BACKWARD_ADJ_FACTOR.value, backward_factor)
+    #
+    # forward_factor = adj_factor_object.cal_forward_factor(backward_factor)
+    # save_data_to_hdf5(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value, forward_factor)
 
-    folder_name = LocalDataFolderName.ADJ_FACTOR.value
-    path = LocalDataPath.path + folder_name + '/'
-    save_data_to_hdf5(path, AdjustmentFactor.BACKWARD_ADJ_FACTOR.value, backward_factor)
-
-    forward_factor = adj_factor_object.cal_forward_factor(backward_factor)
-    save_data_to_hdf5(path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value, forward_factor)
-
-    # path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
-    #        '//' + LocalDataFolderName.A_SHARE.value + '//'
-    # close_df = get_local_data(path, 'close_price.h5')
-    # backward_factor_ratio = adj_factor_object.get_backward_factor_ratio(close_df, code_sh_list,  code_sz_list, calendar_index)
+    path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
+           '//' + LocalDataFolderName.A_SHARE.value + '//'
+    close_df = get_local_data(path, 'close.h5')
+    code_sh_list = []
+    code_sz_list =['300757']
+    backward_factor_ratio = adj_factor_object.get_backward_factor_ratio(close_df, code_sh_list,  code_sz_list, calendar_index)
