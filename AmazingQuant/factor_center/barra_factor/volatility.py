@@ -6,83 +6,81 @@
 # @File    : volatility.py
 # @Project : AmazingQuant
 # ------------------------------
+import datetime
+
 import talib
 import pandas as pd
+import numpy as np
 
 from AmazingQuant.utils.get_data import get_local_data
 from AmazingQuant.config.local_data_path import LocalDataPath
-from AmazingQuant.constant import LocalDataFolderName, AdjustmentFactor
+from AmazingQuant.constant import LocalDataFolderName, RightsAdjustment
 from AmazingQuant.utils.performance_test import Timer
 from AmazingQuant.data_center.api_data.get_share import GetShare
+from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 
 
-class CalFactor(object):
-    def __init__(self, open_df, high_df, low_df, close_df, volume_trade_df, value_trade_df, forward_factor):
-        self.open_df = open_df
-        self.high_df = high_df
-        self.low_df = low_df
-        self.close_df = close_df
-        self.volume_trade_df = volume_trade_df
-        self.value_trade_df = value_trade_df
-        self.forward_factor = forward_factor
+class FactorVolatility(object):
+    def __init__(self, start_date, end_date):
+        self.close_df = None
+        self.index_close_df = None
+        self.start_date = start_date
+        self.end_date = end_date
 
-    def adj_data(self):
-        """
-        open_df, high_df, low_df, close_df, volume_trade_df，前复权
-        value_trade_df 无需复权
-        """
-        self.open_df = self.open_df * self.forward_factor
-        self.high_df = self.high_df * self.forward_factor
-        self.low_df = self.low_df * self.forward_factor
-        self.close_df = self.close_df * self.forward_factor
-        self.volume_trade_df = self.volume_trade_df * self.forward_factor
+    def cache_data(self):
+        kline_object = GetKlineData()
+        all_market_data = kline_object.cache_all_stock_data(dividend_type=RightsAdjustment.FROWARD.value)
+        self.close_df = all_market_data['close'].loc[self.start_date: self.end_date]
 
-    def cal_macd(self, fastperiod=12, slowperiod=26, signalperiod=9):
-        """
-        输入为一个时间序列
-        输出为多个时间序列
-        """
+        all_index_data = kline_object.cache_all_index_data()
+        self.index_close_df = all_index_data['close'].loc[self.start_date: self.end_date]
 
-        def macd(x):
-            macd, macdsignal, macdhist = talib.MACD(x, fastperiod=fastperiod, slowperiod=slowperiod,
-                                                    signalperiod=signalperiod)
-            return [macd, macdsignal, macdhist]
+    def factor_beta(self, index_code='000300.SH'):
+        # BETA（三级因子）:股票收益率对沪深300收益率进行时间序列回归，取回归系数，回归时间窗口为252个交易日，半衰期63个交易日。
+        window, half_life = 252, 63
+        L, Lambda = 0.5 ** (1 / half_life), 0.5 ** (1 / half_life)
+        W = []
+        for i in range(window):
+            W.append(Lambda)
+            Lambda *= L
+        W = W[::-1]
+        index_close_df = self.index_close_df[index_code]
+        index_ratio_df = index_close_df.pct_change()*100
+        index_ratio_df.dropna(inplace=True)
+        ratio_df = self.close_df.pct_change()*100
+        # ratio_df.dropna(axis=0, inplace=True)
+        self.ratio_df  =ratio_df
+        print(index_ratio_df, ratio_df)
 
-        result = self.close_df.apply(lambda x: macd(x), result_type='expand')
-        return pd.DataFrame(result.loc[0].T.to_dict()), pd.DataFrame(result.loc[1].T.to_dict()), \
-               pd.DataFrame(result.loc[2].T.to_dict()).multiply(2)
+        for i in range(ratio_df.shape[0]-window+1):
+            tmp = ratio_df.iloc[i:i+window, :].copy()
+            W_full = np.diag(W)
+            Y_full = tmp.values
 
-    def cal_ema(self, timeperiod=30):
-        """
-        输入为一个时间序列
-        输出为一个时间序列
-        """
-        return self.close_df.apply(lambda x: talib.EMA(x, timeperiod=timeperiod))
+            X_full = np.c_[np.ones((window, 1)), index_ratio_df.iloc[i:i+window].values]
+            print(Y_full.shape, X_full.shape)
+            beta_full = np.linalg.pinv(X_full.T @ W_full @ X_full) @ X_full.T @ W_full @ Y_full
+            # beta_full = pd.Series(beta_full[1], index=idx_full, name=tmp.index[-1])
+            # weights = None
+
+        # weights = (1. / share_data_in_date['float_a_share_value'])
+        # weights[np.isinf(weights)] = 0
+        # print('stock_return', stock_return, x, weights)
+        # wls_model = sm.WLS(stock_return, x, weights=weights)
 
 
 if __name__ == '__main__':
-    path = LocalDataPath.path + LocalDataFolderName.MARKET_DATA.value + '//' + LocalDataFolderName.KLINE_DAILY.value + \
-           '//' + LocalDataFolderName.A_SHARE.value + '//'
+    start_date = datetime.datetime(2020, 1, 1)
+    end_date = datetime.datetime(2024, 1, 1)
+    factor_volatility_object = FactorVolatility(start_date, end_date)
+    factor_volatility_object.cache_data()
+    factor_volatility_object.factor_beta()
 
-    open_df = get_local_data(path, 'open.h5')
-    high_df = get_local_data(path, 'high.h5')
-    low_df = get_local_data(path, 'low.h5')
-    close_df = get_local_data(path, 'close.h5')
-    volume_trade_df = get_local_data(path, 'volume.h5')
-    value_trade_df = get_local_data(path, 'amount.h5')
-
-    adj_factor_path = LocalDataPath.path + LocalDataFolderName.ADJ_FACTOR.value + '/'
-    forward_factor = get_local_data(adj_factor_path, AdjustmentFactor.FROWARD_ADJ_FACTOR.value + '.h5')
-
-    cal_factor_object = CalFactor(open_df, high_df, low_df, close_df, volume_trade_df, value_trade_df,
-                                   forward_factor)
-    cal_factor_object.adj_data()
-
-    share_data_obj = GetShare()
-    share_data = share_data_obj.get_share('float_a_share')
-    with Timer(True):
-        dif, dea, macd = cal_factor_object.cal_macd()
-        ema = cal_factor_object.cal_ema()
-        k, d, j = cal_factor_object.cal_kdj()
+    # share_data_obj = GetShare()
+    # share_data = share_data_obj.get_share('float_a_share')
+    # with Timer(True):
+    #     dif, dea, macd = cal_factor_object.cal_macd()
+    #     ema = cal_factor_object.cal_ema()
+    #     k, d, j = cal_factor_object.cal_kdj()
 
 
