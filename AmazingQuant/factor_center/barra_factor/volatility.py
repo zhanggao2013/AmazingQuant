@@ -12,7 +12,7 @@ import talib
 import pandas as pd
 import numpy as np
 
-from AmazingQuant.factor_center.save_get_indicator import SaveGetFactor
+from AmazingQuant.factor_center.save_get_factor import SaveGetFactor
 from AmazingQuant.constant import RightsAdjustment
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 
@@ -23,6 +23,7 @@ class FactorVolatility(object):
         self.index_close_df = None
         self.start_date = start_date
         self.end_date = end_date
+        self.save_get_factor = SaveGetFactor()
 
     def cache_data(self):
         kline_object = GetKlineData()
@@ -63,8 +64,7 @@ class FactorVolatility(object):
         return beta_df
 
     def save_factor_data(self, factor_name, factor_data):
-        save_get_indicator = SaveGetFactor()
-        save_get_indicator.save_factor(factor_name, factor_data)
+        self.save_get_factor.save_factor(factor_name, factor_data)
 
 
 if __name__ == '__main__':
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     factor_volatility_object = FactorVolatility(start_date, end_date)
     factor_volatility_object.cache_data()
     beta_df = factor_volatility_object.factor_beta()
-    factor_volatility_object.save_factor_data('beta', beta_df)
+    factor_volatility_object.save_factor_data('factor_beta', beta_df)
 
 
 

@@ -14,7 +14,7 @@ import talib
 from AmazingQuant.utils.performance_test import Timer
 from AmazingQuant.constant import RightsAdjustment
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
-from AmazingQuant.factor_center.save_get_indicator import SaveGetFactor
+from AmazingQuant.factor_center.save_get_factor import SaveGetFactor
 from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
 from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
 

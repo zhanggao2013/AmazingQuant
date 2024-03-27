@@ -18,7 +18,7 @@ from AmazingQuant.strategy_center.strategy import *
 
 # 取各种数据
 from AmazingQuant.data_center.api_data.get_index_member import GetIndexMember
-from AmazingQuant.factor_center.save_get_indicator import SaveGetFactor
+from AmazingQuant.factor_center.save_get_factor import SaveGetFactor
 from AmazingQuant.utils.logger import Logger
 from AmazingQuant.environment import Environment
 from AmazingQuant.utils.get_data import get_local_data

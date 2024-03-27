@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/12/18
 # @Author  : gao
-# @File    : save_get_indicator.py
+# @File    : save_get_factor.py
 # @Project : AmazingQuant 
 # ------------------------------
 import os
