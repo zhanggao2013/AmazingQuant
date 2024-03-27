@@ -120,7 +120,7 @@ class FactorPreProcessing(object):
         return self.raw_data
 
     def save_factor_data(self, factor_name):
-        SaveGetFactor().save_factor(factor_name, factor_name + '_pre')
+        SaveGetFactor().save_factor(factor_name, factor_name + '_pre', self.raw_data)
 
 
 class Extreme(object):
@@ -279,5 +279,5 @@ if __name__ == '__main__':
 
     # 补充空值的方法，已实现两种
     # fill_nan_data = factor_pre_obj.fill_nan_processing(FillNanMethod.MEAN.value)
-
+    factor_pre_obj.save_factor_data(factor_name)
 

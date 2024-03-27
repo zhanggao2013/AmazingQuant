@@ -26,9 +26,10 @@ from AmazingQuant.strategy_model.multi_factor.single_factor_analysis.stratificat
 
 
 class FactorAnalysis(object):
-    def __init__(self, factor, factor_name, benchmark_code='000300.SH'):
+    def __init__(self, factor, factor_name, path, benchmark_code='000300.SH'):
         self.factor = factor
         self.factor_name = factor_name
+        self.path = path
         self.benchmark_code = benchmark_code
 
         self.stratification_analysis_obj = None
@@ -63,7 +64,7 @@ class FactorAnalysis(object):
         self.ic_analysis_obj = IcAnalysis(self.factor, self.factor_name, self.market_close_data, ic_decay=self.ic_decay)
         self.ic_analysis_obj.cal_ic_df(method=self.corr_method)
         self.ic_analysis_obj.cal_ic_indicator()
-        self.ic_analysis_obj.save_ic_analysis_result(path, factor_name)
+        self.ic_analysis_obj.save_ic_analysis_result(self.path, factor_name)
         return self.ic_analysis_obj
 
     def regression_analysis(self, ):
@@ -74,7 +75,7 @@ class FactorAnalysis(object):
         self.regression_analysis_obj.cal_net_analysis()
         self.regression_analysis_obj.cal_acf(nlags=self.nlags)
 
-        self.regression_analysis_obj.save_regression_analysis_result(path, factor_name)
+        self.regression_analysis_obj.save_regression_analysis_result(self.path, factor_name)
         return self.regression_analysis_obj
 
     def stratification_analysis(self):
@@ -652,7 +653,7 @@ class FactorAnalysis(object):
                                                          label_opts=opts.LabelOpts(is_show=False))
         return line_stratification_max_drawdown
 
-    def show_page(self, save_path_dir=''):
+    def show_page(self):
         page = Page(page_title='因子评价报告')
 
         table_factor_information = self.table_factor_information()
@@ -707,7 +708,7 @@ class FactorAnalysis(object):
         line_stratification_max_drawdown = self.line_stratification_max_drawdown()
         page.add(line_stratification_max_drawdown)
 
-        page.render(save_path_dir + self.factor_name + "_因子评价报告.html")
+        page.render(self.path + self.factor_name + "_因子评价报告.html")
 
 
 if __name__ == '__main__':
@@ -719,11 +720,13 @@ if __name__ == '__main__':
     factor_ma5 = factor_ma5[factor_ma5.index < datetime(2023, 4, 1)]
     # factor_ma5 = factor_ma5.iloc[:-50, :]
 
-    factor_analysis_obj = FactorAnalysis(factor_ma5, factor_name)
+    path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/' + factor_name+ '/'
+
+    factor_analysis_obj = FactorAnalysis(factor_ma5, factor_name, path)
     print('-' * 20, 'ic_analysis', '-' * 20)
     ic_analysis_obj = factor_analysis_obj.ic_analysis()
     print('-' * 20, 'regression_analysis', '-' * 20)
     regression_analysis_obj = factor_analysis_obj.regression_analysis()
     print('-' * 20, 'stratification_analysis', '-' * 20)
     stratification_analysis_obj = factor_analysis_obj.stratification_analysis()
-    factor_analysis_obj.show_page(path)
+    factor_analysis_obj.show_page()
