@@ -63,8 +63,8 @@ class FactorVolatility(object):
         beta_df = pd.concat(beta_full_list)
         return beta_df
 
-    def save_factor_data(self, factor_name, factor_data):
-        self.save_get_factor.save_factor(factor_name, factor_data)
+    def save_factor_data(self, file_name, factor_name, factor_data):
+        self.save_get_factor.save_factor(file_name, factor_name, factor_data)
 
 
 if __name__ == '__main__':
@@ -73,8 +73,4 @@ if __name__ == '__main__':
     factor_volatility_object = FactorVolatility(start_date, end_date)
     factor_volatility_object.cache_data()
     beta_df = factor_volatility_object.factor_beta()
-    factor_volatility_object.save_factor_data('factor_beta', beta_df)
-
-
-
-
+    factor_volatility_object.save_factor_data('factor_beta', 'factor_beta', beta_df)

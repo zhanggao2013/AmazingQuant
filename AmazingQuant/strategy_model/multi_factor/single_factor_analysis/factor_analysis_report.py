@@ -16,8 +16,8 @@ from pyecharts.options import ComponentTitleOpts, InitOpts
 
 from AmazingQuant.constant import LocalDataFolderName, RightsAdjustment
 from AmazingQuant.config.local_data_path import LocalDataPath
-from AmazingQuant.utils.get_data import get_local_data
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
+from AmazingQuant.factor_center.save_get_factor import SaveGetFactor
 
 from AmazingQuant.strategy_model.multi_factor.single_factor_analysis.ic_analysis import IcAnalysis
 from AmazingQuant.strategy_model.multi_factor.single_factor_analysis.regression_analysis import RegressionAnalysis
@@ -711,9 +711,9 @@ class FactorAnalysis(object):
 
 
 if __name__ == '__main__':
-    factor_name = 'factor_ma5'
-    path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/' + factor_name + '/'
-    factor_ma5 = get_local_data(path, factor_name + '_pre' + '.h5')
+    factor_name = 'factor_beta'
+    save_get_factor = SaveGetFactor()
+    factor_ma5 = save_get_factor.get_factor(factor_name, factor_name + '_pre')
 
     factor_ma5 = factor_ma5[factor_ma5.index >= datetime(2013, 2, 1)]
     factor_ma5 = factor_ma5[factor_ma5.index < datetime(2023, 4, 1)]

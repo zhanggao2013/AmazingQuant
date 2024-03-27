@@ -119,29 +119,8 @@ class FactorPreProcessing(object):
             raise Exception('This extreme method is invalid!')
         return self.raw_data
 
-    def save_factor_data(self, factor_name, data_source=None):
-        if data_source is None:
-            data_source = ['hdf5', 'mongo']
-        if 'hdf5' in data_source:
-            # 保存预处理之后的数据到本地hdf5，单因子检测使用
-            path = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/' + factor_name+ '/'
-            save_data_to_hdf5(path, factor_name+'_pre', self.raw_data)
-
-        if 'mongo' in data_source:
-            # 保存预处理之后的数据到mongo
-            with MongoConnect(DatabaseName.MULTI_FACTOR_DATA.value):
-                doc_list = []
-                raw_data = self.raw_data.rename(columns={i: code_market_to_market_code(i) for i in extreme_data.columns})
-                for index, row in raw_data.iterrows():
-                    doc = FactorPreProcessingData(factor_name=factor_name,
-                                                  time_tag=index,
-                                                  factor_data=row)
-                    doc_list.append(doc)
-                    if len(doc_list) > 999:
-                        FactorPreProcessingData.objects.insert(doc_list)
-                        doc_list = []
-                else:
-                    FactorPreProcessingData.objects.insert(doc_list)
+    def save_factor_data(self, factor_name):
+        SaveGetFactor().save_factor(factor_name, factor_name + '_pre')
 
 
 class Extreme(object):
@@ -278,13 +257,12 @@ class Neutralize(object):
 
 
 if __name__ == '__main__':
-    indicator_name = 'ma5'
-    factor_name = 'factor_' + indicator_name
-    indicator_data = SaveGetFactor().get_factor(indicator_name)
-    indicator_data = indicator_data.iloc[:-50, :]
+    factor_name = 'factor_beta'
+    indicator_data = SaveGetFactor().get_factor(factor_name, factor_name)
+    # indicator_data = indicator_data.iloc[:-50, :]
     factor_pre_obj = FactorPreProcessing(indicator_data)
     # 可根据时间和股票list过滤数据
-    data_filter = factor_pre_obj.data_filter()
+    # data_filter = factor_pre_obj.data_filter()
     # 去极值方法，四种
     extreme_data = factor_pre_obj.extreme_processing(dict(std={'sigma_multiple': 3}))
     # extreme_data = factor_pre_obj.extreme_processing(dict(mad={'median_multiple': 1.483}))
@@ -300,6 +278,6 @@ if __name__ == '__main__':
     # scale_data = factor_pre_obj.scale_processing(ScaleMethod.RANK.value)
 
     # 补充空值的方法，已实现两种
-    fill_nan_data = factor_pre_obj.fill_nan_processing(FillNanMethod.MEAN.value)
-    factor_pre_obj.save_factor_data(factor_name, 'hdf5')
+    # fill_nan_data = factor_pre_obj.fill_nan_processing(FillNanMethod.MEAN.value)
+
 

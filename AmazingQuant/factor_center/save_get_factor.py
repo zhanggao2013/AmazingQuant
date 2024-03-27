@@ -20,11 +20,11 @@ class SaveGetFactor(object):
     def __init__(self):
         self.path_save = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
 
-    def save_factor(self, factor_name, input_data):
-        save_data_to_hdf5(self.path_save + factor_name + '/', factor_name, input_data)
+    def save_factor(self, file_name, factor_name, input_data):
+        save_data_to_hdf5(self.path_save + file_name + '/', factor_name, input_data)
 
-    def get_factor(self, factor_name):
-        data_path = self.path_save + factor_name + '/'+ factor_name + '.h5'
+    def get_factor(self, file_name, factor_name):
+        data_path = self.path_save + file_name + '/' + factor_name + '.h5'
         if not os.path.exists(data_path):
             return None
         return pd.read_hdf(data_path)
@@ -32,5 +32,5 @@ class SaveGetFactor(object):
 
 if __name__ == '__main__':
     with Timer(True):
-        indicator_data = SaveGetFactor().get_factor('ma5')
+        indicator_data = SaveGetFactor().get_factor('ma5', 'ma5')
 
