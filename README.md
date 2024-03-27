@@ -82,6 +82,7 @@ AmazingaQuant——为交易而生的智能投研Lab。包含量化数据服务�
       pip install AmazingQuant  直接安装
 
 # 3.策略编写
+
 ```python
 # -*- coding: utf-8 -*-
 
@@ -99,7 +100,7 @@ from AmazingQuant.strategy_center.strategy import *
 
 # 取各种数据
 from AmazingQuant.data_center.api_data.get_index_member import GetIndexMember
-from AmazingQuant.factor_center.save_get_indicator import SaveGetIndicator
+from AmazingQuant.factor_center.save_get_indicator import SaveGetFactor
 from AmazingQuant.utils.logger import Logger
 from AmazingQuant.environment import Environment
 
@@ -119,11 +120,11 @@ class MaStrategy(StrategyBase):
         # 取K线数据实例
         self.data_class = GetKlineData()
         # 取指标实例
-        self.indicator = SaveGetIndicator()
+        self.indicator = SaveGetFactor()
 
         # 取指标数据
-        self.ma5 = self.indicator.get_indicator('ma5')
-        self.ma10 = self.indicator.get_indicator('ma10')
+        self.ma5 = self.indicator.get_factor('ma5')
+        self.ma10 = self.indicator.get_factor('ma10')
         self.now = time.time()
         Environment.logger = Logger(strategy_name)
 
@@ -186,7 +187,7 @@ class MaStrategy(StrategyBase):
                 close_price = close_price_all['close'][stock]
                 if not close_price:
                     continue
-                if not((stock in self.ma5) and (stock in self.ma10)):
+                if not ((stock in self.ma5) and (stock in self.ma10)):
                     continue
                 ma5 = self.ma5[stock][self.time_tag]
                 ma20 = self.ma10[stock][self.time_tag]

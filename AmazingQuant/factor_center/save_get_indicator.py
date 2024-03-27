@@ -12,19 +12,19 @@ import pandas as pd
 
 from AmazingQuant.utils.performance_test import Timer
 from AmazingQuant.config.local_data_path import LocalDataPath
+from AmazingQuant.utils.save_data import save_data_to_hdf5
+from AmazingQuant.constant import LocalDataFolderName
 
 
-class SaveGetIndicator(object):
+class SaveGetFactor(object):
     def __init__(self):
-        self.path_save = LocalDataPath.path + 'indicator/'
+        self.path_save = LocalDataPath.path + LocalDataFolderName.FACTOR.value + '/'
 
-    def save_indicator(self, indicator_name, input_data):
-        if not os.path.exists(self.path_save):
-            os.mkdir(self.path_save)
-        input_data.to_hdf(self.path_save + indicator_name + '.h5', key=indicator_name, mode='w')
+    def save_factor(self, factor_name, input_data):
+        save_data_to_hdf5(self.path_save + factor_name + '/', factor_name, input_data)
 
-    def get_indicator(self, indicator_name):
-        data_path = self.path_save + indicator_name + '.h5'
+    def get_factor(self, factor_name):
+        data_path = self.path_save + factor_name + '/'+ factor_name + '.h5'
         if not os.path.exists(data_path):
             return None
         return pd.read_hdf(data_path)
@@ -32,5 +32,5 @@ class SaveGetIndicator(object):
 
 if __name__ == '__main__':
     with Timer(True):
-        indicator_data = SaveGetIndicator().get_indicator('ma5')
+        indicator_data = SaveGetFactor().get_factor('ma5')
 

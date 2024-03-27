@@ -40,7 +40,7 @@ import pandas as pd
 import numpy as np
 import statsmodels.api as sm
 
-from AmazingQuant.factor_center.save_get_indicator import SaveGetIndicator
+from AmazingQuant.factor_center.save_get_indicator import SaveGetFactor
 from AmazingQuant.strategy_model.multi_factor.multi_factor_constant import ExtremeMethod, ScaleMethod, FillNanMethod, \
     NeutralizeMethod
 from AmazingQuant.data_center.api_data.get_index_class import GetIndexClass
@@ -280,7 +280,7 @@ class Neutralize(object):
 if __name__ == '__main__':
     indicator_name = 'ma5'
     factor_name = 'factor_' + indicator_name
-    indicator_data = SaveGetIndicator().get_indicator(indicator_name)
+    indicator_data = SaveGetFactor().get_factor(indicator_name)
     indicator_data = indicator_data.iloc[:-50, :]
     factor_pre_obj = FactorPreProcessing(indicator_data)
     # 可根据时间和股票list过滤数据

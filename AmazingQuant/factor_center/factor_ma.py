@@ -3,7 +3,7 @@
 # ------------------------------
 # @Time    : 2019/12/19
 # @Author  : gao
-# @File    : indicator_ma.py
+# @File    : factor_ma.py
 # @Project : AmazingQuant 
 # ------------------------------
 
@@ -14,7 +14,7 @@ import talib
 from AmazingQuant.utils.performance_test import Timer
 from AmazingQuant.constant import RightsAdjustment
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
-from AmazingQuant.factor_center.save_get_indicator import SaveGetIndicator
+from AmazingQuant.factor_center.save_get_indicator import SaveGetFactor
 from AmazingQuant.data_center.tgw_source.tgw_api import TgwApiData
 from AmazingQuant.data_center.tgw_source.tgw_login import tgw_login
 
@@ -25,7 +25,7 @@ class MaIndicator(object):
         self.stock_list = []
 
     def get_stock_list(self):
-        tgw_api_object = TgwApiData(20991231)
+        tgw_api_object = TgwApiData()
         self.stock_list = tgw_api_object.get_code_list(add_market=True, all_code=True)
         return self.stock_list
 
@@ -36,9 +36,9 @@ class MaIndicator(object):
         return self.kline
 
     def save_ma(self, num):
-        save_get_indicator = SaveGetIndicator()
+        save_get_indicator = SaveGetFactor()
         ma = self.kline['close'].rolling(num).mean()
-        save_get_indicator.save_indicator('ma'+str(num), ma)
+        save_get_indicator.save_factor('ma' + str(num), ma)
         return ma
 
 
@@ -51,5 +51,5 @@ if __name__ == '__main__':
         ma_indicator.get_kline_data()
         ma5 = ma_indicator.save_ma(5)
         ma10 = ma_indicator.save_ma(10)
-        save_get_indicator = SaveGetIndicator()
-        a = save_get_indicator.get_indicator('ma5')
+        save_get_indicator = SaveGetFactor()
+        a = save_get_indicator.get_factor('ma5')

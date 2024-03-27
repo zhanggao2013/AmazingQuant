@@ -12,11 +12,8 @@ import talib
 import pandas as pd
 import numpy as np
 
-from AmazingQuant.utils.get_data import get_local_data
-from AmazingQuant.config.local_data_path import LocalDataPath
-from AmazingQuant.constant import LocalDataFolderName, RightsAdjustment
-from AmazingQuant.utils.performance_test import Timer
-from AmazingQuant.data_center.api_data.get_share import GetShare
+from AmazingQuant.factor_center.save_get_indicator import SaveGetFactor
+from AmazingQuant.constant import RightsAdjustment
 from AmazingQuant.data_center.api_data.get_kline import GetKlineData
 
 
@@ -46,41 +43,38 @@ class FactorVolatility(object):
         W = W[::-1]
         index_close_df = self.index_close_df[index_code]
         index_ratio_df = index_close_df.pct_change()*100
-        index_ratio_df.dropna(inplace=True)
+        index_ratio_df = index_ratio_df.iloc[1:]
         ratio_df = self.close_df.pct_change()*100
-        # ratio_df.dropna(axis=0, inplace=True)
-        self.ratio_df  =ratio_df
-        print(index_ratio_df, ratio_df)
-
-        for i in range(ratio_df.shape[0]-window+1):
+        ratio_df = ratio_df.iloc[1:, :]
+        beta_full_list = []
+        for i in range(index_ratio_df.shape[0]-window+1):
             tmp = ratio_df.iloc[i:i+window, :].copy()
             W_full = np.diag(W)
-            Y_full = tmp.values
-
+            Y_full = tmp.dropna(axis=1)
+            idx_full, Y_full = Y_full.columns, Y_full.values
             X_full = np.c_[np.ones((window, 1)), index_ratio_df.iloc[i:i+window].values]
-            print(Y_full.shape, X_full.shape)
             beta_full = np.linalg.pinv(X_full.T @ W_full @ X_full) @ X_full.T @ W_full @ Y_full
-            # beta_full = pd.Series(beta_full[1], index=idx_full, name=tmp.index[-1])
-            # weights = None
 
-        # weights = (1. / share_data_in_date['float_a_share_value'])
-        # weights[np.isinf(weights)] = 0
-        # print('stock_return', stock_return, x, weights)
-        # wls_model = sm.WLS(stock_return, x, weights=weights)
+            beta_full = pd.DataFrame(beta_full[1], index=idx_full, columns=[tmp.index[-1]]).T
+            beta_full_list.append(beta_full)
+            print(tmp.index[-1])
+            # weights = None
+        beta_df = pd.concat(beta_full_list)
+        return beta_df
+
+    def save_factor_data(self, factor_name, factor_data):
+        save_get_indicator = SaveGetFactor()
+        save_get_indicator.save_factor(factor_name, factor_data)
 
 
 if __name__ == '__main__':
-    start_date = datetime.datetime(2020, 1, 1)
+    start_date = datetime.datetime(2013, 1, 1)
     end_date = datetime.datetime(2024, 1, 1)
     factor_volatility_object = FactorVolatility(start_date, end_date)
     factor_volatility_object.cache_data()
-    factor_volatility_object.factor_beta()
+    beta_df = factor_volatility_object.factor_beta()
+    factor_volatility_object.save_factor_data('beta', beta_df)
 
-    # share_data_obj = GetShare()
-    # share_data = share_data_obj.get_share('float_a_share')
-    # with Timer(True):
-    #     dif, dea, macd = cal_factor_object.cal_macd()
-    #     ema = cal_factor_object.cal_ema()
-    #     k, d, j = cal_factor_object.cal_kdj()
+
 
 

@@ -26,6 +26,7 @@ class DownloadInfoData(object):
 
     def get_code_list(self, para_code_list='stock_list'):
         if para_code_list == 'stock_list':
+            # self.code_list = self.tgw_api_object.get_code_list(add_market=True, all_code=True)
             self.code_list = self.tgw_api_object.get_code_list_hist()
         elif para_code_list == 'index_list':
             self.code_list = self.tgw_api_object.get_code_list(add_market=True, all_code=True, index=True)
@@ -41,6 +42,7 @@ class DownloadInfoData(object):
         error_code_list = []
         result = {}
         self.code_list = self.get_code_list(para_code_list)
+        print(len(self.code_list))
         for code in self.code_list:
             print(id, code, num)
             num += 1
@@ -196,7 +198,7 @@ if __name__ == '__main__':
     # index_member_df = info_data_object.download_index_member()
     # shareholder_df = info_data_object.download_10_shareholder()
     # sw_index_member_df = info_data_object.download_sw_index_member()
-    info_data_object.download_stock_struction()
+    # info_data_object.download_stock_struction()
     result = info_data_object.download_finance_data()
     # hist_codelist1 = info_data_object.download_hist_codelist(id='A010010007')
     # hist_codelist2 = info_data_object.download_hist_codelist(id='A010010008')
