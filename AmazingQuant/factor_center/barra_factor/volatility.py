@@ -48,29 +48,37 @@ class FactorVolatility(object):
         ratio_df = self.close_df.pct_change()*100
         ratio_df = ratio_df.iloc[1:, :]
         beta_full_list = []
+        hist_sigma_list = []
         for i in range(index_ratio_df.shape[0]-window+1):
             tmp = ratio_df.iloc[i:i+window, :].copy()
             W_full = np.diag(W)
             Y_full = tmp.dropna(axis=1)
             idx_full, Y_full = Y_full.columns, Y_full.values
             X_full = np.c_[np.ones((window, 1)), index_ratio_df.iloc[i:i+window].values]
+
             beta_full = np.linalg.pinv(X_full.T @ W_full @ X_full) @ X_full.T @ W_full @ Y_full
+
+            hist_sigma_full = pd.DataFrame(np.std(Y_full - X_full @ beta_full, axis=0), index=idx_full,
+                                           columns=[tmp.index[-1]]).T
+            hist_sigma_list.append(hist_sigma_full)
 
             beta_full = pd.DataFrame(beta_full[1], index=idx_full, columns=[tmp.index[-1]]).T
             beta_full_list.append(beta_full)
             print(tmp.index[-1])
-            # weights = None
+
         beta_df = pd.concat(beta_full_list)
-        return beta_df
+        hist_sigma_df = pd.concat(hist_sigma_list)
+        return beta_df, hist_sigma_df
 
     def save_factor_data(self, file_name, factor_name, factor_data):
         self.save_get_factor.save_factor(file_name, factor_name, factor_data)
 
 
 if __name__ == '__main__':
-    start_date = datetime.datetime(2013, 1, 1)
+    start_date = datetime.datetime(2014, 1, 1)
     end_date = datetime.datetime(2024, 1, 1)
     factor_volatility_object = FactorVolatility(start_date, end_date)
     factor_volatility_object.cache_data()
-    beta_df = factor_volatility_object.factor_beta()
-    factor_volatility_object.save_factor_data('factor_beta', 'factor_beta', beta_df)
+    beta_df, hist_sigma_df = factor_volatility_object.factor_beta()
+    # factor_volatility_object.save_factor_data('factor_beta', 'factor_beta', beta_df)
+    factor_volatility_object.save_factor_data('factor_hist_sigma', 'factor_hist_sigma', hist_sigma_df)

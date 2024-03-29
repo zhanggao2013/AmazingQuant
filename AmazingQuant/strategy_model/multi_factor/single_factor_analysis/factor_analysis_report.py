@@ -712,7 +712,7 @@ class FactorAnalysis(object):
 
 
 if __name__ == '__main__':
-    factor_name = 'factor_beta'
+    factor_name = 'factor_hist_sigma'
     save_get_factor = SaveGetFactor()
     factor_ma5 = save_get_factor.get_factor(factor_name, factor_name + '_pre')
 
