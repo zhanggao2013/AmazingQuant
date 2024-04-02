@@ -92,7 +92,7 @@ class FactorVolatility(object):
                 x_dropna_cut['weighted'] = x_dropna_cut['W_ratio'] * x_dropna_cut[x.name]
                 daily_std[x_dropna_cut.index[-1]] = x_dropna_cut['weighted'].std()
             # print(pd.Series(daily_std, name=x.name))
-            return pd.Series(daily_std, name=x.name)
+            return pd.Series(daily_std, name=x.name, dtype=pd.Float64Dtype())
 
         daily_std_df = ratio_df.apply(lambda x: cal_daily_std(x), axis=0)
         return daily_std_df
