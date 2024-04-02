@@ -70,6 +70,33 @@ class FactorVolatility(object):
         hist_sigma_df = pd.concat(hist_sigma_list)
         return beta_df, hist_sigma_df
 
+    def factor_daily_std(self):
+        ratio_df = self.close_df.pct_change() * 100
+        window, half_life = 252, 42
+        L, Lambda = 0.5 ** (1 / half_life), 0.5 ** (1 / half_life)
+        W = []
+        for i in range(window):
+            W.append(Lambda)
+            Lambda *= L
+        W.reverse()
+        W_sum = sum(W)
+        W_ratio = [i / W_sum for i in W]
+
+        def cal_daily_std(x):
+            print(x.name)
+            x_dropna = x.dropna()
+            daily_std = {}
+            for i in range(x_dropna.shape[0]-window):
+                x_dropna_cut = pd.DataFrame(x_dropna.iloc[i: i+window])
+                x_dropna_cut['W_ratio'] = W_ratio
+                x_dropna_cut['weighted'] = x_dropna_cut['W_ratio'] * x_dropna_cut[x.name]
+                daily_std[x_dropna_cut.index[-1]] = x_dropna_cut['weighted'].std()
+            # print(pd.Series(daily_std, name=x.name))
+            return pd.Series(daily_std, name=x.name)
+
+        daily_std_df = ratio_df.apply(lambda x: cal_daily_std(x), axis=0)
+        return daily_std_df
+
     def save_factor_data(self, file_name, factor_name, factor_data):
         self.save_get_factor.save_factor(file_name, factor_name, factor_data)
 
@@ -79,6 +106,8 @@ if __name__ == '__main__':
     end_date = datetime.datetime(2024, 1, 1)
     factor_volatility_object = FactorVolatility(start_date, end_date)
     factor_volatility_object.cache_data()
-    beta_df, hist_sigma_df = factor_volatility_object.factor_beta()
+    # beta_df, hist_sigma_df = factor_volatility_object.factor_beta()
     # factor_volatility_object.save_factor_data('factor_beta', 'factor_beta', beta_df)
-    factor_volatility_object.save_factor_data('factor_hist_sigma', 'factor_hist_sigma', hist_sigma_df)
+    # factor_volatility_object.save_factor_data('factor_hist_sigma', 'factor_hist_sigma', hist_sigma_df)
+    daily_std_df = factor_volatility_object.factor_daily_std()
+    factor_volatility_object.save_factor_data('factor_daily_std', 'factor_daily_std', daily_std_df)
