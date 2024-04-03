@@ -257,7 +257,7 @@ class Neutralize(object):
 
 
 if __name__ == '__main__':
-    factor_name = 'factor_hist_sigma'
+    factor_name = 'factor_daily_std'
     indicator_data = SaveGetFactor().get_factor(factor_name, factor_name)
     # indicator_data = indicator_data.iloc[:-50, :]
     factor_pre_obj = FactorPreProcessing(indicator_data)

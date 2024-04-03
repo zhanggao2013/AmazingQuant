@@ -82,19 +82,16 @@ class FactorVolatility(object):
         W_sum = sum(W)
         W_ratio = [i / W_sum for i in W]
 
-        def cal_daily_std(x):
-            print(x.name)
-            x_dropna = x.dropna()
-            daily_std = {}
-            for i in range(x_dropna.shape[0]-window):
-                x_dropna_cut = pd.DataFrame(x_dropna.iloc[i: i+window])
-                x_dropna_cut['W_ratio'] = W_ratio
-                x_dropna_cut['weighted'] = x_dropna_cut['W_ratio'] * x_dropna_cut[x.name]
-                daily_std[x_dropna_cut.index[-1]] = x_dropna_cut['weighted'].std()
-            # print(pd.Series(daily_std, name=x.name))
-            return pd.Series(daily_std, name=x.name, dtype=pd.Float64Dtype())
+        daily_std_list = []
+        for i in range(ratio_df.shape[0]-window):
+            W_ratio_df = pd.Series(W_ratio, index=ratio_df.iloc[i: i+window].index)
+            ratio_weighted = ratio_df.iloc[i: i+window].mul(W_ratio_df, axis=0)
+            ratio_weighted_std = ratio_weighted.std()
+            ratio_weighted_std.name = ratio_weighted.index[-1]
+            daily_std_list.append(ratio_weighted_std)
 
-        daily_std_df = ratio_df.apply(lambda x: cal_daily_std(x), axis=0)
+        daily_std_df = pd.concat(daily_std_list, axis=1).T
+
         return daily_std_df
 
     def save_factor_data(self, file_name, factor_name, factor_data):
@@ -102,7 +99,7 @@ class FactorVolatility(object):
 
 
 if __name__ == '__main__':
-    start_date = datetime.datetime(2014, 1, 1)
+    start_date = datetime.datetime(2015, 10, 1)
     end_date = datetime.datetime(2024, 1, 1)
     factor_volatility_object = FactorVolatility(start_date, end_date)
     factor_volatility_object.cache_data()

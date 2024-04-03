@@ -712,11 +712,11 @@ class FactorAnalysis(object):
 
 
 if __name__ == '__main__':
-    factor_name = 'factor_hist_sigma'
+    factor_name = 'factor_daily_std'
     save_get_factor = SaveGetFactor()
     factor_ma5 = save_get_factor.get_factor(factor_name, factor_name + '_pre')
 
-    factor_ma5 = factor_ma5[factor_ma5.index >= datetime(2013, 2, 1)]
+    factor_ma5 = factor_ma5[factor_ma5.index >= datetime(2015, 2, 1)]
     factor_ma5 = factor_ma5[factor_ma5.index < datetime(2023, 4, 1)]
     # factor_ma5 = factor_ma5.iloc[:-50, :]
 
