@@ -63,7 +63,7 @@ AmazingaQuant——为交易而生的智能投研Lab。包含量化数据服务�
     * api_data   策略中从本地数据库中取数据的接口模块
 * trade_center
     * mossion_engine   包含下单任务（event_order）和风控（event_risk_management）两部分的engine，分别完成下单前的检查和风控
-    * broker_engine    分为回测时的simulate的broker（主要是event_deal）撮合成交和连接实盘交易CTP、xSpeed等接口两部分
+    * broker_engine    回测时的simulate的broker
 * strategy_center
     * bar_engine       在回测或者交易模式下，用`逐K线`的方式执行每一根bar的交易逻辑，可在日线、分钟线、分笔下运行
 * analysis_center
@@ -75,11 +75,11 @@ AmazingaQuant——为交易而生的智能投研Lab。包含量化数据服务�
 * talib <br> 
       技术指标计算库
 * anaconda <br> 
-      python 3.5 的版本，如果大于3.5的版本，ctp的接口暂时不能用，因为编译问题，后续可以解决
-* Linux Ubuntu <br> 
-      开发环境是ubuntu，当然也可以在windows下用
+      python 3.8以上版本
+* windows <br> 
+      ubuntu/windows都可以
 * 安装AmazingQuant
-      pip install AmazingQuant  直接安装
+      pip install AmazingQuant  直接安装，但版本较老，gitee是最新的版本
 
 # 3.策略编写
 
